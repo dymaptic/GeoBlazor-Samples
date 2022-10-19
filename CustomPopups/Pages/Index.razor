@@ -1,0 +1,38 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<div>
+    <MapView Longitude="_longitude" Latitude="_latitude" Zoom="11" Style="height: 400px; width: 100%;">
+        <Map ArcGISDefaultBasemap="arcgis-topographic">
+            <GraphicsLayer>
+                       @foreach (var point in myPoints)
+                        {
+                            <Graphic>
+                                <Point Longitude="point.Longitude" Latitude="point.Latitude" />
+                                <SimpleMarkerSymbol Color="@(new MapColor(81, 46, 132))">
+                                    <Outline Color="@(new MapColor(255, 255, 255))" Width="1" />
+                                </SimpleMarkerSymbol>
+                                <Attributes Name="@(point.Name)" Description="@(point.Description)"/>
+                                <PopupTemplate Title="{Name}">
+                                    <FieldsPopupContent>
+                                        <FieldInfo FieldName="Description" Label="Description" IsEditable="false" Tooltip="" Visible="true"
+                                                   StringFieldOption="text-box" />
+                                    </FieldsPopupContent>
+                                </PopupTemplate>
+                                
+                            </Graphic>
+                        }
+             </GraphicsLayer>
+        </Map>
+    </MapView>
+</div>
+
+
+@code
+{
+
+    private readonly double _latitude = 34.027; 
+    private readonly double _longitude = -118.805;
+    private List<DataSet> myPoints = DataSet.GenerateSomePoints(34.027, -118.805);
+}
