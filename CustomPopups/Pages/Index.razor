@@ -8,16 +8,17 @@
             <GraphicsLayer>
                        @foreach (var point in myPoints)
                         {
-                            <Graphic>
+                            <Graphic Attributes="@point.Attributes">
                                 <Point Longitude="point.Longitude" Latitude="point.Latitude" />
                                 <SimpleMarkerSymbol Color="@(new MapColor(81, 46, 132))">
                                     <Outline Color="@(new MapColor(255, 255, 255))" Width="1" />
                                 </SimpleMarkerSymbol>
-                                <Attributes Name="@(point.Name)" Description="@(point.Description)"/>
                                 <PopupTemplate Title="{Name}">
                                     <FieldsPopupContent>
                                         <FieldInfo FieldName="Description" Label="Description" IsEditable="false" Tooltip="" Visible="true"
                                                    StringFieldOption="text-box" />
+                                        <FieldInfo FieldName="Address" Label="Original Address" IsEditable="false" Tooltip="" Visible="true"
+                                                                                           StringFieldOption="text-box" />
                                     </FieldsPopupContent>
                                 </PopupTemplate>
                                 
