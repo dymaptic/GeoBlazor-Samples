@@ -19,22 +19,26 @@
         </label>
     </div>
     <div class="form-group">
-        <label>
-            Time Zone:
+        @if (_timeZonesLoaded)
+        {
             <select @onchange="UpdateTimeZone">
-                @foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
+                @foreach (var tzi in _timeZoneInfos)
                 {
-                    if (tz.StandardName == "UTC")
-                    {
-                        <option selected value="@tz.BaseUtcOffset">@tz.DisplayName</option>
-                    }
-                    else
-                    {
-                        <option value="@tz.BaseUtcOffset">@tz.DisplayName</option>
-                    }
+                    <option selected="@(tzi == _timeZoneInfo)" value="@tzi.Id">@tzi.DisplayName</option>
                 }
             </select>
-        </label>
+            <label>
+                Time Zone: UTC @(_timeZoneOffset.Hours.ToString("D2")):@(_timeZoneOffset.Minutes.ToString("D2"))
+                @if (_timeZoneInfo?.IsDaylightSavingTime(_selectedDateTime) == true)
+                {
+                    <span class="daylight-savings">Daylight Savings</span>
+                }
+            </label>
+        }
+        else
+        {
+            <label>Loading Time Zones...</label>
+        }
     </div>
     <div class="form-group">
         @if (_center is not null)
@@ -42,6 +46,10 @@
             <label>
                 Center: @_center.Longitude!.Value.ToString("N6") Longitude / @_center.Latitude!.Value.ToString("N6") Latitude
             </label>
+        }
+        else
+        {
+            <label>Finding Center...</label>
         }
     </div>
     <div class="form-group">
@@ -54,6 +62,10 @@
                 <input type="number" step="1" @bind="_skipInterval"/>
             </label>
             <button type="button" @onclick="() => _cancel = true">Cancel</button>
+        }
+        else
+        {
+            <label>&nbsp;</label>
         }
     </div>
     <div class="form-group">
@@ -75,12 +87,17 @@
 </MapView>
 
 @code {
-    
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchTimeZoneData();
+    }
+
     private async Task OnMapRendered()
     {
         if (!_terminusAdded)
         {
-            _center = await _mapView!.GetCenter();
+            await GetCenterAndTimeZone();
             await CreateTerminator();
             _terminusAdded = true;
             await UpdateGraphic();
@@ -127,7 +144,7 @@
         {
             await _graphicsLayer.Remove(graphic);
         }
-        Console.WriteLine($"Setting Terminator for {_selectedDateTime.ToString()}");
+        
         int ordinalDay = _selectedDateTime.DayOfYear;
         double solarDeclination = -57.295779 * Math.Asin(0.397788 * Math.Cos(0.017203 * (ordinalDay + 10) + 0.052465 * Math.Sin(0.017203 * (ordinalDay - 2))));
         SpatialReference spatialReference = (await _mapView!.GetSpatialReference())!;
@@ -161,7 +178,7 @@
 
     private async Task UpdateGraphic()
     {
-        await _graphicsLayer!.Add(new Graphic(_polygon)
+        await _graphicsLayer!.Add(new Graphic(_polygon!)
         {
             Symbol = new SimpleFillSymbol
             {
@@ -211,17 +228,18 @@
     
     private async Task UpdateTimeZone(ChangeEventArgs arg)
     {
-        if (TimeSpan.TryParse(arg.Value?.ToString(), out _timeZoneOffset))
-        {
-            _selectedDateTime = _selectedDateTime.Add(_timeZoneOffset);
-            _terminusAdded = false;
-            await OnMapRendered();
-        }
+        _selectedDateTime = _selectedDateTime.Add(-_timeZoneOffset);
+        string? timeZoneId = arg.Value?.ToString();
+        if (timeZoneId is null) return;
+        _timeZoneInfo = _timeZoneInfos.FirstOrDefault(tzi => tzi.Id == timeZoneId);
+        if (_timeZoneInfo is null) return;
+        _timeZoneOffset = _timeZoneInfo.GetUtcOffset(_selectedDateTime);
+        _selectedDateTime = _selectedDateTime.Add(_timeZoneOffset);
     }
-    
+
     private async Task OnExtentChanged()
     {
-        _center = await _mapView!.GetCenter();
+        await GetCenterAndTimeZone();
     }
 
     private async Task GoToSunrise()
@@ -255,13 +273,71 @@
             await MoveTimeUntilStateChanged((int)(minutesInterval / 2.0), nextDirection, nextIntersected);
         }
     }
-    
-    private string? Message => _movingToSunrise
+
+    private async Task FetchTimeZoneData()
+    {
+        try
+        {
+            var client = new HttpClient();
+            HttpResponseMessage result;
+            
+            List<Task> fetchTasks = new();
+            for (int i = 1; i < 40; i++)
+            {
+                int featureId = i;
+                fetchTasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        result = await client.GetAsync($"{_timeZoneServiceUrl}{featureId}?f=json");
+                        if (result.IsSuccessStatusCode)
+                        {
+                            TimeZoneData data = (await result.Content.ReadFromJsonAsync<TimeZoneData>())!;
+                            _timeZoneData.Add(data.Feature);
+                            featureId++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                }));
+            }
+            
+            await Task.WhenAll(fetchTasks);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+        _timeZonesLoaded = true;
+        await GetCenterAndTimeZone();
+    }
+
+    private async Task GetCenterAndTimeZone()
+    {
+        _center = await _mapView!.GetCenter();
+        if (!_timeZonesLoaded || _center is null) return;
+        foreach (TimeZone tz in _timeZoneData)
+        {
+            if (await GeometryEngine.Intersects(_center!, tz.Geometry))
+            {
+                _selectedDateTime = _selectedDateTime.Add(-_timeZoneOffset);
+                _timeZoneOffset = TimeSpan.FromHours(tz.Attributes.Zone);
+                _timeZoneInfo = _timeZoneInfos.First(tzi => tzi.BaseUtcOffset == _timeZoneOffset);
+                _timeZoneOffset = _timeZoneInfo.GetUtcOffset(_selectedDateTime);
+                _selectedDateTime = _selectedDateTime.Add(_timeZoneOffset);
+                return;
+            }
+        }
+    }
+
+    private string Message => _movingToSunrise
         ? "Progressing to next Sunrise..."
         : _movingToSunset
             ? "Progressing to next Sunset..."
             : _terminusAdded
-                ? null : "Calculating...";
+                ? "Position the map to a location, then use the buttons above to find sunrise/sunset." : "Calculating Terminator...";
     
     private MapView? _mapView;
     private GraphicsLayer? _graphicsLayer;
@@ -270,10 +346,17 @@
     private Point? _center;
     private Polygon? _polygon;
     private TimeSpan _timeZoneOffset = TimeSpan.Zero;
+    private TimeZoneInfo? _timeZoneInfo;
     private bool _movingToSunrise;
     private bool _movingToSunset;
     private bool _terminusAdded;
     private bool _cancel;
+    private bool _timeZonesLoaded;
     private int _skipInterval = 15;
+    private readonly List<TimeZone> _timeZoneData = new();
+    private readonly IReadOnlyList<TimeZoneInfo> _timeZoneInfos = TimeZoneInfo.GetSystemTimeZones();
     private const double _k = Math.PI / 180;
+    private const string _timeZoneServiceUrl = 
+        "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Time_Zones/FeatureServer/0/";
+   
 }

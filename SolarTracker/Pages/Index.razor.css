@@ -1,3 +1,10 @@
 ﻿.form-group {
     margin-bottom: 1rem;
 }
+
+.daylight-savings {
+    background-color: gold;
+    font-weight: bold;
+    padding: 0.2rem;
+    margin-left: 0.5rem;
+}
