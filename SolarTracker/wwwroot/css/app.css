@@ -3,6 +3,53 @@ h1:focus {
     outline: none;
 }
 
+main {
+    background: linear-gradient(gold, white, #5e5eff);
+    padding: 1rem;
+    height: 100vh;
+}
+
+body {
+    margin: 0;
+}
+
+body.waiting * {
+    cursor: wait;
+}
+
+#loading-panel {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: wait;
+    background: linear-gradient(gold, white, #5e5eff);
+}
+
+.linear-progress {
+    background: white;
+    width: 25vw;
+    margin: 2rem 0 0 0;
+    height: 1.5rem;
+    border-radius: 10rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.linear-progress:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: black;
+    border-radius: 5rem;
+    scale: var(--blazor-load-percentage, 0%) 100%;
+    transform-origin: left top;
+    transition: scale ease-out 0.2s;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

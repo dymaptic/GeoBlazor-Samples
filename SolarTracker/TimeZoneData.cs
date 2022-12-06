@@ -3,7 +3,7 @@ using dymaptic.GeoBlazor.Core.Components.Geometries;
 
 namespace SolarTracker;
 
-public record TimeZoneData(TimeZone Feature);
+public record TimeZoneData(TimeZone[] Features);
 
 public record TimeZone(TimeZoneAttributes Attributes, Polygon Geometry);
 
