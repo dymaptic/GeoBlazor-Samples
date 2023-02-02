@@ -1,0 +1,61 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<div>
+    <MapView @ref="mapView" OnMapRendered="OnMapRenderedHandler" Longitude="_longitude" Latitude="_latitude" Zoom="11" Style="height: 400px; width: 100%;">
+        <Map ArcGISDefaultBasemap="arcgis-topographic">
+            <GraphicsLayer @ref="graphicsLayer">
+                       @foreach (var point in myPoints)
+                        {
+                            <Graphic Attributes="@point.Attributes">
+                                <Point Longitude="point.Longitude" Latitude="point.Latitude" />
+                                <SimpleMarkerSymbol Color="@(new MapColor(81, 46, 132))">
+                                    <Outline Color="@(new MapColor(255, 255, 255))" Width="1" />
+                                </SimpleMarkerSymbol>
+                                <PopupTemplate Title="{Name}">
+                                    <FieldsPopupContent>
+                                        <FieldInfo FieldName="Description" Label="Description" IsEditable="false" Tooltip="" Visible="true"
+                                                   StringFieldOption="text-box" />
+                                        <FieldInfo FieldName="Address" Label="Original Address" IsEditable="false" Tooltip="" Visible="true"
+                                                                                           StringFieldOption="text-box" />
+                                    </FieldsPopupContent>
+                                </PopupTemplate>
+                                
+                            </Graphic>
+                        }
+             </GraphicsLayer>
+        </Map>
+    </MapView>
+</div>
+
+
+@code
+{
+
+    private readonly double _latitude = 34.027; 
+    private readonly double _longitude = -118.805;
+    private List<DataSet> myPoints = DataSet.GenerateSomePoints(34.027, -118.805);
+    private GraphicsLayer? graphicsLayer;
+    private MapView? mapView;
+    private bool firstLoad = true;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+    }
+
+    private async Task OnMapRenderedHandler()
+    {
+        Console.WriteLine("Map Loaded Call");
+        if (firstLoad)
+        {
+            firstLoad = false;
+            // Import a reference to our JS file
+            IJSObjectReference module = await mapView!.JsRuntime.InvokeAsync<IJSObjectReference>("import", "/scripts/custom.js");
+            // call the function to configure the layer
+            await module.InvokeVoidAsync("configureLayer", graphicsLayer.Id, mapView.Id);
+        }
+    
+    }
+}
