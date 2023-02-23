@@ -39,6 +39,7 @@
     private GraphicsLayer? graphicsLayer;
     private MapView? mapView;
     private bool firstLoad = true;
+    IJSObjectReference? module;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -52,10 +53,20 @@
         {
             firstLoad = false;
             // Import a reference to our JS file
-            IJSObjectReference module = await mapView!.JsRuntime.InvokeAsync<IJSObjectReference>("import", "/scripts/custom.js");
+            module = await mapView!.JsRuntime.InvokeAsync<IJSObjectReference>("import", "/scripts/custom.js");
+            var thisJsObjectRef = DotNetObjectReference.Create(this);
             // call the function to configure the layer
-            await module.InvokeVoidAsync("configureLayer", graphicsLayer.Id, mapView.Id);
+            await module.InvokeVoidAsync("configureLayer", thisJsObjectRef, graphicsLayer.Id, mapView.Id);
         }
     
+    }
+    
+    [JSInvokable]
+    public async Task TakeAction(IJSObjectReference g)
+    {
+        Console.WriteLine("Take Action C#");
+        var attributes = await g.InvokeAsync<IJSObjectReference>("get", "attributes");
+        var name = await module.InvokeAsync<string>("getProperty", attributes, "Name");
+        Console.WriteLine(name);
     }
 }
