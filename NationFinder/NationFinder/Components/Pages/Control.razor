@@ -1,0 +1,23 @@
+@page "/control"
+@rendermode InteractiveServer
+<h1>Control</h1>
+
+<label>
+    Night Mode
+    <input type="checkbox" @bind="_showNight" />
+</label>
+
+<button @onclick="Update">Update</button>
+
+@code {
+    [Inject]
+    public IHubContext<SignalRHub> HubContext { get; set; }
+
+    private async Task Update()
+    {
+        await HubContext.Clients.Group("players").SendAsync(nameof(SignalRClient.ToggleState), 
+            new LayerState(true, true, false, false, false));
+    }
+    
+    private bool _showNight;
+}

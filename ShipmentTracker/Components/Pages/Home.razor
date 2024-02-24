@@ -1,0 +1,224 @@
+﻿@page "/"
+@using dymaptic.GeoBlazor.Pro.Model
+
+<PageTitle>Home</PageTitle>
+<h1>Shipments in Transit</h1>
+<RadzenDataGrid Data="@_shipments"
+                TItem="Shipment"
+                AllowFiltering="true"
+                AllowColumnResize="true"
+                FilterMode="FilterMode.Advanced"
+                LogicalFilterOperator="LogicalFilterOperator.Or"
+                AllowSorting="true"
+                PageSize="8"
+                AllowPaging="true"
+                PagerHorizontalAlign="HorizontalAlign.Left"
+                ShowPagingSummary="true"
+                SelectionMode="DataGridSelectionMode.Single"
+                @bind-Value="@_selectedShipment">
+    <Columns>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Id))"
+                              Title="Id"
+                              Filterable="false"
+                              Width="4rem"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Category))"
+                              Title="Category"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.SubCategory))"
+                              Title="Sub-Category"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Name))"
+                              Title="Item"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Quantity))"
+                              Title="Qty"
+                              Width="6rem"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Weight))"
+                              Title="Wt."
+                              Width="6rem"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Latitude))"
+                              Title="Lat."
+                              FormatString="{0:N2}"
+                              Width="7rem"/>
+        <RadzenDataGridColumn TItem="Shipment"
+                              Property="@(nameof(Shipment.Longitude))"
+                              Title="Long."
+                              FormatString="{0:N2}"
+                              Width="7rem"/>
+
+    </Columns>
+</RadzenDataGrid>
+
+@if (_selectedShipment.Any())
+{
+    <br/>
+    var shipment = _selectedShipment.First();
+    var startDate = _startDates![shipment.Id];
+    DateOnly? arrivalDate = _arrivalDates.ContainsKey(shipment.Id)
+        ? _arrivalDates[shipment.Id]
+        : null;
+    <h2>@shipment.Name</h2>
+    <br/>
+    <div class="detail-row">
+        <RadzenTimeline style="width: 40%;">
+            <Items>
+                <RadzenTimelineItem>
+                    <LabelContent>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-m-0">
+                            @startDate.ToLongDateString()
+                        </RadzenText>
+                    </LabelContent>
+                    <ChildContent>
+                        Shipment left the originating facility.
+                    </ChildContent>
+                </RadzenTimelineItem>
+                <RadzenTimelineItem PointStyle="PointStyle.Primary">
+                    <LabelContent>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-m-0">
+                            @_today.ToLongDateString()
+                        </RadzenText>
+                    </LabelContent>
+                    <ChildContent>
+                        Shipment is in transit.
+                    </ChildContent>
+                </RadzenTimelineItem>
+                <RadzenTimelineItem>
+                    <LabelContent>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-m-0">
+                            @(arrivalDate?.ToLongDateString() ?? "...")
+                        </RadzenText>
+                    </LabelContent>
+                    <ChildContent>
+                        Shipment is scheduled for delivery.
+                    </ChildContent>
+                </RadzenTimelineItem>
+            </Items>
+        </RadzenTimeline>
+        <MapView @ref="_mapView"
+                 @key="shipment"
+                 Class="inline"
+                 Latitude="@shipment.Latitude"
+                 Longitude="@shipment.Longitude"
+                 OnViewRendered="() => OnViewRendered(shipment)"
+                 Zoom="6">
+            <Map ArcGISDefaultBasemap="streets">
+                <GraphicsLayer @ref="_graphicsLayer">
+                    <Graphic @ref="_shipmentGraphic" Attributes="BuildAttributes(shipment)">
+                        <Point Latitude="@shipment.Latitude" Longitude="@shipment.Longitude"/>
+                        <SimpleMarkerSymbol Color="CategoryColors.AllColors[shipment.Category]"/>
+                        <PopupTemplate Title="@shipment.Name">
+                            <FieldsPopupContent >
+                                <FieldInfo FieldName="@nameof(Shipment.Category)" />
+                                <FieldInfo FieldName="@nameof(Shipment.SubCategory)" />
+                                <FieldInfo FieldName="@nameof(Shipment.Latitude)" />
+                                <FieldInfo FieldName="@nameof(Shipment.Longitude)" />
+                                <FieldInfo FieldName="@nameof(Shipment.Quantity)" />
+                                <FieldInfo FieldName="@nameof(Shipment.Weight)" />
+                            </FieldsPopupContent>
+                        </PopupTemplate>
+                    </Graphic>
+                    <Graphic @ref="_warehouseGraphic">
+                        <Point Latitude="41.85003" Longitude="-87.65005" />
+                        <PictureMarkerSymbol Url="warehouse.svg" />
+                    </Graphic>
+                </GraphicsLayer>
+            </Map>
+        </MapView>
+    </div>
+    <ol id="directions-widget" class="esri-widget esri-widget--panel esri-directions__scroller">
+        @foreach (DirectionsFeatureSet directionSet in _directions)
+        {
+            if (directionSet.Features is null) continue;
+            TimeSpan travelTime = TimeSpan.FromMinutes(directionSet.TotalTime ?? 0);
+            string formattedTravelTime = (travelTime.Days > 0 ? $"{travelTime.Days} Days, " : "") +
+                                       (travelTime.Hours > 0 ? $"{travelTime.Hours} Hours, " : "") +
+                                       $"{travelTime.Minutes} Minutes";
+            <h3>Drive Time: @formattedTravelTime</h3>
+            foreach (Graphic direction in directionSet.Features)
+            {
+                <li>@(direction.Attributes["text"]) (@(double.Parse(direction.Attributes["length"].ToString()!).ToString("F")) miles)</li>    
+            }
+        }
+    </ol>
+}
+
+@code {
+
+    [Inject] 
+    public required Repository Repository { get; set; }
+    
+    [Inject]
+    public required Route Route { get; set; }
+    
+
+    protected override void OnInitialized()
+    {
+        _shipments = Repository.GetShipments().OrderBy(s => s.Category)
+            .ThenBy(s => s.SubCategory)
+            .ThenBy(s => s.Name)
+            .ToList();
+        _startDates = _shipments.ToDictionary(s => s.Id, s =>
+            _today.AddDays(-_random.Next(3, 20)));
+    }
+
+    private AttributesDictionary BuildAttributes(Shipment shipment)
+    {
+        return new AttributesDictionary(new Dictionary<string, object>
+        {
+            { "OBJECT_ID", shipment.Id },
+            { "Category", shipment.Category },
+            { "SubCategory", shipment.SubCategory },
+            { "Name", shipment.Name },
+            { "Latitude", shipment.Latitude },
+            { "Longitude", shipment.Longitude },
+            { "Quantity", shipment.Quantity },
+            { "Weight", shipment.Weight }
+        });
+    }
+
+    private async Task OnViewRendered(Shipment shipment)
+    {
+        if (shipment == _currentShipment) return;
+        
+        _currentShipment = shipment;
+        // copy to remove unwanted attributes
+        Graphic shipmentClone = new Graphic(_shipmentGraphic!.Geometry);
+        RouteParameters routeParameters = new()
+        {
+            FeatureSetStops = new FeatureSet
+            {
+                Features = [shipmentClone, _warehouseGraphic]
+            },
+            ReturnDirections = true,
+            DirectionsTimeAttribute = DirectionsTimeAttribute.Minutes
+        };
+        RouteSolveResult result = await Route.Solve(_routeUrl, routeParameters);
+        Graphic? routeGraphic = result.RouteResults?.FirstOrDefault()?.Route;
+        if (routeGraphic != null)
+        {  
+            await routeGraphic.SetSymbol(new SimpleLineSymbol(new MapColor(0, 0, 255, 0.5), 5));
+            await _graphicsLayer!.Add(routeGraphic);
+            await _mapView!.GoTo([routeGraphic, shipmentClone, _warehouseGraphic]);
+            _directions = result.RouteResults!.Select(r => r.Directions!).ToArray();
+            _arrivalDates[shipment.Id] = DateOnly.FromDateTime(DateTime.Now.AddMinutes(_directions.Sum(d => d.TotalTime ?? 0)));
+        }
+    }
+
+    private DateOnly _today = DateOnly.FromDateTime(DateTime.Today);
+    private List<Shipment> _shipments = [];
+    private Dictionary<int, DateOnly>? _startDates;
+    private Dictionary<int, DateOnly> _arrivalDates = [];
+    private IList<Shipment> _selectedShipment = [];
+    private readonly Random _random = new();
+    private Shipment? _currentShipment;
+    private MapView? _mapView;
+    private GraphicsLayer? _graphicsLayer;
+    private Graphic? _shipmentGraphic;
+    private Graphic? _warehouseGraphic;
+    private DirectionsFeatureSet[] _directions = Array.Empty<DirectionsFeatureSet>();
+    private readonly string _routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+}

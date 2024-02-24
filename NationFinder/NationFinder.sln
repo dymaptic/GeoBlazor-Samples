@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34525.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NationFinder", "NationFinder\NationFinder.csproj", "{CFCFF0E0-B985-437D-8C5D-BB8DECD83DC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NationFinder.Client", "NationFinder.Client\NationFinder.Client.csproj", "{F1B0F306-FB59-4BDD-88B6-6CC2F29C3A8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFCFF0E0-B985-437D-8C5D-BB8DECD83DC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFCFF0E0-B985-437D-8C5D-BB8DECD83DC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFCFF0E0-B985-437D-8C5D-BB8DECD83DC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFCFF0E0-B985-437D-8C5D-BB8DECD83DC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1B0F306-FB59-4BDD-88B6-6CC2F29C3A8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1B0F306-FB59-4BDD-88B6-6CC2F29C3A8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1B0F306-FB59-4BDD-88B6-6CC2F29C3A8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1B0F306-FB59-4BDD-88B6-6CC2F29C3A8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5FCDB2DB-A1C7-4F3D-956F-F0EAA6201AF1}
+	EndGlobalSection
+EndGlobal

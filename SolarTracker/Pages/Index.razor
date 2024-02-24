@@ -1,10 +1,13 @@
 ﻿@page "/"
+@using dymaptic.GeoBlazor.Core.Events
 
 @inject Projection Projection
 @inject GeometryEngine GeometryEngine
 @inject IJSRuntime JsRuntime
 
 <h1>Day/Night Terminator</h1>
+
+<label><a target="_blank" href="https://github.com/dymaptic/GeoBlazor-Samples/tree/main/SolarTracker">Source Code</a></label>
 
 <div style="margin-bottom: 1rem;">
     <div class="form-group">
@@ -25,7 +28,7 @@
             <select @onchange="UpdateTimeZone">
                 @foreach (var tzi in _timeZoneInfos)
                 {
-                    <option selected="@(tzi == _timeZoneInfo)" value="@tzi.Id">@tzi.DisplayName</option>
+                    <option selected="@tzi.Equals(_timeZoneInfo)" value="@tzi.Id">@tzi.DisplayName</option>
                 }
             </select>
             <label>
@@ -42,19 +45,19 @@
         }
     </div>
     <div class="form-group">
-        @if (_center is not null)
+        @if (_focusPoint is not null)
         {
             <label>
-                Center: @_center.Longitude!.Value.ToString("N6") Longitude / @_center.Latitude!.Value.ToString("N6") Latitude
+                Focus: @_focusPoint.Longitude!.Value.ToString("N6") Longitude / @_focusPoint.Latitude!.Value.ToString("N6") Latitude
             </label>
         }
         else
         {
-            <label>Finding Center...</label>
+            <label>Finding Focus...</label>
         }
     </div>
     <div class="form-group">
-        @if (_center is not null && _polygon is not null)
+        @if (_focusPoint is not null && _polygon is not null)
         {
             <button type="button" disabled="@(!_isNightTime || _movingToSunrise || _movingToSunset)" 
                     @onclick="GoToSunrise">Next Sunrise</button>
@@ -77,35 +80,38 @@
     </div>
 </div>
 <MapView @ref="_mapView" Style="height: 600px; width: 100%;" Zoom="1.5"
-         OnMapRendered="OnMapRendered"
-         OnExtentChanged="OnExtentChanged"
-         EventRateLimitInMilliseconds="2000">
-    <Map ArcGISDefaultBasemap="arcgis-streets">
-        <GraphicsLayer @ref="_graphicsLayer">
-        </GraphicsLayer>
+         OnViewRendered="OnViewRendered"
+         OnClick="SetFocusPoint">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer" />
     </Map>
-    <Graphic>
-        <Point Longitude="_center?.Longitude" Latitude="_center?.Latitude" />
-    </Graphic>
-    <LocateWidget @ref="_locateWidget" Position="OverlayPosition.TopLeft" />
-    <SearchWidget Position="OverlayPosition.TopRight" />
+    <LocateWidget GoToOverride="GoToOverride"
+                  Position="OverlayPosition.TopLeft" />
+    <SearchWidget GoToOverride="GoToOverride"
+                  Position="OverlayPosition.TopRight" />
 </MapView>
 
 @code {
 
     protected override async Task OnInitializedAsync()
     {
+        CalculateDeclinations();
         await FetchTimeZoneData();
     }
 
-    private async Task OnMapRendered()
+    private async Task OnViewRendered()
     {
         if (!_terminusAdded)
         {
-            await GetCenterAndTimeZone();
             await CreateTerminator();
             _terminusAdded = true;
-            await UpdateGraphic();
+            _terminus = new Graphic(_polygon!,
+                new SimpleFillSymbol(new Outline(new MapColor(0, 0, 0, 0)),
+                    new MapColor(0, 0, 0, 0.3), FillStyle.Solid));
+            await _graphicsLayer!.Add(_terminus);
             await JsRuntime.InvokeVoidAsync("removeLoadingCursor");
         }
         else if (_cancel)
@@ -117,7 +123,7 @@
         }
         else if (_movingToSunrise)
         {
-            if (!await GeometryEngine.Intersects(_center!, _polygon!))
+            if (!await GeometryEngine.Intersects(_focusPoint!, _polygon!))
             {
                 await MoveTimeUntilStateChanged((int)(_skipInterval / 2.0), false, false);
                 _movingToSunrise = false;
@@ -131,7 +137,7 @@
         }
         else if (_movingToSunset)
         {
-            if (await GeometryEngine.Intersects(_center!, _polygon!))
+            if (await GeometryEngine.Intersects(_focusPoint!, _polygon!))
             {
                 await MoveTimeUntilStateChanged((int)(_skipInterval / 2.0), false, true);
                 _movingToSunset = false;
@@ -143,75 +149,54 @@
             }
             await UpdateGraphic();
         }
+        if (_focusGraphic is null)
+        {
+            _focusPoint = await _mapView!.GetCenter();
+            _focusGraphic = new Graphic(_focusPoint, _focusSymbol);
+            await _mapView.AddGraphic(_focusGraphic);
+            await GetTimeZone();
+        }
     }
 
     private async Task CreateTerminator()
     {
         // code adapted from https://github.com/jgravois/midnight-commander/blob/master/js/SolarTerminator.js
         int ordinalDay = _selectedDateTime.DayOfYear;
-        double solarDeclination = -57.295779 * 
-                                  Math.Asin(0.397788 * 
-                                            Math.Cos(0.017203 * 
-                                                     (ordinalDay + 10) + 0.052465 * 
-                                                     Math.Sin(0.017203 * (ordinalDay - 2))));
-        SpatialReference spatialReference = (await _mapView!.GetSpatialReference())!;
-        
-        bool isWebMercator = spatialReference.Wkid is null ||
-                             (int)spatialReference.Wkid == 102100 ||
-                             (int)spatialReference.Wkid == 3857 ||
-                             (int)spatialReference.Wkid == 102113;
-        double yMax = isWebMercator ? 85 : 90;
+        double solarDeclination = _declinationPerDay[ordinalDay];
+        double yMax = 85;
         double latitude = yMax * (solarDeclination > 0 ? -1 : 1);
         List<MapPath> rings = new();
         DateTime utcDateTime = _selectedDateTime.Subtract(_timeZoneOffset);
+        
+        double lt = utcDateTime.Hour + utcDateTime.Minute / 60.0 + utcDateTime.Second / 3600.0;
+        double tau = 15 * (lt - 12);
         
         for (double lon = -180; lon < 180; lon++)
         {
             MapPath path = new(new(lon + 1, latitude), 
                 new(lon, latitude), 
                 new(lon, 
-                    GetLatitude(lon, solarDeclination, -yMax, yMax, utcDateTime)), 
-                new(lon + 1, GetLatitude(lon, solarDeclination, -yMax, yMax, utcDateTime)),
+                    GetLatitude(lon, solarDeclination, -yMax, yMax, tau)), 
+                new(lon + 1, GetLatitude(lon, solarDeclination, -yMax, yMax, tau)),
                 new(lon + 1, latitude));
 
             rings.Add(path);
         }
         
         _polygon = new Polygon(rings.ToArray(), SpatialReference.Wgs84);
-        if (isWebMercator)
-        {
-            _polygon = (Polygon)(await Projection.Project(_polygon, SpatialReference.WebMercator))!;
-        }
+        _polygon = (Polygon)(await Projection.Project(_polygon, SpatialReference.WebMercator))!;
     }
 
     private async Task UpdateGraphic()
     {
-        foreach (var graphic in _graphicsLayer!.Graphics)
-        {
-            await _graphicsLayer.Remove(graphic);
-        }
-        
-        await _graphicsLayer!.Add(new Graphic(_polygon!)
-        {
-            Symbol = new SimpleFillSymbol
-            {
-                FillStyle = FillStyle.Solid,
-                Color = new MapColor(0, 0, 0, 0.3),
-                Outline = new Outline
-                {
-                    Color = new MapColor(0, 0, 0, 0)
-                }
-            }
-        });
+        await _terminus!.SetGeometry(_polygon!);
     }
 
-    private double GetLatitude(double longitude, double solarDeclination, double yMin, double yMax, DateTime utcDateTime)
+    private double GetLatitude(double longitude, double solarDeclination, double yMin, double yMax, double tau)
     {
-        double lt = utcDateTime.Hour + utcDateTime.Minute / 60.0 + utcDateTime.Second / 3600.0;
-        double tau = 15 * (lt - 12);
         longitude += tau;
-        double tanLat = -Math.Cos(longitude * _k) / Math.Tan(solarDeclination * _k);
-        double arctanLat = Math.Atan(tanLat) / _k;
+        double tanLat = -Math.Cos(longitude * K) / Math.Tan(solarDeclination * K);
+        double arctanLat = Math.Atan(tanLat) / K;
         return Math.Max(Math.Min(arctanLat, yMax), yMin);
     }
     
@@ -225,7 +210,7 @@
         int day = int.Parse(dateSegments[2]);
         _selectedDateTime = new DateTime(year, month, day, _selectedDateTime.Hour, _selectedDateTime.Minute, 0);
         _terminusAdded = false;
-        await OnMapRendered();
+        await OnViewRendered();
     }
 
     private async Task UpdateTime(ChangeEventArgs arg)
@@ -236,10 +221,10 @@
         int minutes = int.Parse(timeSegments[1]);
         _selectedDateTime = new DateTime(_selectedDateTime.Year, _selectedDateTime.Month, _selectedDateTime.Day, hour, minutes, 0);
         _terminusAdded = false;
-        await OnMapRendered();
+        await OnViewRendered();
     }
     
-    private async Task UpdateTimeZone(ChangeEventArgs arg)
+    private void UpdateTimeZone(ChangeEventArgs arg)
     {
         _selectedDateTime = _selectedDateTime.Add(-_timeZoneOffset);
         string? timeZoneId = arg.Value?.ToString();
@@ -250,23 +235,12 @@
         _selectedDateTime = _selectedDateTime.Add(_timeZoneOffset);
     }
 
-    private async Task OnExtentChanged()
-    {
-        DateTime firedTime = DateTime.Now;
-        _lastExtentChanged = firedTime;
-        await Task.Delay(1000);
-        if (_lastExtentChanged == firedTime)
-        {
-            await GetCenterAndTimeZone();
-        }
-    }
-
     private async Task GoToSunrise()
     {
         await JsRuntime.InvokeVoidAsync("setLoadingCursor");
         _movingToSunrise = true;
         _selectedDateTime = _selectedDateTime.AddMinutes(_skipInterval);
-        await OnMapRendered();
+        await OnViewRendered();
     }
 
     private async Task GoToSunset()
@@ -274,7 +248,7 @@
         await JsRuntime.InvokeVoidAsync("setLoadingCursor");
         _movingToSunset = true;
         _selectedDateTime = _selectedDateTime.AddMinutes(_skipInterval);
-        await OnMapRendered();
+        await OnViewRendered();
     }
 
     private async Task MoveTimeUntilStateChanged(int minutesInterval, bool forward, bool isIntersected)
@@ -283,8 +257,10 @@
         await CreateTerminator();
         bool nextDirection = forward;
         bool nextIntersected = isIntersected;
-        if (isIntersected != await GeometryEngine.Intersects(_center!, _polygon!))
+        if (isIntersected != await GeometryEngine.Intersects(_focusPoint!, _polygon!))
         {
+            _adjusting = true;
+            StateHasChanged();
             nextDirection = !forward;
             nextIntersected = !isIntersected;
         }
@@ -296,6 +272,7 @@
         else
         {
             _isNightTime = !_isNightTime;
+            _adjusting = false;
             await JsRuntime.InvokeVoidAsync("removeLoadingCursor");
         }
     }
@@ -305,7 +282,7 @@
         try
         {
             var client = new HttpClient();
-            HttpResponseMessage result = await client.GetAsync(_timeZoneServiceUrl);
+            HttpResponseMessage result = await client.GetAsync(TimeZoneServiceUrl);
             TimeZoneData data = (await result.Content.ReadFromJsonAsync<TimeZoneData>())!;
             _timeZoneData.AddRange(data.Features);
         }
@@ -314,22 +291,40 @@
             Console.WriteLine(ex.ToString());
         }
         _timeZonesLoaded = true;
-        await GetCenterAndTimeZone();
     }
 
-    private async Task GetCenterAndTimeZone()
+    private void CalculateDeclinations()
+    {
+        for (int i = 1; i < 366; i++)
+        {
+            double solarDeclination = -57.295779 * 
+                                      Math.Asin(0.397788 * 
+                                                Math.Cos(0.017203 * 
+                                                    (i + 10) + 0.052465 * 
+                                                    Math.Sin(0.017203 * (i - 2))));
+            _declinationPerDay[i] = solarDeclination;
+        }
+    }
+
+    private async Task SetFocusPoint(ClickEvent clickEvent)
+    {
+        _focusPoint = clickEvent.MapPoint;
+        await _focusGraphic!.SetGeometry(_focusPoint);
+        await GetTimeZone();
+    }
+
+    private async Task GetTimeZone()
     {
         await JsRuntime.InvokeVoidAsync("setLoadingCursor");
-        _center = await _mapView!.GetCenter();
         if (_polygon is not null)
         {
-            _isNightTime = await GeometryEngine.Intersects(_center!, _polygon!);
+            _isNightTime = await GeometryEngine.Intersects(_focusPoint!, _polygon!);
         }
         
-        if (!_timeZonesLoaded || _center is null) return;
+        if (!_timeZonesLoaded || _focusPoint is null) return;
         foreach (TimeZone tz in _timeZoneData)
         {
-            if (await GeometryEngine.Intersects(_center!, tz.Geometry))
+            if (await GeometryEngine.Intersects(_focusPoint!, tz.Geometry))
             {
                 _selectedDateTime = _selectedDateTime.Add(-_timeZoneOffset);
                 _timeZoneOffset = TimeSpan.FromHours(tz.Attributes.Zone);
@@ -341,35 +336,59 @@
         }
         await JsRuntime.InvokeVoidAsync("removeLoadingCursor");
     }
+   
+    
+    private async void GoToOverride(GoToOverrideParameters parameters)
+    {
+        if (parameters.Target.TargetGeometry is Point point)
+        {
+            _focusPoint = point;
+        }
+        else
+        {
+            Extent extent = parameters.Target.TargetGraphic!.Geometry!.Extent!;
+            _focusPoint = await GeometryEngine.GetExtentCenter(extent);
+        }
+        
+        await _mapView!.SetCenter(_focusPoint!);
+        await _focusGraphic!.SetGeometry(_focusPoint!);
+        await GetTimeZone();
+    }
 
-    private string Message => _movingToSunrise
-        ? "Progressing to next Sunrise..."
-        : _movingToSunset
-            ? "Progressing to next Sunset..."
-            : _terminusAdded
-                ? "Position the map to a location, then use the buttons above to find sunrise/sunset." : "Calculating Terminator...";
+    private string Message => _adjusting 
+        ? "Correcting..." 
+        : _movingToSunrise
+            ? "Progressing to next Sunrise..."
+            : _movingToSunset
+                ? "Progressing to next Sunset..."
+                : _terminusAdded
+                    ? "Click on the map, use the Locator Widget, or search to select a location. Then use the buttons above to find sunrise/sunset." : "Calculating Terminator...";
     
     private MapView? _mapView;
     private GraphicsLayer? _graphicsLayer;
-    private LocateWidget? _locateWidget;
     private DateTime _selectedDateTime = DateTime.UtcNow;
-    private Point? _center;
+    private Point? _focusPoint;
     private Polygon? _polygon;
+    private Graphic? _terminus;
+    private readonly SimpleMarkerSymbol _focusSymbol = new(new Outline(new MapColor(0, 0, 0, 0)),
+        new MapColor(255, 0, 0, 0.5), 10, SimpleMarkerStyle.Circle);
+
+    private Graphic? _focusGraphic;
     private TimeSpan _timeZoneOffset = TimeSpan.Zero;
     private TimeZoneInfo? _timeZoneInfo;
     private bool _movingToSunrise;
     private bool _movingToSunset;
+    private bool _adjusting;
     private bool _terminusAdded;
     private bool _cancel;
     private bool _timeZonesLoaded;
     private bool _isNightTime;
-    private int _skipInterval = 15;
-    private DateTime _lastCenterMove = DateTime.MinValue;
-    private DateTime _lastExtentChanged = DateTime.MinValue;
-    private readonly List<TimeZone> _timeZoneData = new();
+    private int _skipInterval = 30;
+    private readonly List<TimeZone> _timeZoneData = [];
     private readonly IReadOnlyList<TimeZoneInfo> _timeZoneInfos = TimeZoneInfo.GetSystemTimeZones();
-    private const double _k = Math.PI / 180;
-    private const string _timeZoneServiceUrl = 
+    private const double K = Math.PI / 180;
+    private readonly Dictionary<int, double> _declinationPerDay = [];
+    private const string TimeZoneServiceUrl = 
         "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Time_Zones/FeatureServer/0//query?where=1%3D1&outFields=*&f=json";
-   
+
 }
