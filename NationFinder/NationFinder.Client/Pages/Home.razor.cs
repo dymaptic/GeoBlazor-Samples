@@ -84,6 +84,7 @@ public partial class Home: IAsyncDisposable
     {
         _guessSubmitted = false;
         _gameOver = false;
+        _gameStarted = false;
         _selectedCountry = null;
         _selectedGraphicsLayer?.Clear();
         await InvokeAsync(StateHasChanged);
@@ -91,6 +92,7 @@ public partial class Home: IAsyncDisposable
     
     private async Task OnMapClicked(ClickEvent clickEvent)
     {
+        _cursor = "wait";
         if (_guessSubmitted) return;
         Query query = new()
         {
@@ -119,6 +121,8 @@ public partial class Home: IAsyncDisposable
             await _selectedGraphicsLayer!.Clear();
             await _sceneView!.ClearGraphics();
         }
+        
+        _cursor = "default";
     }
     
     private async Task ClearSelection()
@@ -136,6 +140,12 @@ public partial class Home: IAsyncDisposable
         await _sceneView!.GoTo(_worldImageryBasemap!.FullExtent!);
         _guessSubmitted = true;
     }
+
+    private async Task Explore()
+    {
+        _ok = true;
+        await InvokeAsync(StateHasChanged);
+    }
     
     private async Task GameOver(string country)
     {
@@ -145,7 +155,7 @@ public partial class Home: IAsyncDisposable
     }
 
     private Graphic? WorldPolygonGraphic => _worldPolygon is not null
-        ? new Graphic(_worldPolygon, new SimpleFillSymbol(color: new MapColor("white")))
+        ? new Graphic(_worldPolygon, new SimpleFillSymbol(color: new MapColor("black")))
         : null;
     private bool _isRegistered;
     private string? _username;
@@ -156,9 +166,11 @@ public partial class Home: IAsyncDisposable
     private GraphicsLayer? _selectedGraphicsLayer;
     private static readonly IComponentRenderMode InteractiveWasm = new InteractiveWebAssemblyRenderMode(false);
     private Polygon? _worldPolygon;
+    private bool _gameStarted;
     private string? _selectedCountry;
     private bool _guessSubmitted;
     private bool _ok;
     private bool _gameOver;
     private string? _correctCountry;
+    private string _cursor = "default";
 }

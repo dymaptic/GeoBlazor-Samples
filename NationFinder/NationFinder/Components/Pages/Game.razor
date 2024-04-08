@@ -1,7 +1,7 @@
 @page "/game"
 @rendermode RenderMode
 <h1>Nation Finder</h1>
-<h2>Use Your Device, navigate to <span style="color: blue; text-decoration: underline">@(NavigationManager.BaseUri)</span></h2>
+<h2>Use Your Device, navigate to <span style="color: white; text-decoration: underline">@(NavigationManager.BaseUri)</span></h2>
 <h2>Select the matching country</h2>
 
 <div style="visibility: @(_display); display: flex; flex-direction:  row; justify-content: space-between">
@@ -50,37 +50,12 @@
     {
         State.UpdateGameBoard = UpdateGameBoard;
         State.FinalizeGame = FinalizeGame;
+        State.ResetGame = ResetGame;
     }
 
     private async Task OnViewRendered()
     {
-        if (State.CurrentCountry is not null && State.CurrentCountry != _displayedCountry)
-        {
-            _displayedCountry = State.CurrentCountry;
-            Query query = new()
-            {
-                Where = $"COUNTRY = '{State.CurrentCountry}'",
-                ReturnGeometry = true
-            };
-            
-            FeatureSet? result = await _countriesLayer!.QueryFeatures(query);
-            await _graphicsLayer!.Clear();
-            Symbol fillSymbol = new SimpleFillSymbol(new Outline(new MapColor("blue")), new MapColor("brown"));
-            _worldPolygon ??= await GeometryEngine.PolygonFromExtent(_graphicsLayer!.FullExtent!);
-            await _graphicsLayer.Add(WorldPolygonGraphic!);
-            foreach (Graphic graphic in result!.Features!)
-            {
-                Graphic clone = new Graphic(graphic.Geometry, fillSymbol);
-                await _graphicsLayer!.Add(clone);
-                
-            }
-            await _countriesLayer.SetVisibility(false);
-            
-            await _sceneView!.GoTo(result.Features!);
-            _display = "visible";
-            StateHasChanged();
-            await UpdateGameBoard();
-        }
+        await ResetGame();
     }
 
     private async Task UpdateGameBoard()
@@ -134,8 +109,43 @@
         });
     }
 
+    private async Task ResetGame()
+    {
+        _gameOver = false;
+        _display = "collapse";
+        await Task.Yield();
+        if (State.CurrentCountry is not null && State.CurrentCountry != _displayedCountry)
+        {
+            _displayedCountry = State.CurrentCountry;
+            Query query = new()
+            {
+                Where = $"COUNTRY = '{State.CurrentCountry}'",
+                ReturnGeometry = true
+            };
+            
+            FeatureSet? result = await _countriesLayer!.QueryFeatures(query);
+            await _graphicsLayer!.Clear();
+            Symbol fillSymbol = new SimpleFillSymbol(new Outline(new MapColor("lightblue"), 4),
+                new MapColor(251, 205, 128));
+            _worldPolygon ??= await GeometryEngine.PolygonFromExtent(_graphicsLayer!.FullExtent!);
+            await _graphicsLayer.Add(WorldPolygonGraphic!);
+            foreach (Graphic graphic in result!.Features!)
+            {
+                Graphic clone = new Graphic(graphic.Geometry, fillSymbol);
+                await _graphicsLayer!.Add(clone);
+                
+            }
+            await _countriesLayer.SetVisibility(false);
+            
+            await _sceneView!.GoTo(result.Features!);
+            _display = "visible";
+            StateHasChanged();
+            await UpdateGameBoard();
+        }
+    }
+
     private Graphic? WorldPolygonGraphic => _worldPolygon is not null
-        ? new Graphic(_worldPolygon, new SimpleFillSymbol(color: new MapColor("white")))
+        ? new Graphic(_worldPolygon, new SimpleFillSymbol(color: new MapColor("black")))
         : null;
     private SceneView? _sceneView;
     private GraphicsLayer? _graphicsLayer;

@@ -21,11 +21,15 @@
 }
 else
 {
-    if ((!_ok && _selectedCountry is not null) || _gameOver)
+    if ((!_ok && _selectedCountry is not null) || _gameOver || !_gameStarted)
     {
         <div class="overlay-container">
             <div class="overlay">
-                @if (_gameOver)
+                @if (!_gameStarted)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="@(() => _gameStarted = true)">Begin Game</button>
+                }
+                else if (_gameOver)
                 {
                     <label>Answer: @_correctCountry</label>
                     if (_correctCountry == _selectedCountry)
@@ -40,18 +44,19 @@ else
                 else if (_guessSubmitted)
                 {
                     <label>Guess Submitted</label>
-                    <button type="button" class="btn btn-primary" @onclick="@(() => _ok = true)">OK</button>
+                    <button type="button" class="btn btn-primary" @onclick="Explore">Explore the Map</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-primary" @onclick="ClearSelection">Clear Selection</button>
-                    <button type="button" class="btn btn-secondary" @onclick="SubmitGuess">Submit Your Guess</button>
+                    <button type="button" class="btn btn-primary" @onclick="SubmitGuess">Submit Your Guess</button>
+                    <button type="button" class="btn btn-secondary" @onclick="ClearSelection">Clear Selection</button>
                 }
             </div>
         </div>
         
     }
     <SceneView @ref="_sceneView" Class="map-view"
+               Style="@($"cursor: {_cursor};")"
                OnClick="OnMapClicked"
                OnLayerViewCreate="OnLayerViewCreated">
         <Map>
@@ -73,7 +78,20 @@ else
                 </SimpleRenderer>
             </FeatureLayer>
         </Map>
-        <LocateWidget Position="OverlayPosition.TopLeft" />
-        <SearchWidget Position="OverlayPosition.TopRight" />
+        @if (_ok)
+        {
+            <LocateWidget Position="OverlayPosition.TopLeft" />
+            <SearchWidget Position="OverlayPosition.TopRight" />
+            <ExpandWidget Position="OverlayPosition.BottomLeft">
+                <SketchWidget />
+            </ExpandWidget>
+            <ExpandWidget Position="OverlayPosition.BottomRight"
+                          ExpandIcon="esri-icon-basemap">
+                <BasemapGalleryWidget>
+                    <PortalBasemapsSource
+                        QueryParams="@(new Dictionary<string, string> { { "id", "bdb9d65e0b5c480c8dcc6916e7f4e099" } })" />
+                </BasemapGalleryWidget>
+            </ExpandWidget>
+        }
     </SceneView>
 }

@@ -57,6 +57,10 @@
 
     private async Task ResetGame()
     {
+        if (State.ResetGame is not null)
+        {
+            await State.ResetGame();
+        }
         await HubContext.Clients.Group("players").SendAsync(nameof(SignalRClient.ResetGame));
     }
     

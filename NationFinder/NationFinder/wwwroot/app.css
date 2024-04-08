@@ -1,11 +1,26 @@
+body {
+    background-color: #274768;
+    font-family: 'Arial', sans-serif;
+}
+
 .map-view {
-    height: 90vh;
-    width: 100%;
+    background-color: black;
+    height: calc(90vh - 5rem);
+    width: 90vw;
+    margin: 0 auto;
+    box-shadow: 0 0 10px 5px black;
 }
 
 .game-view {
+    background-color: black;
     height: 600px;
     width: 48%;
+    margin: 0 auto;
+    box-shadow: 0 0 10px 5px black;
+}
+
+h1, h2, h3 {
+    color: lightblue;
 }
 
 h1:focus {
@@ -74,8 +89,9 @@ h1:focus {
 }
 
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    color: white;
+    background-color: #274768;
+    border-color: #274768;
 }
 
 .btn-primary:hover {
@@ -108,7 +124,7 @@ h1:focus {
 }
 
 label {
-    background-color: #00a118;
+    background-color: #274768;
     color: white;
     padding: 0.5rem;
     border-radius: 0.25rem;
@@ -123,4 +139,18 @@ label {
 
 #logo img {
     height: 5rem;
+}
+
+@media (max-width: 768px) {
+    #logo {
+        height: 2rem;
+    }
+    
+    #logo img {
+        height: 2rem;
+    }
+    
+    .map-view {
+        height: calc(90vh - 8rem);
+    }
 }

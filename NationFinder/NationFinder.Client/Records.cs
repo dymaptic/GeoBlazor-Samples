@@ -10,4 +10,5 @@ public static class State
     public static Func<Task>? UpdateGameBoard { get; set; }
     public static List<string> Winners { get; set; } = [];
     public static Func<Task>? FinalizeGame { get; set; }
+    public static Func<Task>? ResetGame { get; set; }
 }
