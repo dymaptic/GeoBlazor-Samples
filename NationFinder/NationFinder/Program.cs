@@ -43,6 +43,7 @@ app.UseResponseCompression();
 
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".wsv"] = "application/octet-stream";
+provider.Mappings.Remove(".map");
 
 app.UseStaticFiles();
 // NOTE: for some reason, you still need the plain "UseStaticFiles" call above

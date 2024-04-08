@@ -1,23 +1,76 @@
 @page "/control"
+@using System.Text.Json
 @rendermode InteractiveServer
 <h1>Control</h1>
 
-<label>
-    Night Mode
-    <input type="checkbox" @bind="_showNight" />
-</label>
-
-<button @onclick="Update">Update</button>
+@if (_countries is not null)
+{
+    <select @bind="@State.CurrentCountry">
+        <option value="">Select</option>
+        @foreach (string country in _countries)
+        {
+            <option value="@country">@country</option>
+        }
+    </select>
+}
+<br/>
+<button @onclick="ScoreGame">Score Game</button>
+<br/>
+<button @onclick="ResetGame">Reset Game</button>
 
 @code {
     [Inject]
-    public IHubContext<SignalRHub> HubContext { get; set; }
+    public required IHubContext<SignalRHub> HubContext { get; set; }
+    
+    [Inject]
+    public required IWebHostEnvironment WebHostEnvironment { get; set; }
 
-    private async Task Update()
+    protected override async Task OnInitializedAsync()
     {
-        await HubContext.Clients.Group("players").SendAsync(nameof(SignalRClient.ToggleState), 
-            new LayerState(true, true, false, false, false));
+        string countryJson = await File.ReadAllTextAsync(
+            Path.Combine(WebHostEnvironment.WebRootPath, "countries.json"));
+        CountriesRecord countriesRecord = JsonSerializer.Deserialize<CountriesRecord>(countryJson, _options)!;
+        _countries = countriesRecord.Features
+            .Select(x => x.Attributes.COUNTRY)
+            .Distinct()
+            .Order()
+            .ToList();
+    }
+
+    private async Task ScoreGame()
+    {
+        foreach (KeyValuePair<string, string> kvp in State.UserGuesses)
+        {
+            if (kvp.Value == State.CurrentCountry)
+            {
+                State.Winners.Add(kvp.Key);
+            }
+        }
+
+        if (State.FinalizeGame is not null)
+        {
+            await State.FinalizeGame();
+        }
+        
+        await HubContext.Clients.Group("players").SendAsync(nameof(SignalRClient.GameOver), State.CurrentCountry);
+    }
+
+    private async Task ResetGame()
+    {
+        await HubContext.Clients.Group("players").SendAsync(nameof(SignalRClient.ResetGame));
     }
     
-    private bool _showNight;
+    private List<string>? _countries;
+
+    private readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    public record CountriesRecord(List<CountryRecord> Features);
+
+    public record CountryRecord(CountryAttributesRecord Attributes);
+
+    public record CountryAttributesRecord(string COUNTRY);
+
 }

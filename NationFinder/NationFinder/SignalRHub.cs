@@ -10,13 +10,13 @@ public class SignalRHub: Hub, ISignalRClient
         try
         {
             // check if username is already in use
-            if (ConnectedUsers.Contains(username))
+            if (State.ConnectedUsers.Contains(username))
             {
                 return new CommunicationResult(false, "Username already in use");
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, "players");
-            ConnectedUsers.Add(username);
+            State.ConnectedUsers.Add(username);
 
             return new CommunicationResult(true);
         }
@@ -27,5 +27,13 @@ public class SignalRHub: Hub, ISignalRClient
         }
     }
 
-    private static List<string> ConnectedUsers = [];
+    public async Task SubmitGuess(string country, string username)
+    {
+        State.UserGuesses[username] = country;
+        Console.WriteLine($"{username} guessed {country}");
+        if (State.UpdateGameBoard is not null)
+        {
+            await State.UpdateGameBoard();
+        }
+    }
 }

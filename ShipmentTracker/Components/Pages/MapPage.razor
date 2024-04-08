@@ -7,7 +7,7 @@
          Zoom="3"
          OnLayerViewCreate="OnLayerViewCreate">
     <Map ArcGISDefaultBasemap="streets">
-        <GraphicsLayer @ref="_graphicsLayer">
+        <GraphicsLayer @ref="_graphicsLayer" Title="Shipments">
             
         </GraphicsLayer>
         <FeatureLayer Url="https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/NDFD_Precipitation_v1/FeatureServer/0"
@@ -21,10 +21,12 @@
                               ToggleGraphics="true" />
     </ExpandWidget>
     <LayerListWidget Position="OverlayPosition.TopRight" />
-    <TimeSliderWidget @ref="_timeSliderWidget" Loop="true" Mode="TimeSliderMode.TimeWindow">
+    <TimeSliderWidget @ref="_timeSliderWidget" Loop="true" Mode="TimeSliderMode.TimeWindow"
+                      ContainerId="time-slider-container">
         <TickConfig Mode="TickConfigMode.Percent" Values="new List<double>{ 12.5, 37.5, 62.5, 87.5}"></TickConfig>
     </TimeSliderWidget>
 </MapView>
+<div id="time-slider-container"></div>
 
 @code {
     [Inject] public required Repository Repository { get; set; }

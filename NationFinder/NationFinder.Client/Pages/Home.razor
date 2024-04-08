@@ -1,7 +1,9 @@
 ﻿@page "/"
-@rendermode _interactiveWasm
+@rendermode InteractiveWasm
 
-<PageTitle>Welcome</PageTitle>
+<PageTitle>Nation Finder</PageTitle>
+<h1>Nation Finder</h1>
+<h2>Can you find the country by shape?</h2>
 
 @if (_username is null || !_isRegistered)
 {
@@ -17,57 +19,61 @@
         @_error
     </label>
 }
-else if (_showScene)
+else
 {
-    <SceneView Class="map-view">
-        <Map>
-            <Basemap>
-                @if (_showNight)
+    if ((!_ok && _selectedCountry is not null) || _gameOver)
+    {
+        <div class="overlay-container">
+            <div class="overlay">
+                @if (_gameOver)
                 {
-                    <TileLayer>
-                        <PortalItem Id="d92d38b812da4a0884e47e68c57ac451" />
-                    </TileLayer>
+                    <label>Answer: @_correctCountry</label>
+                    if (_correctCountry == _selectedCountry)
+                    {
+                        <label>You Win!</label>
+                    }
+                    else
+                    {
+                        <label>Your Guess: @_selectedCountry</label>
+                    }
+                }
+                else if (_guessSubmitted)
+                {
+                    <label>Guess Submitted</label>
+                    <button type="button" class="btn btn-primary" @onclick="@(() => _ok = true)">OK</button>
                 }
                 else
                 {
-                    <TileLayer>
-                        <PortalItem Id="10df2279f9684e4a9f6a7f08febac2a9" />
-                    </TileLayer>
+                    <button type="button" class="btn btn-primary" @onclick="ClearSelection">Clear Selection</button>
+                    <button type="button" class="btn btn-secondary" @onclick="SubmitGuess">Submit Your Guess</button>
                 }
-            </Basemap>
-            @if (_showBorders)
-            {
-                <FeatureLayer Opacity="0.5">
-                    <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
-                </FeatureLayer>    
-            }
-        </Map>
-    </SceneView>
-}
-else
-{
-    <MapView Class="map-view">
+            </div>
+        </div>
+        
+    }
+    <SceneView @ref="_sceneView" Class="map-view"
+               OnClick="OnMapClicked"
+               OnLayerViewCreate="OnLayerViewCreated">
         <Map>
             <Basemap>
-               @if (_showNight)
-                {
-                    <TileLayer>
-                        <PortalItem Id="d92d38b812da4a0884e47e68c57ac451" />
-                    </TileLayer>
-                }
-               else
-               {
-                   <TileLayer>
-                       <PortalItem Id="10df2279f9684e4a9f6a7f08febac2a9" />
-                   </TileLayer>
-               }
+                <TileLayer @ref="_worldImageryBasemap" Title="World Imagery">
+                    <PortalItem Id="10df2279f9684e4a9f6a7f08febac2a9"/>
+                </TileLayer>
             </Basemap>
-            @if (_showBorders)
-            {
-                <FeatureLayer Opacity="0.5">
-                    <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
-                </FeatureLayer>
-            }
+            <GraphicsLayer @ref="_selectedGraphicsLayer" />
+            <FeatureLayer @ref="_countriesLayer" 
+                          PopupEnabled="false" 
+                          Title="Countries"
+                          OutFields="@(["COUNTRY"])">
+                <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
+                <SimpleRenderer>
+                    <SimpleFillSymbol Color="@(new MapColor(0, 100, 0, 0.1))">
+                        <Outline Color="@(new MapColor("lightblue"))" Width="2" />
+                    </SimpleFillSymbol>
+                </SimpleRenderer>
+            </FeatureLayer>
         </Map>
-    </MapView>
+        <LocateWidget Position="OverlayPosition.TopLeft" />
+        <SearchWidget Position="OverlayPosition.TopRight" />
+    </SceneView>
 }

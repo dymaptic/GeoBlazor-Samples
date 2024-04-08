@@ -2,5 +2,12 @@ namespace NationFinder.Client;
 
 public record CommunicationResult(bool Success, string? ErrorMessage = null);
 
-public record LayerState(bool ShowScene, bool ShowNight, bool ShowBorders,
-    bool ShowWeather, bool ShowTopography);
+public static class State
+{
+    public static readonly List<string> ConnectedUsers = [];
+    public static readonly Dictionary<string, string> UserGuesses = [];
+    public static string? CurrentCountry { get; set; }
+    public static Func<Task>? UpdateGameBoard { get; set; }
+    public static List<string> Winners { get; set; } = [];
+    public static Func<Task>? FinalizeGame { get; set; }
+}

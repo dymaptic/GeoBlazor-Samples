@@ -4,10 +4,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>9f7da3b7-cad2-485c-808e-dfc54474e75c</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="dymaptic.GeoBlazor.Pro" Version="0.9.5.1" />
+      <PackageReference Include="dymaptic.GeoBlazor.Pro" Version="0.9.8" />
       <PackageReference Include="Radzen.Blazor" Version="4.23.4" />
     </ItemGroup>
 

@@ -6,7 +6,8 @@ namespace NationFinder.Client;
 
 public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISignalRClient
 {
-    public Action<LayerState>? UpdateState;
+    public Func<Task>? ResetGameState;
+    public Func<string, Task>? GameOverNotice;
 
     public async Task InitializeAsync()
     {
@@ -47,7 +48,8 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
             return InitializeAsync();
         };
 
-        _hubConnection.On<LayerState>(nameof(ToggleState), ToggleState);
+        _hubConnection.On<string>(nameof(GameOver), GameOver);
+        _hubConnection.On(nameof(ResetGame), ResetGame);
     }
 
     public async Task<CommunicationResult> RegisterUser(string username)
@@ -61,9 +63,19 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
         await _hubConnection.DisposeAsync();
     }
 
-    public void ToggleState(LayerState state)
+    public async Task SubmitGuess(string country, string username)
     {
-        UpdateState!(state);
+        await _hubConnection.SendAsync(nameof(SubmitGuess), country, username, _cts.Token);
+    }
+
+    public async Task ResetGame()
+    {
+        await ResetGameState!();
+    }
+
+    public async Task GameOver(string country)
+    {
+        await GameOverNotice!(country);
     }
 
     private readonly HubConnection _hubConnection = new HubConnectionBuilder()
@@ -77,4 +89,6 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
 public interface ISignalRClient
 {
     public Task<CommunicationResult> RegisterUser(string username);
+
+    public Task SubmitGuess(string country, string username);
 }

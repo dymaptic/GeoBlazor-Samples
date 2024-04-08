@@ -1,0 +1,250 @@
+﻿@page "/"
+
+<h1>Des Moines Transit</h1>
+<div class="header-row">
+    <label>
+        Find a route: <input type="text" @bind="_routeSearchText" />
+        <button @onclick="OnSearch">Search</button>
+    </label>
+    <label>
+        Bus delay in ms (lower = faster): <input type="number" @bind="_busDelay" />
+    </label>
+</div>
+<br />
+<br />
+<MapView Longitude="-93.598022" Latitude="41.619549" Zoom="11" 
+         Class="map-view"
+         OnClick="OnClick"
+         OnLayerViewCreate="OnLayerViewCreate"
+         @ref="_mapView">
+    <Map ArcGISDefaultBasemap="arcgis-human-geography">
+        <FeatureLayer @ref="_routesLayer" 
+                      Url="https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/IowaGTFS_View/FeatureServer/0/"
+                      OutFields="@(["OBJECTID", 
+                                     "trip_id", 
+                                     "route_shortname", 
+                                     "route_long", 
+                                     "trip_headsign" ])">
+            <PopupTemplate Title="{trip_headsign}" ContentFunction="BuildPopupContent">
+                <ActionButton Image="@(_isPaused ? "images/play.jpg" : "images/pause.jpg")"
+                    Title="@(_isPaused ? "Play" : "Pause")"
+                    Id="play"
+                    CallbackFunction="StartOrPause" />
+            </PopupTemplate>
+        </FeatureLayer>
+        <FeatureLayer @ref="_stopsLayer" 
+                      Url="https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/IowaGTFS_View/FeatureServer/1" 
+                      OutFields="@(["stop_id", "stop_name", "OBJECTID"])"/>
+    </Map>
+    <LayerListWidget Position="OverlayPosition.TopRight" />
+    <LocateWidget Position="OverlayPosition.TopLeft" />
+    <ScaleBarWidget Position="OverlayPosition.BottomLeft" />
+    <PopupWidget DockEnabled="true">
+        <PopupDockOptions ButtonEnabled="false"
+                          BreakPoint="@(new BreakPoint(false))"
+                          Position="PopupDockPosition.BottomRight" />
+    </PopupWidget>
+</MapView>
+@if (_showOtto)
+{
+    <div style="position: absolute; left: calc(50vw - 240px); top: calc(50vh - 188px); z-index: 1000;">
+        <iframe src="https://giphy.com/embed/3orifd633sXjm5mwus" width="480" height="366" frameBorder="0" 
+                class="giphy-embed" allowFullScreen></iframe>
+        <p><a href="https://giphy.com/gifs/season-2-the-simpsons-2x1-3orifd633sXjm5mwus">via GIPHY</a></p>
+    </div>
+}
+
+@code {
+    [Inject]
+    IWebHostEnvironment WebHostEnvironment { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        GetStopTimeData();
+    }
+
+    private void GetStopTimeData()
+    {
+        if (_stopTimeData is not null)
+        {
+            return;
+        }
+        _stopTimeData = new List<StopTimeData>();
+        string filePath = Path.Combine(WebHostEnvironment.WebRootPath, "stop_times.csv");
+        using StreamReader reader = new StreamReader(filePath);
+        using CsvReader csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
+        _stopTimeData = csvReader.GetRecords<StopTimeData>().ToList();
+    }
+
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        HitTestOptions options = new()
+        {
+            IncludeByGeoBlazorId = new[] { _routesLayer!.Id }
+        };
+        HitTestResult result = await _mapView!.HitTest(clickEvent, options);
+        Graphic? feature = result.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
+        if (feature is not null)
+        {
+            Query query = await _routesLayerView!.CreateQuery();
+            query.ObjectIds = [ (int)(double)feature.Attributes["OBJECTID"]! ];
+            query.OutFields = [ "*" ];
+            feature = (await _routesLayerView.QueryFeatures(query))!.Features!.First();
+            
+            await DriveTheBus(feature);
+        }
+    }
+
+    private async Task DriveTheBus(Graphic? feature)
+    {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        CancellationToken token = _cancellationTokenSource.Token;
+        if (feature is null)
+        {
+            // no route found
+            return;
+        }
+
+        _isPaused = false;
+        await _mapView!.OpenPopup(new PopupOpenOptions()
+        {
+            Features = [feature]
+        });
+
+        List<StopTimeData> stopTimes = _stopTimeData!
+            .Where(s => s.TripId == feature.Attributes["trip_id"]!.ToString())
+            .OrderBy(s => s.StopSequence).ToList();
+
+        await _mapView.AddGraphic(_busGraphic!);
+        foreach (StopTimeData stopTime in stopTimes)
+        {
+            while (_isPaused)
+            {
+                await Task.Delay(100, token);
+            }
+            _currentStopId = stopTime.StopId;
+            Query query = await _stopsLayerView!.CreateQuery();
+            query.Where = $"stop_id = '{stopTime.StopId}'";
+            FeatureSet? results = await _stopsLayerView.QueryFeatures(query, token);
+            Graphic? stop = results?.Features?.FirstOrDefault();
+            if (stop is null) continue;
+
+            Point point = (Point)stop.Geometry!;
+            await _busGraphic!.SetGeometry(point);
+            await _mapView!.SetCenter(point);
+            StateHasChanged();
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+            await Task.Delay(_busDelay, token);
+        }
+        await _mapView.RemoveGraphic(_busGraphic!);
+        // _showOtto = true;
+        // StateHasChanged();
+        // await Task.Delay(4000, token);
+        // _showOtto = false;
+        // StateHasChanged();
+    }
+
+    private async ValueTask<PopupContent[]> BuildPopupContent(Graphic graphic)
+    {
+        List<PopupContent> popupContents = new();
+        if (_currentStopId is null)
+        {
+            return await ValueTask.FromResult(popupContents.ToArray());
+        }
+
+        Query query = await _stopsLayerView!.CreateQuery();
+        query.OutFields = ["*"];
+        query.Where = $"stop_id = '{_currentStopId}'";
+        FeatureSet? result = await _stopsLayerView.QueryFeatures(query);
+        Graphic? currentStop = result?.Features?.FirstOrDefault();
+        if (currentStop is null)
+        {
+            return await ValueTask.FromResult(popupContents.ToArray());
+        }
+        StopTimeData currentStopTime = _stopTimeData!.First(s => s.StopId == _currentStopId);
+        TimeOnly stopTime = TimeOnly.Parse(currentStopTime.ArrivalTime);
+        string stopName = currentStop.Attributes["stop_name"]!.ToString()!;
+        Point stopPoint = (Point)currentStop.Geometry!;
+        popupContents.Add(new TextPopupContent($"Stop #{currentStopTime.StopSequence}: {stopName}, {stopTime}"));
+        popupContents.Add(new TextPopupContent($"Coordinates: LAT: {stopPoint.Latitude:N2}, LONG: {stopPoint.Longitude:N2}"));
+        popupContents.Add(new TextPopupContent("<a href='https://www.ridedart.com/mydart/trip-planner'>Plan your trip</a>"));
+
+        return popupContents.ToArray();
+    }
+
+    private Task StartOrPause()
+    {
+        _isPaused = !_isPaused;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnSearch()
+    {
+        Query query = await _routesLayerView!.CreateQuery();
+        query.OutFields = 
+            [ 
+                "OBJECTID", 
+                "trip_id", 
+                "route_shortname", 
+                "route_long", 
+                "trip_headsign" 
+            ];
+        query.Where = $"route_shortname LIKE '%{_routeSearchText}%' OR route_long LIKE '%{_routeSearchText}%' OR trip_headsign LIKE '%{_routeSearchText}%'";
+        FeatureSet? featureSet = await _routesLayerView!.QueryFeatures(query);
+        if (featureSet?.Features is not null && featureSet.Features.Any())
+        {
+            Graphic? feature = featureSet.Features
+                .FirstOrDefault(f => _stopTimeData!
+                    .Any(s => s.TripId == f.Attributes["trip_id"]!.ToString()));
+            await DriveTheBus(feature);
+        }
+    }
+
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (_stopsLayer?.Id == createEvent.Layer?.Id)
+        {
+            _stopsLayerView = createEvent.LayerView as FeatureLayerView;
+        }
+        else if (_routesLayer?.Id == createEvent.Layer?.Id)
+        {
+            _routesLayerView = createEvent.LayerView as FeatureLayerView;
+        }
+    }
+
+    private MapView? _mapView;
+    private FeatureLayer? _routesLayer;
+    private FeatureLayer? _stopsLayer;
+    private List<StopTimeData>? _stopTimeData;
+    private readonly Graphic? _busGraphic = new(new Point(0, 0), 
+        new PictureMarkerSymbol("images/bus.jpg", 30, 30));
+    private CancellationTokenSource? _cancellationTokenSource = new();
+    private bool _isPaused;
+    private int _busDelay = 1000;
+    private string? _currentStopId;
+    private string _routeSearchText = string.Empty;
+    private bool _showOtto;
+    private FeatureLayerView? _stopsLayerView;
+    private FeatureLayerView? _routesLayerView;
+
+    private record StopTimeData
+    {
+        [Name("trip_id")] 
+        public string TripId { get; init; }
+        [Name("arrival_time")] 
+        public string ArrivalTime { get; init; }
+        [Name("stop_id")]
+        public string StopId { get; init; }
+        [Name("stop_sequence")] 
+        public int StopSequence { get; init; }
+    }
+
+}
