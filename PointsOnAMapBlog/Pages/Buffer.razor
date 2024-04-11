@@ -1,0 +1,44 @@
+﻿@page "/buffer"
+@using dymaptic.GeoBlazor.Core.Model
+@inject GeometryEngine GeometryEngine
+
+<PageTitle>Buffer</PageTitle>
+
+<h1>Buffer a point and add the circle (buffer) and the point to the map</h1>
+
+
+<MapView @ref="_mapView" Longitude="0" Latitude="0" Zoom="3" Style="height: 600px; width: 1200px;">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+    </Map>
+</MapView>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            // Create a point on Rome, Italy (lat: 41.9102083, long: 12.3708505)
+            var point = new Point(x:12.3708505, y:41.910283, spatialReference:SpatialReference.Wgs84);
+            // buffer the point by 1000km
+            // Note that b/c we use WGS84, we need to use the GeodesicBuffer method. The plain `Buffer` method should be used with planar coordinate systems
+            var buffer = await GeometryEngine.GeodesicBuffer(point, 1000, LinearUnit.Kilometers);
+            // Create a Red dot symbol
+            var pointSymbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
+            // create a blue circle symbol
+            var circleSymbol = new SimpleFillSymbol(new Outline(new MapColor("#1D809F"), 2), new MapColor("#1D809F"));
+            // Create the graphic
+            var bufferGraphic = new Graphic(buffer, circleSymbol);
+            var pointGraphic = new Graphic(point, pointSymbol);
+            // add it to the map
+            await _mapView.AddGraphic(bufferGraphic);
+            await _mapView.AddGraphic(pointGraphic);
+        }
+    }
+    
+    private MapView _mapView;
+
+} 

@@ -1,0 +1,36 @@
+﻿@page "/"
+@using Point = dymaptic.GeoBlazor.Core.Components.Geometries.Point
+
+<PageTitle>Point on a Map</PageTitle>
+
+<h1>Put a single Point on the map</h1>
+
+
+<MapView @ref="_mapView" Longitude="0" Latitude="0" Zoom="3" Style="height: 600px; width: 1200px;">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+    </Map>
+</MapView>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            // Create a point on Rome, Italy (lat: 41.9102083, long: 12.3708505)
+            var point = new Point(x:12.3708505, y:41.910283, spatialReference:SpatialReference.Wgs84);
+            // Create a Red dot symbol
+            var symbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
+            // Create the graphic
+            var graphic = new Graphic(point, symbol);
+            // add it to the map
+            await _mapView.AddGraphic(graphic);
+        }
+    }
+    
+    private MapView _mapView;
+
+} 
