@@ -1,0 +1,45 @@
+﻿@page "/antarctica"
+@using Point = dymaptic.GeoBlazor.Core.Components.Geometries.Point
+@using dymaptic.GeoBlazor.Core.Model
+@inject GeometryEngine GeometryEngine
+
+<PageTitle>Antarctica</PageTitle>
+
+<h1>Antarctica has an area of 14,200,000 square kilometers</h1>
+
+
+<MapView @ref="_mapView" Longitude="0" Latitude="0" Zoom="2" Style="height: 800px; width: 1200px;">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+    </Map>
+</MapView>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            // Create a point at 0,0 so we can make a circle with the same area as antarctica. 
+            var point = new Point(x:0, y:0, spatialReference:SpatialReference.Wgs84);
+            // Per wikipedia, the area of antarctica is 14,200,000 km^2 and the area of a circle is pi*r^2, we need to compute the radius of the circle with that area
+            var radius = Math.Sqrt(14200000 / Math.PI);
+            var buffer = await GeometryEngine.GeodesicBuffer(point, radius, LinearUnit.Kilometers);
+            // Create a Red dot symbol
+            var pointSymbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
+            // create a blue circle symbol
+            var circleSymbol = new SimpleFillSymbol(new Outline(new MapColor("#1D809F"), 2), new MapColor("#1D809F"));
+            // Create the graphic
+            var bufferGraphic = new Graphic(buffer, circleSymbol);
+            var pointGraphic = new Graphic(point, pointSymbol);
+            // add it to the map
+            await _mapView.AddGraphic(bufferGraphic);
+            await _mapView.AddGraphic(pointGraphic);
+        }
+    }
+    
+    private MapView _mapView;
+
+} 
