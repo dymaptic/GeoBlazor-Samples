@@ -1,7 +1,7 @@
 @page "/game"
 @rendermode RenderMode
 <h1>Nation Finder</h1>
-<h2>Use Your Device, navigate to <span style="color: white; text-decoration: underline">@(NavigationManager.BaseUri)</span></h2>
+<h2>Use Your Device, navigate to <a href=""><span style="color: white; text-decoration: underline">@(NavigationManager.BaseUri)</span></a></h2>
 <h2>Select the matching country</h2>
 
 <div style="visibility: @(_display); display: flex; flex-direction:  row; justify-content: space-between">
@@ -55,7 +55,10 @@
 
     private async Task OnViewRendered()
     {
-        await ResetGame();
+        if (_display == "collapse")
+        {
+            await ResetGame();
+        }
     }
 
     private async Task UpdateGameBoard()
@@ -140,6 +143,7 @@
             await _sceneView!.GoTo(result.Features!);
             _display = "visible";
             StateHasChanged();
+            await Task.Yield();
             await UpdateGameBoard();
         }
     }

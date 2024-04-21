@@ -7,17 +7,30 @@
 
 @if (_username is null || !_isRegistered)
 {
-    <label>
-        Please enter your user name:
-        <input type="text" @bind="_username"/>
-    </label>
-    <button @onclick="Register"
-            disabled="@(string.IsNullOrWhiteSpace(_username))">
-        Register
-    </button>
-    <label style="color: red">
-        @_error
-    </label>
+    <div class="row">
+        <label>
+            Please enter your user name:
+            <input type="text" @bind="_username"/>
+        </label>
+    </div>
+    
+    <div class="row">
+        <label>
+            If you would like more information about GeoBlazor, please provide your email:
+            <input type="email" @bind="_email"/>
+        </label>
+    </div>
+    <div class="row">
+        <button @onclick="Register"
+                disabled="@(string.IsNullOrWhiteSpace(_username))">
+            Register
+        </button>
+    </div>
+    <div class="row">
+        <label style="color: red">
+            @_error
+        </label>
+    </div>
 }
 else
 {
@@ -58,6 +71,7 @@ else
     <SceneView @ref="_sceneView" Class="map-view"
                Style="@($"cursor: {_cursor};")"
                OnClick="OnMapClicked"
+               OnViewRendered="OnViewRendered"
                OnLayerViewCreate="OnLayerViewCreated">
         <Map>
             <Basemap>
@@ -94,4 +108,26 @@ else
             </ExpandWidget>
         }
     </SceneView>
+    <div class="inlay-container">
+        @if (_correctCountry is not null)
+        {
+            <button @onclick="ToggleInlayView">@(_showInlay ? "Hide" : "Show") Target Country</button>
+            @if (_showInlay)
+            {
+                <SceneView Class="inlay-view" Style="border: 2px solid gold;"
+                           OnViewRendered="OnInlayViewRendered"
+                           @ref="_inlayView" WhiteLabel="@null">
+                    <Map>
+                        <GraphicsLayer @ref="_inlayGraphicsLayer"/>
+                        <FeatureLayer @ref="_countriesLayer"
+                                      PopupEnabled="false"
+                                      Title="Countries"
+                                      OutFields="@( ["COUNTRY"])">
+                            <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
+                        </FeatureLayer>
+                    </Map>
+                </SceneView>
+            }
+        }
+    </div>
 }

@@ -8,6 +8,7 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
 {
     public Func<Task>? ResetGameState;
     public Func<string, Task>? GameOverNotice;
+    public Func<string, Task>? SetSelectedCountry;
 
     public async Task InitializeAsync()
     {
@@ -50,11 +51,12 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
 
         _hubConnection.On<string>(nameof(GameOver), GameOver);
         _hubConnection.On(nameof(ResetGame), ResetGame);
+        _hubConnection.On<string>(nameof(SetCountry), SetCountry);
     }
 
-    public async Task<CommunicationResult> RegisterUser(string username)
+    public async Task<CommunicationResult> RegisterUser(string username, string? email)
     {
-        return await _hubConnection.InvokeAsync<CommunicationResult>(nameof(RegisterUser), username, _cts.Token);
+        return await _hubConnection.InvokeAsync<CommunicationResult>(nameof(RegisterUser), username, email, _cts.Token);
     }
 
     public async ValueTask DisposeAsync()
@@ -66,6 +68,16 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
     public async Task SubmitGuess(string country, string username)
     {
         await _hubConnection.SendAsync(nameof(SubmitGuess), country, username, _cts.Token);
+    }
+
+    public async Task<string?> GetSelectedCountry()
+    {
+        return await _hubConnection.InvokeAsync<string>(nameof(GetSelectedCountry));
+    }
+
+    public async Task SetCountry(string country)
+    {
+        await SetSelectedCountry!(country);
     }
 
     public async Task ResetGame()
@@ -88,7 +100,9 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
 
 public interface ISignalRClient
 {
-    public Task<CommunicationResult> RegisterUser(string username);
+    public Task<CommunicationResult> RegisterUser(string username, string? email);
 
     public Task SubmitGuess(string country, string username);
+
+    public Task<string?> GetSelectedCountry();
 }
