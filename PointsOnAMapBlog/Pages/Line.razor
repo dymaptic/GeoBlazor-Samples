@@ -8,7 +8,7 @@
 
 <h1>Create two different lines</h1>
 
-
+@* Map for demonstrating geometric line generation *@
 <MapView @ref="_mapView" Longitude="0" Latitude="0" Zoom="3" Style="height: 600px; width: 1200px;">
     <Map>
         <Basemap>
@@ -18,37 +18,43 @@
 </MapView>
 
 @code {
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             // Create a point on Rome, Italy (lat: 41.9102083, long: 12.3708505)
-            var pointRome = new Point(x:12.3708505, y:41.910283, spatialReference:SpatialReference.Wgs84);
-            // create a point on Houston, TX (lat: 29.817363, long: -95.7316106)
-            var pointHou = new Point(x:-95.7316106, y:  29.817363, spatialReference:SpatialReference.Wgs84);
+            Point pointRome = new Point(x: 12.3708505, y: 41.910283, spatialReference: SpatialReference.Wgs84);
+
+            // Create a point on Houston, TX (lat: 29.817363, long: -95.7316106)
+            Point pointHou = new Point(x: -95.7316106, y: 29.817363, spatialReference: SpatialReference.Wgs84);
+
             // Create a line between the two points
-            var line = new PolyLine(new MapPath[]
+            PolyLine line = new PolyLine(new MapPath[]
             {
-                new MapPath(
-                    new MapPoint(new double[] {(double)pointRome.X!, (double)pointRome.Y!}), 
-                    new MapPoint(new double[] {(double)pointHou.X!, (double)pointHou.Y!}))
+                new(new MapPoint((double)pointRome.X!, (double)pointRome.Y!),
+                    new MapPoint((double)pointHou.X!, (double)pointHou.Y!))
             }, SpatialReference.Wgs84);
-            
+
             // Densify the line to make a nice arc
-            var arc = await GeometryEngine.GeodesicDensify(line, 100, LinearUnit.Kilometers);
+            Geometry arc = await GeometryEngine.GeodesicDensify(line, 100, LinearUnit.Kilometers);
+
             // Create an orange dot symbol
-            var pointSymbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
-            // create a blue line symbol
-            var lineSymbol = new SimpleLineSymbol(new MapColor("#1D809F"), 2);
-            // add it to the map
-            await _mapView.AddGraphic(new Graphic(pointRome, pointSymbol));
+            SimpleMarkerSymbol pointSymbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
+
+            // Create a blue line symbol
+            SimpleLineSymbol lineSymbol = new SimpleLineSymbol(new MapColor("#1D809F"), 2);
+
+            // Add it to the map
+            await _mapView!.AddGraphic(new Graphic(pointRome, pointSymbol));
             await _mapView.AddGraphic(new Graphic(pointHou, pointSymbol));
             await _mapView.AddGraphic(new Graphic(line, lineSymbol));
             await _mapView.AddGraphic(new Graphic(arc, lineSymbol));
         }
     }
-    
-    private MapView _mapView;
 
-} 
+    private MapView? _mapView;
+
+}
