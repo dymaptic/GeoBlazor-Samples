@@ -1,6 +1,6 @@
 ﻿@page "/comparison"
-@using Point = dymaptic.GeoBlazor.Core.Components.Geometries.Point
 @using dymaptic.GeoBlazor.Core.Model
+@using Point = dymaptic.GeoBlazor.Core.Components.Geometries.Point
 @inject GeometryEngine GeometryEngine
 
 <PageTitle>Equator vs. Rome Size Comparison</PageTitle>
@@ -8,6 +8,7 @@
 <h1>Size comparison of the same buffer on the Equator or in Rome</h1>
 
 <div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">
+    @* Map 1 - Focused on Rome *@
     <MapView @ref="_mapViewRome" Longitude="12.3708505" Latitude="41.9102083" Zoom="4" Style="height: 800px; width: 600px;">
         <Map>
             <Basemap>
@@ -16,6 +17,7 @@
         </Map>
     </MapView>
 
+    @* Map 2 - Focused on Equator *@
     <MapView @ref="_mapViewEquator" Longitude="0" Latitude="0" Zoom="4" Style="height: 800px; width: 600px;">
         <Map>
             <Basemap>
@@ -27,42 +29,52 @@
 
 
 @code {
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
-            // Create a point at 0,0 so we can make a circle with the same area as antarctica. 
-            var point = new Point(x:0, y:0, spatialReference:SpatialReference.Wgs84);
-            
-            var buffer = await GeometryEngine.GeodesicBuffer(point, 1000, LinearUnit.Kilometers);
+            // Create a point at 0,0 (the Equator)
+            Point point = new Point(x: 0, y: 0, spatialReference: SpatialReference.Wgs84);
+
+            // Note that b/c we use WGS84, we need to use the GeodesicBuffer method. The plain `Buffer` method should be used with planar coordinate systems
+            // Buffer the point by 1000km
+            Polygon buffer = await GeometryEngine.GeodesicBuffer(point, 1000, LinearUnit.Kilometers);
+
             // Create a Red dot symbol
-            var pointSymbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
-            // create a blue circle symbol
-            var circleSymbol = new SimpleFillSymbol(new Outline(new MapColor("#1D809F"), 2), new MapColor("#1D809F"));
+            SimpleMarkerSymbol pointSymbol = new SimpleMarkerSymbol(new Outline(new MapColor("#E24E42"), 0), 
+                new MapColor("#E24E42"), 10, SimpleMarkerStyle.Circle);
+
+            // Create a blue circle symbol
+            SimpleFillSymbol circleSymbol = new SimpleFillSymbol(new Outline(new MapColor("#1D809F"), 2), 
+                new MapColor("#1D809F"));
+
             // Create the graphic
-            var bufferGraphic = new Graphic(buffer, circleSymbol);
-            var pointGraphic = new Graphic(point, pointSymbol);
-            // add it to the map
+            Graphic bufferGraphic = new Graphic(buffer, circleSymbol);
+            Graphic pointGraphic = new Graphic(point, pointSymbol);
+
+            // Add it to the map
             await _mapViewEquator!.AddGraphic(bufferGraphic);
             await _mapViewEquator.AddGraphic(pointGraphic);
 
             // Create a point on Rome, Italy (lat: 41.9102083, long: 12.3708505)
-            point = new Point(x:12.3708505, y:41.910283, spatialReference:SpatialReference.Wgs84);
-            // buffer the point by 1000km
-            // Note that b/c we use WGS84, we need to use the GeodesicBuffer method. The plain `Buffer` method should be used with planar coordinate systems
+            point = new Point(x: 12.3708505, y: 41.910283, spatialReference: SpatialReference.Wgs84);
+            
             buffer = await GeometryEngine.GeodesicBuffer(point, 1000, LinearUnit.Kilometers);
+
             // Create the graphic
             bufferGraphic = new Graphic(buffer, circleSymbol);
             pointGraphic = new Graphic(point, pointSymbol);
-            // add it to the map
+
+            // Add it to the map
             await _mapViewRome!.AddGraphic(bufferGraphic);
             await _mapViewRome.AddGraphic(pointGraphic);
         }
     }
 
-    
     private MapView? _mapViewEquator;
     private MapView? _mapViewRome;
 
-} 
+}
