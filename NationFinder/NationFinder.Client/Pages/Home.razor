@@ -1,5 +1,5 @@
 ﻿@page "/"
-@rendermode InteractiveWasm
+@rendermode InteractiveAuto
 
 <PageTitle>Nation Finder</PageTitle>
 <h1>Nation Finder</h1>
@@ -80,6 +80,7 @@ else
                 </TileLayer>
             </Basemap>
             <GraphicsLayer @ref="_selectedGraphicsLayer" />
+            <GraphicsLayer @ref="_sketchLayer" />
             <FeatureLayer @ref="_countriesLayer" 
                           PopupEnabled="false" 
                           Title="Countries"
@@ -97,7 +98,7 @@ else
             <LocateWidget Position="OverlayPosition.TopLeft" />
             <SearchWidget Position="OverlayPosition.TopRight" />
             <ExpandWidget Position="OverlayPosition.BottomLeft">
-                <SketchWidget />
+                <SketchWidget GraphicsLayerId="@_sketchLayer.Id" />
             </ExpandWidget>
             <ExpandWidget Position="OverlayPosition.BottomRight"
                           ExpandIcon="esri-icon-basemap">
@@ -108,26 +109,4 @@ else
             </ExpandWidget>
         }
     </SceneView>
-    <div class="inlay-container">
-        @if (_correctCountry is not null)
-        {
-            <button @onclick="ToggleInlayView">@(_showInlay ? "Hide" : "Show") Target Country</button>
-            @if (_showInlay)
-            {
-                <SceneView Class="inlay-view" Style="border: 2px solid gold;"
-                           OnViewRendered="OnInlayViewRendered"
-                           @ref="_inlayView" WhiteLabel="@null">
-                    <Map>
-                        <GraphicsLayer @ref="_inlayGraphicsLayer"/>
-                        <FeatureLayer @ref="_countriesLayer"
-                                      PopupEnabled="false"
-                                      Title="Countries"
-                                      OutFields="@( ["COUNTRY"])">
-                            <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
-                        </FeatureLayer>
-                    </Map>
-                </SceneView>
-            }
-        }
-    </div>
 }

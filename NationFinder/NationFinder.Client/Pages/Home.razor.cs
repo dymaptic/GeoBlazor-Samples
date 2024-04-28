@@ -51,6 +51,23 @@ public partial class Home : IAsyncDisposable
             StateHasChanged();
         }
     }
+    
+    private async Task GameOver(string country)
+    {
+        _gameOver = true;
+        _correctCountry = country;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnViewRendered()
+    {
+        _correctCountry ??= await SignalRClient.GetSelectedCountry();
+    }
+
+    private void SetSelectedCountry(string country)
+    {
+        _correctCountry = country;
+    }
 
     private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {
@@ -89,10 +106,11 @@ public partial class Home : IAsyncDisposable
         _guessSubmitted = false;
         _gameOver = false;
         _gameStarted = false;
+        _ok = false;
         _selectedCountry = null;
         _correctCountry = null;
-        _correctCountryRendered = false;
-        _selectedGraphicsLayer?.Clear();
+        await _selectedGraphicsLayer!.Clear();
+        await _sketchLayer!.Clear();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -153,96 +171,22 @@ public partial class Home : IAsyncDisposable
         await InvokeAsync(StateHasChanged);
     }
 
-    private static readonly IComponentRenderMode InteractiveWasm = new InteractiveWebAssemblyRenderMode(false);
+    private static readonly IComponentRenderMode InteractiveAuto = new InteractiveAutoRenderMode(false);
     private string? _correctCountry;
     private FeatureLayer? _countriesLayer;
-    private bool _correctCountryRendered;
     private string _cursor = "default";
     private string? _email;
     private string? _error;
     private bool _gameOver;
     private bool _gameStarted;
     private bool _guessSubmitted;
-    private GraphicsLayer? _inlayGraphicsLayer;
-    private SceneView? _inlayView;
     private bool _isRegistered;
     private bool _ok;
     private SceneView? _sceneView;
     private string? _selectedCountry;
     private GraphicsLayer? _selectedGraphicsLayer;
-    private bool _showInlay;
+    private GraphicsLayer? _sketchLayer;
     private string? _username;
     private TileLayer? _worldImageryBasemap;
     private Polygon? _worldPolygon;
-
-
-#region Inlay Controls
-
-    private async Task GameOver(string country)
-    {
-        _gameOver = true;
-        _correctCountry = country;
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task OnViewRendered()
-    {
-        if (_showInlay) return;
-
-        if (_correctCountry is null) _correctCountry = await SignalRClient.GetSelectedCountry();
-    }
-
-    private async Task SetSelectedCountry(string country)
-    {
-        _correctCountry = country;
-        await LoadInlayCountry();
-    }
-
-    private void ToggleInlayView()
-    {
-        _showInlay = !_showInlay;
-
-        if (!_showInlay)
-        {
-            _correctCountryRendered = false;
-        }
-    }
-
-    private async Task OnInlayViewRendered()
-    {
-        if (!_correctCountryRendered && _correctCountry is not null)
-        {
-            await LoadInlayCountry();
-        }
-    }
-
-    private async Task LoadInlayCountry()
-    {
-        await Task.Yield();
-
-        if (_correctCountry is not null)
-        {
-            Query query = new() { Where = $"COUNTRY = '{_correctCountry}'", ReturnGeometry = true };
-
-            FeatureSet? result = await _countriesLayer!.QueryFeatures(query);
-            await _inlayGraphicsLayer!.Clear();
-
-            Symbol fillSymbol = new SimpleFillSymbol(new Outline(new MapColor("lightblue"), 4),
-                new MapColor(251, 205, 128));
-            _worldPolygon ??= await GeometryEngine.PolygonFromExtent(_inlayGraphicsLayer!.FullExtent!);
-            await _inlayGraphicsLayer.Add(WorldPolygonGraphic!);
-
-            foreach (Graphic graphic in result!.Features!)
-            {
-                var clone = new Graphic(graphic.Geometry, fillSymbol);
-                await _inlayGraphicsLayer!.Add(clone);
-            }
-
-            await _inlayView!.GoTo(result.Features!);
-            StateHasChanged();
-            _correctCountryRendered = true;
-        }
-    }
-
-#endregion
 }

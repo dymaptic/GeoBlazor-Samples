@@ -8,7 +8,7 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
 {
     public Func<Task>? ResetGameState;
     public Func<string, Task>? GameOverNotice;
-    public Func<string, Task>? SetSelectedCountry;
+    public Action<string>? SetSelectedCountry;
 
     public async Task InitializeAsync()
     {
@@ -75,9 +75,11 @@ public class SignalRClient(NavigationManager navigation): IAsyncDisposable, ISig
         return await _hubConnection.InvokeAsync<string>(nameof(GetSelectedCountry));
     }
 
-    public async Task SetCountry(string country)
+    public Task SetCountry(string country)
     {
-        await SetSelectedCountry!(country);
+        SetSelectedCountry!(country);
+
+        return Task.CompletedTask;
     }
 
     public async Task ResetGame()
