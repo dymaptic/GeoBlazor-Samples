@@ -1,0 +1,249 @@
+﻿@page "/"
+
+@rendermode RenderMode
+<PageTitle>Museums</PageTitle>
+
+<p>Museum Data Source: <a target="_blank" href="https://www.imls.gov/research-evaluation/data-collection/museum-data-files">https://www.imls.gov/research-evaluation/data-collection/museum-data-files</a></p>
+
+
+<div class="form-group">
+    <label class="form-label">
+        Filter by Discipline:
+        <select class="form-select" @onchange="OnFilterChanged">
+            <option value="">All</option>
+            @foreach ((string code, string displayValue) in _disciplines)
+            {
+                <option value="@(code)">@displayValue</option>
+            }
+        </select>
+    </label>
+</div>
+
+
+<div class="form-group">
+    <button class="btn btn-primary" @onclick="ToggleRouting">@(_routing ? "Hide Trip Route" : "Plan Your Trip")</button>
+    @if (_routing)
+    {
+        <p class="instructions">
+            Click on two points on the map to designate starting point and destination. You will see a popup with
+            driving directions!
+        </p>
+    }
+</div>
+
+<div class="form-group">
+    <label class="form-label">
+        Show Traffic:
+        <input class="form-check" type="checkbox" @bind="_showTraffic" />
+    </label>
+</div>
+
+
+<MapView Style="height: 600px; width: 100%;"
+         Latitude="41.8873"
+         Longitude="-87.6195"
+         Zoom="12"
+         @ref="_mapView"
+         OnViewRendered="OnViewRendered"
+         OnClick="OnClick">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+        </Basemap>
+        <GraphicsLayer @ref="_museumLayer" />
+
+        <GraphicsLayer @ref="_routeLayer" />
+
+        <MapImageLayer @ref="_trafficLayer" Visible="@(_showTraffic)">
+            <PortalItem Id="ff11eb5b930b4fabba15c47feb130de4" />
+        </MapImageLayer>
+
+    </Map>
+
+    <PopupWidget @ref="_popupWidget" />
+    <SearchWidget Position="OverlayPosition.TopRight" />
+    <ExpandWidget Position="OverlayPosition.BottomRight">
+        <BasemapGalleryWidget />
+    </ExpandWidget>
+
+    <ExpandWidget Position="OverlayPosition.BottomLeft">
+        <ol id="directions-widget" class="esri-widget esri-widget--panel esri-directions__scroller">
+            @foreach (DirectionsFeatureSet directionSet in _directions)
+            {
+                if (directionSet.Features is null) continue;
+                foreach (Graphic direction in directionSet.Features)
+                {
+                    <li>@(direction.Attributes["text"]) (@(double.Parse(direction.Attributes["length"]!.ToString()!).ToString("F")) miles)</li>
+                }
+            }
+        </ol>
+    </ExpandWidget>
+
+</MapView>
+
+@code {
+
+    [Inject]
+    public required Route Route { get; set; }
+
+    [Inject]
+    public required IWebHostEnvironment WebHostEnvironment { get; set; }
+
+    protected override void OnInitialized()
+    {
+        string filePath = Path.Combine(WebHostEnvironment.WebRootPath, "ChicagoMuseums.csv");
+        using StreamReader reader = new StreamReader(filePath);
+        using CsvReader csvReader = new CsvReader(reader, _csvConfiguration);
+        _records = csvReader.GetRecords<MuseumRecord>().ToList();
+    }
+
+    private async Task OnViewRendered()
+    {
+        if (!_isLoaded)
+        {
+            _isLoaded = true;
+            await LoadMuseums();
+        }
+    }
+
+    private async Task LoadMuseums()
+    {
+        await _museumLayer!.Clear();
+        List<Graphic> graphics = [];
+        PictureMarkerSymbol museumSymbol = new(MuseumIconUrl, 30, 30);
+
+        FieldsPopupContent content = new(
+        [
+            new FieldInfo("Discipline", "Discipline"),
+        new FieldInfo( "StreetAddress", "Address"),
+        new FieldInfo("PhoneNumber", "Phone Number"),
+        new FieldInfo("Website", "Website")
+        ]);
+        PopupTemplate popupTemplate = new("{CommonName}", contents: [content]);
+        foreach (MuseumRecord record in FilteredRecords)
+        {
+            Point point = new Point(record.Longitude, record.Latitude);
+            AttributesDictionary attributes = new(new Dictionary<string, object?>
+            {
+                            {nameof(MuseumRecord.Discipline), record.Discipline},
+                            {nameof(MuseumRecord.CommonName), record.CommonName},
+                            {nameof(MuseumRecord.StreetAddress), record.StreetAddress},
+                            {nameof(MuseumRecord.PhoneNumber), record.PhoneNumber},
+                            {nameof(MuseumRecord.Website), record.Website}
+                        });
+
+            Graphic graphic = new Graphic(point, museumSymbol, popupTemplate, attributes);
+            graphics.Add(graphic);
+        }
+
+        await _museumLayer.Add(graphics);
+    }
+
+
+    private async Task OnFilterChanged(ChangeEventArgs arg)
+    {
+        _filterValue = arg.Value!.ToString();
+        await LoadMuseums();
+    }
+
+    private List<MuseumRecord> FilteredRecords =>
+        string.IsNullOrWhiteSpace(_filterValue)
+            ? _records
+            : _records.Where(r => r.Discipline.Equals(_filterValue)).ToList();
+
+
+    private async Task ToggleRouting()
+    {
+        _routing = !_routing;
+        if (!_routing)
+        {
+            await Clear();
+        }
+        await _popupWidget!.SetProperty(nameof(PopupWidget.AutoOpenEnabled), !_routing);
+    }
+
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        if (!_routing) return;
+        Graphic stop = new(clickEvent.MapPoint);
+        await _routeLayer!.Add(stop);
+        List<Graphic> stops = _routeParameters.FeatureSetStops!.Features!.ToList();
+        stops.Add(stop);
+        _routeParameters.FeatureSetStops.Features = stops.ToArray();
+
+        if (_routeParameters.FeatureSetStops.Features.Length >= 2)
+        {
+            RouteSolveResult result = await Route.Solve(_routeUrl, _routeParameters);
+            await ShowRoute(result);
+        }
+    }
+
+    private async Task ShowRoute(RouteSolveResult result)
+    {
+        Graphic? routeGraphic = result.RouteResults?.FirstOrDefault()?.Route;
+
+        if (routeGraphic is null) return;
+        await routeGraphic.SetSymbol(_routeSymbol);
+        await _routeLayer!.Add(routeGraphic);
+        _directions = result.RouteResults!.Select(r => r.Directions!).ToArray();
+    }
+
+    private async Task Clear()
+    {
+        await _popupWidget!.Close();
+        _directions = [];
+        _routeParameters.FeatureSetStops!.Features = [];
+        await _routeLayer!.Clear();
+    }
+
+    private readonly SimpleLineSymbol _routeSymbol = new(new MapColor(0, 0, 255, 0.5), 5);
+    private readonly RouteParameters _routeParameters = new()
+    {
+        FeatureSetStops = new FeatureSet
+        {
+            Features = []
+        },
+        ReturnDirections = true
+    };
+    private readonly string _routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+    private DirectionsFeatureSet[] _directions = [];
+
+
+    #region Private Fields
+    private MapView? _mapView;
+    private GraphicsLayer? _museumLayer;
+    private PopupWidget? _popupWidget;
+    private GraphicsLayer? _routeLayer;
+    private MapImageLayer? _trafficLayer;
+
+    private List<MuseumRecord> _records = [];
+    private bool _isLoaded;
+    private bool _showTraffic;
+    private bool _routing;
+    private string? _filterValue;
+
+    private static readonly string MuseumIconUrl =
+        "https://upload.wikimedia.org/wikipedia/commons/f/f8/Map_symbol_museum.svg";
+
+    private static readonly IComponentRenderMode RenderMode =
+        new InteractiveServerRenderMode(prerender: false);
+
+    private readonly CsvConfiguration _csvConfiguration = new(CultureInfo.InvariantCulture)
+    {
+        HasHeaderRecord = true,
+        Delimiter = ",",
+        PrepareHeaderForMatch = args => args.Header.ToLower()
+    };
+
+    private readonly Dictionary<string, string> _disciplines = new()
+{
+        {"ART", "Art Museums"},
+        {"BOT", "Botanical Gardens"},
+        {"CMU", "Children's Museums"},
+        {"HST", "History Museums"},
+        {"NAT", "Natural History and Natural Science Museums"},
+        {"SCI", "Science and Technology Museums"},
+        {"ZAW", "Zoos, Aquariums, and Wildlife Conservation"}
+    };
+    #endregion
+}

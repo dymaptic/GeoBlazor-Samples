@@ -40,7 +40,10 @@ else
             <div class="overlay">
                 @if (!_gameStarted)
                 {
-                    <button type="button" class="btn btn-primary" @onclick="@(() => _gameStarted = true)">Begin Game</button>
+                    <button type="button" disabled="@(!_isLoaded)" 
+                            class="btn btn-primary" @onclick="@(() => _gameStarted = true)">
+                        @(_isLoaded ? "Begin Game" : "Please Wait...")
+                    </button>
                 }
                 else if (_gameOver)
                 {
@@ -69,7 +72,7 @@ else
         
     }
     <SceneView @ref="_sceneView" Class="map-view"
-               Style="@($"cursor: {_cursor};")"
+               Style="@($"cursor: {_cursor};{(_isLoaded ? "" : " pointer-events: none;")}")"
                OnClick="OnMapClicked"
                OnViewRendered="OnViewRendered"
                OnLayerViewCreate="OnLayerViewCreated">

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>9_CustomOverlay</Title>
+            <Shortcut>sn9</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CSharp">
+                <![CDATA[
+                    <CustomOverlay Position="OverlayPosition.BottomLeft">
+                        <ol id="directions-widget" class="esri-widget esri-widget--panel esri-directions__scroller">
+                            @foreach (DirectionsFeatureSet directionSet in _directions)
+                            {
+                                if (directionSet.Features is null) continue;
+                                foreach (Graphic direction in directionSet.Features)
+                                {
+                                    <li>@(direction.Attributes["text"]) (@(double.Parse(direction.Attributes["length"]!.ToString()!).ToString("F")) miles)</li>
+                                }
+                            }
+                        </ol>
+                    </CustomOverlay>
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

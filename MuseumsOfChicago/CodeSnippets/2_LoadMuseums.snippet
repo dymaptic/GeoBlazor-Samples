@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>2_LoadMuseums</Title>
+            <Shortcut>sn2</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CSharp">
+                <![CDATA[
+                    private async Task OnViewRendered()
+                    {
+                        if (!_isLoaded)
+                        {
+                            _isLoaded = true;
+                            await LoadMuseums();
+                        }
+                    }
+                    
+                    private async Task LoadMuseums()
+                    {
+                        await _museumLayer!.Clear();
+                        List<Graphic> graphics = [];
+                        PictureMarkerSymbol museumSymbol = new(MuseumIconUrl, 30, 30);
+                        foreach (MuseumRecord record in _records)
+                        {
+                            Point point = new Point(record.Longitude, record.Latitude);
+                            Graphic graphic = new Graphic(point, museumSymbol);
+                            graphics.Add(graphic);
+                        }
+                        await _museumLayer.Add(graphics);
+                    }
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

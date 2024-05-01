@@ -73,9 +73,13 @@ public partial class Home : IAsyncDisposable
     {
         if (createEvent.Layer?.Id == _worldImageryBasemap?.Id)
         {
-            foreach (Sublayer sublayer in _worldImageryBasemap!.AllSublayers!) await sublayer.SetPopupEnabled(false);
+            foreach (Sublayer sublayer in _worldImageryBasemap!.AllSublayers!)
+            {
+                await sublayer.SetPopupEnabled(false);
+            }
 
             _worldPolygon ??= await GeometryEngine.PolygonFromExtent(_worldImageryBasemap!.FullExtent!);
+            _isLoaded = true;
         }
     }
 
@@ -116,9 +120,8 @@ public partial class Home : IAsyncDisposable
 
     private async Task OnMapClicked(ClickEvent clickEvent)
     {
+        if (!_gameStarted || _guessSubmitted) return;
         _cursor = "wait";
-
-        if (_guessSubmitted) return;
 
         Query query = new() { Geometry = clickEvent.MapPoint, ReturnGeometry = true, OutFields = ["*"] };
 
@@ -189,4 +192,5 @@ public partial class Home : IAsyncDisposable
     private string? _username;
     private TileLayer? _worldImageryBasemap;
     private Polygon? _worldPolygon;
+    private bool _isLoaded;
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>10_RoutingLogic</Title>
+            <Shortcut>sn10</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CSharp">
+                <![CDATA[
+                    private async Task ToggleRouting()
+                    {
+                        _routing = !_routing;
+                        if (!_routing)
+                        {
+                            await Clear();
+                        }
+                        await _popupWidget!.SetVisibility(false);
+                    }
+
+                    private async Task OnClick(ClickEvent clickEvent)
+                    {
+                        if (!_routing) return;
+                        Graphic stop = new(clickEvent.MapPoint);
+                        await _routeLayer!.Add(stop);
+                        List<Graphic> stops = _routeParameters.FeatureSetStops!.Features!.ToList();
+                        stops.Add(stop);
+                        _routeParameters.FeatureSetStops.Features = stops.ToArray();
+
+                        if (_routeParameters.FeatureSetStops.Features.Length >= 2)
+                        {
+                            RouteSolveResult result = await Route.Solve(_routeUrl, _routeParameters);
+                            await ShowRoute(result);
+                        }
+                    }
+                    
+                    private async Task ShowRoute(RouteSolveResult result)
+                    {
+                        Graphic? routeGraphic = result.RouteResults?.FirstOrDefault()?.Route;
+
+                        if (routeGraphic is null) return;
+                        await routeGraphic.SetSymbol(_routeSymbol);
+                        await _routeLayer!.Add(routeGraphic);
+                        _directions = result.RouteResults!.Select(r => r.Directions!).ToArray();
+                    }
+
+                    private async Task Clear()
+                    {
+                        await _popupWidget!.Close();
+                        _directions = [];
+                        _routeParameters.FeatureSetStops!.Features = [];
+                        await _routeLayer!.Clear();
+                    }
+
+                    private readonly SimpleLineSymbol _routeSymbol = new(new MapColor(0, 0, 255, 0.5), 5);
+                    private readonly RouteParameters _routeParameters = new()
+                    {
+                        FeatureSetStops = new FeatureSet
+                        {
+                            Features = []
+                        },
+                        ReturnDirections = true
+                    };
+                    private readonly string _routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+                    private DirectionsFeatureSet[] _directions = [];
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>
