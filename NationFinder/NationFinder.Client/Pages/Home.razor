@@ -1,5 +1,5 @@
 ﻿@page "/"
-@rendermode InteractiveWasm
+@rendermode InteractiveAuto
 
 <PageTitle>Nation Finder</PageTitle>
 <h1>Nation Finder</h1>
@@ -7,17 +7,30 @@
 
 @if (_username is null || !_isRegistered)
 {
-    <label>
-        Please enter your user name:
-        <input type="text" @bind="_username"/>
-    </label>
-    <button @onclick="Register"
-            disabled="@(string.IsNullOrWhiteSpace(_username))">
-        Register
-    </button>
-    <label style="color: red">
-        @_error
-    </label>
+    <div class="row">
+        <label>
+            Please enter your user name:
+            <input type="text" @bind="_username"/>
+        </label>
+    </div>
+    
+    <div class="row">
+        <label>
+            If you would like more information about GeoBlazor, please provide your email:
+            <input type="email" @bind="_email"/>
+        </label>
+    </div>
+    <div class="row">
+        <button @onclick="Register"
+                disabled="@(string.IsNullOrWhiteSpace(_username))">
+            Register
+        </button>
+    </div>
+    <div class="row">
+        <label style="color: red">
+            @_error
+        </label>
+    </div>
 }
 else
 {
@@ -27,7 +40,10 @@ else
             <div class="overlay">
                 @if (!_gameStarted)
                 {
-                    <button type="button" class="btn btn-primary" @onclick="@(() => _gameStarted = true)">Begin Game</button>
+                    <button type="button" disabled="@(!_isLoaded)" 
+                            class="btn btn-primary" @onclick="@(() => _gameStarted = true)">
+                        @(_isLoaded ? "Begin Game" : "Please Wait...")
+                    </button>
                 }
                 else if (_gameOver)
                 {
@@ -56,8 +72,9 @@ else
         
     }
     <SceneView @ref="_sceneView" Class="map-view"
-               Style="@($"cursor: {_cursor};")"
+               Style="@($"cursor: {_cursor};{(_isLoaded ? "" : " pointer-events: none;")}")"
                OnClick="OnMapClicked"
+               OnViewRendered="OnViewRendered"
                OnLayerViewCreate="OnLayerViewCreated">
         <Map>
             <Basemap>
@@ -66,6 +83,7 @@ else
                 </TileLayer>
             </Basemap>
             <GraphicsLayer @ref="_selectedGraphicsLayer" />
+            <GraphicsLayer @ref="_sketchLayer" />
             <FeatureLayer @ref="_countriesLayer" 
                           PopupEnabled="false" 
                           Title="Countries"
@@ -83,7 +101,7 @@ else
             <LocateWidget Position="OverlayPosition.TopLeft" />
             <SearchWidget Position="OverlayPosition.TopRight" />
             <ExpandWidget Position="OverlayPosition.BottomLeft">
-                <SketchWidget />
+                <SketchWidget GraphicsLayerId="@_sketchLayer.Id" />
             </ExpandWidget>
             <ExpandWidget Position="OverlayPosition.BottomRight"
                           ExpandIcon="esri-icon-basemap">

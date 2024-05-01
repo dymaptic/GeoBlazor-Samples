@@ -5,7 +5,7 @@ namespace NationFinder;
 
 public class SignalRHub: Hub, ISignalRClient
 {
-    public async Task<CommunicationResult> RegisterUser(string username)
+    public async Task<CommunicationResult> RegisterUser(string username, string? email)
     {
         try
         {
@@ -13,6 +13,11 @@ public class SignalRHub: Hub, ISignalRClient
             if (State.ConnectedUsers.Contains(username))
             {
                 return new CommunicationResult(false, "Username already in use");
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                State.Emails.Add(email);
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, "players");
@@ -35,5 +40,10 @@ public class SignalRHub: Hub, ISignalRClient
         {
             await State.UpdateGameBoard();
         }
+    }
+
+    public async Task<string?> GetSelectedCountry()
+    {
+        return State.CurrentCountry;
     }
 }

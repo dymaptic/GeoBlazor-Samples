@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>4_Popups</Title>
+            <Shortcut>sn4</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CSharp">
+                <![CDATA[
+                    FieldsPopupContent content = new(
+                    [
+                        new FieldInfo("Discipline", "Discipline"),
+            new FieldInfo( "StreetAddress", "Address"),
+            new FieldInfo("PhoneNumber", "Phone Number"),
+            new FieldInfo("Website", "Website")
+                    ]);
+                    PopupTemplate popupTemplate = new("{CommonName}", contents: [content]);
+                    foreach (MuseumRecord record in _records)
+                    {
+                        Point point = new Point(record.Longitude, record.Latitude);
+                        AttributesDictionary attributes = new(new Dictionary<string, object?>
+                        {
+                            {nameof(MuseumRecord.Discipline), record.Discipline},
+                            {nameof(MuseumRecord.CommonName), record.CommonName},
+                            {nameof(MuseumRecord.StreetAddress), record.StreetAddress},
+                            {nameof(MuseumRecord.PhoneNumber), record.PhoneNumber},
+                            {nameof(MuseumRecord.Website), record.Website}
+                        });
+
+                        Graphic graphic = new Graphic(point, museumSymbol, popupTemplate, attributes);
+                        graphics.Add(graphic);
+                    }
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

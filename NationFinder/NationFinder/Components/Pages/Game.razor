@@ -1,7 +1,7 @@
 @page "/game"
 @rendermode RenderMode
 <h1>Nation Finder</h1>
-<h2>Use Your Device, navigate to <span style="color: white; text-decoration: underline">@(NavigationManager.BaseUri)</span></h2>
+<h2>Use Your Device, navigate to <a href=""><span style="color: white; text-decoration: underline">@(NavigationManager.BaseUri)</span></a></h2>
 <h2>Select the matching country</h2>
 
 <div style="visibility: @(_display); display: flex; flex-direction:  row; justify-content: space-between">
@@ -55,12 +55,18 @@
 
     private async Task OnViewRendered()
     {
-        await ResetGame();
+        if (_display == "collapse")
+        {
+            await ResetGame();
+        }
     }
 
     private async Task UpdateGameBoard()
     {
         if (!State.UserGuesses.Any()) return;
+        await _cts.CancelAsync();
+        _cts = new CancellationTokenSource();
+        CancellationToken token = _cts.Token;
         await InvokeAsync(async () =>
         {
             Query query = new()
@@ -71,20 +77,25 @@
                 ReturnGeometry = true
             };
 
-            FeatureSet? result = await _countriesMapLayer!.QueryFeatures(query);
+            FeatureSet? result = await _countriesMapLayer!.QueryFeatures(query, token);
 
             await _graphicsMapLayer!.Clear();
             Symbol fillSymbol = new SimpleFillSymbol(color: new MapColor("blue"));
+            List<Graphic> guesses = [];
+
             foreach (Graphic graphic in result?.Features ?? Enumerable.Empty<Graphic>())
             {
                 Graphic clone = new Graphic(graphic.Geometry, fillSymbol);
-                await _graphicsMapLayer!.Add(clone);
+                guesses.Add(clone);
             }
+
+            await _graphicsMapLayer!.Add(guesses, token);
         });
     }
 
     private async Task FinalizeGame()
     {
+        await _cts.CancelAsync();
         await InvokeAsync(async () =>
         {
             _gameOver = true;
@@ -111,6 +122,8 @@
 
     private async Task ResetGame()
     {
+        await _cts.CancelAsync();
+        _cts = new CancellationTokenSource();
         _gameOver = false;
         _display = "collapse";
         await Task.Yield();
@@ -139,7 +152,8 @@
             
             await _sceneView!.GoTo(result.Features!);
             _display = "visible";
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
             await UpdateGameBoard();
         }
     }
@@ -156,5 +170,6 @@
     private string? _displayedCountry;
     private string _display = "collapse";
     private bool _gameOver;
+    private CancellationTokenSource _cts = new();
     private static readonly IComponentRenderMode RenderMode = new InteractiveServerRenderMode(false);
 }

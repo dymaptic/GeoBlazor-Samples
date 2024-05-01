@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>1_Initialize</Title>
+            <Shortcut>sn1</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CSharp" Kind="any">
+                <![CDATA[
+                    [Inject]
+                    public required IWebHostEnvironment WebHostEnvironment { get; set; }
+                    
+                    protected override void OnInitialized()
+                    {
+                        string filePath = Path.Combine(WebHostEnvironment.WebRootPath, "ChicagoMuseums.csv");
+                        using StreamReader reader = new StreamReader(filePath);
+                        using CsvReader csvReader = new CsvReader(reader, _csvConfiguration);
+                        _records = csvReader.GetRecords<MuseumRecord>().ToList();
+                    }
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>
