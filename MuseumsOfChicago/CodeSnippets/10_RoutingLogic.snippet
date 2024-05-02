@@ -51,18 +51,6 @@
                         _routeParameters.FeatureSetStops!.Features = [];
                         await _routeLayer!.Clear();
                     }
-
-                    private readonly SimpleLineSymbol _routeSymbol = new(new MapColor(0, 0, 255, 0.5), 5);
-                    private readonly RouteParameters _routeParameters = new()
-                    {
-                        FeatureSetStops = new FeatureSet
-                        {
-                            Features = []
-                        },
-                        ReturnDirections = true
-                    };
-                    private readonly string _routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
-                    private DirectionsFeatureSet[] _directions = [];
                 ]]>
             </Code>
         </Snippet>

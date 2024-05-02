@@ -13,11 +13,6 @@
                         _filterValue = arg.Value!.ToString();
                         await LoadMuseums();
                     }
-
-                    private List<MuseumRecord> FilteredRecords =>
-                        string.IsNullOrWhiteSpace(_filterValue)
-                            ? _records
-                            : _records.Where(r => r.Discipline.Equals(_filterValue)).ToList();
                 ]]>
             </Code>
         </Snippet>
