@@ -1,5 +1,6 @@
 @page "/"
 @using Microsoft.Extensions.Caching.Memory
+@using ProfanityFilter
 @using System.Text.Json
 @inject IJSRuntime JsRuntime
 
@@ -8,120 +9,120 @@
 <h1>Nation Finder</h1>
 @if (_username is null || !_isRegistered)
 {
-        <div class="row">
-            <label>
-                Please enter your player name:
-                <input type="text" @bind="_username" />
-            </label>
-        </div>
-        <div class="row">
-            <button @onclick="Register"
-            disabled="@(string.IsNullOrWhiteSpace(_username))">
-                Register
-            </button>
-        </div>
+    <div class="row">
+        <label>
+            Please enter your player name:
+            <input type="text" @bind="_username" />
+        </label>
+    </div>
+    <div class="row">
+        <button @onclick="Register"
+        disabled="@(string.IsNullOrWhiteSpace(_username))">
+            Register
+        </button>
+    </div>
 }
 else
 {
-        <h2>Use the second map to click on the matching county</h2>
-            <label>Use Easy Countries? <input type="checkbox" @bind="UseEasyCountries"/></label>
+    <h2>Use the second map to click on the matching county</h2>
+    <label style="z-index:99; position:relative; margin-bottom:10px">Use Easy Countries? <input type="checkbox" @bind="UseEasyCountries"/></label>
+    <div>
+        <MapView Class="game-view" @ref="_sceneView" OnViewInitialized="OnViewInitalized" OnViewRendered="OnViewRendered">
+            <Map>
+                <GraphicsLayer @ref="_graphicsLayer" />
+                <FeatureLayer @ref="_countriesLayer"
+                PopupEnabled="false"
+                Title="Countries"
+                OutFields="@( ["COUNTRY"])">
+                    <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
+                </FeatureLayer>
+            </Map>
+        </MapView>
+        <br />
         <div>
-            <MapView Class="game-view" @ref="_sceneView" OnViewInitialized="OnViewInitalized" OnViewRendered="OnViewRendered">
-                <Map>
-                    <GraphicsLayer @ref="_graphicsLayer" />
-                    <FeatureLayer @ref="_countriesLayer"
-                    PopupEnabled="false"
-                    Title="Countries"
-                    OutFields="@( ["COUNTRY"])">
-                        <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
-                    </FeatureLayer>
-                </Map>
-            </MapView>
-            <br />
-            <div>
-                <div class="overlay-container">
-                    <div class="overlay">
+            <div class="overlay-container">
+                <div class="overlay">
                     @if (!_gameStarted)
                     {
                         if (!_isLoaded)
                         {
-                                        <label style="text-align:center">Please Wait...</label>
+                            <label style="text-align:center">Please Wait...</label>
                         }
                         else
                         {
-                                        <button type="button" disabled="@(!_isLoaded)"
-                                        class="btn btn-primary" @onclick="@(() => _gameStarted = true)">
-                                            Begin Game
-                                        </button>
+                            <button type="button" disabled="@(!_isLoaded)"
+                            class="btn btn-primary" @onclick="@(() => _gameStarted = true)">
+                                Begin Game
+                            </button>
                         }
                     }
                     else if (_gameOver)
                     {
-                                <label>Answer: @_displayedCountry</label>
+                        <label>Answer: @_displayedCountry</label>
                         if (_displayedCountry == _selectedCountry)
                         {
-                                        <label style="text-align:center">You Win!</label>
+                            <label style="text-align:center">You Win!</label>
                         }
                         else
                         {
-                                        <label>Your Guess: @_selectedCountry</label>
+                            <label>Your Guess: @_selectedCountry</label>
                         }
-                                <br />
-                                <button type="button" disabled="@(!_isLoaded)"
-                                class="btn btn-primary" @onclick="@(ResetGame)">
-                                    Play Again
-                                </button>
+                        <br />
+                        <button type="button" disabled="@(!_isLoaded)"
+                        class="btn btn-primary" @onclick="@(ResetGame)">
+                            Play Again
+                        </button>
                     }
                     else if (_selectedCountry != null)
                     {
-                                <button type="button" class="btn btn-primary" @onclick="SubmitGuess">Submit Your Guess</button>
-                                <button type="button" class="btn btn-secondary" @onclick="ClearSelection">Clear Selection</button>
+                        <button type="button" class="btn btn-primary" @onclick="SubmitGuess">Submit Your Guess</button>
+                        <button type="button" class="btn btn-secondary" @onclick="ClearSelection">Clear Selection</button>
                     }
 
-                    </div>
                 </div>
-
-                <SceneView @ref="_guessSceneView" Class="map-view"
-                Style="@($"{(_isLoaded ? "" : " pointer-events: none;")}")"
-                OnClick="OnMapClicked"
-                OnLayerViewCreate="OnLayerViewCreated">
-                    <Map>
-                        <Basemap>
-                            <TileLayer @ref="_guessWorldImageryBasemap" Title="World Imagery">
-                                <PortalItem Id="10df2279f9684e4a9f6a7f08febac2a9" />
-                            </TileLayer>
-                        </Basemap>
-                        <GraphicsLayer @ref="_guessGraphicsLayer" />
-                        <GraphicsLayer />
-                        <FeatureLayer @ref="_guessCountriesLayer"
-                        PopupEnabled="false"
-                        Title="Countries"
-                        OutFields="@(["COUNTRY"])">
-                            <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
-                            <SimpleRenderer>
-                                <SimpleFillSymbol Color="@(new MapColor(0, 100, 0, 0.1))">
-                                    <Outline Color="@(new MapColor("lightblue"))" Width="2" />
-                                </SimpleFillSymbol>
-                            </SimpleRenderer>
-                        </FeatureLayer>
-                    </Map>
-
-                </SceneView>
             </div>
 
-            <br />
+            <SceneView @ref="_guessSceneView" Class="map-view"
+            Style="@($"{(_isLoaded ? "" : " pointer-events: none;")}")"
+            OnClick="OnMapClicked"
+            OnLayerViewCreate="OnLayerViewCreated">
+                <Map>
+                    <Basemap>
+                        <TileLayer @ref="_guessWorldImageryBasemap" Title="World Imagery">
+                            <PortalItem Id="10df2279f9684e4a9f6a7f08febac2a9" />
+                        </TileLayer>
+                    </Basemap>
+                    <GraphicsLayer @ref="_guessGraphicsLayer" />
+                    <GraphicsLayer />
+                    <FeatureLayer @ref="_guessCountriesLayer"
+                    PopupEnabled="false"
+                    Title="Countries"
+                    OutFields="@(["COUNTRY"])">
+                        <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
+                        <SimpleRenderer>
+                            <SimpleFillSymbol Color="@(new MapColor(0, 100, 0, 0.1))">
+                                <Outline Color="@(new MapColor("lightblue"))" Width="2" />
+                            </SimpleFillSymbol>
+                        </SimpleRenderer>
+                    </FeatureLayer>
+                </Map>
 
-            <div class="row">
-                <label>Leader Board:</label>
-                <br />
-                <table>
+            </SceneView>
+        </div>
+
+        <br />
+
+        <div class="row">
+            <label>Leader Board:</label>
+            <br />
+            <table>
                 @foreach (var item in _scores)
                 { 
-                            <tr><td><label>@item.Key</label></td> <td><label>@item.Value</label></td></tr>
+                    <tr><td><label>@item.Key</label></td> <td><label>@item.Value</label></td></tr>
                 }
-                </table>
-            </div>
+            </table>
         </div>
+    </div>
 }
 
 
@@ -407,6 +408,8 @@ else
     private void Register()
     {
         _isRegistered = true;
+
+        _username = new ProfanityFilter().CensorString(string.Concat(_username?.Trim().Take(50) ?? ""));
 
         _ = localStorage.SetItemAsStringAsync("username", _username ?? "");
 
