@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using dymaptic.GeoBlazor.Pro.Model
 
 <PageTitle>Home</PageTitle>
 <h1>Shipments in Transit</h1>
@@ -152,7 +151,7 @@
     public required Repository Repository { get; set; }
     
     [Inject]
-    public required Route Route { get; set; }
+    public required RouteService Route { get; set; }
     
 
     protected override void OnInitialized()
@@ -167,7 +166,7 @@
 
     private AttributesDictionary BuildAttributes(Shipment shipment)
     {
-        return new AttributesDictionary(new Dictionary<string, object>
+        return new AttributesDictionary(new Dictionary<string, object?>
         {
             { "OBJECT_ID", shipment.Id },
             { "Category", shipment.Category },
