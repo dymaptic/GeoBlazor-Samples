@@ -104,7 +104,10 @@
                  Longitude="@shipment.Longitude"
                  OnViewRendered="() => OnViewRendered(shipment)"
                  Zoom="6">
-            <Map ArcGISDefaultBasemap="streets">
+            <Map>
+                <Basemap>
+                    <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+                </Basemap>
                 <GraphicsLayer @ref="_graphicsLayer">
                     <Graphic @ref="_shipmentGraphic" Attributes="BuildAttributes(shipment)">
                         <Point Latitude="@shipment.Latitude" Longitude="@shipment.Longitude"/>
@@ -139,7 +142,7 @@
             <h3>Drive Time: @formattedTravelTime</h3>
             foreach (Graphic direction in directionSet.Features)
             {
-                <li>@(direction.Attributes["text"]) (@(double.Parse(direction.Attributes["length"].ToString()!).ToString("F")) miles)</li>    
+                <li>@(direction.Attributes["text"]) (@(double.Parse(direction.Attributes["length"]!.ToString()!).ToString("F")) miles)</li>    
             }
         }
     </ol>

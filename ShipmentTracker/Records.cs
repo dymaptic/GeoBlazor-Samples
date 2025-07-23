@@ -10,7 +10,31 @@ public record Shipment(
     double Latitude,
     double Longitude,
     int Quantity,
-    double Weight);
+    double Weight,
+    string TrackingNumber = "",
+    string CustomerName = "",
+    string CustomerEmail = "",
+    string OriginAddress = "",
+    string DestinationAddress = "",
+    ShipmentStatus Status = ShipmentStatus.InTransit,
+    DateTime CreatedDate = default,
+    DateTime? DeliveredDate = null);
+
+public enum ShipmentStatus { Pending, InTransit, Delivered, Delayed }
+
+public record SearchCriteria(
+    string? TrackingNumber,
+    string? CustomerName,
+    DateOnly? StartDate,
+    DateOnly? EndDate,
+    ShipmentStatus? Status);
+
+public record TrackingEvent(
+    DateTime Timestamp,
+    string Location,
+    string Description,
+    double? Latitude = null,
+    double? Longitude = null);
 
 public static class CategoryColors
 {

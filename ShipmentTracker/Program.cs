@@ -27,12 +27,7 @@ app.UseHttpsRedirection();
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".wsv"] = "application/octet-stream";
 
-app.UseStaticFiles();
-// NOTE: for some reason, you still need the plain "UseStaticFiles" call above
-app.UseStaticFiles(new StaticFileOptions
-{
-    ContentTypeProvider = provider
-});
+app.MapStaticAssets();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

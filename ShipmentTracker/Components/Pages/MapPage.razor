@@ -14,9 +14,9 @@
         </GraphicsLayer>
         <FeatureLayer Url="https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/NDFD_Precipitation_v1/FeatureServer/0"
                       Visible="@_showWeather"
-                      @ref="_weatherLayer" /></MapImageLayer>
+                      @ref="_weatherLayer" />
         <MapImageLayer @ref="_trafficLayer" Visible="@_showTraffic">
-            <PortalItem Id="ff11eb5b930b4fabba15c47feb130de4" />
+            <PortalItem PortalItemId="ff11eb5b930b4fabba15c47feb130de4" />
         </MapImageLayer>
     </Map>
     <ExpandWidget Position="OverlayPosition.BottomLeft">
@@ -27,9 +27,22 @@
                               ToggleGraphics="true" />
     </ExpandWidget>
     <LayerListWidget Position="OverlayPosition.TopRight" />
+    <ExpandWidget Position="OverlayPosition.TopLeft">
+        <div class="map-controls">
+            <h4>Map Layers</h4>
+            <div class="form-check">
+                <RadzenCheckBox @bind-Value="_showWeather" Name="weatherToggle" />
+                <RadzenLabel Text="Show Weather" For="weatherToggle" Class="ms-2" />
+            </div>
+            <div class="form-check mt-2">
+                <RadzenCheckBox @bind-Value="_showTraffic" Name="trafficToggle" />
+                <RadzenLabel Text="Show Traffic" For="trafficToggle" Class="ms-2" />
+            </div>
+        </div>
+    </ExpandWidget>
     <TimeSliderWidget @ref="_timeSliderWidget" Loop="true" Mode="TimeSliderMode.TimeWindow"
                       ContainerId="time-slider-container">
-        <TickConfig Mode="TickConfigMode.Percent" Values="new List<double>{ 12.5, 37.5, 62.5, 87.5}"></TickConfig>
+        <TickConfig Mode="TickConfigMode.Percent" Values="@([ 12.5, 37.5, 62.5, 87.5 ])"></TickConfig>
     </TimeSliderWidget>
 </MapView>
 <div id="time-slider-container"></div>
@@ -104,6 +117,7 @@
     private readonly List<Graphic> _shipmentGraphics = [];
     private GraphicsLayer? _graphicsLayer;
     private FeatureLayer? _weatherLayer;
+    private MapImageLayer? _trafficLayer;
     private TimeSliderWidget? _timeSliderWidget;
     private bool _graphicsAdded;
     private bool _showWeather;

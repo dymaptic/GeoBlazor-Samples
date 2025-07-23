@@ -1,0 +1,143 @@
+@page "/search"
+
+<PageTitle>Search Shipments</PageTitle>
+<h1>Search Shipments</h1>
+
+<div class="content">
+    <div class="search-form">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <RadzenLabel Text="Tracking Number" />
+                <RadzenTextBox @bind-Value="_trackingNumber" Placeholder="Enter tracking number..." Class="w-100" />
+            </div>
+            <div class="col-md-6">
+                <RadzenLabel Text="Customer Name" />
+                <RadzenTextBox @bind-Value="_customerName" Placeholder="Enter customer name..." Class="w-100" />
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Start Date" />
+                <RadzenDatePicker @bind-Value="_startDate" DateFormat="MM/dd/yyyy" Class="w-100" />
+            </div>
+            <div class="col-md-3">
+                <RadzenLabel Text="End Date" />
+                <RadzenDatePicker @bind-Value="_endDate" DateFormat="MM/dd/yyyy" Class="w-100" />
+            </div>
+            <div class="col-md-3">
+                <RadzenLabel Text="Status" />
+                <RadzenDropDown @bind-Value="_selectedStatus" Data="@_statusOptions" 
+                    TextProperty="Text" ValueProperty="Value" 
+                    AllowClear="true" Placeholder="All statuses" Class="w-100" />
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <RadzenButton Text="Search" Icon="search" ButtonStyle="ButtonStyle.Primary" Click="SearchShipments" />
+                <RadzenButton Text="Clear" Icon="clear" ButtonStyle="ButtonStyle.Light" Click="ClearSearch" Class="ms-2" />
+            </div>
+        </div>
+    </div>
+
+    @if (_searchResults != null)
+    {
+        <h2>Search Results (@_searchResults.Count shipments found)</h2>
+        <RadzenDataGrid Data="@_searchResults" TItem="Shipment" AllowPaging="true" PageSize="10">
+            <Columns>
+                <RadzenDataGridColumn TItem="Shipment" Property="TrackingNumber" Title="Tracking #" Width="120px">
+                    <Template Context="shipment">
+                        <a href="/track/@shipment.TrackingNumber" class="text-primary">@shipment.TrackingNumber</a>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Shipment" Property="CustomerName" Title="Customer" />
+                <RadzenDataGridColumn TItem="Shipment" Property="Name" Title="Item" />
+                <RadzenDataGridColumn TItem="Shipment" Property="Status" Title="Status">
+                    <Template Context="shipment">
+                        <span class="badge @GetStatusBadgeClass(shipment.Status)">@shipment.Status</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Shipment" Property="CreatedDate" Title="Created" FormatString="{0:MM/dd/yyyy}" />
+                <RadzenDataGridColumn TItem="Shipment" Property="DestinationAddress" Title="Destination" />
+            </Columns>
+        </RadzenDataGrid>
+    }
+</div>
+
+<style>
+    .search-form {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.25rem;
+        margin-bottom: 2rem;
+    }
+    
+    .badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .badge-pending { background-color: #ffc107; color: #000; }
+    .badge-intransit { background-color: #0dcaf0; color: #000; }
+    .badge-delivered { background-color: #198754; color: #fff; }
+    .badge-delayed { background-color: #dc3545; color: #fff; }
+</style>
+
+@code {
+    [Inject] public required Repository Repository { get; set; }
+
+    private string? _trackingNumber;
+    private string? _customerName;
+    private DateTime? _startDate;
+    private DateTime? _endDate;
+    private ShipmentStatus? _selectedStatus;
+    private List<Shipment>? _searchResults;
+
+    private readonly List<StatusOption> _statusOptions = new()
+    {
+        new StatusOption { Text = "Pending", Value = ShipmentStatus.Pending },
+        new StatusOption { Text = "In Transit", Value = ShipmentStatus.InTransit },
+        new StatusOption { Text = "Delivered", Value = ShipmentStatus.Delivered },
+        new StatusOption { Text = "Delayed", Value = ShipmentStatus.Delayed }
+    };
+
+    private void SearchShipments()
+    {
+        var criteria = new SearchCriteria(
+            _trackingNumber,
+            _customerName,
+            _startDate.HasValue ? DateOnly.FromDateTime(_startDate.Value) : null,
+            _endDate.HasValue ? DateOnly.FromDateTime(_endDate.Value) : null,
+            _selectedStatus
+        );
+
+        _searchResults = Repository.SearchShipments(criteria);
+    }
+
+    private void ClearSearch()
+    {
+        _trackingNumber = null;
+        _customerName = null;
+        _startDate = null;
+        _endDate = null;
+        _selectedStatus = null;
+        _searchResults = null;
+    }
+
+    private string GetStatusBadgeClass(ShipmentStatus status)
+    {
+        return status switch
+        {
+            ShipmentStatus.Pending => "badge-pending",
+            ShipmentStatus.InTransit => "badge-intransit",
+            ShipmentStatus.Delivered => "badge-delivered",
+            ShipmentStatus.Delayed => "badge-delayed",
+            _ => "badge-secondary"
+        };
+    }
+
+    private class StatusOption
+    {
+        public string Text { get; set; } = string.Empty;
+        public ShipmentStatus Value { get; set; }
+    }
+}
