@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-SimpleSearch-881b5a42-0b71-4c8c-9901-8d12693bd109</UserSecretsId>
+    <CompressionEnabled Condition="$(Configuration) != 'RELEASE' OR $(EnableCompression) != 'true'">false</CompressionEnabled>
+    <DefineConstants Condition="$(EnableCompression) == 'true'">$(DefineConstants);ENABLE_COMPRESSION</DefineConstants>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleSearch.Client\SimpleSearch.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.6" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,58 @@
+﻿@page "/"
+@using System.Text.Json
+
+<PageTitle>Home</PageTitle>
+
+<MapView @ref="_mapView" 
+         Style="height: 500px; width: 100%;" 
+         Latitude="35.855398" 
+         Longitude="-78.815522" 
+         OnClick="OnClick">
+    <WebMap>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer" />
+    </Map>
+    <SearchWidget @ref="_searchWidget" 
+                  Position="OverlayPosition.TopRight"
+                  ResultGraphicEnabled="false"
+                  OnSelectResult="OnSelectResult" />
+    <PopupWidget DockEnabled="true">
+        <PopupDockOptions Position="PopupDockPosition.BottomRight" />
+    </PopupWidget>
+</MapView>
+
+@code {
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        var point = clickEvent.MapPoint;
+        await _mapView!.GoTo(point.Extent!);
+        await _searchWidget!.Search(point);
+    }
+
+    private async Task OnSelectResult(SearchSelectResultEvent selectResultEvent)
+    {
+        try
+        {
+            var searchResult = selectResultEvent.Result?.Feature;
+            if (searchResult is null)
+            {
+                return;
+            }
+
+            await _graphicsLayer!.Clear();
+            await _graphicsLayer.Add(new Graphic(searchResult.Geometry, _bouncingPinSymbol));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during search: {ex.Message}");
+        }
+    }
+
+
+    private GraphicsLayer? _graphicsLayer;
+    private SearchWidget? _searchWidget;
+    private PictureMarkerSymbol? _bouncingPinSymbol = new PictureMarkerSymbol("bouncing_pin.gif", 40, 40);
+    private MapView? _mapView;
+}

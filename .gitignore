@@ -9,6 +9,8 @@
 
 # appsettings
 appsettings.json
+appsettings.Development.json
+appsettings.Production.json
 
 # User-specific files
 *.rsuser
@@ -360,3 +362,6 @@ MigrationBackup/
 
 /MuseumsOfChicago/GeoBlazor.Sample.Museums/appsettings.Development.json
 /MuseumsOfChicago/GeoBlazor.Sample.Museums.Client/wwwroot/appsettings.Development.json
+SimpleSearch/SimpleSearch/appsettings.Development.json
+
+SimpleSearch/SimpleSearch/wwwroot/lib/
