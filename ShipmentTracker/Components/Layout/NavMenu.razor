@@ -1,6 +1,9 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Shipment Tracker</a>
+        <a class="navbar-brand" href="">
+            <img src="warehouse.svg" alt="LogiTrack" class="nav-logo" />
+            LogiTrack
+        </a>
     </div>
 </div>
 
@@ -10,14 +13,37 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="nav-icon dashboard-icon" aria-hidden="true"></span> Dashboard
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="map">
-                <span class="bi geoblazor-nav-menu" aria-hidden="true"></span> Map
+                <span class="nav-icon map-icon" aria-hidden="true"></span> Shipment Map
+            </NavLink>
+        </div>
+        
+        <div class="nav-divider"></div>
+        
+        <div class="nav-category">Management</div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="#">
+                <span class="nav-icon inventory-icon" aria-hidden="true"></span> Inventory
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="#">
+                <span class="nav-icon reports-icon" aria-hidden="true"></span> Reports
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="#">
+                <span class="nav-icon settings-icon" aria-hidden="true"></span> Settings
             </NavLink>
         </div>
     </nav>
 </div>
+

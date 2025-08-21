@@ -1,4 +1,4 @@
-using dymaptic.GeoBlazor.Core.Objects;
+using dymaptic.GeoBlazor.Core.Model;
 
 namespace ShipmentTracker;
 
