@@ -27,7 +27,7 @@ else
     <h2>Use the second map to click on the matching county</h2>
     <label style="z-index:99; position:relative; margin-bottom:10px">Use Easy Countries? <input type="checkbox" @bind="UseEasyCountries"/></label>
     <div>
-        <MapView Class="game-view" @ref="_sceneView" OnViewInitialized="OnViewInitalized" OnViewRendered="OnViewRendered">
+        <MapView Class="game-view" @ref="_sceneView" OnViewInitialized="OnViewInitialized" OnViewRendered="OnViewRendered">
             <Map>
                 <GraphicsLayer @ref="_graphicsLayer" />
                 <FeatureLayer @ref="_countriesLayer"
@@ -83,9 +83,9 @@ else
             </div>
 
             <SceneView @ref="_guessSceneView" Class="map-view"
-            Style="@($"{(_isLoaded ? "" : " pointer-events: none;")}")"
-            OnClick="OnMapClicked"
-            OnLayerViewCreate="OnLayerViewCreated">
+                    Style="@($"{(_isLoaded ? "" : " pointer-events: none;")}")"
+                    OnClick="OnMapClicked"
+                    OnLayerViewCreate="OnLayerViewCreated">
                 <Map>
                     <Basemap>
                         <TileLayer @ref="_guessWorldImageryBasemap" Title="World Imagery">
@@ -93,11 +93,8 @@ else
                         </TileLayer>
                     </Basemap>
                     <GraphicsLayer @ref="_guessGraphicsLayer" />
-                    <GraphicsLayer />
-                    <FeatureLayer @ref="_guessCountriesLayer"
-                    PopupEnabled="false"
-                    Title="Countries"
-                    OutFields="@(["COUNTRY"])">
+                    <FeatureLayer @ref="_guessCountriesLayer" PopupEnabled="false" @Title="Countries"
+                        OutFields="@(["COUNTRY"])">
                         <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
                         <SimpleRenderer>
                             <SimpleFillSymbol Color="@(new MapColor(0, 100, 0, 0.1))">
@@ -106,7 +103,6 @@ else
                         </SimpleRenderer>
                     </FeatureLayer>
                 </Map>
-
             </SceneView>
         </div>
 
@@ -206,7 +202,7 @@ else
     }
 
 
-    private async Task OnViewInitalized()
+    private async Task OnViewInitialized()
     {
         //hides the UI controls for the
         IJSObjectReference module =
@@ -422,7 +418,7 @@ else
     private Graphic? WorldPolygonGraphic => _worldPolygon is not null
         ? new Graphic(_worldPolygon, new SimpleFillSymbol(color: new MapColor("black")))
         : null;
-    public bool UseEasyCountries { get; set; }
+
     private MapView? _sceneView;
     private GraphicsLayer? _graphicsLayer;
     private FeatureLayer? _countriesLayer;
@@ -448,10 +444,11 @@ else
     private List<string> _countries = new List<string>();
 
     private Dictionary<string, int> _scores = new Dictionary<string, int>();
-
-    private static readonly IComponentRenderMode RenderMode = new InteractiveServerRenderMode(false);
+    
+    public bool UseEasyCountries { get; set; }
 
     private readonly List<string> _easyCountries = new List<string>() { "Germany", "Brazil", "United States", "United Kingdom", "Japan", 
         "France", "South Africa", "Norway", "Italy", "Cuba", "Canada", "Antarctica", "Australia", "Chile", "China" };
 
+    private static readonly IComponentRenderMode RenderMode = new InteractiveServerRenderMode(false);
 }

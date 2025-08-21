@@ -2,7 +2,15 @@
 @using System.Text.Json
 @rendermode InteractiveServer
 <h1>Control</h1>
-
+<p>
+    Usage: <br/>
+    0. Open the /Game page <br />
+    1. Pick country from the list <br />
+    2. Click "Set Country" to set the country for the game <br />
+    3. Click "Reset Game" <br />
+    4. Score game <br />
+    5. Go to step 1. <br/>
+</p>
 <div class="row">
     @if (_countries is not null)
     {
@@ -16,10 +24,10 @@
     }
 </div>
 <div class="row">
-    <button @onclick="ResetGame">Reset Game</button>
+    <button @onclick="SetCountry">Set Country</button>
 </div>
 <div class="row">
-    <button @onclick="SetCountry">Set Country</button>
+    <button @onclick="ResetGame">Reset Game</button>
 </div>
 <div class="row">
     <button @onclick="ScoreGame">Score Game</button>
