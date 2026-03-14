@@ -1,0 +1,454 @@
+@page "/"
+@using Microsoft.Extensions.Caching.Memory
+@using ProfanityFilter
+@using System.Text.Json
+@inject IJSRuntime JsRuntime
+
+@rendermode RenderMode
+
+<h1>Nation Finder</h1>
+@if (_username is null || !_isRegistered)
+{
+    <div class="row">
+        <label>
+            Please enter your player name:
+            <input type="text" @bind="_username" />
+        </label>
+    </div>
+    <div class="row">
+        <button @onclick="Register"
+        disabled="@(string.IsNullOrWhiteSpace(_username))">
+            Register
+        </button>
+    </div>
+}
+else
+{
+    <h2>Use the second map to click on the matching county</h2>
+    <label style="z-index:99; position:relative; margin-bottom:10px">Use Easy Countries? <input type="checkbox" @bind="UseEasyCountries"/></label>
+    <div>
+        <MapView Class="game-view" @ref="_sceneView" OnViewInitialized="OnViewInitialized" OnViewRendered="OnViewRendered">
+            <Map>
+                <GraphicsLayer @ref="_graphicsLayer" />
+                <FeatureLayer @ref="_countriesLayer"
+                PopupEnabled="false"
+                Title="Countries"
+                OutFields="@( ["COUNTRY"])">
+                    <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
+                </FeatureLayer>
+            </Map>
+        </MapView>
+        <br />
+        <div>
+            <div class="overlay-container">
+                <div class="overlay">
+                    @if (!_gameStarted)
+                    {
+                        if (!_isLoaded)
+                        {
+                            <label style="text-align:center">Please Wait...</label>
+                        }
+                        else
+                        {
+                            <button type="button" disabled="@(!_isLoaded)"
+                            class="btn btn-primary" @onclick="@(() => _gameStarted = true)">
+                                Begin Game
+                            </button>
+                        }
+                    }
+                    else if (_gameOver)
+                    {
+                        <label>Answer: @_displayedCountry</label>
+                        if (_displayedCountry == _selectedCountry)
+                        {
+                            <label style="text-align:center">You Win!</label>
+                        }
+                        else
+                        {
+                            <label>Your Guess: @_selectedCountry</label>
+                        }
+                        <br />
+                        <button type="button" disabled="@(!_isLoaded)"
+                        class="btn btn-primary" @onclick="@(ResetGame)">
+                            Play Again
+                        </button>
+                    }
+                    else if (_selectedCountry != null)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="SubmitGuess">Submit Your Guess</button>
+                        <button type="button" class="btn btn-secondary" @onclick="ClearSelection">Clear Selection</button>
+                    }
+
+                </div>
+            </div>
+
+            <SceneView @ref="_guessSceneView" Class="map-view"
+                    Style="@($"{(_isLoaded ? "" : " pointer-events: none;")}")"
+                    OnClick="OnMapClicked"
+                    OnLayerViewCreate="OnLayerViewCreated">
+                <Map>
+                    <Basemap>
+                        <TileLayer @ref="_guessWorldImageryBasemap" Title="World Imagery">
+                            <PortalItem Id="10df2279f9684e4a9f6a7f08febac2a9" />
+                        </TileLayer>
+                    </Basemap>
+                    <GraphicsLayer @ref="_guessGraphicsLayer" />
+                    <FeatureLayer @ref="_guessCountriesLayer" PopupEnabled="false" @Title="Countries"
+                        OutFields="@(["COUNTRY"])">
+                        <PortalItem Id="ac80670eb213440ea5899bbf92a04998" />
+                        <SimpleRenderer>
+                            <SimpleFillSymbol Color="@(new MapColor(0, 100, 0, 0.1))">
+                                <Outline Color="@(new MapColor("lightblue"))" Width="2" />
+                            </SimpleFillSymbol>
+                        </SimpleRenderer>
+                    </FeatureLayer>
+                </Map>
+            </SceneView>
+        </div>
+
+        <br />
+
+        <div class="row">
+            <label>Leader Board:</label>
+            <br />
+            <table>
+                @foreach (var item in _scores)
+                { 
+                    <tr><td><label>@item.Key</label></td> <td><label>@item.Value</label></td></tr>
+                }
+            </table>
+        </div>
+    </div>
+}
+
+
+@code {
+
+    [Inject]
+    public required GeometryEngine GeometryEngine { get; set; }
+
+    [Inject]
+    public required IWebHostEnvironment WebHostEnvironment { get; set; }
+
+    [Inject]
+    public required IMemoryCache MemoryCache { get; set; }
+
+    [Inject]
+    public required AuthenticationManager AuthenticationManager { get; set; }
+
+    [Inject]
+    public required Blazored.LocalStorage.ILocalStorageService localStorage { get; set; }
+
+
+    private readonly JsonSerializerOptions _options = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _username = await localStorage.GetItemAsStringAsync("username");
+
+        if (!string.IsNullOrEmpty(_username))
+        {
+            _isRegistered = true;
+        }
+
+        //loading the country options from the json file, or from memory cache if it exists
+        if (MemoryCache.TryGetValue("countries", out object? cacheItem))
+        {
+            _countries = (cacheItem as List<string>)!;
+        }
+        else
+        {
+            var countryJson = await File.ReadAllTextAsync(
+                Path.Combine(WebHostEnvironment.WebRootPath, "countries.json"));
+            var countriesRecord = JsonSerializer.Deserialize<Control.CountriesRecord>(countryJson, _options)!;
+
+            //gets a distinct list
+            _countries = countriesRecord.Features
+                .Select(x => x.Attributes.COUNTRY)
+                .Distinct()
+                .Order()
+                .ToList();
+
+            MemoryCache.Set("countries", _countries, DateTime.UtcNow.AddHours(24));
+        }
+
+        if (MemoryCache.TryGetValue("scores", out object? scores))
+        {
+            _scores = (scores as Dictionary<string, int>) ?? new Dictionary<string, int>();
+        }
+        else
+        {
+            _scores = new Dictionary<string, int>();
+        }
+
+        if (!string.IsNullOrEmpty(_username))
+        {
+            _scores.TryAdd(_username, 0);
+        }
+
+        var random = new Random();
+
+        if (!UseEasyCountries)
+        {
+            _displayedCountry = _countries[random.Next(_countries.Count)];
+        }
+        else
+        {
+            _displayedCountry = _easyCountries[random.Next(_easyCountries.Count)];
+        }
+    }
+
+
+    private async Task OnViewInitialized()
+    {
+        //hides the UI controls for the
+        IJSObjectReference module =
+            await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./geoblazorextension.js");
+
+        await module.InvokeVoidAsync("hideUiControls", _sceneView!.JsModule, _sceneView.Id);
+    }
+
+    private async Task OnViewRendered()
+    { //hides all the country layers
+        if (_displayedCountry != _renderedCountry)
+        {
+            await _countriesLayer!.SetVisibility(false);
+            await SetSelectedCountry();
+        }
+    }
+
+    private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.Layer?.Id == _guessWorldImageryBasemap?.Id)
+        {
+            foreach (Sublayer sublayer in _guessWorldImageryBasemap!.AllSublayers!)
+            {
+                await sublayer.SetPopupEnabled(false);
+            }
+
+            _worldPolygon ??= await GeometryEngine.PolygonFromExtent(_guessWorldImageryBasemap!.FullExtent!);
+            _isLoaded = true;
+        }
+    }
+
+    private async Task SetSelectedCountry()
+    {
+        Query query = new()
+            {
+                Where = $"COUNTRY = '{_displayedCountry}'",
+                ReturnGeometry = true
+            };
+
+        FeatureSet? result = await _countriesLayer!.QueryFeatures(query);
+        await _graphicsLayer!.Clear();
+
+        Symbol fillSymbol = new SimpleFillSymbol(new Outline(new MapColor("lightblue"), 2),
+            new MapColor(251, 205, 128));
+
+        //draws the blue background around the map
+        _worldPolygon ??= await GeometryEngine.PolygonFromExtent(_graphicsLayer!.FullExtent!);
+        await _graphicsLayer.Add(WorldPolygonGraphic!);
+
+        //copies the selected country graphic and displays it on the graphics layer on the map
+        foreach (Graphic graphic in result!.Features!)
+        {
+            Graphic clone = new Graphic(graphic.Geometry, fillSymbol);
+            await _graphicsLayer!.Add(clone);
+        }
+
+        _renderedCountry = _displayedCountry;
+        try
+        {
+            await _sceneView!.GoTo(result.Features!);
+        }
+        catch
+        {
+            //user clicking around throws an error, but they shouldn't be able to here
+        }
+
+    }
+
+    /// <summary>
+    /// resets the game and picks another country
+    /// </summary>
+    private async Task ResetGame()
+    {
+        _gameOver = false;
+        var random = new Random();
+
+        //choose the next country
+        if (!UseEasyCountries)
+        {
+            _displayedCountry = _countries[random.Next(_countries.Count)];
+        }
+        else
+        {
+            _displayedCountry = _easyCountries[random.Next(_easyCountries.Count)];
+        }
+
+        _selectedCountry = null;
+        await SetSelectedCountry();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// handles the user clicking on a country on the map
+    /// </summary>
+    private async Task OnMapClicked(ClickEvent clickEvent)
+    {
+        if (!_gameStarted || _gameOver) return;
+
+        try
+        {
+            Query query = new() { Geometry = clickEvent.MapPoint, ReturnGeometry = true, OutFields = ["*"] };
+
+            FeatureSet? result = await _guessCountriesLayer!.QueryFeatures(query);
+
+            Graphic? selectedCountryGraphic = result?.Features?.FirstOrDefault();
+
+            //build the outline of the country the user selected
+            if (selectedCountryGraphic is not null)
+            {
+                _selectedCountry = selectedCountryGraphic.Attributes["COUNTRY"]?.ToString();
+                await _guessGraphicsLayer!.Clear();
+
+                Symbol fillSymbol = new SimpleFillSymbol(new Outline(new MapColor("lightblue"), 4),
+                    new MapColor(251, 205, 128));
+
+                var clone = new Graphic(selectedCountryGraphic.Geometry, fillSymbol,
+                    attributes: selectedCountryGraphic.Attributes);
+
+                await _guessGraphicsLayer.Add(WorldPolygonGraphic!);
+                await _guessGraphicsLayer!.Add(clone);
+
+                try
+                {
+                    await _guessSceneView!.GoTo(selectedCountryGraphic.Geometry!.Extent!);
+                }
+                catch
+                {
+                    //user clicking around throws an error
+                }
+            }
+            else
+            {
+                await _guessGraphicsLayer!.Clear();
+                await _guessSceneView!.ClearGraphics();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    /// <summary>
+    /// Moves the map to the standard view, clears the graphics. clears _selectedCountry
+    /// </summary>
+    private async Task ClearSelection()
+    {
+        _selectedCountry = null;
+        await _guessGraphicsLayer!.Clear();
+
+        try
+        {
+            await _guessSceneView!.GoTo(_guessWorldImageryBasemap!.FullExtent!);
+        }
+        catch
+        {
+            //user clicking around throws an error
+        }
+
+        await _guessSceneView!.ClearGraphics();
+    }
+
+    /// <summary>
+    /// Moves the map to the standard view, clears the graphics. set the game over flag
+    /// </summary>
+    private async Task SubmitGuess()
+    {
+        _gameOver = true;
+
+        if (MemoryCache.TryGetValue("scores", out object? scores))
+        {
+            _scores = (scores as Dictionary<string, int>)!;
+        }
+
+        if (_username != null)
+        {
+            _scores.TryAdd(_username, 0);
+
+            if (_selectedCountry == _displayedCountry)
+            {
+                _scores[_username] += 1;
+            }
+
+            MemoryCache.Set("scores", _scores);
+        }
+
+        try
+        {
+            await _guessSceneView!.GoTo(_guessWorldImageryBasemap!.FullExtent!);
+        }
+        catch
+        {
+            //user clicking around throws an error
+        }
+        await _guessGraphicsLayer!.Clear();
+
+    }
+
+    private void Register()
+    {
+        _isRegistered = true;
+
+        _username = new ProfanityFilter().CensorString(string.Concat(_username?.Trim().Take(50) ?? ""));
+
+        _ = localStorage.SetItemAsStringAsync("username", _username ?? "");
+
+        if (!string.IsNullOrEmpty(_username))
+        {
+            _scores.TryAdd(_username, 0);
+        }
+    }
+
+    private Graphic? WorldPolygonGraphic => _worldPolygon is not null
+        ? new Graphic(_worldPolygon, new SimpleFillSymbol(color: new MapColor("black")))
+        : null;
+
+    private MapView? _sceneView;
+    private GraphicsLayer? _graphicsLayer;
+    private FeatureLayer? _countriesLayer;
+    private Polygon? _worldPolygon;
+
+    private GraphicsLayer? _guessGraphicsLayer;
+
+    private TileLayer? _guessWorldImageryBasemap;
+
+    private SceneView? _guessSceneView;
+    private FeatureLayer? _guessCountriesLayer;
+
+    private string? _selectedCountry;
+    private string? _renderedCountry;
+    private string? _displayedCountry;
+
+    private bool _isLoaded;
+    private string? _username;
+    private bool _isRegistered;
+    private bool _gameStarted = false;
+    private bool _gameOver;
+
+    private List<string> _countries = new List<string>();
+
+    private Dictionary<string, int> _scores = new Dictionary<string, int>();
+    
+    public bool UseEasyCountries { get; set; }
+
+    private readonly List<string> _easyCountries = new List<string>() { "Germany", "Brazil", "United States", "United Kingdom", "Japan", 
+        "France", "South Africa", "Norway", "Italy", "Cuba", "Canada", "Antarctica", "Australia", "Chile", "China" };
+
+    private static readonly IComponentRenderMode RenderMode = new InteractiveServerRenderMode(false);
+}

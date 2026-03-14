@@ -1,0 +1,27 @@
+﻿using AndroidX.Activity;
+using dymaptic.GeoBlazor.Pro.Sample.Maui.Platforms.Android;
+using Microsoft.AspNetCore.Components.WebView;
+using Microsoft.Maui.Platform;
+using System;
+
+
+namespace dymaptic.GeoBlazor.Pro.Sample.Maui;
+
+public partial class MainPage
+{
+    private void OnBlazorWebViewInitialized(object? sender, BlazorWebViewInitializedEventArgs e)
+    {
+        if (e.WebView.Context?.GetActivity() is not ComponentActivity activity)
+        {
+            throw new InvalidOperationException($"The permission-managing WebChromeClient requires that the current activity be a '{nameof(ComponentActivity)}'.");
+        }
+
+        e.WebView.Settings.SetGeolocationEnabled(true);
+#pragma warning disable CA1422
+        e.WebView.Settings.SetGeolocationDatabasePath(e.WebView.Context?.FilesDir?.Path);
+#pragma warning disable CA1416
+        e.WebView.SetWebChromeClient(new PermissionManagingBlazorWebChromeClient(e.WebView.WebChromeClient!, activity));
+#pragma warning restore CA1416
+#pragma warning restore CA1422
+    }
+}

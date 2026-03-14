@@ -1,0 +1,29 @@
+﻿@using NationFinder.Components.Pages
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="NationFinder.styles.css" />
+    <link href="_content/dymaptic.GeoBlazor.Pro"/>
+    <link href="_content/dymaptic.GeoBlazor.Core"/>
+    <link href="_content/dymaptic.GeoBlazor.Core/assets/esri/themes/light/main.css" rel="stylesheet" />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+    </Router>
+
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>

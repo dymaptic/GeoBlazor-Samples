@@ -1,0 +1,258 @@
+﻿@page "/apply-edits"
+<PageTitle>Update FeatureLayer with ApplyEdits</PageTitle>
+<h1>Update FeatureLayer with ApplyEdits</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/editing-applyedits/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/IncidentsReport/FeatureServer/0">Incidents Report</a>
+</div>
+<p class="instructions">
+    Select a feature to begin editing
+</p>
+
+<MapView @ref="_mapView" Class="map-view" Longitude="-117.18" Latitude="34.06" Zoom="14"
+         OnClick="OnClick" Style="padding-right: 380px">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisDarkGrayBase" />
+        </Basemap>
+        <FeatureLayer @ref="_featureLayer"
+                      OutFields="@(["*"])"
+                      Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/IncidentsReport/FeatureServer/0">
+        </FeatureLayer>
+    </Map>
+    @if (_featureLayer is not null)
+    {
+        <FeatureFormWidget @ref="_form" LayerId="@_featureLayer!.Id"
+                           GroupDisplay="GroupDisplay.Sequential" ContainerId="formDiv"
+                           OnSubmit="OnFormSubmit">
+            <FormTemplate Title="Enter the incident number">
+                <FieldElement FieldName="IncidentType" Label="Choose incident type" />
+                <FieldElement FieldName="IncidentDescription" Label="Describe the problem" />
+            </FormTemplate>
+        </FeatureFormWidget>
+        <FeatureTemplatesWidget ContainerId="addTemplatesDiv" LayerIds="@([_featureLayer.Id])"
+                                OnSelect="OnTemplateSelected"/>
+    }
+    
+    <CustomOverlay @ref="_sidebar" Position="OverlayPosition.Manual">
+        <div id="editArea" class="editArea-container esri-widget--panel">
+            <div id="addFeatureDiv" style="display:@_addFeatureDivDisplayStyle;">
+                <h3 class="list-heading">Report Incidents</h3>
+                <ul style="font-size: 13px; padding-left: 1.5em;">
+                    <li>Select template from the list</li>
+                    <li>Click on the map to create a new feature</li>
+                    <li>Update associated attribute data</li>
+                    <li>Click <i>Update Incident Info</i></li>
+                </ul>
+                <div id="addTemplatesDiv"></div>
+            </div>
+
+            <div id="featureUpdateDiv" style="display:@_attributeEditingDisplayStyle; margin-top: 1em;">
+                <div id="attributeArea">
+                    <div id="formDiv"></div>
+                    <input type="button" @onclick="Submit"
+                        class="esri-button"
+                        value="Update incident info"
+                        id="btnUpdate" />
+                </div>
+                <br />
+                <div id="deleteArea">
+                    <input type="button" @onclick="DeleteEdits"
+                        class="esri-button"
+                        value="Delete incident"
+                        id="btnDelete" />
+                </div>
+            </div>
+
+            <div id="updateInstructionDiv" style="text-align:center; display:block">
+                <p class="or-wrap">
+                    <span class="or-text">Or</span>
+                </p>
+                <p id="selectHeader">Select an incident to edit or delete.</p>
+            </div>
+        </div>
+    </CustomOverlay>
+</MapView>
+
+@code {
+
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        await UnselectFeature();
+        string cursor = await _mapView!.GetCursor();
+        if (cursor != "crosshair")
+        {
+            HitTestResult hitTestResult = await _mapView.HitTest(clickEvent);
+            if (hitTestResult.Results.Length == 0)
+            {
+                ToggleEditingDivs("block", "none");
+            }
+            else if (hitTestResult.Results[0] is GraphicHit graphicHit &&
+                graphicHit.LayerId == _featureLayer!.Id)
+            {
+                if (_addFeatureDivDisplayStyle == "block")
+                {
+                    ToggleEditingDivs("none", "block");
+                }
+
+                if (_featureLayer.ObjectIdField is null)
+                {
+                    return;
+                }
+
+                if (graphicHit.Graphic.Attributes.TryGetValue(_featureLayer.ObjectIdField!, out object? value))
+                {
+                    await SelectFeature(long.Parse(value!.ToString()!));
+                }
+            }
+        }
+    }
+
+    private async Task SelectFeature(long objectId)
+    {
+        Query query = await _featureLayer!.CreateQuery();
+        query.ObjectIds = [objectId];
+        query.OutFields = ["*"];
+        query.ReturnGeometry = true;
+        FeatureSet? queryResult = await _featureLayer.QueryFeatures(query);
+        if (queryResult?.Features is not null && queryResult.Features.Any())
+        {
+            _editFeature = queryResult.Features[0];
+            await _form!.SetFeature(_editFeature);
+
+            _highlightHandle = await ((FeatureLayerView)_featureLayer.LayerView!).Highlight(_editFeature);
+        }
+    }
+
+    private async Task OnTemplateSelected(FeatureTemplatesSelectEvent selectEvent)
+    {
+        AttributesDictionary attributes = selectEvent.Template!.Prototype!.Attributes;
+        await UnselectFeature();
+        await _mapView!.SetCursor("crosshair");
+        await _mapView.AddReactiveListener<ClickEvent?>("click", async clickEvent =>
+        {
+            await _form!.SetFeature(null);
+            if (clickEvent?.MapPoint is not null)
+            {
+                Point point = clickEvent.MapPoint.Clone();
+                #pragma warning disable BL0005
+                point.Z = null;
+                #pragma warning restore BL0005
+                _editFeature = new Graphic(point);
+                await _editFeature.Attributes.AddOrUpdate("IncidentType", attributes["IncidentType"]!);
+                var edits = new FeatureEdits
+                {
+                    AddFeatures = [_editFeature]
+                };
+                await ApplyEditsToIncidents(edits);
+                await _mapView.SetCursor("auto");
+            }
+            else
+            {
+                Console.WriteLine("event.mapPoint is not defined");
+            }
+        }, true);
+    }
+
+    private async Task OnFormSubmit(FeatureFormSubmitEvent submitEvent)
+    {
+        if (_editFeature is not null)
+        {
+            AttributesDictionary updated = (await _form!.GetValues())!;
+            foreach (string key in updated.Keys)
+            {
+                await _editFeature.Attributes.AddOrUpdate(key, updated[key]!);
+            }
+
+            var edits = new FeatureEdits
+            {
+                UpdateFeatures = [_editFeature]
+            };
+
+            await ApplyEditsToIncidents(edits);
+            await _mapView!.SetCursor("auto");
+        }
+    }
+
+    private async Task ApplyEditsToIncidents(FeatureEdits edits)
+    {
+        try
+        {
+            FeatureEditsResult editsResult = await _featureLayer!.ApplyEdits(edits);
+            if (editsResult.AddFeatureResults.Any() ||
+                editsResult.UpdateFeatureResults.Any())
+            {
+                await UnselectFeature();
+                ObjectId objectId;
+
+                if (editsResult.AddFeatureResults.Any())
+                {
+                    objectId = editsResult.AddFeatureResults[0].ObjectId!;
+                }
+                else
+                {
+                    objectId = editsResult.UpdateFeatureResults[0].ObjectId!;
+                }
+                
+                await SelectFeature(objectId);
+                if (_addFeatureDivDisplayStyle == "block")
+                {
+                    ToggleEditingDivs("none", "block");
+                }
+                else if (_addFeatureDivDisplayStyle == "none")
+                {
+                    ToggleEditingDivs("block", "none");
+                }
+            }
+            else if (editsResult.DeleteFeatureResults.Any())
+            {
+                ToggleEditingDivs("block", "none");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task Submit()
+    {
+        await _form!.Submit();
+    }
+
+    private async Task UnselectFeature()
+    {
+        if (_highlightHandle is not null)
+        {
+            await _highlightHandle.Remove();
+            _highlightHandle = null;
+        }
+    }
+
+    private void ToggleEditingDivs(string addDiv, string attributesDiv)
+    {
+        _addFeatureDivDisplayStyle = addDiv;
+        _attributeEditingDisplayStyle = attributesDiv;
+        _sidebar!.Refresh();
+    }
+
+    private async Task DeleteEdits()
+    {
+        var edits = new FeatureEdits
+        {
+            DeleteFeatures = [_editFeature!]
+        };
+        await ApplyEditsToIncidents(edits);
+        await _mapView!.SetCursor("auto");
+    }
+
+    private MapView? _mapView;
+    private FeatureLayer? _featureLayer;
+    private Handle? _highlightHandle;
+    private FeatureFormWidget? _form;
+    private Graphic? _editFeature;
+    private string _addFeatureDivDisplayStyle = "block";
+    private string _attributeEditingDisplayStyle = "none";
+    private CustomOverlay? _sidebar;
+}

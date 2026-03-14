@@ -1,0 +1,36 @@
+﻿@page "/swipe"
+<PageTitle>Swipe Widget</PageTitle>
+<h1>Swipe Widget</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-swipe/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/WV03_Kilauea_20180519_ShortwaveInfrared/MapServer">Shortwave Infrared Tile Layer</a>
+    <a class="btn btn-primary" target="_blank" href="https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/WV03_Kilauea_20180519_NearInfrared/MapServer">Near Infrared Tile Layer</a>
+</div>
+<p class="instructions">
+    This sample demonstrates how to use a Swipe widget to compare two different TileLayers from the 2018 Kilauea eruption. The Swipe widget allows users to view collections of layers simultaneously by placing a divider and handle in the view to display selected parts of a layer or layers. This widget currently works with all layers except GroupLayers.
+</p>
+
+<MapView Class="map-view" Zoom="15" Longitude="-154.88" Latitude="19.46">
+    <Constraints MaxZoom="17" MinZoom="8" />
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+        <TileLayer @ref="_shortWaveLayer" 
+                   Url="https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/WV03_Kilauea_20180519_ShortwaveInfrared/MapServer" MaxScale="3000" />
+        <TileLayer @ref="_nearInfraredLayer" 
+                   Url="https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/WV03_Kilauea_20180519_NearInfrared/MapServer" MaxScale="3000" />
+    </Map>
+    <ExpandWidget Position="OverlayPosition.TopRight">
+        <LayerListWidget />
+    </ExpandWidget>
+    <SwipeWidget SwipePosition="30" 
+                 LeadingLayers="@([_nearInfraredLayer!])"
+                 TrailingLayers="@([_shortWaveLayer!])" />
+</MapView>
+
+@code {
+    private TileLayer? _shortWaveLayer;
+    private TileLayer? _nearInfraredLayer;
+}

@@ -1,0 +1,58 @@
+@page "/control"
+@using Microsoft.Extensions.Caching.Memory
+@using System.Text.Json
+@rendermode InteractiveServer
+<h1>Control</h1>
+
+
+<div class="row">
+    <h3>Leader Board:</h3>
+    <br />
+    <table>
+        @foreach (var item in _scores)
+        {
+            <tr><td><label>@item.Key</label></td> <td><label>@item.Value</label></td></tr>
+        }
+    </table>
+
+</div>
+<div class="row">
+    <button @onclick="ClearAllUsers">Clear All Users</button>
+</div>
+
+
+@code {
+
+    [Inject]
+    public required IMemoryCache MemoryCache { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (MemoryCache.TryGetValue("scores", out object? scores))
+        {
+            _scores = (scores as Dictionary<string, int>) ?? new Dictionary<string, int>();
+        }
+        else
+        {
+            _scores = new Dictionary<string, int>();
+        }
+
+    }
+
+
+    private void ClearAllUsers()
+    {
+        MemoryCache.Set("scores", new Dictionary<string, int>());
+    }
+
+
+
+    public record CountriesRecord(List<CountryRecord> Features);
+
+    public record CountryRecord(CountryAttributesRecord Attributes);
+
+    public record CountryAttributesRecord(string COUNTRY);
+
+    private Dictionary<string, int> _scores = new Dictionary<string, int>();
+
+}

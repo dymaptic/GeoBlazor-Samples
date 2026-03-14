@@ -1,0 +1,136 @@
+﻿@page "/group-layers"
+<PageTitle>Group Layers</PageTitle>
+<h1>Group Layers</h1>
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/effect-blur-shadow/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9">World Imagery Tile Layer</a>
+</div>
+<p class="instructions">
+    This sample uses a combination of layer effects and layer blending on multiple layers to make a country stand out from the rest of the map. 
+    When the app loads, you will see the country of France will stand out from the rest. The user can then click on any country to highlight that country on the map.
+</p>
+<MapView Zoom="6"
+         ExcludeApiKey="true"
+         Center="@(new Point(2, 46))"
+         Class="map-view"
+         OnLayerViewCreate="OnLayerViewCreate"
+         OnClick="OnClick"
+         OnViewRendered="OnViewRendered"
+         @ref="_mapView" PopupEnabled="false">
+    <Constraints SnapToZoom="false"
+                 MinScale="147914381" />
+    <Map>
+        <GroupLayer Opacity="0"
+                    @ref="_groupLayer">
+            <TileLayer @ref="_tileLayer">
+                <PortalItem PortalItemId="10df2279f9684e4a9f6a7f08febac2a9" />
+            </TileLayer>
+            <GraphicsLayer BlendMode="BlendMode.DestinationIn"
+                           Title="layer"
+                           @ref="_graphicsLayer" />
+        </GroupLayer>
+        <TileLayer @ref="_worldImagery">
+            <PortalItem PortalItemId="10df2279f9684e4a9f6a7f08febac2a9" />
+        </TileLayer>
+        <FeatureLayer Visible="false"
+                      PopupEnabled="false"
+                      @ref="_countries">
+            <PortalItem PortalItemId="53a1e68de7e4499cad77c80daba46a94" />
+        </FeatureLayer>
+    </Map>
+    <CustomOverlay Position="OverlayPosition.TopRight">
+        <div id="messageDiv" class="esri-widget esri-heading">
+            <h4 class="esri-heading">Click on a country</h4>
+        </div>
+    </CustomOverlay>
+    <PopupWidget DefaultPopupTemplateEnabled="false" />
+</MapView>
+
+@code {
+
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.Layer?.Id == _worldImagery?.Id && !_worldImageryPopupsDisabled)
+        {
+            foreach (Sublayer sublayer in _worldImagery!.Sublayers!)
+            {
+                await sublayer.SetPopupEnabled(false);
+            }
+            
+            _worldImageryPopupsDisabled = true;
+        }
+        
+        if (createEvent.Layer?.Id == _tileLayer?.Id && !_tilePopupsDisabled)
+        {
+            foreach (Sublayer sublayer in _tileLayer!.Sublayers!)
+            {
+                await sublayer.SetPopupEnabled(false);
+            }
+            
+            _tilePopupsDisabled = true;
+        }
+    }
+
+    private async Task OnViewRendered()
+    {
+        if (!_highlighted)
+        {
+            _highlighted = true;
+            Query query = new()
+            {
+                Geometry = _mapView!.Center,
+                ReturnGeometry = true,
+                OutFields = ["*"]
+            };
+
+            await HighlightCountry(query);
+        }
+    }
+    
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        Query query = new()
+        {
+            Geometry = clickEvent.MapPoint,
+            ReturnGeometry = true,
+            OutFields = ["*"]
+        };
+
+        await HighlightCountry(query);
+    }
+
+    private async Task HighlightCountry(Query query)
+    {
+        SimpleFillSymbol symbol = new(color: new MapColor(255, 255, 255, 1));
+        
+        FeatureSet? featureSet = await _countries!.QueryFeatures(query);
+
+        if (featureSet?.Features?.FirstOrDefault() is { } feature)
+        {
+            await _graphicsLayer!.Clear();
+            await feature.SetSymbol(symbol);
+            await _graphicsLayer.Add(feature);
+            await _mapView!.GoTo(feature.Geometry!.Extent!);
+
+            await _worldImagery!.SetEffect("blur(8px) brightness(1.2) grayscale(0.8)");
+            await _groupLayer!.SetEffect("brightness(1.5) drop-shadow(0, 0px, 12px)");
+            await _groupLayer.SetOpacity(1);
+        }
+        else
+        {
+            await _worldImagery!.SetEffect(null);
+            await _groupLayer!.SetEffect(null);
+        }
+    }
+
+    private MapView? _mapView;
+    private GroupLayer? _groupLayer;
+    private TileLayer? _worldImagery;
+    private TileLayer? _tileLayer;
+    private GraphicsLayer? _graphicsLayer;
+    private FeatureLayer? _countries;
+    private bool _worldImageryPopupsDisabled;
+    private bool _tilePopupsDisabled;
+    private bool _highlighted;
+
+}

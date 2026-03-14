@@ -1,0 +1,263 @@
+@page "/highlight-features-by-geometry"
+@using dymaptic.GeoBlazor.Core.Interfaces
+
+@inject GeometryEngine GeometryEngine
+
+<PageTitle>Highlight Features by Geometry</PageTitle>
+<h1>Highlight Features by Geometry</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d72ab790752142bd9dfb190c79d6582b">National Park Service Establishments</a>
+</div>
+<p class="instructions">
+    Use the Sketch Widget's rectangle tool to draw a selection area on the map.
+    Features that intersect the rectangle will be highlighted and shown in the
+    Feature Table below. Draw multiple rectangles to expand the selection. Use the
+    "Clear Selection" button to reset.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+
+<MapView @ref="_mapView"
+         Class="map-view"
+         BackgroundColor="@(new MapColor("white"))"
+         OnViewRendered="OnViewRendered"
+         OnLayerViewCreate="OnLayerViewCreate">
+    <SpatialReference Wkid="102003" />
+    <Constraints SnapToZoom="false" MinScale="50465153" />
+    <Map>
+        <Basemap>
+            <FeatureLayer Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2"
+                          Effect="@(new Effect("drop-shadow(-10px, 10px, 6px gray)"))">
+                <SimpleRenderer>
+                    <SimpleFillSymbol Color="@(new MapColor("#f0ebe4"))">
+                        <Outline Color="@(new MapColor("#DCDCDC"))" Width="0.5" />
+                    </SimpleFillSymbol>
+                </SimpleRenderer>
+                <SpatialReference Wkid="102003" />
+            </FeatureLayer>
+        </Basemap>
+        <FeatureLayer @ref="_npsLayer">
+            <PortalItem PortalItemId="d72ab790752142bd9dfb190c79d6582b" />
+        </FeatureLayer>
+        <GraphicsLayer @ref="_polygonGraphicsLayer" />
+    </Map>
+    <SketchWidget Position="OverlayPosition.TopLeft"
+                  GraphicsLayer="@_polygonGraphicsLayer"
+                  AvailableCreateTools="@([AvailableCreateTool.Rectangle])"
+                  UpdateOnGraphicClick="false"
+                  CreationMode="CreationMode.Single"
+                  OnSketchEvent="OnSketchEvent">
+        <SketchWidgetVisibleElements SettingsMenu="false" UndoRedoMenu="false">
+            <SelectionTools LassoSelection="false" RectangleSelection="false" />
+        </SketchWidgetVisibleElements>
+    </SketchWidget>
+    <CustomOverlay Position="OverlayPosition.TopLeft">
+        <button class="esri-button" style="width: auto; margin: 5px;" @onclick="ClearSelection">
+            Clear Selection
+        </button>
+    </CustomOverlay>
+    @if (_npsLayer is not null)
+    {
+        <FeatureTableWidget @ref="_featureTable"
+                            ContainerId="feature-table-container"
+                            OnCellClick="OnCellClick"
+                            OnCellPointerOver="OnCellPointerOver"
+                            OnCellPointerOut="OnCellPointerOut"
+                            FilterBySelectionEnabled="false"
+                            Layers="@([ _npsLayer ])" />
+    }
+</MapView>
+
+<div id="feature-table-container" style="height: 40%; min-height: 200px; width: 100%; margin-bottom: 4rem;"></div>
+
+@code {
+    private async Task OnViewRendered()
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+
+            // Set extent to the lower 48 states
+            await _mapView!.SetExtent(new Extent(
+                xmax: 2275062,
+                xmin: -2752064,
+                ymax: 1676207,
+                ymin: -1348080,
+                spatialReference: new SpatialReference(102003)));
+        }
+    }
+
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.LayerView is FeatureLayerView flv && createEvent.Layer?.Id == _npsLayer?.Id)
+        {
+            _layerView = flv;
+        }
+    }
+
+    private async Task OnCellClick()
+    {
+        IReadOnlyList<IFeatureTableWidgetActiveFilters>? activeFilters = await _featureTable!.GetActiveFilters();
+        
+        if (activeFilters is null || activeFilters.Count == 0)
+        {
+            return;
+        }
+
+        foreach (IFeatureTableWidgetActiveFilters filter in activeFilters)
+        {
+            // Check if the active filter is a selection filter and if the selections have changed
+            if (filter is SelectionFilter { ObjectIds: not null } selectionFilter
+                && (selectionFilter.ObjectIds.Count != _selectedObjectIds.Count
+                || selectionFilter.ObjectIds.Any(i => !_selectedObjectIds.Contains(i))))
+            {
+                _selectedObjectIds.Clear();
+                _selectedObjectIds.AddRange(selectionFilter.ObjectIds);
+                
+                // Apply feature effect to blur non-selected features
+                var featureEffect = new FeatureEffect(
+                    filter: new FeatureFilter(objectIds: _selectedObjectIds.ToArray()),
+                    excludedEffect: [new Effect("blur(5px) grayscale(90%) opacity(40%)")]);
+
+                await _layerView!.SetFeatureEffect(featureEffect);
+            }
+        }
+    }
+
+    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    {
+        if (sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete })
+        {
+            // Get all drawn rectangle geometries and union them
+            Geometry[] geometries = _polygonGraphicsLayer.Graphics
+                .Where(g => g.Geometry is not null)
+                .Select(g => g.Geometry!)
+                .ToArray();
+
+            if (geometries.Length == 0) return;
+
+            Geometry? queryGeometry = geometries.Length == 1
+                ? geometries[0]
+                : await GeometryEngine.Union(geometries);
+
+            if (queryGeometry is not null)
+            {
+                await SelectFeatures(queryGeometry);
+            }
+        }
+    }
+
+    private async Task SelectFeatures(Geometry geometry)
+    {
+        if (_layerView is null)
+        {
+            // Try to get the layer view if it wasn't available earlier
+            if (_npsLayer?.LayerView is FeatureLayerView flv)
+            {
+                _layerView = flv;
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        try
+        {
+            var query = new Query(Geometry: geometry);
+            FeatureSet? result = await _layerView.QueryFeatures(query);
+
+            if (result?.Features is null || !result.Features.Any())
+            {
+                await ClearSelection();
+                return;
+            }
+            
+            // Get objectIds from the query result
+            _selectedObjectIds.Clear();
+
+            foreach (Graphic feature in result.Features)
+            {
+                if (feature.Attributes.TryGetValue("ObjectId", out object? oidValue) && oidValue is not null)
+                {
+                    if (long.TryParse(oidValue.ToString(), out long oid))
+                    {
+                        _selectedObjectIds.Add(oid);
+                    }
+                }
+            }
+
+            // Update the feature table highlight and filter
+            await _featureTable!.SetHighlightIds([]);
+            await _featureTable.SetFilterGeometry(geometry);
+            string[] highlightIds = _selectedObjectIds.Select(id => id.ToString()).ToArray();
+            await _featureTable.SetHighlightIds(highlightIds);
+
+            // Apply feature effect to blur non-selected features
+            var featureEffect = new FeatureEffect(
+                filter: new FeatureFilter(objectIds: _selectedObjectIds.ToArray()),
+                excludedEffect: [new Effect("blur(5px) grayscale(90%) opacity(40%)")]);
+
+            await _layerView!.SetFeatureEffect(featureEffect);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error selecting features: {ex.Message}");
+        }
+    }
+
+    private async Task ClearSelection()
+    {
+        _selectedObjectIds.Clear();
+
+        if (_featureTable is not null)
+        {
+            await _featureTable.SetHighlightIds(null);
+            await _featureTable.SetFilterGeometry(null);
+        }
+
+        await _polygonGraphicsLayer.RemoveAll();
+
+        if (_layerView is not null)
+        {
+            await _layerView.SetFeatureEffect(null);
+        }
+    }
+
+    private async Task OnCellPointerOver(FeatureTableCellPointeroverEvent pointeroverEvent)
+    {
+        if (_onRowOverHighlight is not null)
+        {
+            await _onRowOverHighlight.Remove();
+        }
+
+        if (pointeroverEvent.Feature is null)
+        {
+            return;
+        }
+
+        _onRowOverHighlight = await _layerView!.Highlight(pointeroverEvent.Feature!);
+    }
+
+    private async Task OnCellPointerOut()
+    {
+        if (_onRowOverHighlight is not null)
+        {
+            await _onRowOverHighlight.Remove();
+        }
+    }
+
+    private MapView? _mapView;
+    private FeatureLayer? _npsLayer;
+    private GraphicsLayer _polygonGraphicsLayer = new();
+    private FeatureTableWidget? _featureTable;
+    private FeatureLayerView? _layerView;
+    private readonly List<ObjectId> _selectedObjectIds = [];
+    private bool _firstRender = true;
+    Handle? _onRowOverHighlight;
+}

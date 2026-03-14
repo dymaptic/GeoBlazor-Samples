@@ -1,0 +1,123 @@
+﻿@page "/search-custom-source"
+@using System.Net
+@inject ArcGISRest Rest
+@inject GeometryEngine GeometryEngine
+
+<PageTitle>Search with Custom Source</PageTitle>
+<h1>Search with Custom Source</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-customsource/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=55ebf90799fa4a3fa57562700a68c405">Streets BaseMap</a>
+</div>
+<p class="instructions">
+    Demonstrates how to create your own custom search sources. Also uses the Pro <code>ArcGISRest</code> service to query the ArcGIS REST API.
+</p>
+
+<MapView @ref="_view" 
+         Class="map-view"
+         Center="@_center"
+         Scale="3000000"
+         OnExtentChanged="OnExtentChanged">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+        </Basemap>
+    </Map>
+    <SearchWidget IncludeDefaultSources="false" Position="OverlayPosition.TopRight">
+        <LocatorSearchSource Placeholder="example: 8 Boulevard du Port" 
+                      GetSuggestionsHandler="GetSuggestions"
+                      GetResultsHandler="GetResults" />
+    </SearchWidget>
+</MapView>
+
+@code {
+
+    private void OnExtentChanged(Extent extent)
+    {
+        _center = _view!.Center ?? _center;
+    }
+
+    private async Task<IReadOnlyList<SuggestResult>> GetSuggestions(int? maxSuggestions, int? sourceIndex, 
+        SpatialReference? spatialReference, string? suggestTerm, Guid? viewId)
+    {
+        // You can request data from a
+        // third-party source to find some
+        // suggestions with provided suggestTerm
+        // the user types in the Search widget
+        RequestResponse<QueryData> response = await Rest.Request<QueryData>($"{URL}search/", new RequestOptions()
+        {
+            Query = new Dictionary<string, object?>
+            {
+                { "q", WebUtility.UrlEncode(suggestTerm) },
+                { "limit", 6 },
+                { "lat", _center.Latitude },
+                { "lon", _center.Longitude }
+            },
+            ResponseType = ResponseType.Json
+        });
+      
+        return response.Data?.Features
+            .Select(feature => new SuggestResult("name", feature.Properties["label"].ToString()!, sourceIndex!.Value))
+            .ToArray() ?? [];
+    }
+
+    private async Task<IReadOnlyList<SearchResult>> GetResults(bool? exactMatch, Point? location, int? maxResults, int? sourceIndex, 
+        SpatialReference? spatialReference, SuggestResult suggestResult, Guid? viewId)
+    {
+        // If the Search widget passes the current location,
+        // you can use this in your own custom source
+        string url = URL;
+        Dictionary<string, object?> query = new();
+        if (location is not null)
+        {
+            url += "reverse/";
+            query["lat"] = location.Latitude;
+            query["lon"] = location.Longitude;
+        }
+        else
+        {
+            url += "search/";
+            query["q"] = WebUtility.UrlEncode(suggestResult.Text);
+            query["limit"] = 6;
+        }
+
+        RequestResponse<QueryData> response = await Rest.Request<QueryData>(url, new RequestOptions
+        {
+            Query = query,
+            ResponseType = ResponseType.Json
+        });
+
+        List<SearchResult> results = [];
+        if (response.Data is null)
+        {
+            return results.ToArray();
+        }
+
+        foreach (QueryFeature feature in response.Data.Features)
+        {
+            Graphic g = new Graphic(new Point(x: feature.Geometry.Coordinates[0], y: feature.Geometry.Coordinates[1]),
+                attributes: new AttributesDictionary(feature.Properties!));
+            Polygon buffer = (await GeometryEngine.GeodesicBuffer(g.Geometry!, 100, GeometryEngineLinearUnit.Meters))!;
+            results.Add(new SearchResult
+            {
+                Extent = await buffer.GetExtent(),
+                Feature = g,
+                Name = feature.Properties["label"].ToString()
+            });
+        }
+
+        return results.ToArray();
+    }
+
+    private MapView? _view;
+    private const string URL = "https://api-adresse.data.gouv.fr/";
+
+    private record QueryData(QueryFeature[] Features);
+
+    private record QueryFeature(QueryGeometry Geometry, Dictionary<string, object> Properties);
+
+    private record QueryGeometry(double[] Coordinates);
+
+    private Point _center = new(2.21, 46.22);
+}

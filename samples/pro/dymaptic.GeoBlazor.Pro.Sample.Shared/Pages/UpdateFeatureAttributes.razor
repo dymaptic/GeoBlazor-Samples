@@ -1,0 +1,183 @@
+﻿@page "/update-feature-attributes"
+<PageTitle>Update Feature Attributes</PageTitle>
+<h1>Update Feature Attributes</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/editing-groupedfeatureform/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=449887ea7d60429fbf6f0c67881f2758">Building Damage Assessments</a>
+</div>
+<p class="instructions">
+    Select a feature to begin editing
+</p>
+
+<MapView @ref="_mapView" Class="map-view" Longitude="-88.143" Latitude="41.774" Zoom="17"
+         OnClick="OnClick" PopupEnabled="false">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+        <FeatureLayer @ref="_featureLayer"
+                      OutFields="@(["*"])">
+            <PortalItem PortalItemId="449887ea7d60429fbf6f0c67881f2758"/>
+            <FormTemplate Title="Damage assessments"
+                          Description="Provide information for insurance">
+                <GroupElement Label="Inspector Information">
+                    <FieldElement Label="name" FieldName="inspector"/>
+                    <FieldElement Label="Email address" FieldName="inspemail" VisibilityExpression="alwaysHidden"/>
+                    <FieldElement Label="Date of Inspection" FieldName="insp_date"/>
+                </GroupElement>
+                <GroupElement Label="Contact Information"
+                              Description="The insured's contact information">
+                    <FieldElement Label="Business name" FieldName="placename"/>
+                    <FieldElement Label="First name" FieldName="firstname"/>
+                    <FieldElement Label="Last name" FieldName="lastname"/>
+                    <FieldElement Label="Work telephone number" FieldName="workphone"/>
+                </GroupElement>
+                <GroupElement Label="Insurance coverage"
+                              Description="Structure and contents coverage">
+                    <FieldElement Label="Structure insured" FieldName="strinsur"/>
+                    <FieldElement Label="Contents insured" FieldName="continsur"/>
+                </GroupElement>
+                <GroupElement Label="Insurance type information"
+                              Description="Type of insurance coverage">
+                    <FieldElement Label="Renter's" FieldName="rentinsur"/>
+                    <FieldElement Label="Flood" FieldName="floodinsur"/>
+                    <FieldElement Label="Fire" FieldName="fireinsur"/>
+                </GroupElement>
+                <FormTemplateExpressionInfo Name="alwaysHidden" Expression="1 == 0"/>
+            </FormTemplate>
+        </FeatureLayer>
+    </Map>
+    @if (_featureLayer is not null)
+    {
+        <FeatureFormWidget @ref="_form" 
+                           LayerId="@_featureLayer!.Id" 
+                           GroupDisplay="GroupDisplay.Sequential" 
+                           ContainerId="form"
+                           OnSubmit="OnFormSubmit"
+                           OnValueChange="OnValueChange" />
+    }
+    <CustomOverlay Position="OverlayPosition.TopRight">
+        <div id="update" class="esri-widget @_hiddenClass">
+            <div id="form" class="scroller esri-component esri-feature-form esri-widget esri-widget--panel"></div>
+            <input type="button" class="esri-button" value="Update Assessment" id="btnUpdate"
+                   @onclick="Update" />
+        </div>  
+    </CustomOverlay>
+    <CustomOverlay Position="OverlayPosition.TopRight">
+        <div id="info" class="esri-widget @_infoHiddenClass">
+            <h3>Select a feature to begin editing</h3>
+        </div>
+    </CustomOverlay>
+</MapView>
+
+@code {
+
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        if (_highlightHandle is not null)
+        {
+            await _highlightHandle.Remove();
+            _highlightHandle = null;
+        }
+
+        HitTestResult hitTest = await _mapView!.HitTest(clickEvent);
+        ViewHit[] results = hitTest.Results;
+        if (results.Length > 0 &&
+            results[0] is GraphicHit graphicHit &&
+            graphicHit.LayerId == _featureLayer!.Id)
+        {
+            await SelectFeature((ObjectId)graphicHit.Graphic.Attributes[_featureLayer.ObjectIdField!]!);
+        }
+        else
+        {
+            HideUpdate();
+        }
+    }
+
+    private async Task SelectFeature(ObjectId objectId)
+    {
+        Query query = await _featureLayer!.CreateQuery();
+        query.ObjectIds = [objectId];
+        query.OutFields = ["*"];
+        query.ReturnGeometry = true;
+        FeatureSet? results = await _featureLayer.QueryFeatures(query);
+        if (results?.Features is not null && results.Features!.Any())
+        {
+            _editFeature = results.Features[0];
+            await _form!.SetFeature(_editFeature);
+            _highlightHandle = await ((FeatureLayerView)_featureLayer!.LayerView!).Highlight(_editFeature);
+            ShowUpdate();
+        }
+    }
+    
+    private void ShowUpdate()
+    {
+        _hiddenClass = string.Empty;
+        _infoHiddenClass = "esri-hidden";
+    }
+
+    private void HideUpdate()
+    {
+        _hiddenClass = "esri-hidden";
+        _infoHiddenClass = string.Empty;
+    }
+    
+    private async Task OnFormSubmit(FeatureFormSubmitEvent submitEvent)
+    {
+        try
+        {
+            if (_editFeature is not null)
+            {
+                AttributesDictionary updated = (await _form!.GetValues())!;
+
+                foreach (string key in updated.Keys)
+                {
+                    await _editFeature.Attributes.AddOrUpdate(key, updated[key]!);
+                }
+
+                var edits = new FeatureEdits { UpdateFeatures = [_editFeature] };
+
+                await ApplyAttributeUpdates(edits);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task ApplyAttributeUpdates(FeatureEdits edits)
+    {
+        try
+        {
+            FeatureEditsResult editsResult = await _featureLayer!.ApplyEdits(edits);
+            if (editsResult.AddFeatureResults.Any())
+            {
+                await SelectFeature(editsResult.AddFeatureResults[0].ObjectId!);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task Update()
+    {
+        await _form!.Submit();
+    }
+    
+    private void OnValueChange(FeatureFormValueChangeEvent arg)
+    {
+        Console.WriteLine($"New Value: {arg.Value}");
+    }
+
+    private MapView? _mapView;
+    private FeatureLayer? _featureLayer;
+    private Handle? _highlightHandle;
+    private FeatureFormWidget? _form;
+    private Graphic? _editFeature;
+    private string _hiddenClass = "esri-hidden";
+    private string _infoHiddenClass = string.Empty;
+}

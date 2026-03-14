@@ -1,0 +1,138 @@
+@page "/length-and-area"
+
+@inject GeometryEngine GeometryEngine
+
+<PageTitle>Length and Area</PageTitle>
+<h1>Length and Area</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/find-length-and-area/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=867895a71a1840399476fc717e76bb43">Mid-Century BaseMap</a>
+</div>
+<p class="instructions">
+    Use the Sketch Widget to draw a polygon or line, and the area or length will be 
+    calculated for both Planar and Geodesic units.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+
+<MapView OnViewRendered="OnViewRendered"
+         Longitude="-10"
+         Latitude="30"
+         Zoom="3"
+         Class="map-view">
+    <Map>
+        <Basemap>
+            <PortalItem PortalItemId="867895a71a1840399476fc717e76bb43" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer">
+            <Graphic @ref="_sketchGraphic">
+                <Polygon @ref="_startingGeometry" Rings="new[] { _mapRings }">
+                    <SpatialReference Wkid="3857" />
+                </Polygon>
+                <SimpleFillSymbol Color="new MapColor(0, 0, 200, 0.3)">
+                    <Outline Color="@(new MapColor("Black"))" Width="2" />
+                </SimpleFillSymbol>
+            </Graphic>
+        </GraphicsLayer>
+    </Map>
+    <CustomOverlay @ref="_overlay" Position="OverlayPosition.Manual">
+        <div id="measurements" class="esri-widget">@((MarkupString)_measurement)</div>
+    </CustomOverlay>
+    <ScaleBarWidget Unit="ScaleUnit.Metric" Position="OverlayPosition.BottomRight" />
+    <SketchWidget Position="OverlayPosition.TopRight" OnSketchEvent="OnSketchEvent"
+                  AvailableCreateTools="@([AvailableCreateTool.Polyline, AvailableCreateTool.Polygon, AvailableCreateTool.Rectangle])"
+                  CreationMode="CreationMode.Update" UpdateOnGraphicClick="true"
+                  GraphicsLayerId="_graphicsLayer.Id">
+        <SketchWidgetVisibleElements SettingsMenu="false" UndoRedoMenu="false">
+            <CreateTools Point="false" Circle="false" />
+            <SelectionTools LassoSelection="false" RectangleSelection="false" />
+        </SketchWidgetVisibleElements>
+    </SketchWidget>
+</MapView>
+
+@code
+{
+    private async Task OnViewRendered()
+    {
+        if (!_firstRender)
+        {
+            await GetArea(_startingGeometry!);
+            _firstRender = true;
+        }
+    }
+
+    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    {
+        if (_firstSketch)
+        {
+            await _graphicsLayer.Remove(_sketchGraphic!);
+            _firstSketch = false;
+        }
+        if ((!_updating && sketchEvent.EventType == SketchEventType.Update) || 
+            sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete })
+        {
+            if (_sketchGraphic is not null && sketchEvent.State == SketchEventState.Complete)
+            {
+                await _graphicsLayer.Remove(_sketchGraphic);
+                _overlay!.Refresh();
+            }
+            _updating = true;
+            _sketchGraphic = sketchEvent.Graphics.FirstOrDefault();
+            if (_sketchGraphic is not null)
+            {
+                await GetMeasurements(_sketchGraphic.Geometry!);  
+            }
+            _updating = false;
+        }
+    }
+
+    private async Task GetMeasurements(Geometry geometry)
+    {
+        switch (geometry)
+        {
+            case Polygon polygon:
+                await GetArea(polygon);
+                break;
+            case Polyline polyLine:
+                await GetLength(polyLine);
+                break;
+        }
+    }
+
+    private async Task GetArea(Polygon polygon)
+    {
+        double geodesicArea = await GeometryEngine.GeodesicArea(polygon, GeometryEngineAreaUnit.SquareKilometers);
+        double planarArea = await GeometryEngine.PlanarArea(polygon, GeometryEngineAreaUnit.SquareKilometers);
+        _measurement =
+            $"<b>Geodesic area</b>: {geodesicArea:N2} km² | <b>Planar area</b>: {planarArea:N2} km²";
+        _overlay!.Refresh();
+    }
+
+    private async Task GetLength(Polyline polyline)
+    {
+        double geodesicLength = await GeometryEngine.GeodesicLength(polyline, GeometryEngineLinearUnit.Kilometers);
+        double planarLength = await GeometryEngine.PlanarLength(polyline, GeometryEngineLinearUnit.Kilometers);
+        _measurement =
+            $"<b>Geodesic length</b>: {geodesicLength:N2} km | <b>Planar length</b>: {planarLength:N2} km";
+        _overlay!.Refresh();
+    }
+
+    private GraphicsLayer _graphicsLayer = new();
+    private Polygon? _startingGeometry;
+    private CustomOverlay? _overlay;
+    private string _measurement = string.Empty;
+    private bool _firstRender;
+    private bool _firstSketch = true;
+    private bool _updating;
+    private Graphic? _sketchGraphic;
+    private readonly MapPath _mapRings = new(
+        new MapPoint(-4508069.082189632, 3599936.936171892),
+        new MapPoint(-4508069.082189632, 5478453.343307884),
+        new MapPoint(-2629552.6750536393, 5478453.343307884),
+        new MapPoint(-2629552.6750536393, 3599936.936171892),
+        new MapPoint(-4508069.082189632, 3599936.936171892));
+}

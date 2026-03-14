@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <base href="/" />
+        <link rel="icon" href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/favicon.ico"]" />
+        <link rel="stylesheet" href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/bootstrap/bootstrap.min.css"]" />
+        <link href="@Assets[$"_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/site.css"]" rel="stylesheet" />
+		<link href="@Assets[$"_content/dymaptic.GeoBlazor.Pro.Sample.Shared/css/site.css"]" rel="stylesheet" />
+        <link href="@Assets["dymaptic.GeoBlazor.Pro.Sample.WebApp.styles.css"]" rel="stylesheet" />
+        <link href="@Assets["_content/dymaptic.GeoBlazor.Core"]" />
+        <link href="@Assets["_content/dymaptic.GeoBlazor.Pro"]" />
+        <link href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared"]" />
+        <link href="@Assets["_content/dymaptic.GeoBlazor.Pro.Sample.Shared"]" />
+        <script src="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/functions.js"]"></script>
+        <script src="@Assets["https://js.arcgis.com/calcite-components/3.2.1/calcite.esm.js"]"
+                type="module"></script>
+        <link href="/esri/themes/dark/main.css"/>
+        <script src="@Assets["_content/dymaptic.GeoBlazor.Pro.Sample.Shared/proFunctions.js"]"></script>
+        <ImportMap />
+
+        @{
+#if DEBUG
+        }
+        <HeadOutlet @rendermode="@_configuredRenderMode" />
+        @{
+#else
+        }
+        <HeadOutlet @rendermode="@InteractiveAuto" />
+        @{
+#endif
+        }
+        
+    </head>
+
+    <body>
+        
+        @{
+#if DEBUG
+        }
+        @* This should always be set to Server mode so that it can toggle on the server. *@
+        <RenderModeSelector @rendermode="InteractiveServer" />
+        <Routes @rendermode="@_configuredRenderMode" />
+        @{
+#else
+        }
+        <Routes @rendermode="@InteractiveAuto" />
+        @{
+#endif
+        }
+        
+        <script src="@Assets["_framework/blazor.web.js"]"></script>
+    </body>
+</html>
+
+@code {
+    
+    [Inject]
+    public required IConfiguration Configuration { get; set; }
+    
+#if DEBUG
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        _configuredRenderMode = Configuration.GetValue<string?>("RenderMode") switch
+        {
+            "Server" => InteractiveServer,
+            "WebAssembly" => InteractiveWebAssembly,
+            "Auto" => InteractiveAuto,
+            _ => null
+        };
+    }
+    
+    private IComponentRenderMode? _configuredRenderMode = InteractiveAuto;
+#endif
+}

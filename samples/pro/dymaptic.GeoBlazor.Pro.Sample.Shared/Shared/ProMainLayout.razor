@@ -1,0 +1,94 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>GeoBlazor Samples</PageTitle>
+
+<div class="page">
+    <ProNavMenu SearchText="@_searchText" EnterKeyPressed="_enterKeyPressed" />
+    <main>
+        <div class="top-row px-4">
+            <div class="search-input-wrap">
+                <input type="search" id="search-input"
+                       placeholder="Search for sample..."
+                       @oninput="UpdateSearchFilter"
+                       @onkeyup="SearchFilterKeyUp" />
+                <label for="search-input" class="search-label">
+                    <img src="/_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/search.svg" alt="Search" />
+                </label>
+            </div>
+            @if (!NavigationManager.Uri.Contains("source-code") &&
+                NavigationManager.Uri != NavigationManager.BaseUri &&
+                !NavigationManager.Uri.Contains("about"))
+            {
+                <button type="button" class="btn btn-primary" @onclick="ViewPageSource">Source Code</button>
+            }
+            <button type="button" class="btn btn-secondary" @onclick="ViewRepositorySource">GitHub Repo</button>
+        </div>
+        <article class="content px-4">
+            <ErrorHandler>
+                @Body
+            </ErrorHandler>
+        </article>
+    </main>
+</div>
+
+@code {
+    [Inject]
+    public required IConfiguration Configuration { get; set; }
+    
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+    
+    [Inject]
+    public required HttpClient HttpClient { get; set; }
+    
+    [Inject]
+    public required IJSRuntime JsRuntime { get; set; }
+    
+    [Inject]
+    public required AuthenticationManager AuthenticationManager { get; set; }
+    
+    [CascadingParameter(Name="PageRouteData")]
+    public required RouteData RouteData { get; set; }
+        
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            bool isDarkMode = await JsRuntime.InvokeAsync<bool>("isDarkMode");
+            Configuration["GeoBlazor:Theme"] = isDarkMode ? "Dark" : "Light";
+            StateHasChanged();
+            IJSObjectReference coreModule = await AuthenticationManager.GetCoreJsModule();
+            WFSServer[] wfsServers = Configuration.GetSection("WFSServers").Get<WFSServer[]>()!;
+            await JsRuntime.InvokeVoidAsync("setInterceptors", coreModule, wfsServers);
+        }
+    }
+    
+    private void ViewPageSource()
+    {
+        string currentPageName = RouteData.PageType.Name;
+        NavigationManager.NavigateTo($"source-code/{currentPageName}");
+    }
+
+    private void ViewRepositorySource()
+    {
+        NavigationManager.NavigateTo("https://github.com/dymaptic/GeoBlazor");
+    }
+    
+    private void UpdateSearchFilter(ChangeEventArgs arg)
+    {
+        _searchText = arg.Value?.ToString() ?? string.Empty;
+    }
+
+    private void SearchFilterKeyUp(KeyboardEventArgs arg)
+    {
+        if (arg.Key.Equals("Enter"))
+        {
+            _enterKeyPressed = true;
+        }
+    }
+    
+    private string _searchText = string.Empty;
+    private bool _enterKeyPressed;
+
+    private record WFSServer(string Url, string OutputFormat);
+}

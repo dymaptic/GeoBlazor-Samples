@@ -1,0 +1,136 @@
+@page "/ogc-feature-layers"
+
+<h3>OGC Feature Layers</h3>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-ogcfeaturelayer/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://demo.ldproxy.net/vineyards">Vineyards in Rhineland-Palatinate, Germany</a>
+</div>
+<p class="instructions">
+    This sample shows how to access an <a target="_blank" href="https://www.ogc.org/standards/ogcapi-features">OGC API Features service</a> 
+    using an OGCFeatureLayer. Since this layer type brings the data in as features, you can perform your own rendering, 
+    labeling, clustering, etc. It also demonstrates how to use <code>ExpandWidget</code> Groups to toggle multiple widgets at once.
+</p>
+<p class="instructions">
+    During high traffic times, this data set has been known to be slow or unresponsive. Please check back later if you do not see the green vineyards loading.
+</p>
+
+<MapView @ref="_mapView"
+         class="map-view"
+         Longitude="6.93"
+         Latitude="49.87"
+         Zoom="12"
+         OnViewRendered="OnViewRendered"
+         OnLayerViewCreate="OnLayerViewCreate">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+        <OGCFeatureLayer Url="https://demo.ldproxy.net/vineyards" 
+                         CollectionId="vineyards"
+                         MinScale="5_000_000"
+                         Opacity="0.6"
+                         Copyright="Landwirtschaftskammer RLP (2020), dl-de/by-2-0, <a href='http://weinlagen.lwk-rlp.de/'' target='_blank'>weinlagen.lwk-rlp.de</a>, <a href='http://weinlagen.lwk-rlp.de/portal/nutzungsbedingungen/gewaehrleistung-haftung.html' target='_blank'>Regelungen zu Gewährleistung und Haftung</a>">
+            <Label MaxScale="0" MinScale="100_000">
+                <LabelExpressionInfo Expression="$feature.NAME" />
+                <TextSymbol Color="@(new MapColor("#4a6741"))"
+                            HaloSize="1"
+                            HaloColor="@(new MapColor("white"))">
+                    <MapFont Family="IM FELL DW Pica PRO"
+                             Style="MapFontStyle.Italic"
+                             Weight="FontWeight.Normal" />
+                </TextSymbol>
+            </Label>
+            <SimpleRenderer>
+                <WebStyleSymbol StyleUrl="https://www.arcgis.com/sharing/rest/content/items/c71b13cf8f28452faf91ad0552574d24/data"
+                                Name="Mangrove_Common_5" />
+            </SimpleRenderer>
+            <PopupTemplate Title="{name}">
+                <TextPopupContent Text="The {name} vineyard is {area_ha} hectares and resides in {village} village. It is within the {region} region and the {subregion} subregion. " />
+            </PopupTemplate>
+        </OGCFeatureLayer>
+    </Map>
+    <PopupWidget @ref="_popupWidget" DockEnabled="true">
+        <PopupDockOptions Position="PopupDockPosition.BottomRight"
+                          BreakPoint="@(new BreakPoint(false))"
+                          ButtonEnabled="false" />
+    </PopupWidget>
+    <ExpandWidget ExpandIcon="question" Expanded="true" Position="OverlayPosition.TopLeft" Group="sample-group">
+        <div id="appTitle" class="esri-widget">
+            <h3>Wineries</h3>
+            <p>
+                Click on a feature to see more information about a specific winery. Use the filter icon on
+                the left to filter the data by the area of the winery.
+            </p>
+        </div>
+    </ExpandWidget>
+    <ExpandWidget @ref="_filterExpand" ExpandIcon="filter" Position="OverlayPosition.TopLeft" Group="sample-group">
+        <div id="winery-filter" class="esri-widget">
+            <div class="filter-title"><b>Filter by area (hectares)</b></div>
+            <div class="filter-item" @onclick="@(() => FilterByType("greater100"))">Greater than 100</div>
+            <div class="filter-item" @onclick="@(() => FilterByType("fiftyTo100"))">50 - 100</div>
+            <div class="filter-item" @onclick="@(() => FilterByType("lessThan50"))">Less than 50</div>
+        </div>
+    </ExpandWidget>
+</MapView>
+
+@code {
+
+    private async Task OnViewRendered()
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            
+            // clear the filters when user closes the expand widget
+            await _filterExpand!.AddReactiveWatcher<bool>("filterExpand.expanded", 
+                async expanded =>
+            {
+                if (!expanded)
+                {
+                    await _wineryLayerView!.SetFeatureEffect(null);
+                }
+            }, "filterExpand");
+        }
+    }
+
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.LayerView is OGCFeatureLayerView ogcFeatureLayerView)
+        {
+            // register the layer view for the OGCFeatureLayer
+            _wineryLayerView = ogcFeatureLayerView;
+        }
+    }
+
+    private async Task FilterByType(string selectedType)
+    {
+        // close popup if it is open
+        if (await _popupWidget!.GetVisible() == true)
+        {
+            await _mapView!.ClosePopup();
+        }
+        
+        // determine filter definition based on the selected type
+        string filterDef = selectedType switch
+        {
+            "greater100" => "area_ha > 100",
+            "fiftyTo100" => "area_ha >= 50 AND area_ha <= 100",
+            "lessThan50" => "area_ha < 50",
+            _ => string.Empty
+        };
+
+        if (_wineryLayerView is not null)
+        {
+            await _wineryLayerView.SetFeatureEffect(
+                new FeatureEffect(excludedEffect: [new Effect("opacity(20%)")], 
+                    filter: new FeatureFilter(where: filterDef)));
+        }
+    }
+    
+    private bool _firstRender = true;
+    private MapView? _mapView;
+    private PopupWidget? _popupWidget;
+    private OGCFeatureLayerView? _wineryLayerView;
+    private ExpandWidget? _filterExpand;
+}

@@ -1,0 +1,130 @@
+﻿@page "/popup-edit"
+
+<PageTitle>Popup with Edit Action</PageTitle>
+<h1>Popup with Edit Action</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/popup-editaction/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3">Topographic Vector BaseMap</a>
+</div>
+<p class="instructions">
+    The sample makes use of both Popups and the Editor widget. It does this by demonstrating how to add a 
+    custom edit action to a PopupTemplate displayed in a Popup. The popup displays a custom Edit feature action. 
+    It works by starting an Editor workflow for editing attribute data. Edits can then be made and updated. 
+    Once this happens, the popup's content is updated to display these feature edits. One thing to note is 
+    that the Editor works with feature layers that are editable. In this case, we have a service that is set 
+    to allow only attribute editing.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+<MapView @ref="_view"
+         Longitude="-106.49"
+         Latitude="31.8"
+         Zoom="15"
+         Class="map-view"
+         Style="min-height: 500px;"
+         OnViewRendered="OnViewRendered">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+        <FeatureLayer @ref="_featureLayer"
+                      OutFields="@(new []{"*"})"
+                      Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/El_Paso_Recreation_AttributeEditsOnly/FeatureServer/1">
+            <PopupTemplate Title="Trail name: {trailName}" ContentFunction="DifficultyLevel">
+                <FieldInfo FieldName="trailName" />
+                <FieldInfo FieldName="difficulty" />
+                <ActionButton Title="Edit feature" ActionId="edit-this" ClassName="esri-icon-edit" CallbackFunction="EditThis" />
+            </PopupTemplate>
+        </FeatureLayer>
+    </Map>
+    <EditorWidget @ref="_editor" Position="OverlayPosition.TopRight" Visible="false">
+        <EditorWidgetVisibleElements SnappingControls="false" />
+        <EditorLayerInfo LayerId="_featureLayer!.Id">
+            <FormTemplate>
+                <FieldElement FieldName="trailName" Label="Trail name" />
+                <FieldElement FieldName="condition" Label="Condition" Hint="The overall condition for running/biking?" />
+                <FieldElement FieldName="difficulty" Label="Difficulty" Hint="How difficult was this trail to run/bike?" />
+                <FieldElement FieldName="trckType" Label="Track type" Hint="Running or biking?" />
+                <FieldElement FieldName="notes" Label="Additional comments" />
+            </FormTemplate>
+        </EditorLayerInfo>
+    </EditorWidget>
+    <PopupWidget @ref="_popupWidget" />
+    <ExpandWidget Position="OverlayPosition.TopLeft" 
+                  ExpandTooltip="Open for info"
+                  CollapseTooltip="Close info"
+                  Expanded="true"
+                  HtmlContent="@_expandContent" />
+</MapView>
+
+@code {
+    private ValueTask<PopupContent[]?> DifficultyLevel(Graphic graphic)
+    {
+        AttachmentsPopupContent attachmentsElement = 
+            new AttachmentsPopupContent(displayType: AttachmentsPopupContentDisplayType.List);
+        string level = graphic.Attributes["difficulty"]!.ToString()!;
+        string green = $"<b><span style='color:green'>{level}</span></b>.";
+        string purple = $"<b><span style='color:purple'>{level}</span></b>.";
+        string red = $"<b><span style='color:red'>{level}</span></b>.";
+        string text = level switch {
+            "easy" => $"The {{trailName}} trail has a difficulty level of {green}",
+            "medium" => $"The {{trailName}} trail has a difficulty level of {purple}",
+            "hard" => $"The {{trailName}} trail has a difficulty level of {red}",
+            _ => throw new NotImplementedException()
+            };
+        TextPopupContent textElement = new TextPopupContent(text);
+
+        return new ValueTask<PopupContent[]?>([textElement, attachmentsElement]);
+    }
+    
+    private async Task EditThis()
+    {
+        await _view!.ClosePopup();
+        Graphic feature =(await _popupWidget!.GetSelectedFeature())!;
+        await _editor!.StartUpdateWorkflowAtFeatureEdit(feature);
+        await _editor.SetVisibility(true);
+    }
+
+    private async Task OnViewRendered()
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            await _editor!.AddReactiveWaiter("editor.viewModel.state === \"ready\" && editor.visible === true", async () =>
+            {
+                await _editor!.SetVisibility(false);
+                await _view!.OpenPopup(_popupOpenOptions);
+            }, "editor");
+        
+            await _popupWidget!.AddReactiveWaiter("popup.visible === true", async () =>
+            {
+                await _editor!.SetVisibility(false);
+            }, "popup");
+        }
+    }
+
+    private MapView? _view;
+    private PopupWidget? _popupWidget;
+    private FeatureLayer? _featureLayer;
+    private EditorWidget? _editor;
+    private bool _firstRender = true;
+    private readonly PopupOpenOptions _popupOpenOptions = new()
+    {
+        FetchFeatures = true,
+        ShouldFocus = true
+    };
+    // lang=html
+    private readonly string _expandContent = 
+        @"<div style=""width: 250px; padding: 13px;"" class=""esri-widget"">
+              <h3>
+                  Select a feature to display its popup
+              </h3>
+              <h4>
+                  Edit the feature by clicking on the ""Edit feature"" action within the popup.
+              </h4>
+          </div>";
+}
