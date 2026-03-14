@@ -1,0 +1,15 @@
+﻿@page "/source-code"
+@page "/source-code/{PageUrl}"
+@using Markdig
+
+<PageTitle>Source Code</PageTitle>
+<h1>Source Code</h1>
+
+@if (string.IsNullOrWhiteSpace(_pageContent))
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div id="source-code">@((MarkupString)Markdown.ToHtml(_pageContent, Pipeline))</div>
+}

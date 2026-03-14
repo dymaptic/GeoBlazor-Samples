@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Markdig" Version="0.44.0"/>
+        <PackageReference Include="MarkdigExtensions.SyntaxHighlighting" Version="1.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.2"/>
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="10.0.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\samples\core\dymaptic.GeoBlazor.Core.Sample.Shared\dymaptic.GeoBlazor.Core.Sample.Shared.csproj" />
+    </ItemGroup>
+
+    <Choose>
+        <When Condition="'$(UseProjectReferences)' == 'true'">
+            <ItemGroup>
+                <ProjectReference Include="$(ProProjectPath)\dymaptic.GeoBlazor.Pro.csproj" />
+            </ItemGroup>
+        </When>
+        <Otherwise>
+            <ItemGroup>
+                <PackageReference Include="dymaptic.GeoBlazor.Pro" Version="*" />
+            </ItemGroup>
+        </Otherwise>
+    </Choose>
+
+    <Target Name="Copy Razor Files" BeforeTargets="Build" Condition="'$(UseProjectReferences)' == 'true'">
+        <Exec Command="dotnet $(ProGBBuildToolsPath)/RazorCopy.dll"/>
+    </Target>
+</Project>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+        <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'RELEASE' and '$(RunAOT)' == 'true'">
+      <RunAOTCompilation>true</RunAOTCompilation>
+      <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\dymaptic.GeoBlazor.Pro.Sample.Shared\dymaptic.GeoBlazor.Pro.Sample.Shared.csproj" />
+    </ItemGroup>
+
+</Project>

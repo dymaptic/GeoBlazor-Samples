@@ -1,0 +1,98 @@
+﻿@page "/demographic-data"
+
+@inject LocationService LocationService;
+@inject ArcGISRest ArcGISRest;
+@inject GeometryEngine GeometryEngine;
+
+<PageTitle>Demographic Data</PageTitle>
+<h1>Demographic Data</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/get-demographic-data/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b">Navigation BaseMap</a>
+</div>
+<p class="instructions">
+    Zoom in and click on a city, or use the Search Widget to find a city, 
+    and you will see a popup with population data for a 1-mile radius buffer 
+    around the selected point.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+<MapView @ref="View"
+         Longitude="9.1900"
+         Latitude="45.4642"
+         Zoom="4"
+         Class="map-view"
+         OnClick="OnViewClick">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+        </Basemap>
+    </Map>
+    <SearchWidget OnSelectResult="OnSearchSelectResult"
+                  Position="OverlayPosition.TopRight" />
+</MapView>
+
+<SimpleFillSymbol @ref="BufferSymbol" Color="@(new MapColor(50, 50, 50, 0.1))">
+    <Outline Color="@(new MapColor(0, 0, 0, 0, 25))" Width="0.5" />
+</SimpleFillSymbol>
+
+@code {
+
+    private MapView? View { get; set; }
+    private Symbol? BufferSymbol { get; set; }
+
+    private async Task OnSearchSelectResult(SearchSelectResultEvent selectResultEvent)
+    {
+        SearchResult selectResult = selectResultEvent.Result!;
+        await GetDemographicData(selectResult.Name!, (Point)selectResult.Feature!.Geometry!);
+    }
+
+    private async Task OnViewClick(ClickEvent clickEvent)
+    {
+        Point mapPoint = clickEvent.MapPoint;
+        var locatorUrl = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+        AddressCandidate address = await LocationService.LocationToAddress(locatorUrl, mapPoint);
+        string? city = null;
+        if (address.Attributes.TryGetValue("City", out object? attribute))
+        {
+            city = attribute.ToString();
+        }
+        else if (address.Attributes.TryGetValue("Region", out object? addressAttribute))
+        {
+            city = addressAttribute.ToString();
+        }
+        if (city is null) return;
+
+        await GetDemographicData(city, mapPoint);
+    }
+
+    private async Task GetDemographicData(string locationName, Point mapPoint)
+    {
+        Graphic[] features = await ArcGISRest.QueryDemographicData(mapPoint);
+        await ShowData(locationName, features[0].Attributes, mapPoint);
+    }
+
+    private async Task ShowData(string locationName, AttributesDictionary attributes, Point mapPoint)
+    {
+        await View!.ClosePopup();
+        var popupTitle = $"Global facts near {locationName}";
+        attributes.TryGetValue("TOTPOP", out object? totalPop);
+        attributes.TryGetValue("TOTMALES", out object? totalMales);
+        attributes.TryGetValue("TOTFEMALES", out object? totalFemales);
+        attributes.TryGetValue("AVGHHSZ", out object? avgHouseholdSize);
+        string popupContent = $"Population: {totalPop}<br>Males: {totalMales}<br>Females: {totalFemales}<br>Average Household Size: {avgHouseholdSize}";
+
+        await View!.ShowPopup(new PopupTemplate(popupTitle, popupContent), mapPoint);
+
+        Polygon buffer = (await GeometryEngine.GeodesicBuffer(mapPoint, 1, GeometryEngineLinearUnit.Miles))!;
+        var bufferGraphic = new Graphic(buffer, BufferSymbol);
+
+        await View.ClearGraphics();
+        await View.AddGraphic(bufferGraphic);
+    }
+
+}

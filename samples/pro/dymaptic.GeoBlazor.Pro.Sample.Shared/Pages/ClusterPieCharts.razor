@@ -1,0 +1,81 @@
+﻿@page "/cluster-pie-charts"
+
+<PageTitle>Clusters as Pie Charts</PageTitle>
+<h1>Clusters as Pie Charts</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-pie-charts/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=433b5f7f524a4d1ebf3a9f8e1bd49ee0">311 Calls</a>
+</div>
+<p class="instructions">
+    
+</p>
+
+<MapView Class="map-view" OnLayerViewCreate="OnLayerViewCreate">
+    <WebMap>
+        <PortalItem PortalItemId="433b5f7f524a4d1ebf3a9f8e1bd49ee0" />
+    </WebMap>
+    <Constraints SnapToZoom="false" />
+    <HomeWidget Position="OverlayPosition.TopLeft" />
+    <ExpandWidget Position="OverlayPosition.TopLeft"
+                  ExpandIcon="list-bullet"
+                  Expanded="true">
+        <LegendWidget />
+    </ExpandWidget>
+</MapView>
+
+@code {
+    [Inject]
+    public required LabelGenerator LabelGenerator { get; set; }
+    
+    [Inject]
+    public required PieChartGenerator PieChartGenerator { get; set; }
+
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (_featureLayer is null && createEvent.Layer is FeatureLayer fl)
+        {
+            _featureLayer = fl;
+            await _featureLayer.SetEffect(new Effect("drop-shadow(2px, 2px, 2px, gray)"));
+            FeatureReductionCluster reduction = await GenerateClusterConfig();
+            await _featureLayer.SetFeatureReduction(reduction);
+        }
+    }
+    
+    private async Task<FeatureReductionCluster> GenerateClusterConfig()
+    {
+        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!)).PrimaryScheme!;
+        
+        TextSymbol labelSymbol = (TextSymbol)labelScheme.LabelingInfo.First().Symbol!;
+#pragma warning disable BL0005
+        labelSymbol.Color = labelSymbol.HaloColor!.Clone();
+        labelSymbol.HaloColor = new MapColor(255, 255, 255, 0.3);
+        labelSymbol.Font!.Size = 10;
+
+        PieChartClusterRendererResult result = await PieChartGenerator.CreateRendererForClustering(
+            _featureLayer!, PieChartShape.Donut);
+        PieChartRenderer renderer = result.Renderer;
+        renderer.HolePercentage = 0.66;
+#pragma warning restore BL0005
+        List<FieldInfo> fieldInfos = result.Fields.Select(f => 
+            new FieldInfo(f.Name, f.Alias, format: new FieldInfoFormat(0, true)))
+            .ToList();
+        List<string> fieldNames = fieldInfos.Select(fi => fi.FieldName!).ToList();
+
+        PopupTemplate popupTemplate = new(content: new List<PopupContent>
+        {
+            new TextPopupContent("This cluster represents <b>{cluster_count}</b> features."),
+            new MediaPopupContent(mediaInfos:
+            [
+                new PieChartMediaInfo("311 Reports", value: new ChartMediaInfoValue(fieldNames))
+            ]),
+            new FieldsPopupContent()
+        }, fieldInfos: fieldInfos);
+        Dimension? minSize = labelScheme.ClusterMinSize is null ? null : new Dimension(labelScheme.ClusterMinSize.Value); 
+        return new FeatureReductionCluster(clusterMinSize: minSize,
+            labelingInfo: labelScheme.LabelingInfo, popupTemplate: popupTemplate, renderer: renderer,
+            fields: result.Fields);
+    }
+
+    private FeatureLayer? _featureLayer;
+}

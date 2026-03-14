@@ -1,0 +1,104 @@
+@page "/graphics-legend"
+<PageTitle>Graphics Legend</PageTitle>
+<h1>Graphics Legend</h1>
+<p class="instructions">
+    Exclusive to GeoBlazor Pro, create a legend based on your custom graphics! Allows you to 
+    define custom labels, group graphics by their symbol, toggle visibility, 
+    and select graphics to open their popups. This page includes a legend in the view, in an ExpandWidget,
+    and outside the view.
+</p>
+
+<MapView @ref="_view" 
+         Class="map-view"
+         OnViewRendered="OnViewRendered"
+         Longitude="-100" Latitude="40"
+         Zoom="3">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer1" Title="Layer 1" />
+        <GraphicsLayer @ref="_graphicsLayer2" Title="Layer 2" />
+    </Map>
+    <ExpandWidget Position="OverlayPosition.BottomRight">
+        <GraphicsLegendWidget Label="Legend in Expand Widget" 
+                              GraphicLabelTemplate="{Name}, Pop: {Pop}"
+                              GroupBySymbol="true"
+                              SelectGraphics="true" />
+    </ExpandWidget>
+    <GraphicsLegendWidget Position="OverlayPosition.BottomLeft"
+                          Label="Custom Graphics Legend"
+                          GraphicLabelTemplate="{Name}, Pop: {Pop}"
+                          GroupBySymbol="true"
+                          ToggleGraphics="true" />
+</MapView>
+
+<GraphicsLegendWidget MapView="_view"
+                      Label="Exterior Legend"
+                      GraphicLabelTemplate="{Name}"
+                      Style="width: 200px;" />
+
+@code {
+    
+    private async Task OnViewRendered()
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            PictureMarkerSymbol symbol1 = new("https://static.arcgis.com/images/Symbols/Basic/RedStickpin.png", 
+                32, 32);
+
+            PictureMarkerSymbol symbol2 = new("https://static.arcgis.com/images/Symbols/Basic/BlueStickpin.png",
+                32, 32);
+            
+            SimpleMarkerSymbol symbol3 = new(color: new MapColor("green"));
+            SimpleMarkerSymbol symbol4 = new(color: new MapColor(120, 0, 30, 0.6));
+            PopupTemplate popupTemplate = new("{Name}", "Population: {Pop}");
+            
+            await _graphicsLayer1!.Add(new Graphic(new Point(-117.1957, 34.0572), symbol1,
+                popupTemplate,
+                new AttributesDictionary(new Dictionary<string, object?>
+                {
+                    {"Name", "San Diego"},
+                    { "Pop", 1_390_000 }
+                })));
+            
+            await _graphicsLayer1!.Add(new Graphic(new Point(-122.3321, 47.6062), symbol2,
+                popupTemplate,
+                new AttributesDictionary(new Dictionary<string, object?>
+                {
+                    {"Name", "Seattle"},
+                    { "Pop", 737_020 }
+                })));
+            
+            await _graphicsLayer2!.Add(new Graphic(new Point(-122.4194, 37.7749), symbol3,
+                popupTemplate,
+                new AttributesDictionary(new Dictionary<string, object?>
+                {
+                    {"Name", "San Francisco"},
+                    { "Pop", 873_970 }
+                })));
+
+            await _view!.AddGraphic(new Graphic(new Point(-74.0060, 40.7128), symbol4,
+                popupTemplate,
+                new AttributesDictionary(new Dictionary<string, object?>
+                {
+                    { "Name", "New York" }, 
+                    { "Pop", 20_200_000 }
+                }), legendLabel: "East Coast, Pop: {Pop}"));
+            
+            await _view!.AddGraphic(new Graphic(new Point(-71.0589, 42.3601), symbol4,
+                popupTemplate,
+                new AttributesDictionary(new Dictionary<string, object?>
+                {
+                    {"Name", "Boston"},
+                    { "Pop", 4_628_910 }
+                }), legendLabel: "East Coast, Pop: {Pop}"));
+        }
+    }
+    
+    private MapView? _view;
+    private GraphicsLayer? _graphicsLayer1;
+    private GraphicsLayer? _graphicsLayer2;
+    private bool _firstRender = true;
+}

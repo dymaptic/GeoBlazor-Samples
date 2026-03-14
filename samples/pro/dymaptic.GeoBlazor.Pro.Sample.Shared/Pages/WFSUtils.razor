@@ -1,0 +1,128 @@
+@page "/wfsutils"
+
+<h3>WFS Utils</h3>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about">Office for National Statistics (UK)</a>
+</div>
+<p class="instructions">
+    This sample shows how you can use the wfsUtils class to browse FeatureTypes in the WFS service before adding them to your map. To do this, we use wfsUtils.getCapabilities, which executes the GetCapabilities request on the WFS service and returns the feature types.
+</p>
+
+<MapView @ref="_mapView"
+         class="map-view"
+         Longitude="-2"
+         Latitude="53"
+         Zoom="5"
+         PopupEnabled="true">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+    </Map>
+    <LayerListWidget Position="OverlayPosition.BottomLeft" />
+    <PopupWidget DefaultPopupTemplateEnabled="true" />
+    <CustomOverlay Position="OverlayPosition.TopRight">
+        <div id="panelItem">
+            <div class="panel-header">
+                <label>OGC WFS endpoint</label>
+                <input @bind="_endpoint" type="text" />
+                <button class="btn btn-primary" type="button" @onclick="GetCapabilities">Get Capabilities</button>
+            </div>
+            <calcite-loader id="loader" type="indeterminate" hidden="@(!_loading)"></calcite-loader>
+            @if (_showWarning)
+            {
+                <calcite-notice id="warning" kind="warning" icon="exclamation-mark-triangle" width="full">
+                    <div slot="title">Unsupported WFS</div>
+                    <div slot="message">The WFS service must support WFS 2.0.0 and have GeoJSON output format enabled.</div>
+                </calcite-notice>
+            }
+            <div id="listArea">
+                @if (_featureTypes is not null)
+                {
+                    <ul>
+                        @foreach (WFSFeatureType feature in _featureTypes)
+                        {
+                            <li @onclick="@(() => UpdateSelectedLayer(feature))">@feature.Title</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </CustomOverlay>
+</MapView>
+
+@code {
+    [Inject]
+    public required WfsUtils Utils { get; set; }
+
+    private async Task GetCapabilities()
+    {
+        _showWarning = false;
+        if (string.IsNullOrEmpty(_endpoint))
+        {
+            return;
+        }
+
+        _loading = true;
+        StateHasChanged();
+        await Task.Yield();
+
+        try
+        {
+            _capabilities = await Utils.GetCapabilities(_endpoint, new WfsUtilsGetCapabilitiesOptions());
+            _featureTypes = _capabilities?.FeatureTypes;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching WFS capabilities: {ex.Message}");
+            _featureTypes = null;
+            _capabilities = null;
+            _showWarning = true;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task UpdateSelectedLayer(WFSFeatureType featureType)
+    {
+        try
+        {
+            await _mapView!.ClosePopup();
+
+            if (_layer is not null)
+            {
+                await _mapView.RemoveLayer(_layer);
+            }
+        
+            WFSLayerInfo? layerInfo = await Utils.GetWFSLayerInfo(_capabilities!, featureType.Name);
+            _layer = await Utils.GetLayerFromLayerInfo(layerInfo!);
+
+            if (_layer is not null)
+            {
+                await _mapView.AddLayer(_layer);
+                await _mapView.GoTo(layerInfo!.Extent!);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating selected layer: {ex.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+    
+    private string _endpoint = "https://dservices1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/services/Counties_May_2023_Boundaries_EN_BUC/WFSServer?service=wfs";
+    private bool _loading;
+    private bool _showWarning;
+    private IReadOnlyCollection<WFSFeatureType>? _featureTypes;
+    private WFSCapabilities? _capabilities;
+    private WFSLayer? _layer;
+    private MapView? _mapView;
+}

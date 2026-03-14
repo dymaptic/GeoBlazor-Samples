@@ -1,0 +1,21 @@
+<Project>
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <!--
+        By default, samples reference GeoBlazor NuGet packages with Version="*" (latest).
+        Set UseProjectReferences=true and configure the paths below to use local project references instead.
+        This is useful when developing GeoBlazor Core/Pro alongside the samples (e.g., as submodules).
+
+        Example usage:
+          dotnet build /p:UseProjectReferences=true /p:CoreProjectPath=../GeoBlazor/src/dymaptic.GeoBlazor.Core /p:ProProjectPath=../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro
+    -->
+    <PropertyGroup Condition="'$(UseProjectReferences)' == 'true'">
+        <CoreProjectPath Condition="'$(CoreProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor.Core</CoreProjectPath>
+        <ProProjectPath Condition="'$(ProProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor.Pro\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
+    </PropertyGroup>
+
+</Project>

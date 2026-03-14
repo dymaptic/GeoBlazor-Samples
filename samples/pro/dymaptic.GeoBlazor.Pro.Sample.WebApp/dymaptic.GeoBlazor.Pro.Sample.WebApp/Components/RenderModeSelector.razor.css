@@ -1,0 +1,27 @@
+﻿.render-mode-selector-row {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: row;
+    padding: 1rem;
+    background-color: var(--geoblazor-primary);
+    color: white;
+    font-weight: bold;
+}
+
+select {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding: 0.2rem;
+    border-radius: 0.5rem;
+    border: 1px solid black;
+}
+
+@media (min-width: 1075px) {
+    .render-mode-selector-row {
+        left: 20rem;
+    }
+}

@@ -1,0 +1,98 @@
+﻿@page "/binning"
+
+<PageTitle>Binning</PageTitle>
+<h1>Binning</h1>
+
+<PageTitle>Clustering</PageTitle>
+    <h1>Clustering</h1>
+    
+    <div class="links-div">
+        <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-binning/">ArcGIS API for JavaScript Reference</a>
+        <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/NYC_motor_crashes/FeatureServer/0">NYC Motor Crashes</a>
+    </div>
+    <p class="instructions">
+        This sample demonstrates how to enable binning on a FeatureLayer. 
+        Binning is a method of aggregating points in a FeatureLayer, CSVLayer, or GeoJSONLayer by grouping them in predefined bins. 
+        Bins are generated using geohashes.
+    </p>
+
+<MapView Center="@(new Point(-73.9304, 40.6971))"
+         Scale="144447" Class="map-view">
+    <Constraints SnapToZoom="false" />
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+        <FeatureLayer @ref="_featureLayer"
+                      Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/NYC_motor_crashes/FeatureServer/0"
+                      Title="Motor vehicle crashes (2020)"
+                      DefinitionExpression="@($"CRASH_DATE > Date '12-31-{_year - 1}' AND CRASH_DATE < Date '01-01-{_year + 1}'")">
+            <PopupTemplate Title="Crash location">
+                <FieldInfo FieldName="CRASH_DATE" Label="Date">
+                    <FieldInfoFormat DateFormat="DateFormat.DayShortMonthYearLongTime" />
+                </FieldInfo>
+                <FieldInfo FieldName="NUMBER_OF_PERSONS_KILLED" Label="Fatalities" />
+                <FieldInfo FieldName="NUMBER_OF_PERSONS_INJURED" Label="Injuries" />
+            </PopupTemplate>
+            <SimpleRenderer Label="Crash location">
+                <SimpleMarkerSymbol Style="SimpleMarkerSymbolStyle.Circle" 
+                                    Size="5" Color="@(new MapColor(_colors[3]))">
+                    <Outline Style="SimpleLineSymbolStyle.Solid" Width="0.5" 
+                             Color="@(new MapColor(15, 15, 15, 0.3))" />
+                </SimpleMarkerSymbol>
+            </SimpleRenderer>
+            <FeatureReductionBinning @ref="_featureBinning" FixedBinLevel="6" LabelsVisible="true"
+                                     PopupEnabled="true">
+                <AggregateField Name="aggregateCount" StatisticType="AggregateStatisticType.Count" />
+                <Label MinScale="144448" MaxScale="0" DeconflictionStrategy="DeconflictionStrategy.None">
+                    <TextSymbol Color="@(new MapColor("white"))"
+                                HaloColor="@(new MapColor(_colors[4]))" HaloSize="0.5">
+                        <MapFont Family="Noto Sans" Size="10" Weight="FontWeight.Bold" />
+                    </TextSymbol>
+                    <LabelExpressionInfo Expression="Text($feature.aggregateCount, '#,###')" /> 
+                </Label>
+                <PopupTemplate Title="Car crashes" StringContent="{aggregateCount} car crashes occurred in this area." />
+                <SimpleRenderer>
+                    <SimpleFillSymbol Color="@(new MapColor(0, 255, 71, 1))">
+                        <Outline Color="@(new MapColor(153, 31, 23, 0.3))" Width="0.3" />
+                    </SimpleFillSymbol>
+                    <ColorVariable Field="aggregateCount">
+                        <VisualVariableLegendOptions Title="Number of crashes" />
+                        <ColorStop Value="0" Color="@(new MapColor(_colors[0]))" />
+                        <ColorStop Value="25" Color="@(new MapColor(_colors[1]))" />
+                        <ColorStop Value="75" Color="@(new MapColor(_colors[2]))" />
+                        <ColorStop Value="200" Color="@(new MapColor(_colors[3]))" />
+                        <ColorStop Value="300" Color="@(new MapColor(_colors[4]))" />
+                    </ColorVariable>
+                </SimpleRenderer>
+            </FeatureReductionBinning>
+
+        </FeatureLayer>
+    </Map>
+    <HomeWidget Position="OverlayPosition.TopLeft" />
+    <ExpandWidget Position="OverlayPosition.TopLeft" ExpandIcon="list-bullet" Expanded="false">
+        <button type="button" @onclick="ToggleBinning" class="esri-button">Toggle Binning</button>
+        <LegendWidget />
+    </ExpandWidget>
+</MapView>
+
+@code {
+    private async Task ToggleBinning()
+    {
+        _binning = !_binning;
+        if (!_binning)
+        {
+            await _featureLayer!.SetFeatureReduction(null);
+        }
+        else
+        {
+            await _featureLayer!.SetFeatureReduction(_featureBinning!);
+        }
+    }
+    
+    private readonly int _year = 2020;
+    private readonly string[] _colors = ["#d7e1ee", "#cbd6e4", "#b3bfd1", "#c86558", "#991f17"];
+    private bool _binning = true;
+    private FeatureLayer? _featureLayer;
+    private FeatureReductionBinning? _featureBinning;
+}

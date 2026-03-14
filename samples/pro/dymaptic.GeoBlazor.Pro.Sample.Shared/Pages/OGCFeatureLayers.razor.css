@@ -1,0 +1,28 @@
+#appTitle {
+    padding: 15px;
+    width: 400px;
+}
+
+#winery-filter {
+    width: 150px;
+}
+
+.filter-item {
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    vertical-align: baseline;
+    cursor: pointer;
+}
+
+.filter-title {
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    vertical-align: baseline;
+}
+
+.filter-item:focus,
+.filter-item:hover {
+    background-color: rgb(186, 185, 185);
+}

@@ -1,0 +1,28 @@
+﻿@page "/print-widget"
+<PageTitle>Print Widget</PageTitle>
+<h1>Print Widget</h1>
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-print/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d6d830a7184f4971b8a2f42cd774d9a7">Missing Migrants Around the Globe Class Breaks Web Map</a>
+</div>
+<p class="instructions">
+    This sample demonstrates how to add a Print widget for a 2D MapView. The widget can preserve map scale or map extent in the printout. By default, the map extent is preserved. Use TemplateOptions.scaleEnabled to preserve scale instead. The widget also prints a localized date in the printout.
+</p>
+<p class="instructions">
+    The Print widget calls the Get Layout Templates Info task on the GPServer to discover possible customTextElements values for each template. When using a custom print service, values found there will be populated in the Print widget under Advanced options. These values can be overwritten in the Print widget UI, or programmatically using Print.templateCustomTextElements.
+</p>
+<p class="instructions">
+    Note: printing a SceneView is not possible at this time. Instead, see SceneView.takeScreenshot().
+</p>
+
+<MapView Class="map-view">
+    <WebMap>
+        <PortalItem PortalItemId="d6d830a7184f4971b8a2f42cd774d9a7" />
+    </WebMap>
+    <PrintWidget Position="OverlayPosition.TopRight" />
+</MapView>
+
+@code {
+
+    
+}

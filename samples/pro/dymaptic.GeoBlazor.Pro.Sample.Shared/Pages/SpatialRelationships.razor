@@ -1,0 +1,183 @@
+﻿@page "/spatial-relationships"
+
+@inject GeometryEngine GeometryEngine
+
+<PageTitle>Spatial Relationships</PageTitle>
+<h1>Spatial Relationships</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/find-spatial-relationships/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=358ec1e175ea41c3bf5c68f0da11ae2b">Dark Gray Canvas BaseMap</a>
+</div>
+<p class="instructions">
+    Drag the rectangle or line to see the Spatial Relationship legend update. You
+    can also draw a new shape with the Sketch Tool.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+
+<MapView @ref="_view"
+         Longitude="-118.80500"
+         Latitude="34.02700"
+         Zoom="13"
+         Class="map-view"
+         Style="min-height: 600px;"
+         OnViewRendered="OnViewRendered">
+    <Map>
+        <Basemap>
+            <PortalItem PortalItemId="358ec1e175ea41c3bf5c68f0da11ae2b" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer">
+
+        </GraphicsLayer>
+    </Map>
+    <SketchWidget Position="OverlayPosition.TopRight" 
+                  UpdateOnGraphicClick="true" 
+                  OnSketchEvent="OnSketchEvent"
+                  GraphicsLayer="@(_graphicsLayer)"
+                  EventRateLimitInMilliseconds="200">
+        <SnappingOptions Enabled="true" />
+        <SketchWidgetVisibleElements SettingsMenu="false" UndoRedoMenu="false">
+            <CreateTools Point="false" />
+            <SelectionTools LassoSelection="false" RectangleSelection="false" />
+        </SketchWidgetVisibleElements>
+    </SketchWidget>
+    <CustomOverlay @ref="_overlay" Position="OverlayPosition.BottomRight">
+        <div id="relationship-results" class="esri-widget">
+            <div>
+                <b>Spatial relationships</b>
+            </div>
+            @foreach (KeyValuePair<SpatialRelationship, bool> kvp in _relationshipResults)
+             {
+                 if (kvp.Value)
+                 {
+                     <div id="@kvp.Key">
+                         <b>@kvp.Key.ToString(): @kvp.Value.ToString()</b>
+                     </div>
+                 }
+                 else
+                 {
+                     <div id="@kvp.Key">
+                         @kvp.Key.ToString(): @kvp.Value.ToString()
+                     </div>
+                 }
+             }
+        </div>
+    </CustomOverlay>
+</MapView>
+
+@code {
+    private async Task OnViewRendered()
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            await _graphicsLayer!.Add(_startingGraphic1);
+            await _graphicsLayer.Add(_startingGraphic2);
+            _currentGraphics.Add(_startingGraphic1);
+            _currentGraphics.Add(_startingGraphic2);
+        }
+    }
+
+    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    {
+        if (sketchEvent.EventType == SketchEventType.Create)
+        {
+            if (sketchEvent.State == SketchEventState.Start)
+            {
+                Graphic first = _currentGraphics[0];
+                await _graphicsLayer!.Remove(first);
+                _currentGraphics.RemoveAt(0);
+                return;
+            }
+            if (sketchEvent.State == SketchEventState.Complete)
+            {
+                _currentGraphics.Add(sketchEvent.Graphics[0]);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        await _cts.CancelAsync();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            Graphic[] currentGraphics = _graphicsLayer!.Graphics.ToArray();
+            Geometry? geometry1 = await currentGraphics[0].GetGeometry();
+            Geometry? geometry2 = await currentGraphics[1].GetGeometry();
+
+            if (geometry1 is null || geometry2 is null)
+            {
+                return;
+            }
+
+            await UpdateRelationshipResults(geometry1, geometry2, _cts.Token);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task UpdateRelationshipResults(Geometry geometry1, Geometry geometry2, CancellationToken token)
+    {
+        _relationshipResults[SpatialRelationship.Contains] = await GeometryEngine.Contains(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.Crosses] = await GeometryEngine.Crosses(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.Disjoint] = await GeometryEngine.Disjoint(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.EqualTo] = await GeometryEngine.AreEqual(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.Intersects] = await GeometryEngine.Intersects(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.Overlaps] = await GeometryEngine.Overlaps(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.Touches] = await GeometryEngine.Touches(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        _relationshipResults[SpatialRelationship.Within] = await GeometryEngine.Within(geometry1, geometry2);
+        if (token.IsCancellationRequested) return;
+        StateHasChanged();
+    }
+
+    private CancellationTokenSource _cts = new();
+    private readonly List<Graphic> _currentGraphics = [];
+    private readonly Graphic _startingGraphic1 = new(new Polyline([
+        polyLinePaths
+    ], new SpatialReference(102100)), new SimpleLineSymbol(width: 2));
+    private readonly Graphic _startingGraphic2 = new(new Polygon([
+        polygonPaths
+    ], new SpatialReference(102100)), new SimpleFillSymbol());
+    private CustomOverlay? _overlay;
+    private GraphicsLayer? _graphicsLayer;
+    private MapView? _view;
+    private bool _firstRender = true;
+
+    private static readonly MapPath polyLinePaths =
+    [
+        new(-13227000.704542402, 4032506.197638312),
+        new(-13223540.698857695, 4034443.92109266),
+        new(-13222135.94452635, 4032506.197638312),
+        new(-13221470.479577951, 4033494.9524006792),
+        new(-13221470.404932415, 4033494.9524006792)
+    ];
+
+    private static readonly MapPath polygonPaths =
+    [
+        new(-13228098.704542402, 4035365.9427463487),
+        new(-13226362.225451587, 4035365.9427463487),
+        new(-13226362.225451587, 4032059.2948176656),
+        new(-13228098.704542402, 4032059.2948176656),
+        new(-13228098.704542402, 4035365.9427463487)
+    ];
+
+    private readonly Dictionary<SpatialRelationship, bool> _relationshipResults =
+        Enum.GetNames(typeof(SpatialRelationship))
+            .ToDictionary(k => (SpatialRelationship)Enum.Parse(typeof(SpatialRelationship), k), _ => false);
+}

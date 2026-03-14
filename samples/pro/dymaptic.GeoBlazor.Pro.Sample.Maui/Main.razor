@@ -1,0 +1,43 @@
+﻿@using Microsoft.Maui.Devices
+@using Microsoft.Maui.ApplicationModel
+<Router AppAssembly="@typeof(App).Assembly"
+        AdditionalAssemblies="@(new[] { typeof(ProMainLayout).Assembly, typeof(Navigation).Assembly })"
+        NotFoundPage="@typeof(NotFound)">
+    <Found Context="routeData">
+        <CascadingValue Name="PageRouteData" Value="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(ProMainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </CascadingValue>
+    </Found>
+</Router>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await CheckAndRequestLocationPermission();
+    }
+
+    private async Task CheckAndRequestLocationPermission()
+    {
+        if (DeviceInfo.Platform == DevicePlatform.WinUI) return;
+        PermissionStatus status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+
+        if (status == PermissionStatus.Granted)
+            return;
+
+        if (status == PermissionStatus.Denied && DeviceInfo.Platform == DevicePlatform.iOS)
+        {
+            // Prompt the user to turn on in settings
+            // On iOS once a permission has been denied it may not be requested again from the application
+            return;
+        }
+
+        if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
+        {
+            // Prompt the user with additional information as to why the permission is needed
+        }
+
+        await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+    }
+}

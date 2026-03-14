@@ -1,0 +1,93 @@
+﻿@page "/routes"
+
+<PageTitle>Routes</PageTitle>
+<h1>Routes</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/route/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=4f2e99ba65e34bb8af49733d9778fb8e">Human Geography Dark BaseMap</a>
+</div>
+<p class="instructions">
+    Click on two points on the map to designate starting point and destination. You will see a popup with
+    driving directions!
+</p>
+<button @onclick="Clear" class="btn btn-danger">Clear</button>
+<MapView Longitude="-117.195"
+         Latitude="34.057"
+         Zoom="13"
+         Class="map-view"
+         OnClick="OnClick">
+    <Map>
+        <Basemap>
+            <PortalItem PortalItemId="4f2e99ba65e34bb8af49733d9778fb8e" />
+        </Basemap>
+        <GraphicsLayer @ref="_routeLayer" />
+    </Map>
+    <CustomOverlay Position="OverlayPosition.TopRight">
+        <ol id="directions-widget" class="esri-widget esri-widget--panel esri-directions__scroller">
+            @foreach (DirectionsFeatureSet directionSet in _directions)
+            {
+                if (directionSet.Features is null) continue;
+                foreach (Graphic direction in directionSet.Features)
+                {
+                    <li>@(direction.Attributes["text"]) (@(double.Parse(direction.Attributes["length"]!.ToString()!).ToString("F")) miles)</li>    
+                }
+            }
+        </ol>
+    </CustomOverlay>
+</MapView>
+
+@code {
+    [Inject]
+    public required RouteService RouteService { get; set; }
+    
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        Graphic stop = new(clickEvent.MapPoint, _stopSymbol);
+        await _routeLayer!.Add(stop);
+        List<Graphic> stops = _routeParameters.FeatureSetStops!.Features!.ToList();
+        stops.Add(stop);
+        _routeParameters.FeatureSetStops = _routeParameters.FeatureSetStops with {Features = stops.ToArray()};
+
+        if (_routeParameters.FeatureSetStops.Features?.Count >= 2)
+        {
+            RouteSolveResult result = await RouteService.Solve(_routeUrl, _routeParameters);
+            await ShowRoute(result);
+        }
+    }
+    
+    private async Task ShowRoute(RouteSolveResult result)
+    {
+        Graphic? routeGraphic = result.RouteResults?.FirstOrDefault()?.Route;
+
+        if (routeGraphic is null) return;
+        await routeGraphic.SetSymbol(_routeSymbol);
+        await _routeLayer!.Add(routeGraphic);
+        _directions = result.RouteResults!.Select(r => r.Directions!).ToArray();
+    }
+
+    private async Task Clear()
+    {
+        _directions = [];
+        _routeParameters.FeatureSetStops = _routeParameters.FeatureSetStops! with {Features = []};
+        await _routeLayer!.Clear();
+    }
+
+    private GraphicsLayer? _routeLayer;
+    private readonly SimpleMarkerSymbol _stopSymbol = new(new Outline(new MapColor("white"), width: 5), new MapColor("white"), 
+        style: SimpleMarkerSymbolStyle.Cross, size: 15);
+    private readonly SimpleLineSymbol _routeSymbol = new(new MapColor(0, 0, 255, 0.5), 5);
+    private readonly RouteParameters _routeParameters = new()
+    {
+        FeatureSetStops = new FeatureSet
+        {
+            Features = []
+        },
+        OutSpatialReference = new SpatialReference(3857),
+        ReturnDirections = true
+    };
+    
+    private readonly string _routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+    private DirectionsFeatureSet[] _directions = [];
+
+}

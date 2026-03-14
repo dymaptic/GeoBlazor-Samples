@@ -1,0 +1,126 @@
+﻿@page "/clustering-popups"
+
+<PageTitle>Clustering Popups</PageTitle>
+<h1>Clustering Popups</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-filter/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Places_of_Worship_India/FeatureServer/0">Places of Worship</a>
+</div>
+<p class="instructions">
+    This sample demonstrates how to generate a default PopupTemplate and labels for point clusters enabled in a MapView. 
+    To generate a PopupTemplate, use the injectable <code>PopupTemplateCreator</code> class and the <code>GetTemplates</code> method. 
+    Use the <code>LabelCreator</code> class and the <code>GetLabelSchemes</code> method to generate suggested default labelingInfo 
+    for the clusters along with a suggested clusterMinSize.
+</p>
+
+<MapView Class="map-view" @ref="_mapView"
+         Center="@(new Point(80.20127, 22.12355))"
+         Zoom="4"
+         OnLayerViewCreate="OnLayerViewCreate">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+        <FeatureLayer @ref="_featureLayer"
+                      Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Places_of_Worship_India/FeatureServer/0"
+                      Title="Places of worship"
+                      OutFields="@(new []{"name", "religion", "denomination"})">
+            <PopupTemplate Title="{name}">
+                <FieldsPopupContent>
+                    <FieldInfo FieldName="religion" />
+                    <FieldInfo FieldName="denomination" />
+                </FieldsPopupContent>
+            </PopupTemplate>
+        </FeatureLayer>
+    </Map>
+    <ExpandWidget ExpandIcon="list-bullet" Expanded="true" Position="OverlayPosition.TopRight">
+        <div id="infoDiv" class="esri-widget">
+            Filter by religion:
+            <select id="filter" class="esri-select" @onchange="OnFilterChanged">
+                <option value="">All</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Christian">Christian</option>
+                <option value="Muslim">Muslim</option>
+                <option value="Buddhist">Buddhist</option>
+                <option value="Sikh">Sikh</option>
+                <option value="Jain">Jain</option>
+            </select>
+            <div style="padding-top: 10px">
+                <button id="toggle-cluster" @onclick="ToggleClustering" class="esri-button">
+                    @(_clustering ? "Disable Clustering" : "Enable Clustering")
+                </button>
+            </div>
+        </div>
+        <LegendWidget />
+    </ExpandWidget>
+    <PopupWidget @ref="_popupWidget" />
+</MapView>
+
+@code {
+    [Inject]
+    public required PopupTemplateGenerator PopupTemplateGenerator { get; set; }
+    [Inject]
+    public required LabelGenerator LabelGenerator { get; set; }
+
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.Layer?.Id == _featureLayer?.Id)
+        {
+            _layerView = createEvent.LayerView as FeatureLayerView;
+            await _mapView!.AddReactiveWaiter("view.popup.viewModel", OverrideClusterSymbol,
+                "view", true);
+
+            _cluster = await GenerateClusterConfig();
+            await _featureLayer!.SetFeatureReduction(_cluster);
+        }
+    }
+
+    private async Task OverrideClusterSymbol()
+    {
+        await _popupWidget!.SetSelectedClusterBoundaryFeatureSymbol(new SimpleFillSymbol(
+            new Outline(new MapColor(50, 50, 50, 0.25), 0.5),
+            new MapColor(50, 50, 50, 0.15), SimpleFillSymbolStyle.Solid));
+    }
+
+    private async Task<FeatureReductionCluster> GenerateClusterConfig()
+    {
+        PopupTemplateResults templateResults = await PopupTemplateGenerator.GetClusterTemplates(_featureLayer!);
+        PopupTemplate popupTemplate = templateResults.PrimaryTemplate.Value;
+        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!)).PrimaryScheme!;
+        Dimension? minSize = labelScheme.ClusterMinSize is null ? null : new Dimension(labelScheme.ClusterMinSize.Value);
+        return new FeatureReductionCluster(clusterMinSize: minSize,
+            labelingInfo: labelScheme.LabelingInfo, popupTemplate: popupTemplate, maxScale: 50000);
+    }
+
+    private async Task ToggleClustering()
+    {
+        _clustering = !_clustering;
+        
+        if (_clustering)
+        {
+            await _featureLayer!.SetFeatureReduction(_cluster);
+        }
+        else
+        {
+            await _featureLayer!.SetFeatureReduction(null);
+        }
+    }
+    
+    private async Task OnFilterChanged(ChangeEventArgs arg)
+    {
+        string? newValue = arg.Value?.ToString();
+        string? whereClause = string.IsNullOrEmpty(newValue) ? null : $"religion = '{newValue}'";
+        await _layerView!.SetFilter(new FeatureFilter(where: whereClause));
+
+        await _mapView!.ClosePopup();
+    }
+
+    private MapView? _mapView;
+    private FeatureLayer? _featureLayer;
+    private FeatureLayerView? _layerView;
+    private PopupWidget? _popupWidget;
+    private FeatureReductionCluster? _cluster;
+    private bool _clustering = true;
+
+}

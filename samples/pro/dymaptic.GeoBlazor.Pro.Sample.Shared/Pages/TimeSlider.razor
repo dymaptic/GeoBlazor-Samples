@@ -1,0 +1,58 @@
+﻿@page "/time-slider"
+<PageTitle>Time Slider</PageTitle>
+<h1>Time Slider</h1>
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider/">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=f9e9283b9c9741d09aad633f68758bf6">National Weather Service Precipitation Forecast</a>
+</div>
+<p class="instructions">
+    A Map is created with a feature layer and the Extent of the Time Slider Widget is set after load.
+</p>
+<MapView @ref="_mapView"
+         Longitude="-40" 
+         Latitude="28" 
+         Zoom="4" 
+         Center="new Point(-100, 30)" 
+         Class="map-view" 
+         OnViewRendered="OnViewRendered"
+         OnLayerViewCreate="OnLayerViewCreate">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+        </Basemap>
+
+    </Map>
+    <TimeSliderWidget @ref="_timeSliderWidget" Loop="true" 
+                      Mode="TimeSliderMode.TimeWindow">
+        <TickConfig Mode="TickConfigMode.Percent" Values="@([ 12.5, 37.5, 62.5, 87.5 ])"></TickConfig>
+    </TimeSliderWidget>
+</MapView>
+<FeatureLayer @ref="_featureLayer">
+    <PortalItem PortalItemId="f9e9283b9c9741d09aad633f68758bf6" />
+</FeatureLayer>
+
+@code {
+
+    private async Task OnViewRendered()
+    {
+        if (!_mapView!.Map!.Layers.Contains(_featureLayer!))
+        {
+            await _mapView!.AddLayer(_featureLayer!);
+        }
+    }
+
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.Layer is not FeatureLayer layer)
+        {
+            return;
+        }
+
+        await _timeSliderWidget?.SetFullTimeExtent(layer.TimeInfo!.FullTimeExtent!)!;
+        await _timeSliderWidget.SetStops(new StopsByInterval(layer.TimeInfo?.Interval));
+    }
+    
+    private MapView? _mapView;
+    private TimeSliderWidget? _timeSliderWidget;
+    private FeatureLayer? _featureLayer;
+}
