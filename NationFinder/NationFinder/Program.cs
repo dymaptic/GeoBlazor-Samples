@@ -15,8 +15,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddResponseCompression(opts =>
 {
-    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-        new[] { "application/octet-stream" });
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
 });
 
 builder.Services.AddGeoBlazorPro(builder.Configuration);
@@ -41,16 +40,7 @@ else
 app.UseHttpsRedirection();
 app.UseResponseCompression();
 
-var provider = new FileExtensionContentTypeProvider();
-provider.Mappings[".wsv"] = "application/octet-stream";
-provider.Mappings.Remove(".map");
-
-app.UseStaticFiles();
-// NOTE: for some reason, you still need the plain "UseStaticFiles" call above
-app.UseStaticFiles(new StaticFileOptions
-{
-    ContentTypeProvider = provider
-});
+app.MapStaticAssets();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

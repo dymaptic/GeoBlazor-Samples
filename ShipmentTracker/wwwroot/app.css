@@ -8,11 +8,11 @@ html, body {
 }
 
 :root {
-    --primary-color: #0f5b94;
-    --secondary-color: #0078d7;
-    --accent-color: #e46c0a;
+    --primary-color: #7c3aed;
+    --secondary-color: #8b5cf6;
+    --accent-color: #f59e0b;
     --light-bg: #f8f9fa;
-    --dark-bg: #1a2c38;
+    --dark-bg: #581c87;
     --text-color: #333;
     --text-light: #f8f9fa;
     --border-color: #ddd;
@@ -37,12 +37,12 @@ a:hover {
 }
 
 .btn-primary:hover {
-    background-color: #0a4776;
-    border-color: #0a4776;
+    background-color: #6d28d9;
+    border-color: #6d28d9;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.2rem rgba(15, 91, 148, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
 }
 
 .content {
@@ -122,9 +122,23 @@ h1:focus {
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 
+.detail-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.rz-timeline {
+    margin: 4rem;
+}
+
+.map-container {
+    flex: 0 1 1;
+}
+
 .inline {
     height: 400px;
-    width: 400px;
+    width: 100%;
+
 }
 
 #time-slider-container {
@@ -175,3 +189,36 @@ h1:focus {
     color: #666;
 }
 
+
+.rz-selectable tbody tr.rz-data-row td, .rz-selectable tbody tr.rz-data-row .rz-cell-data {
+    cursor: pointer;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    color: white;
+    border-radius: 4px;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    padding-left: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.nav-link:focus {
+    color: white;
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.nav-link.active .nav-icon {
+    opacity: 1;
+}

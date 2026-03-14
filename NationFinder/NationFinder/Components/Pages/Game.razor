@@ -4,15 +4,15 @@
 <h2>Use Your Device, navigate to <a href=""><span style="color: white; text-decoration: underline">@(NavigationManager.BaseUri)</span></a></h2>
 <h2>Select the matching country</h2>
 
-<div style="visibility: @(_display); display: flex; flex-direction:  row; justify-content: space-between">
-    <SceneView Class="game-view" @ref="_sceneView" OnViewRendered="OnViewRendered">
+<div style="display: flex; flex-direction:  row; justify-content: space-between">
+    <SceneView Class="game-view" @ref="_sceneView" OnLayerViewCreate="OnLayerViewCreated">
         <Map>
             <GraphicsLayer @ref="_graphicsLayer" />
             <FeatureLayer @ref="_countriesLayer"
                           PopupEnabled="false"
                           Title="Countries"
                           OutFields="@(["COUNTRY"])">
-                <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
+                <PortalItem PortalItemId="ac80670eb213440ea5899bbf92a04998"/>
             </FeatureLayer>
         </Map>
     </SceneView>
@@ -23,7 +23,7 @@
                           PopupEnabled="false"
                           Title="Countries"
                           OutFields="@(["COUNTRY"])">
-                <PortalItem Id="ac80670eb213440ea5899bbf92a04998"/>
+                <PortalItem PortalItemId="ac80670eb213440ea5899bbf92a04998"/>
             </FeatureLayer>
         </Map>
     </MapView>
@@ -53,9 +53,9 @@
         State.ResetGame = ResetGame;
     }
 
-    private async Task OnViewRendered()
+    private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {
-        if (_display == "collapse")
+        if (createEvent.Layer?.Id == _countriesLayer?.Id)
         {
             await ResetGame();
         }
@@ -125,7 +125,6 @@
         await _cts.CancelAsync();
         _cts = new CancellationTokenSource();
         _gameOver = false;
-        _display = "collapse";
         await Task.Yield();
         if (State.CurrentCountry is not null && State.CurrentCountry != _displayedCountry)
         {
@@ -151,7 +150,6 @@
             await _countriesLayer.SetVisibility(false);
             
             await _sceneView!.GoTo(result.Features!);
-            _display = "visible";
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
             await UpdateGameBoard();
@@ -168,7 +166,6 @@
     private FeatureLayer? _countriesMapLayer;
     private Polygon? _worldPolygon;
     private string? _displayedCountry;
-    private string _display = "collapse";
     private bool _gameOver;
     private CancellationTokenSource _cts = new();
     private static readonly IComponentRenderMode RenderMode = new InteractiveServerRenderMode(false);

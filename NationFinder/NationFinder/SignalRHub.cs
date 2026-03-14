@@ -42,8 +42,8 @@ public class SignalRHub: Hub, ISignalRClient
         }
     }
 
-    public async Task<string?> GetSelectedCountry()
+    public Task<string?> GetSelectedCountry()
     {
-        return State.CurrentCountry;
+        return Task.FromResult(State.CurrentCountry);
     }
 }

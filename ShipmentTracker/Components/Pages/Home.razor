@@ -97,39 +97,41 @@
                 </RadzenTimelineItem>
             </Items>
         </RadzenTimeline>
-        <MapView @ref="_mapView"
-                 @key="shipment"
-                 Class="inline"
-                 Latitude="@shipment.Latitude"
-                 Longitude="@shipment.Longitude"
-                 OnViewRendered="() => OnViewRendered(shipment)"
-                 Zoom="6">
-            <Map>
-                <Basemap>
-                    <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
-                </Basemap>
-                <GraphicsLayer @ref="_graphicsLayer">
-                    <Graphic @ref="_shipmentGraphic" Attributes="BuildAttributes(shipment)">
-                        <Point Latitude="@shipment.Latitude" Longitude="@shipment.Longitude"/>
-                        <SimpleMarkerSymbol Color="CategoryColors.AllColors[shipment.Category]"/>
-                        <PopupTemplate Title="@shipment.Name">
-                            <FieldsPopupContent >
-                                <FieldInfo FieldName="@nameof(Shipment.Category)" />
-                                <FieldInfo FieldName="@nameof(Shipment.SubCategory)" />
-                                <FieldInfo FieldName="@nameof(Shipment.Latitude)" />
-                                <FieldInfo FieldName="@nameof(Shipment.Longitude)" />
-                                <FieldInfo FieldName="@nameof(Shipment.Quantity)" />
-                                <FieldInfo FieldName="@nameof(Shipment.Weight)" />
-                            </FieldsPopupContent>
-                        </PopupTemplate>
-                    </Graphic>
-                    <Graphic @ref="_warehouseGraphic">
-                        <Point Latitude="41.85003" Longitude="-87.65005" />
-                        <PictureMarkerSymbol Url="warehouse.svg" />
-                    </Graphic>
-                </GraphicsLayer>
-            </Map>
-        </MapView>
+        <div class="map-container">
+            <MapView @ref="_mapView"
+                    @key="shipment"
+                    Class="inline"
+                    Latitude="@shipment.Latitude"
+                    Longitude="@shipment.Longitude"
+                    OnViewRendered="() => OnViewRendered(shipment)"
+                    Zoom="6">
+                <Map>
+                    <Basemap>
+                        <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+                    </Basemap>
+                    <GraphicsLayer @ref="_graphicsLayer">
+                        <Graphic @ref="_shipmentGraphic" Attributes="BuildAttributes(shipment)">
+                            <Point Latitude="@shipment.Latitude" Longitude="@shipment.Longitude"/>
+                            <SimpleMarkerSymbol Color="CategoryColors.AllColors[shipment.Category]"/>
+                            <PopupTemplate Title="@shipment.Name">
+                                <FieldsPopupContent >
+                                    <FieldInfo FieldName="@nameof(Shipment.Category)" />
+                                    <FieldInfo FieldName="@nameof(Shipment.SubCategory)" />
+                                    <FieldInfo FieldName="@nameof(Shipment.Latitude)" />
+                                    <FieldInfo FieldName="@nameof(Shipment.Longitude)" />
+                                    <FieldInfo FieldName="@nameof(Shipment.Quantity)" />
+                                    <FieldInfo FieldName="@nameof(Shipment.Weight)" />
+                                </FieldsPopupContent>
+                            </PopupTemplate>
+                        </Graphic>
+                        <Graphic @ref="_warehouseGraphic">
+                            <Point Latitude="41.85003" Longitude="-87.65005" />
+                            <PictureMarkerSymbol Url="warehouse.svg" />
+                        </Graphic>
+                    </GraphicsLayer>
+                </Map>
+            </MapView>
+        </div>
     </div>
     <ol id="directions-widget" class="esri-widget esri-widget--panel esri-directions__scroller">
         @foreach (DirectionsFeatureSet directionSet in _directions)
