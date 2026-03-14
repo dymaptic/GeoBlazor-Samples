@@ -1,0 +1,125 @@
+@page "/pro-Bookmarks"
+
+<PageTitle>Bookmarks and Bookmarks Widget</PageTitle>
+<h1>Bookmarks Widget</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-bookmarks/">Bookmarks Sample</a>
+    <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html">ArcGIS API for JavaScript WebMap reference</a>
+</div>
+
+<p class="instructions">
+    Sample demonstrates the use of the Bookmarks widget and Bookmark actions.
+    Also included is the TimelineWidget, which requires GeoBlazor Pro.
+</p>
+<MapView @ref="_mapView" Class="map-view" 
+         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewRendered="OnViewRendered">
+    <WebMap>
+        <PortalItem PortalItemId="70b726074af04a7e9839d8a07f64c039" />
+    </WebMap>
+    <ExpandWidget Expanded="true" Position="OverlayPosition.TopRight">
+        <BookmarksWidget  @ref="_bookmarksWidget" OnBookmarkSelect="OnBookmarkClick" DragEnabled="true">
+            <BookmarksVisibleElements EditBookmarkButton="true" AddBookmarkButton="true" />
+        </BookmarksWidget>
+    </ExpandWidget>
+    <TimeSliderWidget @ref="_timeSliderWidget" 
+                      Position="OverlayPosition.BottomLeft" 
+                      Mode="TimeSliderMode.TimeWindow" 
+                      Loop="true">
+    </TimeSliderWidget>
+    <ExpandWidget Position="OverlayPosition.TopLeft">
+        <LegendWidget>
+            <LegendStyle Type="LegendStyleType.Card" />
+        </LegendWidget>
+    </ExpandWidget>
+    <CustomOverlay Position="OverlayPosition.BottomRight">
+        <div id="controls" class="esri-widget">
+            <button id="buffer" class="esri-button" @onclick="OnClearFilterClick">Clear filter</button>
+        </div>
+    </CustomOverlay>
+</MapView>
+
+<h2>Bookmarks</h2>
+<p><em>Only updates on Adding new bookmarks to demonstrate Reactive Binding to Collection Event.</em></p>
+<ul>
+    @foreach (Bookmark bookmark in _bookmarksWidget?.Bookmarks ?? [])
+    {
+        <li>@bookmark.Name</li>
+    }
+</ul>
+
+
+@code {
+
+    private async Task OnViewRendered()
+    {
+        if (!_handlerRegistered)
+        {
+            _handlerRegistered = true;
+            // Register a reactive listener for the "bookmarks.after-add" event on the bookmarks collection
+            await _bookmarksWidget!.AddReactiveListener<object>("bookmarks.after-add", 
+                HandleBookmarkAddedEvent);
+            await HandleBookmarkAddedEvent(new());
+        }
+    }
+
+    private async Task HandleBookmarkAddedEvent(object _)
+    {
+        // Call GetBookmarks to refresh the list of bookmarks from JavaScript
+        IReadOnlyList<Bookmark> __ = await _bookmarksWidget!.GetBookmarks() ?? [];
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    /// <summary>
+    /// Setting the TimeSliderWidget properties from the WebMap
+    /// </summary>
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        try
+        {
+            if (createEvent.Layer is not FeatureLayer) return;
+
+            _layerView = createEvent.LayerView as FeatureLayerView;
+
+            WebMapProperties? props = await _timeSliderWidget?.GetPropertiesFromWebMap(_mapView!.Id)!;
+
+            await _timeSliderWidget?.SetPropertiesFromWebMap(props!)!;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting TimeSliderWidget properties: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Setting feature layer effect to highlight the selected hurricane
+    /// </summary>
+    private void OnBookmarkClick(BookmarkSelectEvent eventArgs)
+    {
+        if (_layerView is null) return;
+
+        var hurricaneName = eventArgs.Bookmark.Name;
+
+        var featureEffect = new FeatureEffect([new Effect { Value = "grayscale(100%) opacity(30%)" }],
+            filter: new FeatureFilter(where: $"Name = '{hurricaneName!.ToUpper()}'"));
+           
+        _ = _layerView.SetFeatureEffect(featureEffect);
+    }
+
+    /// <summary>
+    /// Clearing the feature layer effect
+    /// </summary>
+    private void OnClearFilterClick()
+    {
+        if (_layerView is null) return;
+        _ = _layerView.SetFeatureEffect(null);
+    }
+    
+    private MapView? _mapView;
+    private FeatureLayerView? _layerView;
+    private TimeSliderWidget? _timeSliderWidget;
+    private BookmarksWidget? _bookmarksWidget;
+    private bool _handlerRegistered;
+
+}

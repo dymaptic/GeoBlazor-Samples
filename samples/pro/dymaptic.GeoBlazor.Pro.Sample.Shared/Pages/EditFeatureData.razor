@@ -1,0 +1,34 @@
+﻿@page "/edit-feature-data"
+
+<PageTitle>Edit Feature Data</PageTitle>
+<h1>Edit Feature Data</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/edit-feature-data/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=979c6cc89af9449cbeb5342a439c6a76">Light Gray Canvas BaseMap</a>
+</div>
+<p class="instructions">
+    The Editor Widget has two modes. "Select" allows you to select, edit, and delete
+    an existing feature. Clicking "New Feature" allows you to add a feature to the map.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+<MapView Longitude="-118.80543"
+         Latitude="34.03000"
+         Zoom="13"
+         Class="map-view"
+         Style="min-height: 500px;">
+    <Map>
+        <Basemap>
+            <PortalItem PortalItemId="979c6cc89af9449cbeb5342a439c6a76" />
+        </Basemap>
+        <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/my_points/FeatureServer/0" />
+    </Map>
+    <EditorWidget Position="OverlayPosition.TopRight" />
+</MapView>
+
+@code {
+}

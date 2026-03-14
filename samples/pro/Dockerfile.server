@@ -1,0 +1,24 @@
+﻿# This is a dockerfile for building a container around the Blazor Server sample project. 
+# With the server app, you can provide an API key at run time.
+
+# BUILD DIRECTIONS: 
+# Step one is to build this file. Make sure you're in the same directory
+# 1. docker build -f Dockerfile.server -t dy-blazor-api-server .
+# Step two is to run the new image as a container. 8080 is the random port selected, feel free to change.
+# 2. docker run -p 8080:80 --name dy-blazor-api-server dy-blazor-api-server -e ApiKey=YOUR_API_KEY
+
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
+
+COPY ../../ .
+RUN dotnet restore "dymaptic.GeoBlazor.Pro.Sample.Server/dymaptic.GeoBlazor.Pro.Sample.Server.csproj"
+RUN dotnet build "dymaptic.GeoBlazor.Pro.Sample.Server/dymaptic.GeoBlazor.Pro.Sample.Server.csproj" -c Release -o /build
+
+FROM build AS publish
+RUN dotnet publish "dymaptic.GeoBlazor.Pro.Sample.Server/dymaptic.GeoBlazor.Pro.Sample.Server.csproj" -c Release -o /publish
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
+WORKDIR /app
+COPY --from=publish /publish ./
+ENTRYPOINT ["dotnet", "dymaptic.GeoBlazor.Pro.Sample.Server.dll"]

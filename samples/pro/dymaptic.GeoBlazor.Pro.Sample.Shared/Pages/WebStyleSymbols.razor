@@ -1,0 +1,200 @@
+@page "/web-style-symbols"
+<h3>WebStyleSymbols</h3>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank"
+       href="https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-2d/">ArcGIS API for
+        JavaScript</a>
+    <a class="btn btn-primary" target="_blank"
+       href="http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/LA_County_Points_of_Interest/FeatureServer/0">LA
+        County Points of Interest</a>
+</div>
+<p class="instructions">
+    This sample demonstrates how to style feature layer with 2D Web Style Symbols using UniqueValueRenderer in 2D
+    MapView.
+</p>
+
+<MapView class="map-view">
+    <Extent Xmin="-13185668" Xmax="-13183855" Ymin="4066176" Ymax="4067515">
+        <SpatialReference Wkid="102100"/>
+    </Extent>
+    <Constraints MinScale="2311104" />
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+        <FeatureLayer Url="http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/LA_County_Points_of_Interest/FeatureServer/0">
+            <UniqueValueRenderer ValueExpression="@_category"
+                                 ValueExpressionTitle="Symbol Categories"
+                                 UniqueValueInfos="RendererInfos">
+                <SizeVariable ValueExpression="$view.scale">
+                    <SizeStop Value="@Scale" Size="20" />
+                    <SizeStop Value="@(Scale * 2)" Size="15" />
+                    <SizeStop Value="@(Scale * 4)" Size="10" />
+                    <SizeStop Value="@(Scale * 8)" Size="5" />
+                    <SizeStop Value="@(Scale * 16)" Size="2" />
+                    <SizeStop Value="@(Scale * 32)" Size="1" />
+                </SizeVariable>
+            </UniqueValueRenderer>
+            <PopupTemplate Title="{Name}">
+                <FieldsPopupContent>
+                    <FieldInfo FieldName="cat2" Label="Category" />
+                    <FieldInfo FieldName="addrln1" Label="Address" />
+                    <FieldInfo FieldName="city" Label="City" />
+                    <FieldInfo FieldName="phones" Label="Phone number" />
+                    <FieldInfo FieldName="link" Label="Link" />
+                </FieldsPopupContent>
+            </PopupTemplate>
+        </FeatureLayer>
+    </Map>
+    <PopupWidget DefaultPopupTemplateEnabled="true" />
+    <BookmarksWidget Position="OverlayPosition.TopLeft">
+        <Bookmark Name="Angeles National Forest">
+            <Viewpoint>
+                <Extent Xmin="-13139131.948889678"
+                        Xmax="-13092887.54677721"
+                        Ymin="4047767.23531948"
+                        Ymax="4090610.189673263">
+                    <SpatialReference Wkid="102100" />
+                </Extent>
+            </Viewpoint>
+        </Bookmark>
+        <Bookmark Name="Crystal Lake">
+            <Viewpoint>
+                <Extent Xmin="-13125852.551697943"
+                        Xmax="-13114291.451169826"
+                        Ymin="4066904.1101411926"
+                        Ymax="4077614.8487296384">
+                    <SpatialReference Wkid="102100" />
+                </Extent>
+            </Viewpoint>
+        </Bookmark>
+        <Bookmark Name="San Fernando">
+            <Viewpoint>
+                <Extent Xmin="-13185668.186639601"
+                        Xmax="-13183855.195875114"
+                        Ymin="4066176.418652561"
+                        Ymax="4067515.260976006">
+                    <SpatialReference Wkid="102100" />
+                </Extent>
+            </Viewpoint>
+        </Bookmark>
+    </BookmarksWidget>
+    <LegendWidget Position="OverlayPosition.BottomRight" />
+</MapView>
+
+@code {
+
+    private UniqueValueInfo[] RendererInfos => _symbolCats.Select(symCat =>
+            new UniqueValueInfo(symCat,
+                new WebStyleSymbol(styleName: "Esri2DPointSymbolsStyle", name: symCat), 
+                symCat))
+        .ToArray();
+
+    private const int Scale = 36112;
+    private readonly string[] _symbolCats =
+    [
+        "post-office",
+        "atm",
+        "place-of-worship",
+        "park",
+        "school",
+        "hospital",
+        "fire-station",
+        "playground",
+        "shopping-center",
+        "campground",
+        "golf-course",
+        "library",
+        "city-hall",
+        "beach",
+        "police-station",
+        "subway-station",
+        "train-station",
+        "cemetery",
+        "trail",
+        "radio-tower",
+        "museum",
+        "airport",
+        "live-music-venue",
+        "sports-complex",
+        "ferry"
+    ];
+
+    private readonly string _category =
+        @"if($feature.cat2 == ""UPS Locations"" || $feature.cat2 == ""USPS Mail Collection Boxes"" || $feature.cat2 == ""DHL Locations"" || $feature.cat2 == ""Federal Express Locations""){
+            return ""post-office""
+          }
+          else if($feature.cat2==""Banking and Finance""){
+            return ""atm""
+          }
+          else if($feature.cat2 == ""Churches""){
+            return ""place-of-worship""
+          }
+          else if($feature.cat2 == ""Parks and Gardens""){
+            return ""park""
+          }
+          else if($feature.cat1 == ""Education""){
+            return ""school""
+          }
+          else if($feature.cat2 == ""Mental Health Centers"" ||$feature.cat2 == ""Medicare and Medicaid Offices""|| $feature.cat2 == ""Mental Health Counseling"" || $feature.cat2== ""Dental Care"" || $feature.cat2 == ""Health Clinics"" || $feature.cat2== ""Health Centers"" || $feature.cat2 == ""Health Education and Counseling"" || $feature.cat2== ""Health Screening and Testing"" || $feature.cat2== ""Hospitals and Medical Centers""){
+            return ""hospital""
+          }
+          else if($feature.cat2 == ""Fire Stations""){
+            return ""fire-station""
+          }
+          else if($feature.cat2 == ""Recreation Centers"" || $feature.cat2 == ""Recreation Programs"" || $feature.cat2 == ""Park and Ride Locations""){
+            return ""playground""
+          }
+          else if($feature.cat2 == ""Shopping Centers"" || $feature.cat2==""Thrift Shops""){
+            return ""shopping-center""
+          }
+          else if($feature.cat2 == ""Campgrounds""){
+            return ""campground""
+          }
+          else if($feature.cat2 == ""Golf Courses""){
+            return ""golf-course""
+          }
+          else if($feature.cat2 == ""Libraries""){
+            return ""library""
+          }
+          else if($feature.cat2 == ""City Halls""|| $feature.cat2 == ""Government Offices"" || $feature.cat2 ==""County Offices"" || $feature.cat2 ==""Probation Offices"" || $feature.cat2 ==""Social Security Administration""){
+            return ""city-hall""
+          }
+          else if($feature.cat2 == ""Beaches and Marinas""){
+            return ""beach""
+          }
+          else if($feature.cat2 == ""Sheriff and Police Stations""){
+            return ""police-station""
+          }
+          else if($feature.cat2 == ""Metro Stations""){
+            return ""subway-station""
+          }
+          else if($feature.cat2 == ""Metrolink Stations"" || $feature.cat2 == ""Amtrak Stations""){
+            return ""train-station""
+          }
+          else if($feature.cat2 == ""Cemeteries""){
+            return ""cemetery""
+          }
+          else if($feature.cat2 == ""Trails""){
+            return ""trail""
+          }
+          else if($feature.cat2 == ""Microwave Towers"" || $feature.cat2 ==""Cellular Towers""){
+            return ""radio-tower""
+          }
+          else if($feature.cat2 == ""Museums and Aquariums""){
+            return ""museum""
+          }
+          else if($feature.cat2 == ""Airport""){
+            return ""airport""
+          }
+          else if($feature.cat2 == ""Cultural and Performing Arts Centers""){
+            return ""live-music-venue""
+          }
+          else if($feature.cat2 == ""Sports Venues""){
+            return ""sports-complex""
+          }
+          else if($feature.cat2 == ""Ferries""){
+            return ""ferry""
+          }";
+}

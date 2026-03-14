@@ -1,0 +1,33 @@
+body {
+    overflow: auto;
+    height: 100%;
+}
+
+@media (min-width: 1075px) {
+    body {
+        overflow: hidden;
+        height: 100vh;
+    }
+    
+    article, .content {
+        height: fit-content;
+    }
+}
+
+@media (max-width: 799px) {
+    main .top-row.px-4 {
+        display: flex;
+    }
+}
+
+.content {
+    max-width: 1200px;
+    width: 100%;
+    flex-grow: 1;
+    margin: 0 auto;
+    padding-bottom: 10rem;
+}
+
+.esri-grid {
+    background-color: #fff;
+}

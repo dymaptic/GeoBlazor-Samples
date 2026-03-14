@@ -1,0 +1,168 @@
+@page "/living-atlas/{mapType}/{portalIdOrUrl}"
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Web
+
+@layout BlankLayout
+
+<PageTitle>Addresses</PageTitle>
+
+@if (MapType is "scene" or "web-scene")
+{
+    <SceneView Style="height: 100vh; width: 100%; margin: 0;"
+               Longitude="@Longitude"
+               Latitude="@Latitude"
+               ZIndex="@ZIndex"
+               Tilt="@Tilt">
+        @if (MapType is "scene")
+        {
+            <Map Ground="world-elevation">
+                <Basemap>
+                    <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+                </Basemap>
+            </Map>
+        }
+        else
+        {
+            <WebScene>
+                <PortalItem PortalItemId="@PortalIdOrUrl" />
+            </WebScene>
+        }
+        @switch (Widget)
+        {
+            case "layer-list":
+                <LayerListWidget Position="OverlayPosition.BottomLeft" />
+
+                break;
+            case "legend":
+                <LegendWidget Position="OverlayPosition.BottomLeft" />
+
+                break;
+            case "time-slider":
+                <TimeSliderWidget FullTimeExtent="@_timeExtent"
+                                  Stops="@_stopses"
+                                  Position="OverlayPosition.BottomLeft" />
+
+                break;
+            case "search":
+                <SearchWidget Position="OverlayPosition.TopRight" />
+
+                break;
+        }
+    </SceneView>
+}
+else
+{
+    <MapView Style="height: 100vh; width: 100%; margin: 0;"
+             Longitude="@Longitude"
+             Latitude="@Latitude"
+             Zoom="@Zoom">
+        @if (MapType is "feature" or "feature-url" or "map-image")
+        {
+            <Map>
+                <Basemap>
+                    <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+                </Basemap>
+                @if (MapType is "feature")
+                {
+                    <FeatureLayer>
+                        <PortalItem PortalItemId="@PortalIdOrUrl" />
+                    </FeatureLayer>
+                }
+                else if (MapType is "feature-url")
+                {
+                    <FeatureLayer Url="@(HttpUtility.UrlDecode(PortalIdOrUrl))" />
+                }
+                else
+                {
+                    <MapImageLayer>
+                        <PortalItem PortalItemId="@PortalIdOrUrl" />
+                    </MapImageLayer>
+                }
+            </Map>
+        }
+        else if (MapType is "basemap")
+        {
+            <Map>
+                <Basemap>
+                    <BasemapStyle Name="@(Enum.TryParse(PortalIdOrUrl, true, out BasemapStyleName basemapStyleName) ? basemapStyleName : BasemapStyleName.ArcgisTopographic)" />
+                </Basemap>
+            </Map>
+        }
+        else
+        {
+            <WebMap>
+                <PortalItem PortalItemId="@PortalIdOrUrl" />
+            </WebMap>
+        }
+        @switch (Widget)
+        {
+            case "layer-list":
+                <LayerListWidget Position="OverlayPosition.BottomLeft" />
+
+                break;
+            case "legend":
+                <LegendWidget Position="OverlayPosition.BottomLeft" />
+
+                break;
+            case "time-slider":
+                <TimeSliderWidget FullTimeExtent="@_timeExtent"
+                                  Stops="@_stopses"
+                                  Position="OverlayPosition.BottomLeft" />
+
+                break;
+            case "search":
+                <SearchWidget Position="OverlayPosition.TopRight" />
+
+                break;
+        }
+    </MapView>
+}
+
+@code {
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+    
+    [Parameter]
+    public required string MapType { get; set; }
+    
+    [Parameter]
+    public required string PortalIdOrUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Uri uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        _query = QueryHelpers.ParseQuery(uri.Query)
+            .ToDictionary(q => q.Key, q => q.Value.ToString());
+    }
+
+    private double? Longitude => 
+        double.TryParse(_query.GetValueOrDefault("longitude"), out double longitude) 
+            ? longitude 
+            : null;
+    
+    private double? Latitude => 
+        double.TryParse(_query.GetValueOrDefault("latitude"), out double latitude) 
+            ? latitude 
+            : null;
+    
+    private double? ZIndex => 
+        double.TryParse(_query.GetValueOrDefault("zIndex"), out double zIndex) 
+            ? zIndex 
+            : null;
+    
+    private double? Tilt => 
+        double.TryParse(_query.GetValueOrDefault("tilt"), out double tilt) 
+            ? tilt 
+            : null;
+    
+    private int? Zoom => 
+        int.TryParse(_query.GetValueOrDefault("zoom"), out int zoom) 
+            ? zoom 
+            : null;
+
+    private string? Widget => _query.GetValueOrDefault("widget");
+
+    private readonly TimeExtent _timeExtent = new(DateTime.Now, DateTime.Now.AddDays(3));
+    private readonly TimeSliderStops _stopses = new StopsByInterval(new TimeInterval(TemporalTime.Hours, 8));
+    private Dictionary<string, string> _query = [];
+}

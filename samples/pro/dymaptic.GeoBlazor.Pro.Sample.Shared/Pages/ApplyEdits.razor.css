@@ -1,0 +1,13 @@
+﻿#editArea {
+    padding: 6px;
+    width: 370px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: -370px;
+    overflow-y: scroll;
+}
+
+#addTemplatesDiv ::deep .esri-item-list__scroller {
+    overflow-y: unset;
+}

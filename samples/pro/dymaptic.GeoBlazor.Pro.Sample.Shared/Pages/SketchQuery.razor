@@ -1,0 +1,83 @@
+﻿@page "/sketch-query"
+
+<PageTitle>Sketch Query</PageTitle>
+<h1>Sketch Query</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/query-a-feature-layer-spatial/">ArcGIS API for JavaScript</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=867895a71a1840399476fc717e76bb43">Mid-Century BaseMap</a>
+</div>
+<p class="instructions">
+    Use the Sketch Widget to draw a polygon, and the area of the polygon
+    will be used for an intersection query against a Parcel Layer. Click on 
+    the rendered parcels to see a popup.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+
+<MapView @ref="View"
+         Longitude="-118.80543"
+         Latitude="34.03000"
+         Zoom="13"
+         Class="map-view">
+    <Map>
+        <Basemap>
+            <PortalItem PortalItemId="867895a71a1840399476fc717e76bb43" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer" />
+    </Map>
+    <SketchWidget OnSketchEvent="OnSketchEvent" Position="OverlayPosition.TopRight" 
+                  CreationMode="CreationMode.Update"
+                  GraphicsLayerId="_graphicsLayer.Id"
+                  EventRateLimitInMilliseconds="1000"/>
+</MapView>
+
+<FeatureLayer @ref="ParcelLayer"
+              Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/LA_County_Parcels/FeatureServer/0" />
+<PopupTemplate @ref="PopupTemplate" Title="Parcel {APN}"
+               StringContent="Type: {UseType} <br> Land value: {Roll_LandValue} <br> Tax Rate City: {TaxRateCity}" />
+<SimpleFillSymbol @ref="FillSymbol" Color="@(new MapColor(20, 130, 200, 0.5))">
+    <Outline Color="@(new MapColor("white"))" Width="0.5" />
+</SimpleFillSymbol>
+
+@code {
+    public MapView? View { get; set; }
+    public FeatureLayer? ParcelLayer { get; set; }
+    public PopupTemplate? PopupTemplate { get; set; }
+    public SimpleFillSymbol? FillSymbol { get; set; }
+
+    private readonly Query _query = new()
+    {
+        SpatialRelationship = SpatialRelationship.Intersects,
+        OutFields = new HashSet<string> { "APN", "UseType", "TaxRateCity", "Roll_LandValue" },
+        ReturnGeometry = true,
+        Where="1=1"
+    };
+
+    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    {
+        if ((!_updating && sketchEvent.EventType == SketchEventType.Update) || 
+            sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete })
+        {
+            if (_sketchGraphic is not null && sketchEvent.State == SketchEventState.Complete)
+            {
+                await _graphicsLayer.Remove(_sketchGraphic);
+            }
+            _updating = true;
+            _sketchGraphic = sketchEvent.Graphics.FirstOrDefault();
+            if (_sketchGraphic is not null)
+            {
+                _query.Geometry = _sketchGraphic.Geometry;
+                await View!.QueryFeatures(_query, ParcelLayer!, FillSymbol!, PopupTemplate!);    
+            }
+            _updating = false;
+        }
+    }
+
+    private GraphicsLayer _graphicsLayer = new();
+    private Graphic? _sketchGraphic;
+    private bool _updating;
+}

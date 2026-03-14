@@ -1,0 +1,54 @@
+@page "/test"
+@inject GeometryEngine GeometryEngine
+@inject ProjectionEngine ProjectionEngine
+
+<div class="form-group">
+    <label>
+        Enter Point Latitude:<input type="number" @bind="_pointLatitude" />
+    </label>
+</div>
+<div class="form-group">
+    <label>
+        Enter Point Longitude:<input type="number" @bind="_pointLongitude" />
+    </label>
+</div>
+<div class="form-group">
+    <label>
+        Is Inside Polygon: @(_isInside.HasValue ? _isInside.Value.ToString() : "N/A")
+    </label>
+</div>
+<MapView Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer" />
+    </Map>
+    <SketchWidget OnSketchEvent="OnSketchEvent" GraphicsLayerId="_graphicsLayer.Id" />
+</MapView>
+
+
+@code {
+    private async Task OnSketchEvent(SketchEvent arg)
+    {
+        if (arg.State == SketchEventState.Complete)
+        {
+            Polygon drawnGraphic = (Polygon)arg.Graphics[0].Geometry!;
+            _polygon = (Polygon)(await ProjectionEngine.Project(drawnGraphic, new SpatialReference(4324)))!;
+            await AssertGraphics();
+        }
+    }
+
+    private async Task AssertGraphics()
+    {
+        var graphic = new Graphic(new Point(_pointLongitude, _pointLatitude, spatialReference: new SpatialReference(4324)));
+        _isInside = await GeometryEngine.Contains(_polygon!, graphic.Geometry!);
+        Console.WriteLine($"Is inside: {_isInside}");
+    }
+
+    private GraphicsLayer _graphicsLayer = new();
+    private Polygon? _polygon;
+    private double? _pointLatitude;
+    private double? _pointLongitude;
+    private bool? _isInside;
+}

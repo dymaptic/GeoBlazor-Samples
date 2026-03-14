@@ -1,0 +1,105 @@
+@page "/geojson-styles"
+<PageTitle>Custom Styled GeoJSON Layers</PageTitle>
+<h1>Custom Styled GeoJSON Layers</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://wiki.openstreetmap.org/wiki/Geojson_CSS">GeoJSON CSS Spec</a>
+    <a class="btn btn-secondary" target="_blank" href="https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0">Mapbox SimpleStyle Spec</a>
+</div>
+<p class="instructions">
+    This map showcases Seattle tourist attractions with custom styling using the <code>ProGeoJSONLayer</code> and GeoJSON style properties.
+    Click on any feature to see its popup with title and description. The data includes points (landmarks), 
+    lines (walking routes), polygons (districts), and multipoints with various marker colors, sizes, and stroke styles.
+</p>
+
+<div class="form-group">
+    <h4>Toggle Layers:</h4>
+    <div class="form-row">
+        <input class="form-check-input" type="checkbox" id="points-layer" checked @onchange="@(() => ToggleLayerVisibility("points"))" />
+        <label for="points-layer">Tourist Points</label>
+    </div>
+    <div class="form-row">
+        <input class="form-check-input" type="checkbox" id="polygons-layer" @onchange="@(() => ToggleLayerVisibility("polygons"))" />
+        <label for="polygons-layer">Neighborhoods</label>
+    </div>
+    <div class="form-row">
+        <input class="form-check-input" type="checkbox" id="lines-layer" @onchange="@(() => ToggleLayerVisibility("lines"))" />
+        <label for="lines-layer">Transportation Routes</label>
+    </div>
+    <div class="form-row">
+        <input class="form-check-input" type="checkbox" id="multipoints-layer" @onchange="@(() => ToggleLayerVisibility("multipoints"))" />
+        <label for="multipoints-layer">Public Services</label>
+    </div>
+</div>
+
+<MapView @ref="_mapView" 
+         Class="map-view" 
+         Latitude="47.6101" 
+         Longitude="-122.3421" 
+         Zoom="12"
+         OnViewRendered="OnViewRendered"
+         OnLayerViewCreate="OnLayerViewCreate">
+    <PopupWidget @ref="_popupWidget" DefaultPopupTemplateEnabled="true" />
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+        </Basemap>
+        <ProGeoJSONLayer @ref="_pointsLayer" 
+                         ArcGIsLayerId="points" 
+                         PopupEnabled="true" 
+                         Visible="true" 
+                         SourceJSON="@_pointsJSON"
+                         ApplyStyles="true" />
+        <ProGeoJSONLayer @ref="_polygonsLayer" 
+                         ArcGIsLayerId="polygons" 
+                         PopupEnabled="true" 
+                         Visible="false" 
+                         SourceJSON="@_polygonsJSON"
+                         ApplyStyles="true" />
+        <ProGeoJSONLayer @ref="_linesLayer" 
+                         ArcGIsLayerId="lines" 
+                         PopupEnabled="true" 
+                         Visible="false" 
+                         SourceJSON="@_linesJSON"
+                         ApplyStyles="true" />
+        <ProGeoJSONLayer @ref="_multipointsLayer" 
+                         ArcGIsLayerId="multipoints" 
+                         PopupEnabled="true" 
+                         Visible="false" 
+                         SourceJSON="@_multipointsJSON"
+                         ApplyStyles="true" />
+    </Map>
+</MapView>
+
+<div class="form-group">
+    @foreach (KeyValuePair<ProGeoJSONLayer, List<Graphic>> kvp in _features)
+    {
+        if (kvp.Key.Visible != true)
+        {
+            continue;
+        }
+        
+        foreach (Graphic feature in kvp.Value.OrderBy(v => v.Attributes["name"]?.ToString() ?? ""))
+        {
+            string name = feature.Attributes["name"]?.ToString() ?? "Unknown";
+            string color = "black";
+
+            if (feature.Attributes.TryGetValue("marker_color", out object? markerColor))
+            {
+                color = markerColor?.ToString() ?? "black";
+            }
+            else if (feature.Attributes.TryGetValue("stroke", out object? strokeColor))
+            {
+                color = strokeColor?.ToString() ?? "black";
+            }
+            else if (feature.Attributes.TryGetValue("fill", out object? fillColor))
+            {
+                color = fillColor?.ToString() ?? "black";
+            }
+
+            <button class="btn" @onclick="@(() => GoToLocation(feature))" style="@($"background-color: {color}")">
+                @name
+            </button>
+        }
+    }
+</div>
