@@ -1,95 +1,107 @@
-# CLAUDE.md - GeoBlazor Samples
+# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## What This Repo Is
 
-This repository contains all sample applications for the [GeoBlazor](https://github.com/dymaptic/GeoBlazor) ecosystem. GeoBlazor is a Blazor component library that brings ArcGIS Maps SDK for JavaScript capabilities to .NET applications using pure C#.
+A collection of sample and demo applications for [GeoBlazor](https://github.com/dymaptic/GeoBlazor) — a Blazor component library wrapping ArcGIS Maps SDK for JavaScript. This is NOT the GeoBlazor library itself; these are consuming applications that demonstrate its usage.
 
-## Related Repositories
+## Build & Run
 
-| Repository        | URL                                              | Purpose                              |
-|-------------------|--------------------------------------------------|--------------------------------------|
-| **This Repo**     | https://github.com/dymaptic/GeoBlazor-Samples    | Sample applications                  |
-| GeoBlazor (Core)  | https://github.com/dymaptic/GeoBlazor             | Open-source Blazor mapping library   |
-| GeoBlazor Pro     | https://github.com/dymaptic/GeoBlazor.Pro         | Commercial extension with 3D support |
-
-## Repository Structure
-
-```
-GeoBlazor-Samples/
-├── samples/
-│   ├── core/                                    # Core (open-source) samples
-│   │   ├── dymaptic.GeoBlazor.Core.Sample.Shared/   # Shared sample pages (Razor)
-│   │   ├── dymaptic.GeoBlazor.Core.Sample.WebApp/   # Blazor Server + WASM host
-│   │   ├── dymaptic.GeoBlazor.Core.Sample.Wasm/     # Standalone WASM
-│   │   ├── dymaptic.GeoBlazor.Core.Sample.Maui/     # MAUI Hybrid
-│   │   ├── dymaptic.GeoBlazor.Core.Sample.OAuth/    # OAuth authentication demo
-│   │   └── dymaptic.GeoBlazor.Core.Sample.TokenRefresh/  # Token refresh demo
-│   └── pro/                                     # Pro (commercial) samples
-│       ├── dymaptic.GeoBlazor.Pro.Sample.Shared/     # Shared Pro sample pages
-│       ├── dymaptic.GeoBlazor.Pro.Sample.WebApp/     # Pro Blazor Server + WASM host
-│       ├── dymaptic.GeoBlazor.Pro.Sample.Wasm/       # Pro standalone WASM
-│       └── dymaptic.GeoBlazor.Pro.Sample.Maui/       # Pro MAUI Hybrid
-├── projects/                                    # Community/blog project examples
-│   ├── CustomPopups/
-│   ├── NationFinder/
-│   ├── DesMoineBusRoutes/
-│   ├── SolarTracker/
-│   └── ...
-└── packages/                                    # Local NuGet package cache
-```
-
-## Common Commands
-
-### Build and Run Samples
-
-Samples reference GeoBlazor via NuGet packages by default. To run locally:
+Each sample/project is an independent .NET application with its own `.sln` or `.csproj`:
 
 ```bash
-# Run Core WebApp sample
-dotnet run --project samples/core/dymaptic.GeoBlazor.Core.Sample.WebApp/dymaptic.GeoBlazor.Core.Sample.WebApp/dymaptic.GeoBlazor.Core.Sample.WebApp.csproj
+# Run any individual sample or project
+cd samples/core/dymaptic.GeoBlazor.Core.Sample.Wasm
+dotnet run
 
-# Run Pro WebApp sample
-dotnet run --project samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.csproj
+cd projects/DesMoineBusRoutes
+dotnet run
 ```
 
-### Build with Project References (for development)
+There is no top-level solution file. Build/run at the individual project level.
 
-When developing GeoBlazor Core/Pro alongside samples, use MSBuild properties to switch from NuGet to project references:
+### Using Local GeoBlazor Source
+
+To develop against local GeoBlazor repos instead of NuGet packages:
 
 ```bash
-dotnet build <sample.csproj> /p:UseProjectReferences=true /p:CoreProjectPath=<path-to-core> /p:ProProjectPath=<path-to-pro>
+dotnet build /p:UseProjectReferences=true \
+  /p:CoreProjectPath=../GeoBlazor/src/dymaptic.GeoBlazor.Core \
+  /p:ProProjectPath=../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro
 ```
+
+The `Directory.Build.props` at the repo root controls this toggle. The `Choose` blocks in individual `.csproj` files switch between `PackageReference` (NuGet, default) and `ProjectReference` (local source) based on `UseProjectReferences`.
+
+### Local NuGet Packages
+
+`nuget.config` adds a `./packages` local feed alongside nuget.org. Drop `.nupkg` files in `packages/` for local testing.
+
+## Repository Layout
+
+### `samples/` — Library Samples (net10.0)
+
+Official GeoBlazor sample apps, split into Core and Pro. These target **net10.0** and use `Version="*"` for GeoBlazor packages (always latest).
+
+- **`samples/core/`** — Core samples use a Shared library pattern:
+  - `*.Sample.Shared` — Razor class library with all sample pages/components
+  - `*.Sample.Wasm` — Standalone Blazor WebAssembly host
+  - `*.Sample.WebApp` — Blazor Web App host (Server + WASM with `.Client` project)
+  - `*.Sample.Maui` — MAUI hybrid host
+  - `*.Sample.OAuth` / `*.Sample.TokenRefresh` — Auth-specific samples
+
+- **`samples/pro/`** — Pro samples mirror the Core structure but add Pro-specific features (3D, advanced widgets). Pro Shared references Core Shared.
+
+### `projects/` — Real-World Examples (mixed targets)
+
+Independent demo apps with varying .NET versions and hosting models:
+
+| Project | Target | Hosting Model | GeoBlazor |
+|---------|--------|---------------|-----------|
+| ShipmentTracker | net9.0 | Blazor Web App (Server + WASM) | Pro 4.1.0 |
+| SimpleSearch | net9.0 | Blazor Web App (Server + WASM) | Core (latest) |
+| NationFinder | net9.0 | Blazor Web App (Server + WASM) | Core (latest) |
+| NationFinder2 | net9.0 | Blazor Server | Core (latest) |
+| CustomPopups | net8.0 | Blazor Server | Core 3.0.1 |
+| CustomPopupsJS | net8.0 | Blazor Server | Core 3.0.1 |
+| DesMoineBusRoutes | net8.0 | Blazor Server | Core 3.0.1 |
+| MuseumsOfChicago | net8.0 | Blazor Web App | Core (latest) |
+| PointsOnAMapBlog | net8.0 | Blazor WASM | Core 3.0.1 |
+| SolarTracker | net8.0 | Blazor WASM | Core 3.0.1 |
 
 ## Configuration
 
-Sample apps require an `appsettings.json` with:
+Most samples require an **ArcGIS API key** in `appsettings.json` or user secrets:
 
 ```json
-{
-  "ArcGISApiKey": "<your-api-key>",
-  "GeoBlazor": {
-    "LicenseKey": "<pro-license-key-if-using-pro>"
-  }
-}
+{ "ArcGISApiKey": "YOUR_API_KEY" }
 ```
 
-These files are in `.gitignore` to avoid committing secrets.
+Pro samples additionally need a **GeoBlazor Pro license key**. Projects with `UserSecretsId` support `dotnet user-secrets`.
 
-## Adding New Samples
+## Key Patterns
 
-1. Create a new Razor page in the appropriate `Sample.Shared/Pages/` directory
-2. Use the same header pattern as existing samples (links to ArcGIS JS sample + data source)
-3. Add navigation entry to `NavMenu.razor`
-4. Test in both Server and WebAssembly render modes
+- **Shared library pattern**: Core and Pro samples put all Razor pages in a `*.Sample.Shared` RCL, then reference it from multiple hosting projects (WASM, WebApp, MAUI). This keeps demo code in one place.
+- **GeoBlazor package toggle**: `Directory.Build.props` + `Choose` blocks in `.csproj` files enable switching between NuGet packages and local project references via MSBuild property.
+- **No tests**: This is a samples repo — there are no test projects.
 
-## Live Demo
+## Agents
 
-The Pro samples are deployed at https://samples.geoblazor.com via GitHub Actions in the GeoBlazor.Pro repository.
+Specialized Claude Code agent configurations for GeoBlazor development are maintained in the [GeoBlazor-Agents](https://github.com/dymaptic/GeoBlazor-Agents) repository. These provide researcher/developer/reviewer triplets for .NET, JavaScript, TypeScript, GeoBlazor Core/Pro/Code-Gen, C#/JS interop, and MCP development.
 
-## Dependencies
+### Finding Agents
 
-- .NET 8.0+ SDK
-- ArcGIS API key (free from [ArcGIS Developers](https://developers.arcgis.com/))
-- GeoBlazor Pro license key (for Pro samples only)
+Agents are available from two locations (check in this order):
+
+1. **Local on disk** — `CLAUDE_CONFIG_DIR` environment variable points to the local config directory (currently `D:/claude files`). Agent templates live in `$CLAUDE_CONFIG_DIR/agents/` with subdirectories per domain (`dotnet/`, `geoblazor/`, `interop/`, `javascript/`, `typescript/`, `mcp-experts/`).
+2. **GitHub** — If not available locally, fetch from `https://github.com/dymaptic/GeoBlazor-Agents`. The `agents/` directory mirrors the local structure. Use `gh api repos/dymaptic/GeoBlazor-Agents/contents/agents` to browse, or clone the repo.
+
+### Key Agent Files
+
+- `AGENTS_REFERENCE.md` — Full catalog with triggers, descriptions, and usage examples
+- `agents/DESIGN.md` — Agent system design principles and patterns
+- `agents/AGENT_SYSTEM_TEMPLATE.md` — Template for creating new agents
+
+### Agent Workflow
+
+Use the **researcher → developer → reviewer** pattern: research existing patterns and known issues first, then implement, then review. For cross-repo work use `geoblazor-architect`; for C#/JS boundary issues use `interop-architect`.
