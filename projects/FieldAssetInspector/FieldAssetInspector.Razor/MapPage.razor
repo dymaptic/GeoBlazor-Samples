@@ -1,0 +1,130 @@
+@namespace FieldAssetInspector.Razor
+
+<div class="map-container">
+    <MapView @ref="_mapView"
+             Class="map-view"
+             OnViewClickHandler="OnMapClick"
+             Style="height: 100%; width: 100%;">
+
+        <Map>
+            <Basemap>
+                <BasemapStyle Name="BasemapStyleName.ArcGISStreets" />
+            </Basemap>
+
+            @* Water distribution system - hydrants, valves, and mains *@
+            <FeatureLayer @ref="_featureLayer"
+                          Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/FeatureServer/2"
+                          OutFields="@(new[] { "*" })"
+                          Title="Water Network Assets">
+
+                <SimpleRenderer>
+                    <SimpleMarkerSymbol Color="@(new MapColor(26, 115, 232))"
+                                        Size="10"
+                                        Style="SimpleMarkerSymbolStyle.Circle">
+                        <Outline Color="@(new MapColor(255, 255, 255))" Width="1.5" />
+                    </SimpleMarkerSymbol>
+                </SimpleRenderer>
+
+                <PopupTemplate Title="Asset: {objectid}"
+                               StringContent="<b>Type:</b> {facilityid}<br/><b>Status:</b> {enabled}">
+                </PopupTemplate>
+
+            </FeatureLayer>
+
+            @* Water mains as a line layer *@
+            <FeatureLayer Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/FeatureServer/4"
+                          Title="Water Mains"
+                          Opacity="0.6">
+                <SimpleRenderer>
+                    <SimpleLineSymbol Color="@(new MapColor(52, 168, 83))"
+                                      Width="2"
+                                      Style="SimpleLineSymbolStyle.Solid" />
+                </SimpleRenderer>
+            </FeatureLayer>
+        </Map>
+
+        @* Center on a known area with water network data *@
+        <Point Longitude="-95.9979" Latitude="36.1540" />
+        <ViewPoint Scale="5000" />
+
+        @* Standard map widgets *@
+        <ZoomWidget Position="OverlayPosition.TopLeft" />
+        <LocateWidget Position="OverlayPosition.TopLeft" />
+        <SearchWidget Position="OverlayPosition.TopRight" />
+        <LegendWidget Position="OverlayPosition.BottomRight" />
+        <ScaleBarWidget Position="OverlayPosition.BottomLeft" />
+
+    </MapView>
+
+    @if (_selectedAsset is not null)
+    {
+        <div class="asset-overlay">
+            <div class="asset-overlay-header">
+                <h4>@(_selectedAsset.AssetType)</h4>
+                <button class="close-btn" @onclick="ClearSelection">&times;</button>
+            </div>
+            <div class="asset-overlay-body">
+                @foreach (var attr in _selectedAsset.Attributes)
+                {
+                    <div class="attr-row">
+                        <span class="attr-label">@attr.Key</span>
+                        <span class="attr-value">@(attr.Value?.ToString() ?? "—")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private MapView? _mapView;
+    private FeatureLayer? _featureLayer;
+    private FieldAsset? _selectedAsset;
+
+    private async Task OnMapClick(ViewClickEvent clickEvent)
+    {
+        if (_mapView is null || _featureLayer is null) return;
+
+        try
+        {
+            // Perform a hit test to find features at the click location
+            HitTestResult hitTestResult = await _mapView.HitTest(clickEvent);
+            ViewHit? hit = hitTestResult.Results?.FirstOrDefault();
+
+            if (hit is GraphicHit graphicHit)
+            {
+                var graphic = graphicHit.Graphic;
+                if (graphic?.Attributes is not null)
+                {
+                    _selectedAsset = new FieldAsset
+                    {
+                        ObjectId = graphic.Attributes.TryGetValue("objectid", out var oid)
+                            ? oid?.ToString() ?? "Unknown"
+                            : "Unknown",
+                        AssetType = graphic.Attributes.TryGetValue("facilityid", out var fid)
+                            ? fid?.ToString() ?? "Water Asset"
+                            : "Water Asset",
+                        Status = graphic.Attributes.TryGetValue("enabled", out var enabled)
+                            ? enabled?.ToString() ?? "Unknown"
+                            : "Unknown",
+                        Attributes = graphic.Attributes
+                    };
+                }
+            }
+            else
+            {
+                _selectedAsset = null;
+            }
+        }
+        catch
+        {
+            // Gracefully handle hit test failures
+            _selectedAsset = null;
+        }
+    }
+
+    private void ClearSelection()
+    {
+        _selectedAsset = null;
+    }
+}

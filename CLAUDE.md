@@ -68,6 +68,7 @@ Independent demo apps with varying .NET versions and hosting models:
 | MuseumsOfChicago | net8.0 | Blazor Web App | Core (latest) |
 | PointsOnAMapBlog | net8.0 | Blazor WASM | Core 3.0.1 |
 | SolarTracker | net8.0 | Blazor WASM | Core 3.0.1 |
+| FieldAssetInspector | net9.0 | Uno Platform + MAUI Embedding (BlazorWebView) | Pro (latest) |
 
 ## Configuration
 

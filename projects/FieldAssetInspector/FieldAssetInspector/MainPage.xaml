@@ -1,0 +1,97 @@
+<Page
+    x:Class="FieldAssetInspector.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utu="using:Uno.Toolkit.UI"
+    xmlns:embed="using:Uno.Extensions.Maui"
+    xmlns:controls="using:FieldAssetInspector.MauiControls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="60" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar Panel -->
+        <Grid Grid.Column="0"
+              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+              Width="320"
+              x:Name="SidebarPanel">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- App Header -->
+            <StackPanel Grid.Row="0" Padding="16" Spacing="4">
+                <TextBlock Text="Field Asset Inspector"
+                           Style="{StaticResource TitleTextBlockStyle}"
+                           Foreground="{ThemeResource OnSurfaceBrush}" />
+                <TextBlock Text="Powered by GeoBlazor Pro + Uno Platform"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource OnSurfaceVariantBrush}"
+                           Opacity="0.7" />
+            </StackPanel>
+
+            <MenuFlyoutSeparator Grid.Row="1" />
+
+            <!-- Asset Info Panel -->
+            <ScrollViewer Grid.Row="2" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Selected Asset"
+                               Style="{StaticResource SubtitleTextBlockStyle}"
+                               Foreground="{ThemeResource OnSurfaceBrush}" />
+
+                    <TextBlock x:Name="AssetInfoText"
+                               Text="Click on a map feature to inspect its attributes."
+                               TextWrapping="Wrap"
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Foreground="{ThemeResource OnSurfaceVariantBrush}" />
+
+                    <!-- Asset Detail Fields (shown when an asset is selected) -->
+                    <StackPanel x:Name="AssetDetailsPanel"
+                                Spacing="8"
+                                Visibility="Collapsed">
+
+                        <TextBox x:Name="AssetIdField"
+                                 Header="Asset ID"
+                                 IsReadOnly="True"
+                                 PlaceholderText="—" />
+
+                        <TextBox x:Name="AssetTypeField"
+                                 Header="Asset Type"
+                                 IsReadOnly="True"
+                                 PlaceholderText="—" />
+
+                        <TextBox x:Name="AssetStatusField"
+                                 Header="Status"
+                                 PlaceholderText="—" />
+
+                        <TextBox x:Name="AssetNotesField"
+                                 Header="Inspector Notes"
+                                 PlaceholderText="Enter notes..."
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="100" />
+
+                        <Button Content="Save Changes"
+                                HorizontalAlignment="Stretch"
+                                Style="{StaticResource FilledButtonStyle}"
+                                Click="OnSaveChangesClick" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Map Area (Blazor via MAUI Embedding) -->
+        <embed:MauiHost
+            Grid.Column="1"
+            xmlns:embed="using:Uno.Extensions.Maui"
+            Source="controls:EmbeddedMapView" />
+    </Grid>
+</Page>
