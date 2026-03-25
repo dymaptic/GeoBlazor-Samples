@@ -30,7 +30,7 @@
     </Extent>
     <PopupWidget @ref="_popup" DockEnabled="true">
         <PopupDockOptions ButtonEnabled="false"
-                          BreakPoint="@(new BreakPoint(false))"
+                          BreakPoint="@(new Breakpoint(false))"
                           Position="PopupDockPosition.BottomRight" />
     </PopupWidget>
     <LegendWidget Position="OverlayPosition.BottomLeft">
@@ -87,7 +87,7 @@
             await _mapView.AddGraphic(pointGraphic);
         }
 
-        await _popup!.SetFeatures(result.Features);
+        await _popup!.SetFeatures(result.Features ?? []);
     }
 
     private double? Distance => _queryType == "distance" ? 0.5 : null;

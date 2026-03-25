@@ -13,9 +13,11 @@
         Example usage:
           dotnet build /p:UseProjectReferences=true /p:CoreProjectPath=../GeoBlazor/src/dymaptic.GeoBlazor.Core /p:ProProjectPath=../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro
     -->
-    <PropertyGroup Condition="'$(UseProjectReferences)' == 'true'">
-        <CoreProjectPath Condition="'$(CoreProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor.Core</CoreProjectPath>
-        <ProProjectPath Condition="'$(ProProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor.Pro\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
-    </PropertyGroup>
 
+    <!-- Import parent Directory.Build.props if it exists (e.g., when running as submodule of the GeoBlazor Pro module) -->
+    <Import Project="../Directory.Build.props" 
+            Condition="Exists('$(MSBuildThisFileDirectory)../Directory.Build.props')" />
+    <PropertyGroup Condition="Exists('$(MSBuildThisFileDirectory)../Directory.Build.props')">
+        <UseProjectReferences>true</UseProjectReferences>
+    </PropertyGroup>
 </Project>

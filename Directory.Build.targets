@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup>
+        <BuildDependsOn Condition="'$(UseProjectReferences)' == 'true'">TriggerProESBuild;$(BuildDependsOn)</BuildDependsOn>
+    </PropertyGroup>
+</Project>

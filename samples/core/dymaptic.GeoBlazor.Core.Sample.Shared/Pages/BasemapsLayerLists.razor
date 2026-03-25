@@ -79,7 +79,7 @@
         BasemapLayerListWidgetVisibleElements visibleElements = await _widget!.GetVisibleElements()
             ?? new BasemapLayerListWidgetVisibleElements(baseLayers: true, referenceLayers: true);
         
-        await visibleElements.SetBaseLayers(!visibleElements.BaseLayers);
+        await visibleElements.SetBaseLayers(visibleElements.BaseLayers ?? false);
         await _widget.SetVisibleElements(visibleElements);
     }
 

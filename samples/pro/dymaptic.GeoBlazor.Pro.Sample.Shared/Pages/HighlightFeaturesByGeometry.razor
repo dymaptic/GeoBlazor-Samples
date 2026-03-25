@@ -102,14 +102,14 @@
 
     private async Task OnCellClick()
     {
-        IReadOnlyList<IFeatureTableWidgetActiveFilters>? activeFilters = await _featureTable!.GetActiveFilters();
+        IReadOnlyList<IFeatureTableActiveFilter>? activeFilters = await _featureTable!.GetActiveFilters();
         
         if (activeFilters is null || activeFilters.Count == 0)
         {
             return;
         }
 
-        foreach (IFeatureTableWidgetActiveFilters filter in activeFilters)
+        foreach (IFeatureTableActiveFilter filter in activeFilters)
         {
             // Check if the active filter is a selection filter and if the selections have changed
             if (filter is SelectionFilter { ObjectIds: not null } selectionFilter
@@ -217,7 +217,7 @@
 
         if (_featureTable is not null)
         {
-            await _featureTable.SetHighlightIds(null);
+            await _featureTable.SetHighlightIds([]);
             await _featureTable.SetFilterGeometry(null);
         }
 
