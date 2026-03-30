@@ -1,5 +1,6 @@
-using dymaptic.GeoBlazor.Pro;
+using dymaptic.GeoBlazor.Core;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Hosting;
 
 namespace FieldAssetInspector.MauiControls;

@@ -3,12 +3,12 @@
 <div class="map-container">
     <MapView @ref="_mapView"
              Class="map-view"
-             OnViewClickHandler="OnMapClick"
+             OnClick="OnMapClick"
              Style="height: 100%; width: 100%;">
 
         <Map>
             <Basemap>
-                <BasemapStyle Name="BasemapStyleName.ArcGISStreets" />
+                <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
             </Basemap>
 
             @* Water distribution system - hydrants, valves, and mains *@
@@ -81,7 +81,7 @@
     private FeatureLayer? _featureLayer;
     private FieldAsset? _selectedAsset;
 
-    private async Task OnMapClick(ViewClickEvent clickEvent)
+    private async Task OnMapClick(ClickEvent clickEvent)
     {
         if (_mapView is null || _featureLayer is null) return;
 
@@ -107,7 +107,7 @@
                         Status = graphic.Attributes.TryGetValue("enabled", out var enabled)
                             ? enabled?.ToString() ?? "Unknown"
                             : "Unknown",
-                        Attributes = graphic.Attributes
+                        Attributes = graphic.Attributes.ToDictionary()
                     };
                 }
             }

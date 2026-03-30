@@ -8,7 +8,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="dymaptic.GeoBlazor.Pro" />
+        <PackageReference Include="dymaptic.GeoBlazor.Core" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
     </ItemGroup>
 </Project>

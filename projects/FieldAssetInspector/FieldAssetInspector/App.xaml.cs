@@ -2,27 +2,22 @@ using Uno.Extensions.Maui;
 
 namespace FieldAssetInspector;
 
-public partial class App : EmbeddingApplication
+public partial class App : Microsoft.UI.Xaml.Application
 {
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
 
-        MainWindow = new Window();
-#if DEBUG
-        MainWindow.EnableHotReload();
-#endif
-
-        Host = UnoHost
-            .CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
+        var appBuilder = this.CreateBuilder(args)
+            .Configure(host => host.ConfigureServices((context, services) =>
             {
                 services.AddSingleton<HttpClient>();
-            })
-            .UseMauiEmbedding<MauiControlsApp>()
-            .Build();
+            }))
+            .UseMauiEmbedding<MauiControlsApp>();
 
-        MainWindow.Content = new MainPage();
-        MainWindow.Activate();
+        var host = appBuilder.Build();
+
+        appBuilder.Window.Content = new MainPage();
+        appBuilder.Window.Activate();
     }
 }

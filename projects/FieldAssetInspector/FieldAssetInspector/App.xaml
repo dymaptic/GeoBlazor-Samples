@@ -1,8 +1,7 @@
-<unoext:EmbeddingApplication
+<Application
     x:Class="FieldAssetInspector.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:unoext="using:Uno.Extensions">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Application.Resources>
         <ResourceDictionary>
@@ -19,4 +18,4 @@
         </ResourceDictionary>
     </Application.Resources>
 
-</unoext:EmbeddingApplication>
+</Application>
