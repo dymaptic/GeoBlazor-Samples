@@ -32,7 +32,8 @@ summary a {
 }
 
 .esri-widget:not(.esri-feature-table) {
-    color: unset;
+    color: var(--text-emphasis);
+    background-color: var(--background-grey-2);
 }
 
 .esri-button {
