@@ -67,20 +67,12 @@
     
     private async Task ToggleReferenceLayersVisibility()
     {
-        BasemapLayerListWidgetVisibleElements visibleElements = await _widget!.GetVisibleElements()
-            ?? new BasemapLayerListWidgetVisibleElements(baseLayers: true, referenceLayers: true);
-        
-        await visibleElements.SetReferenceLayers(!visibleElements.ReferenceLayers ?? false);
-        await _widget.SetVisibleElements(visibleElements);
+        await _widget!.SetHideReferenceLayers(_widget!.HideReferenceLayers ?? true);
     }
     
     private async Task ToggleBaseLayersVisibility()
     {
-        BasemapLayerListWidgetVisibleElements visibleElements = await _widget!.GetVisibleElements()
-            ?? new BasemapLayerListWidgetVisibleElements(baseLayers: true, referenceLayers: true);
-        
-        await visibleElements.SetBaseLayers(visibleElements.BaseLayers ?? false);
-        await _widget.SetVisibleElements(visibleElements);
+        await _widget!.SetHideBaseLayers(_widget!.HideBaseLayers ?? true);
     }
 
     private int? _windowWidth;

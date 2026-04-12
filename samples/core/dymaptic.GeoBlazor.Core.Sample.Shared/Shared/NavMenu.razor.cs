@@ -1,3 +1,4 @@
+using dymaptic.GeoBlazor.Core.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 

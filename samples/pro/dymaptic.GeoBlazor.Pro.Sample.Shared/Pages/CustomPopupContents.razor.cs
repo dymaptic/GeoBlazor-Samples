@@ -9,6 +9,7 @@ using dymaptic.GeoBlazor.Core.Model;
 using dymaptic.GeoBlazor.Core.Options;
 using dymaptic.GeoBlazor.Core.Results;
 using dymaptic.GeoBlazor.Pro.Events;
+using dymaptic.GeoBlazor.Pro.Components.Logic;
 using dymaptic.GeoBlazor.Pro.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -42,10 +43,10 @@ public partial class CustomPopupContents
         try
         {
             StatisticDefinition levelCount = new("LEVEL_", "level_count",
-                StatisticType.Count, new StatisticDefinitionStatisticParameters());
+                StatisticType.Count);
 
             StatisticDefinition enrollmentAvg = new("ENROLLMENT", "enroll_avg",
-                StatisticType.Avg, new StatisticDefinitionStatisticParameters());
+                StatisticType.Avg);
 
             Query queryObject = new(Geometry: creatorEvent.Graphic?.Geometry,
                 GroupByFieldsForStatistics: ["LEVEL_"],
@@ -105,7 +106,7 @@ public partial class CustomPopupContents
 
     private async Task OnSelectResult(SearchSelectResultEvent searchSelectResultEvent)
     {
-        Graphic? resultGraphic = searchSelectResultEvent.Result?.Feature;
+        Graphic? resultGraphic = searchSelectResultEvent.Result.Feature;
         if (resultGraphic is not null)
         {
             // we have to reload the graphic to ensure that the popup has refreshed and can be reused

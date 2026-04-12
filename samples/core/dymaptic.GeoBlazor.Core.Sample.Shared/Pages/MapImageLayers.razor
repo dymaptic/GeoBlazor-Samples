@@ -161,7 +161,7 @@
                                                  Color="@(new MapColor("white"))" />
                                     </SimpleFillSymbol>
                                 </SimpleRenderer>
-                                <Label LabelExpression="[name]"
+                                <LabelClass LabelExpression="[name]"
                                        LabelPlacement="LabelPlacement.AlwaysHorizontal"
                                        MinScale="2_400_000"
                                        MaxScale="73_000">
@@ -170,7 +170,7 @@
                                                 HaloSize="@(1)">
                                         <MapFont Size="@(11)" />
                                     </TextSymbol>
-                                </Label>
+                                </LabelClass>
                             </Sublayer>
                             <Sublayer SublayerId="2"
                                       Visible="true"
@@ -181,15 +181,15 @@
                                                  Color="@(new MapColor("white"))" />
                                     </SimpleFillSymbol>
                                 </SimpleRenderer>
-                                <Label LabelExpression="[state_abbr]"
+                                <LabelClass LabelExpression="[state_abbr]"
                                        LabelPlacement="LabelPlacement.AlwaysHorizontal"
                                        MinScale="18_500_000"
                                        MaxScale="9_250_000">
                                     <TextSymbol Color="@(new MapColor("blue"))">
                                         <MapFont Size="@(16)" />
                                     </TextSymbol>
-                                </Label>
-                                <Label LabelExpression="[_state_name]"
+                                </LabelClass>
+                                <LabelClass LabelExpression="[_state_name]"
                                        LabelPlacement="LabelPlacement.AlwaysHorizontal"
                                        MinScale="9_250_000"
                                        MaxScale="2_400_000">
@@ -198,7 +198,7 @@
                                                 HaloSize="@(1)">
                                         <MapFont Size="@(14)" Weight="FontWeight.Bold" />
                                     </TextSymbol>
-                                </Label>
+                                </LabelClass>
                             </Sublayer>
                             <Sublayer SublayerId="0">
                                 <SimpleRenderer Label="Cities">
@@ -206,7 +206,7 @@
                                                         Size="@(0.5)"
                                                         Color="@(new MapColor("white"))" />
                                 </SimpleRenderer>
-                                <Label Where="pop2000 > 500000"
+                                <LabelClass Where="pop2000 > 500000"
                                        LabelExpression="[areaname]"
                                        LabelPlacement="LabelPlacement.AboveRight"
                                        MinScale="18_500_000"
@@ -215,8 +215,8 @@
                                                 BackgroundColor="@(new MapColor(0, 0, 0, 0.5))">
                                         <MapFont Size="@(10)" />
                                     </TextSymbol>
-                                </Label>
-                                <Label Where="pop2000 > 500000"
+                                </LabelClass>
+                                <LabelClass Where="pop2000 > 500000"
                                        LabelExpression="[areaname]"
                                        LabelPlacement="LabelPlacement.AboveRight"
                                        MinScale="4_800_000">
@@ -224,8 +224,8 @@
                                                 BackgroundColor="@(new MapColor(0, 0, 0, 0.5))">
                                         <MapFont Size="@(16)" />
                                     </TextSymbol>
-                                </Label>
-                                <Label Where="pop2000 <= 500000"
+                                </LabelClass>
+                                <LabelClass Where="pop2000 <= 500000"
                                        LabelExpression="[areaname]"
                                        LabelPlacement="LabelPlacement.AboveRight"
                                        MinScale="4_800_000">
@@ -233,7 +233,7 @@
                                                 BackgroundColor="@(new MapColor(0, 0, 0, 0.5))">
                                         <MapFont Size="@(7)" />
                                     </TextSymbol>
-                                </Label>
+                                </LabelClass>
                             </Sublayer>
 
                             break;
@@ -313,7 +313,12 @@
 
     private async Task OnSliderThumbDrag(SliderThumbDragEvent dragEvent)
     {
-        _selectedPopulation = dragEvent.Value;
+        if (dragEvent.Value is null)
+        {
+            return;
+        }
+
+        _selectedPopulation = dragEvent.Value.Value;
 
         if (dragEvent.State == SliderThumbDragState.Stop)
         {

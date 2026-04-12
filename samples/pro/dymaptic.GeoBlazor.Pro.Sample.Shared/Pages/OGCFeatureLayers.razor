@@ -31,8 +31,8 @@
                          MinScale="5_000_000"
                          Opacity="0.6"
                          Copyright="Landwirtschaftskammer RLP (2020), dl-de/by-2-0, <a href='http://weinlagen.lwk-rlp.de/'' target='_blank'>weinlagen.lwk-rlp.de</a>, <a href='http://weinlagen.lwk-rlp.de/portal/nutzungsbedingungen/gewaehrleistung-haftung.html' target='_blank'>Regelungen zu Gewährleistung und Haftung</a>">
-            <Label MaxScale="0" MinScale="100_000">
-                <LabelExpressionInfo Expression="$feature.NAME" />
+            <LabelClass MaxScale="0" MinScale="100_000">
+                <LabelClassLabelExpressionInfo Expression="$feature.NAME" />
                 <TextSymbol Color="@(new MapColor("#4a6741"))"
                             HaloSize="1"
                             HaloColor="@(new MapColor("white"))">
@@ -40,7 +40,7 @@
                              Style="MapFontStyle.Italic"
                              Weight="FontWeight.Normal" />
                 </TextSymbol>
-            </Label>
+            </LabelClass>
             <SimpleRenderer>
                 <WebStyleSymbol StyleUrl="https://www.arcgis.com/sharing/rest/content/items/c71b13cf8f28452faf91ad0552574d24/data"
                                 Name="Mangrove_Common_5" />

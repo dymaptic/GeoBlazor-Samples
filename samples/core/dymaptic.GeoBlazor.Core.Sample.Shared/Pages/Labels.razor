@@ -15,7 +15,7 @@
         <PortalItem PortalItemId="372b7caa8fe340b0a6300df93ef18a7e" />
         <FeatureLayer>
             <PortalItem PortalItemId="6012738cd1c74582a5f98ea30ae9876f" />
-            <Label LabelPlacement="LabelPlacement.AboveCenter">
+            <LabelClass LabelPlacement="LabelPlacement.AboveCenter">
                 <TextSymbol Color="@(new MapColor("green"))" 
                             BackgroundColor="@(new MapColor(213, 184, 255, 0.75))"
                             BorderLineColor="@(new MapColor("green"))"
@@ -23,8 +23,8 @@
                             Yoffset="5">
                     <MapFont Family="Playfair Display" Size="12" Weight="FontWeight.Bold" />
                 </TextSymbol>
-                <LabelExpressionInfo Expression="$feature.MARKER_ACTIVITY" />
-            </Label>
+                <LabelClassLabelExpressionInfo Expression="$feature.MARKER_ACTIVITY" />
+            </LabelClass>
             <SimpleRenderer>
                 <SimpleMarkerSymbol Color="@(new MapColor(0, 100, 0, 0.6))" Size="3">
                     <Outline Color="@(new MapColor(0, 0, 0, 0.1))" Width="0.5" />

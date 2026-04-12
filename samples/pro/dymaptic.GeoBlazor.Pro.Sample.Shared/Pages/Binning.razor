@@ -44,13 +44,13 @@
             <FeatureReductionBinning @ref="_featureBinning" FixedBinLevel="6" LabelsVisible="true"
                                      PopupEnabled="true">
                 <AggregateField Name="aggregateCount" StatisticType="AggregateStatisticType.Count" />
-                <Label MinScale="144448" MaxScale="0" DeconflictionStrategy="DeconflictionStrategy.None">
+                <LabelClass MinScale="144448" MaxScale="0" DeconflictionStrategy="DeconflictionStrategy.None">
                     <TextSymbol Color="@(new MapColor("white"))"
                                 HaloColor="@(new MapColor(_colors[4]))" HaloSize="0.5">
                         <MapFont Family="Noto Sans" Size="10" Weight="FontWeight.Bold" />
                     </TextSymbol>
-                    <LabelExpressionInfo Expression="Text($feature.aggregateCount, '#,###')" /> 
-                </Label>
+                    <LabelClassLabelExpressionInfo Expression="Text($feature.aggregateCount, '#,###')" /> 
+                </LabelClass>
                 <PopupTemplate Title="Car crashes" StringContent="{aggregateCount} car crashes occurred in this area." />
                 <SimpleRenderer>
                     <SimpleFillSymbol Color="@(new MapColor(0, 255, 71, 1))">

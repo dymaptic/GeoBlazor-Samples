@@ -57,13 +57,13 @@
                                     Color="@(new MapColor("#69dcff"))">
                     <Outline Color="@(new MapColor(0, 139, 174, 0.5))" Width="6"/>
                 </SimpleMarkerSymbol>
-                <Label DeconflictionStrategy="DeconflictionStrategy.None"
+                <LabelClass DeconflictionStrategy="DeconflictionStrategy.None"
                        LabelPlacement="LabelPlacement.CenterCenter">
-                    <LabelExpressionInfo Expression="Text($feature.cluster_count, '#,###')"/>
+                    <LabelClassLabelExpressionInfo Expression="Text($feature.cluster_count, '#,###')"/>
                     <TextSymbol Color="@(new MapColor("#004a5d"))">
                         <MapFont Weight="FontWeight.Bold" Family="Noto Sans" Size="12"/>
                     </TextSymbol>
-                </Label>
+                </LabelClass>
             </FeatureReductionCluster>
         </GeoJSONLayer>
         <FeatureLayer LegendEnabled="false" PopupEnabled="false">

@@ -38,12 +38,13 @@
                   UpdateOnGraphicClick="true" 
                   OnSketchEvent="OnSketchEvent"
                   GraphicsLayer="@(_graphicsLayer)"
-                  EventRateLimitInMilliseconds="200">
+                  EventRateLimitInMilliseconds="200"
+                  HideSelectionToolsLassoSelection="true"
+                  HideSelectionToolsRectangleSelection="true"
+                  HideCreateToolsPoint="true"
+                  HideSettingsMenu="true"
+                  HideUndoRedoMenu="true">
         <SnappingOptions Enabled="true" />
-        <SketchWidgetVisibleElements SettingsMenu="false" UndoRedoMenu="false">
-            <CreateTools Point="false" />
-            <SelectionTools LassoSelection="false" RectangleSelection="false" />
-        </SketchWidgetVisibleElements>
     </SketchWidget>
     <CustomOverlay @ref="_overlay" Position="OverlayPosition.BottomRight">
         <div id="relationship-results" class="esri-widget">

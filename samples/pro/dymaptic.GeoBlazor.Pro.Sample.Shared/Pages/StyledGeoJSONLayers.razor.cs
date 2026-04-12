@@ -4,9 +4,10 @@ using dymaptic.GeoBlazor.Core.Components.Views;
 using dymaptic.GeoBlazor.Core.Components.Widgets;
 using dymaptic.GeoBlazor.Core.Events;
 using dymaptic.GeoBlazor.Core.Model;
-using dymaptic.GeoBlazor.Core.Options;
+using dymaptic.GeoBlazor.Core.Components.Logic;
 using dymaptic.GeoBlazor.Pro.Components.Layers;
 using Microsoft.AspNetCore.Components;
+using dymaptic.GeoBlazor.Core.Options;
 
 
 namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;

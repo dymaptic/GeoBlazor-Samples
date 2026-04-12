@@ -41,8 +41,8 @@
             </PopupTemplate>
         </FeatureLayer>
     </Map>
-    <EditorWidget @ref="_editor" Position="OverlayPosition.TopRight" Visible="false">
-        <EditorWidgetVisibleElements SnappingControls="false" />
+    <EditorWidget @ref="_editor" Position="OverlayPosition.TopRight" Visible="false" HideSnappingControlsElementsEnabledToggle="true">
+        <SnappingOptions Enabled="false" />
         <EditorLayerInfo LayerId="_featureLayer!.Id">
             <FormTemplate>
                 <FieldElement FieldName="trailName" Label="Trail name" />
@@ -112,7 +112,7 @@
     private FeatureLayer? _featureLayer;
     private EditorWidget? _editor;
     private bool _firstRender = true;
-    private readonly PopupOpenOptions _popupOpenOptions = new()
+    private readonly PopupViewPopupOpenOptions _popupOpenOptions = new()
     {
         FetchFeatures = true,
         ShouldFocus = true

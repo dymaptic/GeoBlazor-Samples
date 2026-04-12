@@ -46,11 +46,13 @@
     <SketchWidget Position="OverlayPosition.TopRight" OnSketchEvent="OnSketchEvent"
                   AvailableCreateTools="@([AvailableCreateTool.Polyline, AvailableCreateTool.Polygon, AvailableCreateTool.Rectangle])"
                   CreationMode="CreationMode.Update" UpdateOnGraphicClick="true"
-                  GraphicsLayerId="_graphicsLayer.Id">
-        <SketchWidgetVisibleElements SettingsMenu="false" UndoRedoMenu="false">
-            <CreateTools Point="false" Circle="false" />
-            <SelectionTools LassoSelection="false" RectangleSelection="false" />
-        </SketchWidgetVisibleElements>
+                  GraphicsLayerId="_graphicsLayer.Id"
+                  HideSettingsMenu="true"
+                  HideUndoRedoMenu="true"
+                  HideCreateToolsPoint="true"
+                  HideCreateToolsCircle="true"
+                  HideSelectionToolsLassoSelection="true"
+                  HideSelectionToolsRectangleSelection="true">
     </SketchWidget>
 </MapView>
 

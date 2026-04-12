@@ -1,5 +1,5 @@
 @page "/highlight-features-by-geometry"
-@using dymaptic.GeoBlazor.Core.Interfaces
+@using dymaptic.GeoBlazor.Core.Components.Logic
 
 @inject GeometryEngine GeometryEngine
 
@@ -51,10 +51,11 @@
                   AvailableCreateTools="@([AvailableCreateTool.Rectangle])"
                   UpdateOnGraphicClick="false"
                   CreationMode="CreationMode.Single"
-                  OnSketchEvent="OnSketchEvent">
-        <SketchWidgetVisibleElements SettingsMenu="false" UndoRedoMenu="false">
-            <SelectionTools LassoSelection="false" RectangleSelection="false" />
-        </SketchWidgetVisibleElements>
+                  OnSketchEvent="OnSketchEvent"
+                  HideSelectionToolsLassoSelection="true"
+                  HideSelectionToolsRectangleSelection="true"
+                  HideSettingsMenu="true"
+                  HideRedoMenu="true">
     </SketchWidget>
     <CustomOverlay Position="OverlayPosition.TopLeft">
         <button class="esri-button" style="width: auto; margin: 5px;" @onclick="ClearSelection">
