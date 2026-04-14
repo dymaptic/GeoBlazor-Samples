@@ -807,7 +807,7 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     border-top: 1px solid var(--background-grey-3);
 }
 
-.nav-list .nav-list-item.nav-group:first-of-type {
+.nav-list .nav-pinned + .nav-group {
     margin-top: 0.5rem;
 }
 
@@ -824,6 +824,11 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     padding: 0.75rem;
     user-select: none;
     border-radius: var(--box-radius);
+    background: none;
+    border: none;
+    width: 100%;
+    font: inherit;
+    text-align: left;
 }
 
 .nav-list .nav-list-item .nav-list-expander:hover {
