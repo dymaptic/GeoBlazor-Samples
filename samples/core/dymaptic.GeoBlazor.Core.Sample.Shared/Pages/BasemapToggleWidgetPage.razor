@@ -15,7 +15,7 @@
 
 <div class="form-group" style="margin-bottom: 1rem;">
     <label>Basemap Pair:
-        <select class="form-select" style="display:inline-block; width: auto;" @onchange="OnPairChanged">
+        <select class="form-select" style="display:inline-block; width: auto;" value="@_pairIndex" @onchange="OnPairChanged">
             <option value="0">Satellite / Streets</option>
             <option value="1">Topographic / Dark Gray</option>
             <option value="2">Navigation / Imagery</option>

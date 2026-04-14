@@ -16,7 +16,7 @@
 <div style="display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-bottom: 1rem;">
     <div class="form-group">
         <label>Unit:
-            <select class="form-select" style="display:inline-block; width: auto;" @onchange="OnUnitChanged">
+            <select class="form-select" style="display:inline-block; width: auto;" value="@_unit" @onchange="OnUnitChanged">
                 <option value="Imperial">Imperial (miles/feet)</option>
                 <option value="Metric">Metric (km/m)</option>
                 <option value="Dual">Dual (both)</option>
@@ -25,7 +25,7 @@
     </div>
     <div class="form-group">
         <label>Style:
-            <select class="form-select" style="display:inline-block; width: auto;" @onchange="OnStyleChanged">
+            <select class="form-select" style="display:inline-block; width: auto;" value="@_style" @onchange="OnStyleChanged">
                 <option value="Ruler">Ruler</option>
                 <option value="Line">Line</option>
             </select>
