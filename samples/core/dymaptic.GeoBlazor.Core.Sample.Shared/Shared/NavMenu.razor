@@ -1,4 +1,4 @@
-﻿<div class="top-row navbar">
+<div class="top-row navbar">
     <div class="container-fluid">
         <div class="navbar__logo" aria-label="GeoBlazor Logo"></div>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -11,18 +11,8 @@
     <ul class="nav-list">
         @foreach (PageLink page in UngroupedPages)
         {
-            string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
             <li class="nav-list-item nav-pinned" @onclick="@(() => NavigateTo(page.Href))">
-                <NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
-                    @if (page.IconClass is not null)
-                    {
-                        <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
-                    }
-                    else
-                    {
-                        <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
-                    }
-                </NavLink>
+                @RenderNavLink(page)
             </li>
         }
 
@@ -41,18 +31,8 @@
                     <ul class="nav-list nav-sublist">
                         @foreach (PageLink page in pages)
                         {
-                            string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
                             <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
-                                <NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
-                                    @if (page.IconClass is not null)
-                                    {
-                                        <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
-                                    }
-                                    else
-                                    {
-                                        <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
-                                    }
-                                </NavLink>
+                                @RenderNavLink(page)
                             </li>
                         }
                     </ul>
@@ -61,3 +41,20 @@
         }
     </ul>
 </div>
+
+@{
+    RenderFragment RenderNavLink(PageLink page)
+    {
+        string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
+        return@<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
+            @if (page.IconClass is not null)
+            {
+                <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
+            }
+            else
+            {
+                <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
+            }
+        </NavLink>;
+    }
+}

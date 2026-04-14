@@ -6,6 +6,22 @@ namespace dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 
 public partial class NavMenu
 {
+    // Category name constants
+    public static class Categories
+    {
+        public const string MapsAndScenes = "Maps & Scenes";
+        public const string Layers = "Layers";
+        public const string Visualization = "Visualization";
+        public const string Widgets = "Widgets";
+        public const string Queries = "Queries";
+        public const string Interaction = "Interaction";
+        public const string Location = "Location";
+    }
+
+    protected static readonly string[] GroupOrder =
+        [Categories.MapsAndScenes, Categories.Layers, Categories.Visualization,
+         Categories.Widgets, Categories.Queries, Categories.Interaction, Categories.Location];
+
     [Inject]
     public required IJSRuntime JsRuntime { get; set; }
     [Inject]
@@ -22,13 +38,11 @@ public partial class NavMenu
         ? Pages
         : Pages.Where(p => p.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
-    protected IEnumerable<PageLink> UngroupedPages => FilteredPages.Where(p =>
-        string.IsNullOrEmpty(p.Href) || !PageCategories.ContainsKey(p.Href));
+    protected IEnumerable<PageLink> UngroupedPages => FilteredPages.Where(p => p.Category is null);
 
     protected IEnumerable<(string GroupName, IEnumerable<PageLink> Pages)> GroupedFilteredPages =>
         GroupOrder
-            .Select(g => (GroupName: g, Pages: FilteredPages.Where(p =>
-                PageCategories.TryGetValue(p.Href, out var cat) && cat == g)))
+            .Select(g => (GroupName: g, Pages: FilteredPages.Where(p => p.Category == g)))
             .Where(g => g.Pages.Any());
 
     protected HashSet<string> ExpandedGroups { get; set; } = new();
@@ -66,7 +80,9 @@ public partial class NavMenu
 
             if (currentPage != string.Empty)
             {
-                if (PageCategories.TryGetValue(currentPage, out string? group))
+                string? group = Pages.FirstOrDefault(p => p.Href == currentPage)?.Category;
+
+                if (group is not null)
                 {
                     ExpandedGroups.Add(group);
                 }
@@ -116,122 +132,65 @@ public partial class NavMenu
     public virtual PageLink[] Pages =>
     [
         new("", "Home", "oi-home"),
-        new("navigation", "Navigation", "oi-compass"),
-        new("drawing", "Drawing", "oi-pencil"),
-        new("click-to-add", "Click to Add Point", "oi-map-marker"),
-        new("many-graphics", "Many Graphics", "oi-calculator"),
-        new("scene", "Scene & Attributes", "oi-globe"),
-        new("widgets", "Widgets", "oi-location"),
-        new("basemaps", "Basemaps", "oi-map"),
-        new("feature-layers", "Feature Layers", "oi-layers"),
-        new("map-image-layers", "Map Image Layers", "oi-image"),
-        new("labels", "Labels", "oi-text"),
-        new("popups", "Popups", "oi-chat"),
-        new("popup-actions", "Popup Actions", "oi-bullhorn"),
-        new("bookmarks", "Bookmarks", "oi-bookmark"),
-        new("vector-layer", "Vector Layer", "oi-arrow-right"),
-        new("layer-lists", "Layer Lists", "oi-list"),
-        new("basemap-layer-lists", "Basemap Layer Lists", "oi-spreadsheet"),
-        new("csv-layer", "CSV Layers", "oi-grid-four-up"),
-        new("kmllayers", "KML Layers", "oi-excerpt"),
-        new("georss-layer", "GeoRSS Layer", "oi-rss"),
-        new("osm-layer", "OpenStreetMaps Layer", null, "osm.webp"),
-        new("wcslayers", "WCS Layers", "oi-project"),
-        new("wfslayers", "WFS Layers", null, "wfs.svg"),
-        new("wmslayers", "WMS Layers", null, "wms.svg"),
-        new("wmtslayers", "WMTS Layers", null, "wmts.svg"),
-        new("imagerylayer", "Imagery Layers", "oi-image"),
-        new("imagery-tile-layer", "Imagery Tile Layers", null, "tile.webp"),
-        new("web-map", "Web Map", "oi-browser"),
-        new("web-scene", "Web Scene", "oi-box"),
-        new("events", "Events", "oi-flash"),
-        new("reactive-utils", "Reactive Utils", "oi-wrench"),
-        new("hit-tests", "Hit Tests", "oi-star"),
-        new("sql-query", "SQL Query", "oi-data-transfer-download"),
-        new("sql-filter-query", "SQL Filter", "oi-arrow-thick-bottom"),
-        new("server-side-queries", "Server-Side Queries", "oi-question-mark"),
-        new("query-related-features", "Query Related Features", "oi-people"),
-        new("query-top-features", "Query Top Features", "oi-arrow-thick-top"),
-        new("place-selector", "Place Selector", "oi-arrow-bottom"),
-        new("service-areas", "Service Areas", "oi-comment-square"),
-        new("measurement-widgets", "Measurement Widgets", null, "ruler.svg"),
-        new("calculate-geometries", "Calculate Geometries", "oi-clipboard"),
-        new("projection", "Display Projection", "oi-sun"),
-        new("projection-tool", "Projection Tool", "oi-cog"),
-        new("basemap-projections", "Basemap Projections", "oi-bullhorn"),
-        new("unique-value", "Unique Renderers", "oi-eyedropper"),
-        new("marker-rotation", "Marker Rotation", "oi-loop-circular"),
-        new("graphic-tracking", "Graphic Tracking", "oi-move"),
-        new("geometry-methods", "Geometry Methods", "oi-task"),
-        new("locator-methods", "Locator Methods", "oi-task"),
-        new("search-multi-source", "Search Multiple Sources", "oi-magnifying-glass"),
-        new("reverse-geolocator", "GeoLocator", "oi-arrow-circle-bottom")
+        new("navigation", "Navigation", "oi-compass", Category: Categories.MapsAndScenes),
+        new("scene", "Scene & Attributes", "oi-globe", Category: Categories.MapsAndScenes),
+        new("basemaps", "Basemaps", "oi-map", Category: Categories.MapsAndScenes),
+        new("web-map", "Web Map", "oi-browser", Category: Categories.MapsAndScenes),
+        new("web-scene", "Web Scene", "oi-box", Category: Categories.MapsAndScenes),
+
+        new("feature-layers", "Feature Layers", "oi-layers", Category: Categories.Layers),
+        new("map-image-layers", "Map Image Layers", "oi-image", Category: Categories.Layers),
+        new("vector-layer", "Vector Layer", "oi-arrow-right", Category: Categories.Layers),
+        new("csv-layer", "CSV Layers", "oi-grid-four-up", Category: Categories.Layers),
+        new("kmllayers", "KML Layers", "oi-excerpt", Category: Categories.Layers),
+        new("georss-layer", "GeoRSS Layer", "oi-rss", Category: Categories.Layers),
+        new("osm-layer", "OpenStreetMaps Layer", null, "osm.webp", Category: Categories.Layers),
+        new("wcslayers", "WCS Layers", "oi-project", Category: Categories.Layers),
+        new("wfslayers", "WFS Layers", null, "wfs.svg", Category: Categories.Layers),
+        new("wmslayers", "WMS Layers", null, "wms.svg", Category: Categories.Layers),
+        new("wmtslayers", "WMTS Layers", null, "wmts.svg", Category: Categories.Layers),
+        new("imagerylayer", "Imagery Layers", "oi-image", Category: Categories.Layers),
+        new("imagery-tile-layer", "Imagery Tile Layers", null, "tile.webp", Category: Categories.Layers),
+
+        new("labels", "Labels", "oi-text", Category: Categories.Visualization),
+        new("unique-value", "Unique Renderers", "oi-eyedropper", Category: Categories.Visualization),
+        new("marker-rotation", "Marker Rotation", "oi-loop-circular", Category: Categories.Visualization),
+
+        new("widgets", "Widgets", "oi-location", Category: Categories.Widgets),
+        new("popups", "Popups", "oi-chat", Category: Categories.Widgets),
+        new("popup-actions", "Popup Actions", "oi-bullhorn", Category: Categories.Widgets),
+        new("bookmarks", "Bookmarks", "oi-bookmark", Category: Categories.Widgets),
+        new("layer-lists", "Layer Lists", "oi-list", Category: Categories.Widgets),
+        new("basemap-layer-lists", "Basemap Layer Lists", "oi-spreadsheet", Category: Categories.Widgets),
+        new("measurement-widgets", "Measurement Widgets", null, "ruler.svg", Category: Categories.Widgets),
+        new("search-multi-source", "Search Multiple Sources", "oi-magnifying-glass", Category: Categories.Widgets),
+
+        new("sql-query", "SQL Query", "oi-data-transfer-download", Category: Categories.Queries),
+        new("sql-filter-query", "SQL Filter", "oi-arrow-thick-bottom", Category: Categories.Queries),
+        new("server-side-queries", "Server-Side Queries", "oi-question-mark", Category: Categories.Queries),
+        new("query-related-features", "Query Related Features", "oi-people", Category: Categories.Queries),
+        new("query-top-features", "Query Top Features", "oi-arrow-thick-top", Category: Categories.Queries),
+
+        new("drawing", "Drawing", "oi-pencil", Category: Categories.Interaction),
+        new("click-to-add", "Click to Add Point", "oi-map-marker", Category: Categories.Interaction),
+        new("many-graphics", "Many Graphics", "oi-calculator", Category: Categories.Interaction),
+        new("events", "Events", "oi-flash", Category: Categories.Interaction),
+        new("reactive-utils", "Reactive Utils", "oi-wrench", Category: Categories.Interaction),
+        new("hit-tests", "Hit Tests", "oi-star", Category: Categories.Interaction),
+        new("graphic-tracking", "Graphic Tracking", "oi-move", Category: Categories.Interaction),
+
+        new("place-selector", "Place Selector", "oi-arrow-bottom", Category: Categories.Location),
+        new("service-areas", "Service Areas", "oi-comment-square", Category: Categories.Location),
+        new("calculate-geometries", "Calculate Geometries", "oi-clipboard", Category: Categories.Location),
+        new("projection", "Display Projection", "oi-sun", Category: Categories.Location),
+        new("projection-tool", "Projection Tool", "oi-cog", Category: Categories.Location),
+        new("basemap-projections", "Basemap Projections", "oi-bullhorn", Category: Categories.Location),
+        new("geometry-methods", "Geometry Methods", "oi-task", Category: Categories.Location),
+        new("locator-methods", "Locator Methods", "oi-task", Category: Categories.Location),
+        new("reverse-geolocator", "GeoLocator", "oi-arrow-circle-bottom", Category: Categories.Location),
     ];
-    public record PageLink(string Href, string Title, string? IconClass, string? ImageFile = null, bool Pro = false);
 
-    // Category mapping: page href -> group name. Pages not listed appear ungrouped.
-    protected static readonly Dictionary<string, string> CorePageCategories = new()
-    {
-        ["navigation"] = "Maps & Scenes",
-        ["scene"] = "Maps & Scenes",
-        ["basemaps"] = "Maps & Scenes",
-        ["web-map"] = "Maps & Scenes",
-        ["web-scene"] = "Maps & Scenes",
-
-        ["feature-layers"] = "Layers",
-        ["map-image-layers"] = "Layers",
-        ["vector-layer"] = "Layers",
-        ["csv-layer"] = "Layers",
-        ["kmllayers"] = "Layers",
-        ["georss-layer"] = "Layers",
-        ["osm-layer"] = "Layers",
-        ["wcslayers"] = "Layers",
-        ["wfslayers"] = "Layers",
-        ["wmslayers"] = "Layers",
-        ["wmtslayers"] = "Layers",
-        ["imagerylayer"] = "Layers",
-        ["imagery-tile-layer"] = "Layers",
-
-        ["labels"] = "Visualization",
-        ["unique-value"] = "Visualization",
-        ["marker-rotation"] = "Visualization",
-
-        ["widgets"] = "Widgets",
-        ["popups"] = "Widgets",
-        ["popup-actions"] = "Widgets",
-        ["bookmarks"] = "Widgets",
-        ["layer-lists"] = "Widgets",
-        ["basemap-layer-lists"] = "Widgets",
-        ["measurement-widgets"] = "Widgets",
-        ["search-multi-source"] = "Widgets",
-
-        ["sql-query"] = "Queries",
-        ["sql-filter-query"] = "Queries",
-        ["server-side-queries"] = "Queries",
-        ["query-related-features"] = "Queries",
-        ["query-top-features"] = "Queries",
-
-        ["drawing"] = "Interaction",
-        ["click-to-add"] = "Interaction",
-        ["many-graphics"] = "Interaction",
-        ["events"] = "Interaction",
-        ["reactive-utils"] = "Interaction",
-        ["hit-tests"] = "Interaction",
-        ["graphic-tracking"] = "Interaction",
-
-        ["place-selector"] = "Location",
-        ["service-areas"] = "Location",
-        ["calculate-geometries"] = "Location",
-        ["projection"] = "Location",
-        ["projection-tool"] = "Location",
-        ["basemap-projections"] = "Location",
-        ["geometry-methods"] = "Location",
-        ["locator-methods"] = "Location",
-        ["reverse-geolocator"] = "Location",
-    };
-
-    protected virtual Dictionary<string, string> PageCategories => CorePageCategories;
-
-    protected static readonly string[] GroupOrder =
-        ["Maps & Scenes", "Layers", "Visualization", "Widgets", "Queries", "Interaction", "Location"];
+    public record PageLink(
+        string Href, string Title, string? IconClass,
+        string? ImageFile = null, bool Pro = false, string? Category = null);
 }

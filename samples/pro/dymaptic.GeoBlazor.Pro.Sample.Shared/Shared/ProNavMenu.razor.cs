@@ -17,70 +17,35 @@ public partial class ProNavMenu : NavMenu
                     href = $"pro-{href}";
                 }
 
-                return new PageLink(href, p.Title, p.IconClass, p.ImageFile);
+                return p with { Href = href };
             }),
-        new("imagery-group-blend", "PRO: Imagery Blend", null, "blend.svg", true),
-        new("sketch-query", "PRO: Sketch Query", "oi-location", null, true),
-        new("edit-feature-data", "PRO: Edit Data", "oi-map-marker", null, true),
-        new("popup-edit", "PRO: Popup Edit Data", "oi-pencil", null, true),
-        new("update-feature-attributes", "PRO: Update Attributes", "oi-brush", null, true),
-        new("apply-edits", "PRO: Apply Edits", "oi-check", null, true),
-        new("spatial-relationships", "PRO Relationships", "oi-link-intact", null, true),
-        new("demographic-data", "PRO: Demographics", "oi-people", null, true),
-        new("length-and-area", "PRO: Length & Area", "oi-graph", null, true),
-        new("swipe", "PRO: Swipe Widget", "oi-arrow-thick-left", null, true),
-        new("time-slider", "PRO: Time Slider", "oi-vertical-align-center", null, true),
-        new("search-custom-source", "PRO: Custom Search", "oi-magnifying-glass", null, true),
-        new("clustering", "PRO: Clustering", "oi-fullscreen-exit", null, true),
-        new("clustering-popups", "PRO: Clustering Popups", "oi-fullscreen-enter", null, true),
-        new("cluster-pie-charts", "PRO: Pie Chart Clusters", "oi-pie-chart", null, true),
-        new("binning", "PRO: Binning", "oi-grid-three-up", null, true),
-        new("routes", "PRO: Routes", "oi-transfer", null, true),
-        new("graphics-legend", "PRO: Graphics Legend", "oi-list-rich", null, true),
-        new("group-layers", "PRO: Group Layers", null, "groupLayer.svg", true),
-        new("ogc-feature-layers", "PRO: OGC Feature Layers", "oi-layers", null, true),
-        new("wfsutils", "PRO: WFS Utils", "oi-wrench", null, true),
-        new("print-widget", "PRO: Print Widgets", "oi-print", null, true),
-        new("custom-popup-content", "PRO: Custom Popup Content", null, "customPopup.svg", true),
-        new("geojson-styles", "PRO: GeoJSON Styles", "oi-brush", null, true),
-        new("web-style-symbols", "PRO: Web Style Symbols", "oi-brush", null, true),
-        new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true)
+        new("imagery-group-blend", "PRO: Imagery Blend", null, "blend.svg", true, Categories.Layers),
+        new("sketch-query", "PRO: Sketch Query", "oi-location", null, true, Categories.Queries),
+        new("edit-feature-data", "PRO: Edit Data", "oi-map-marker", null, true, Categories.Interaction),
+        new("popup-edit", "PRO: Popup Edit Data", "oi-pencil", null, true, Categories.Widgets),
+        new("update-feature-attributes", "PRO: Update Attributes", "oi-brush", null, true, Categories.Interaction),
+        new("apply-edits", "PRO: Apply Edits", "oi-check", null, true, Categories.Interaction),
+        new("spatial-relationships", "PRO Relationships", "oi-link-intact", null, true, Categories.Queries),
+        new("demographic-data", "PRO: Demographics", "oi-people", null, true, Categories.Location),
+        new("length-and-area", "PRO: Length & Area", "oi-graph", null, true, Categories.Location),
+        new("swipe", "PRO: Swipe Widget", "oi-arrow-thick-left", null, true, Categories.Widgets),
+        new("time-slider", "PRO: Time Slider", "oi-vertical-align-center", null, true, Categories.Widgets),
+        new("search-custom-source", "PRO: Custom Search", "oi-magnifying-glass", null, true, Categories.Widgets),
+        new("clustering", "PRO: Clustering", "oi-fullscreen-exit", null, true, Categories.Visualization),
+        new("clustering-popups", "PRO: Clustering Popups", "oi-fullscreen-enter", null, true, Categories.Visualization),
+        new("cluster-pie-charts", "PRO: Pie Chart Clusters", "oi-pie-chart", null, true, Categories.Visualization),
+        new("binning", "PRO: Binning", "oi-grid-three-up", null, true, Categories.Visualization),
+        new("routes", "PRO: Routes", "oi-transfer", null, true, Categories.Location),
+        new("graphics-legend", "PRO: Graphics Legend", "oi-list-rich", null, true, Categories.Visualization),
+        new("group-layers", "PRO: Group Layers", null, "groupLayer.svg", true, Categories.Layers),
+        new("ogc-feature-layers", "PRO: OGC Feature Layers", "oi-layers", null, true, Categories.Layers),
+        new("wfsutils", "PRO: WFS Utils", "oi-wrench", null, true, Categories.Layers),
+        new("print-widget", "PRO: Print Widgets", "oi-print", null, true, Categories.Widgets),
+        new("custom-popup-content", "PRO: Custom Popup Content", null, "customPopup.svg", true, Categories.Widgets),
+        new("geojson-styles", "PRO: GeoJSON Styles", "oi-brush", null, true, Categories.Visualization),
+        new("web-style-symbols", "PRO: Web Style Symbols", "oi-brush", null, true, Categories.Visualization),
+        new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true, Categories.Interaction)
     ];
-
-    protected override Dictionary<string, string> PageCategories => new(CorePageCategories)
-    {
-        // Remapped Core pages
-        ["pro-widgets"] = "Widgets",
-        ["pro-bookmarks"] = "Widgets",
-
-        // Pro pages
-        ["imagery-group-blend"] = "Layers",
-        ["sketch-query"] = "Queries",
-        ["edit-feature-data"] = "Interaction",
-        ["popup-edit"] = "Widgets",
-        ["update-feature-attributes"] = "Interaction",
-        ["apply-edits"] = "Interaction",
-        ["spatial-relationships"] = "Queries",
-        ["demographic-data"] = "Location",
-        ["length-and-area"] = "Location",
-        ["swipe"] = "Widgets",
-        ["time-slider"] = "Widgets",
-        ["search-custom-source"] = "Widgets",
-        ["clustering"] = "Visualization",
-        ["clustering-popups"] = "Visualization",
-        ["cluster-pie-charts"] = "Visualization",
-        ["binning"] = "Visualization",
-        ["routes"] = "Location",
-        ["graphics-legend"] = "Visualization",
-        ["group-layers"] = "Layers",
-        ["ogc-feature-layers"] = "Layers",
-        ["wfsutils"] = "Layers",
-        ["print-widget"] = "Widgets",
-        ["custom-popup-content"] = "Widgets",
-        ["geojson-styles"] = "Visualization",
-        ["web-style-symbols"] = "Visualization",
-        ["highlight-features-by-geometry"] = "Interaction",
-    };
 
     protected override bool CollapseNavMenu { get; set; } = true;
     private string LowerNavMenuCssClass => _lowerNavMenuOpen ? "" : "lower-collapse";
