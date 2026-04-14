@@ -106,7 +106,7 @@ public partial class CustomPopupContents
 
     private async Task OnSelectResult(SearchSelectResultEvent searchSelectResultEvent)
     {
-        Graphic? resultGraphic = searchSelectResultEvent.Result.Feature;
+        Graphic? resultGraphic = searchSelectResultEvent.Result?.Feature;
         if (resultGraphic is not null)
         {
             // we have to reload the graphic to ensure that the popup has refreshed and can be reused

@@ -29,7 +29,7 @@ public partial class StyledGeoJSONLayers
             FeatureSet? results = await layer
                 .QueryFeatures(new Query(Where: "1=1", OutFields: ["*"], ReturnGeometry: true));
 
-            if (results?.Features is not null && results.Features.Count > 0)
+            if (results?.Features is not null && results.Features.Length > 0)
             {
                 _features[layer] = results.Features.ToList();
             }
