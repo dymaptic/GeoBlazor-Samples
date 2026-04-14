@@ -770,8 +770,10 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     color: var(--geoblazor-accent-emphasis);
 }
 
-.nav-list .nav-list-item:has(.nav-list-link.active) {
-    background-color: var(--background-grey-3);
+.nav-list .nav-list-item:has(> .nav-list-link.active) {
+    background-color: var(--background-grey-1);
+    border-left: 3px solid transparent;
+    border-image: var(--geoblazor-gradient-vertical) 1;
 }
 
 .nav-list .nav-list-item .nav-list-link.active {
@@ -786,26 +788,87 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     background-image: unset;
 }
 
+/* Pinned top-level items (Home) */
+.nav-list .nav-list-item.nav-pinned {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid var(--background-grey-3);
+    border-radius: 0;
+    padding-bottom: 0.75rem;
+}
+
+/* Group headers */
+.nav-list .nav-list-item.nav-group {
+    padding: 0;
+    margin-bottom: 0.25rem;
+    margin-top: 0.25rem;
+    background-color: transparent;
+    border-radius: 0;
+    border-top: 1px solid var(--background-grey-3);
+}
+
+.nav-list .nav-list-item.nav-group:first-of-type {
+    margin-top: 0.5rem;
+}
+
+.nav-list .nav-list-item.nav-group:hover {
+    background-color: transparent;
+}
+
 .nav-list .nav-list-item .nav-list-expander {
-    color: var(--geoblazor-secondary);
+    color: var(--text-emphasis);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    user-select: none;
+    border-radius: var(--box-radius);
 }
 
 .nav-list .nav-list-item .nav-list-expander:hover {
     color: var(--geoblazor-secondary-hover);
+    background-color: var(--background-grey-1);
     background-image: unset;
 }
 
-.nav-list .nav-list-item > .nav-list .nav-list-item .nav-list-link {
-    color: var(--text-emphasis);
-    font-size: 1rem;
+.nav-group-title {
+    font-family: 'Aller', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .nav-list .nav-list-item .nav-list-expander svg {
+    width: 12px;
+    height: 12px;
     transform: rotate(0);
+    transition: transform 0.2s ease;
+    fill: var(--geoblazor-secondary);
+    flex-shrink: 0;
 }
 
 .nav-list .nav-list-item.active .nav-list-expander svg {
     transform: rotate(90deg);
+    fill: var(--geoblazor-accent);
+}
+
+/* Nested sublist */
+.nav-list .nav-sublist {
+    padding-left: 1rem;
+    padding-right: 0;
+    margin-top: 0;
+    padding-bottom: 0.25rem;
+}
+
+.nav-list .nav-sublist .nav-list-item {
+    padding: 0.4rem 0.75rem;
+    margin-bottom: 0.125rem;
+}
+
+.nav-list .nav-list-item > .nav-list .nav-list-item .nav-list-link {
+    font-size: 0.9rem;
 }
 
 .side-bar a {
@@ -1019,8 +1082,10 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
         background-color: var(--background-grey-3);
     }
 
-    .nav-list .nav-list-item:has(.nav-list-link.active) {
-        background-color: var(--background-grey-4);
+    .nav-list .nav-list-item:has(> .nav-list-link.active) {
+        background-color: var(--background-grey-3);
+        border-left: 3px solid transparent;
+        border-image: var(--geoblazor-gradient-vertical) 1;
     }
 
     .oi img:not(.pro .oi img) {

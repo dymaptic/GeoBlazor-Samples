@@ -46,6 +46,42 @@ public partial class ProNavMenu : NavMenu
         new("web-style-symbols", "PRO: Web Style Symbols", "oi-brush", null, true),
         new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true)
     ];
+
+    protected override Dictionary<string, string> PageCategories => new(CorePageCategories)
+    {
+        // Remapped Core pages
+        ["pro-widgets"] = "Widgets",
+        ["pro-bookmarks"] = "Widgets",
+
+        // Pro pages
+        ["imagery-group-blend"] = "Layers",
+        ["sketch-query"] = "Queries",
+        ["edit-feature-data"] = "Interaction",
+        ["popup-edit"] = "Widgets",
+        ["update-feature-attributes"] = "Interaction",
+        ["apply-edits"] = "Interaction",
+        ["spatial-relationships"] = "Queries",
+        ["demographic-data"] = "Location",
+        ["length-and-area"] = "Location",
+        ["swipe"] = "Widgets",
+        ["time-slider"] = "Widgets",
+        ["search-custom-source"] = "Widgets",
+        ["clustering"] = "Visualization",
+        ["clustering-popups"] = "Visualization",
+        ["cluster-pie-charts"] = "Visualization",
+        ["binning"] = "Visualization",
+        ["routes"] = "Location",
+        ["graphics-legend"] = "Visualization",
+        ["group-layers"] = "Layers",
+        ["ogc-feature-layers"] = "Layers",
+        ["wfsutils"] = "Layers",
+        ["print-widget"] = "Widgets",
+        ["custom-popup-content"] = "Widgets",
+        ["geojson-styles"] = "Visualization",
+        ["web-style-symbols"] = "Visualization",
+        ["highlight-features-by-geometry"] = "Interaction",
+    };
+
     protected override bool CollapseNavMenu { get; set; } = true;
     private string LowerNavMenuCssClass => _lowerNavMenuOpen ? "" : "lower-collapse";
 

@@ -22,6 +22,33 @@ public partial class NavMenu
         ? Pages
         : Pages.Where(p => p.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
+    protected IEnumerable<PageLink> UngroupedPages => FilteredPages.Where(p =>
+        string.IsNullOrEmpty(p.Href) || !PageCategories.ContainsKey(p.Href));
+
+    protected IEnumerable<(string GroupName, IEnumerable<PageLink> Pages)> GroupedFilteredPages =>
+        GroupOrder
+            .Select(g => (GroupName: g, Pages: FilteredPages.Where(p =>
+                PageCategories.TryGetValue(p.Href, out var cat) && cat == g)))
+            .Where(g => g.Pages.Any());
+
+    protected HashSet<string> ExpandedGroups { get; set; } = new();
+
+    protected void ToggleGroup(string groupName)
+    {
+        if (!ExpandedGroups.Add(groupName))
+        {
+            ExpandedGroups.Remove(groupName);
+        }
+    }
+
+    protected bool IsGroupExpanded(string groupName)
+    {
+        if (!string.IsNullOrWhiteSpace(SearchText))
+            return true;
+
+        return ExpandedGroups.Contains(groupName);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -39,9 +66,14 @@ public partial class NavMenu
 
             if (currentPage != string.Empty)
             {
+                if (PageCategories.TryGetValue(currentPage, out string? group))
+                {
+                    ExpandedGroups.Add(group);
+                }
+
                 await JsRuntime.InvokeVoidAsync("scrollToNav", currentPage);
             }
-            
+
             StateHasChanged();
         }
 
@@ -136,4 +168,70 @@ public partial class NavMenu
         new("reverse-geolocator", "GeoLocator", "oi-arrow-circle-bottom")
     ];
     public record PageLink(string Href, string Title, string? IconClass, string? ImageFile = null, bool Pro = false);
+
+    // Category mapping: page href -> group name. Pages not listed appear ungrouped.
+    protected static readonly Dictionary<string, string> CorePageCategories = new()
+    {
+        ["navigation"] = "Maps & Scenes",
+        ["scene"] = "Maps & Scenes",
+        ["basemaps"] = "Maps & Scenes",
+        ["web-map"] = "Maps & Scenes",
+        ["web-scene"] = "Maps & Scenes",
+
+        ["feature-layers"] = "Layers",
+        ["map-image-layers"] = "Layers",
+        ["vector-layer"] = "Layers",
+        ["csv-layer"] = "Layers",
+        ["kmllayers"] = "Layers",
+        ["georss-layer"] = "Layers",
+        ["osm-layer"] = "Layers",
+        ["wcslayers"] = "Layers",
+        ["wfslayers"] = "Layers",
+        ["wmslayers"] = "Layers",
+        ["wmtslayers"] = "Layers",
+        ["imagerylayer"] = "Layers",
+        ["imagery-tile-layer"] = "Layers",
+
+        ["labels"] = "Visualization",
+        ["unique-value"] = "Visualization",
+        ["marker-rotation"] = "Visualization",
+
+        ["widgets"] = "Widgets",
+        ["popups"] = "Widgets",
+        ["popup-actions"] = "Widgets",
+        ["bookmarks"] = "Widgets",
+        ["layer-lists"] = "Widgets",
+        ["basemap-layer-lists"] = "Widgets",
+        ["measurement-widgets"] = "Widgets",
+        ["search-multi-source"] = "Widgets",
+
+        ["sql-query"] = "Queries",
+        ["sql-filter-query"] = "Queries",
+        ["server-side-queries"] = "Queries",
+        ["query-related-features"] = "Queries",
+        ["query-top-features"] = "Queries",
+
+        ["drawing"] = "Interaction",
+        ["click-to-add"] = "Interaction",
+        ["many-graphics"] = "Interaction",
+        ["events"] = "Interaction",
+        ["reactive-utils"] = "Interaction",
+        ["hit-tests"] = "Interaction",
+        ["graphic-tracking"] = "Interaction",
+
+        ["place-selector"] = "Location",
+        ["service-areas"] = "Location",
+        ["calculate-geometries"] = "Location",
+        ["projection"] = "Location",
+        ["projection-tool"] = "Location",
+        ["basemap-projections"] = "Location",
+        ["geometry-methods"] = "Location",
+        ["locator-methods"] = "Location",
+        ["reverse-geolocator"] = "Location",
+    };
+
+    protected virtual Dictionary<string, string> PageCategories => CorePageCategories;
+
+    protected static readonly string[] GroupOrder =
+        ["Maps & Scenes", "Layers", "Visualization", "Widgets", "Queries", "Interaction", "Location"];
 }
