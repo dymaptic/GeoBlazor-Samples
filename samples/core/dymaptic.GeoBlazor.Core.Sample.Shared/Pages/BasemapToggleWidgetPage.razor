@@ -1,0 +1,52 @@
+@page "/basemap-toggle-widget"
+
+<PageTitle>Basemap Toggle Widget</PageTitle>
+<h1>Basemap Toggle Widget</h1>
+
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-basemaptoggle/">ArcGIS Sample</a>
+    <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapToggle.html">BasemapToggle API Reference</a>
+</div>
+<p class="instructions">
+    The Basemap Toggle widget allows switching between two basemap styles with a single click.
+    Select a basemap pair below, then click the toggle button in the bottom-right corner of the map
+    to switch between the two styles.
+</p>
+
+<div class="form-group" style="margin-bottom: 1rem;">
+    <label>Basemap Pair:
+        <select class="form-select" style="display:inline-block; width: auto;" @onchange="OnPairChanged">
+            <option value="0">Satellite / Streets</option>
+            <option value="1">Topographic / Dark Gray</option>
+            <option value="2">Navigation / Imagery</option>
+            <option value="3">OSM Standard / Terrain</option>
+        </select>
+    </label>
+</div>
+
+<MapView @key="@_pairIndex" Longitude="-118.24" Latitude="34.05" Zoom="12" Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="@_pairs[_pairIndex].Primary" />
+        </Basemap>
+    </Map>
+    <BasemapToggleWidget NextBasemapStyle="@_pairs[_pairIndex].Secondary"
+                         Position="OverlayPosition.BottomRight" />
+</MapView>
+
+@code {
+    private int _pairIndex;
+
+    private readonly (BasemapStyleName Primary, BasemapStyleName Secondary)[] _pairs =
+    [
+        (BasemapStyleName.ArcgisImageryStandard, BasemapStyleName.ArcgisStreets),
+        (BasemapStyleName.ArcgisTopographic, BasemapStyleName.ArcgisDarkGray),
+        (BasemapStyleName.ArcgisNavigation, BasemapStyleName.ArcgisImagery),
+        (BasemapStyleName.OsmStandard, BasemapStyleName.ArcgisTerrain),
+    ];
+
+    private void OnPairChanged(ChangeEventArgs e)
+    {
+        _pairIndex = int.Parse(e.Value?.ToString() ?? "0");
+    }
+}

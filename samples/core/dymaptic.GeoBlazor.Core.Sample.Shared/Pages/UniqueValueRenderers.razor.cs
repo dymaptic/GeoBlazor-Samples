@@ -60,7 +60,7 @@ public partial class UniqueValueRenderers
         ["proposed"] = new SimpleLineSymbol(new MapColor(192, 192, 192), 1.5, SimpleLineSymbolStyle.Dot)
     };
     private readonly UniqueValueRenderer _uniqueValueRenderer = new(uniqueValueInfos: roadTypes
-            .Select(r => new UniqueValueInfo(r.Key.ToUpperFirstChar().Replace("_", " "), r.Value, r.Key))
+            .Select(r => new UniqueValueInfo(string.Concat(r.Key[0].ToString().ToUpper(), r.Key.AsSpan(1)).Replace("_", " "), r.Value, r.Key))
             .ToArray(),
         field: "highway", defaultLabel: "Service",
         legendOptions: new UniqueValueRendererLegendOptions("Route Type"));
