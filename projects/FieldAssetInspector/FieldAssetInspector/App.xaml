@@ -9,7 +9,7 @@
 
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
 
-                <ResourceDictionary Source="ms-appx:///FieldAssetInspector/Styles/ColorPaletteOverride.xaml" />
+                <ResourceDictionary Source="Styles/ColorPaletteOverride.xaml" />
                 <MaterialTheme xmlns="using:Uno.Material" />
                 <ToolkitResources xmlns="using:Uno.Toolkit.UI" />
                 <MaterialToolkitTheme xmlns="using:Uno.Toolkit.UI.Material" />

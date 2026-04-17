@@ -32,7 +32,7 @@
                 <TextBlock Text="Field Asset Inspector"
                            Style="{StaticResource TitleTextBlockStyle}"
                            Foreground="{ThemeResource OnSurfaceBrush}" />
-                <TextBlock Text="Powered by GeoBlazor Pro + Uno Platform"
+                <TextBlock Text="Powered by GeoBlazor + Uno Platform"
                            Style="{StaticResource CaptionTextBlockStyle}"
                            Foreground="{ThemeResource OnSurfaceVariantBrush}"
                            Opacity="0.7" />
@@ -68,9 +68,8 @@
                                  IsReadOnly="True"
                                  PlaceholderText="—" />
 
-                        <TextBox x:Name="AssetStatusField"
-                                 Header="Status"
-                                 PlaceholderText="—" />
+                        <!-- Dynamically populated attribute fields -->
+                        <StackPanel x:Name="AttributeFieldsPanel" Spacing="8" />
 
                         <TextBox x:Name="AssetNotesField"
                                  Header="Inspector Notes"
