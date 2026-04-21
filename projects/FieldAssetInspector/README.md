@@ -2,6 +2,8 @@
 
 A cross-platform **Uno Platform** application demonstrating **GeoBlazor** map integration via MAUI Embedding.
 
+[Read the blog post](https://geoblazor.com/blog/bridging-multiple-platforms-with-geoblazor-and-uno)
+
 ![Screenshot](Screenshot.png)
 
 ## Overview
