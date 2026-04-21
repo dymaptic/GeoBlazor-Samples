@@ -1,0 +1,68 @@
+@namespace FieldAssetInspector.Razor
+@inject AssetSelectionService Selection
+
+<div class="map-container">
+    @* Center on Oklahoma area with railroad infrastructure data *@
+    <MapView @ref="_mapView"
+             Class="map-view"
+             OnClick="OnMapClick"
+             Longitude="-95.9979" Latitude="36.1540"
+             Zoom="10"
+             Style="height: 100%; width: 100%;">
+
+        <Map>
+            <Basemap>
+                <BasemapStyle Name="BasemapStyleName.ArcgisStreets"/>
+            </Basemap>
+
+            <FeatureLayer @ref="_bridgesLayer" 
+                          OutFields="@(["*"])"
+                          Title="Railroad Bridges">
+                <PortalItem PortalItemId="c553cf96679d4454b1d60aa0b6a268f9" />
+                <SimpleRenderer>
+                    <PictureMarkerSymbol Url="images/railroad_bridge.png"></PictureMarkerSymbol>
+                </SimpleRenderer>
+            </FeatureLayer>
+        </Map>
+
+        @* Standard map widgets *@
+        <ZoomWidget Position="OverlayPosition.TopLeft"/>
+        <SearchWidget Position="OverlayPosition.TopRight"/>
+        <ScaleBarWidget Position="OverlayPosition.BottomLeft"/>
+
+    </MapView>
+</div>
+
+@code {
+    private MapView? _mapView;
+    private FeatureLayer? _bridgesLayer;
+
+    private async Task OnMapClick(ClickEvent clickEvent)
+    {
+        if (_mapView is null) return;
+
+        string objectIdField = _bridgesLayer?.ObjectIdField ?? "OBJECTID";
+
+        HitTestResult hitTestResult = await _mapView.HitTest(clickEvent);
+        ViewHit? hit = hitTestResult.Results.FirstOrDefault();
+
+        if (hit is GraphicHit graphicHit)
+        {
+            Graphic graphic = graphicHit.Graphic;
+            FieldAsset asset = new()
+            {
+                ObjectIdField = objectIdField,
+                ObjectId = graphic.Attributes.TryGetValue(objectIdField, out object? oid)
+                    ? oid?.ToString() ?? "Unknown"
+                    : "Unknown",
+                AssetType = "Railroad Bridge",
+                Attributes = graphic.Attributes.ToDictionary()
+            };
+            Selection.Select(asset);
+        }
+        else
+        {
+            Selection.Clear();
+        }
+    }
+}

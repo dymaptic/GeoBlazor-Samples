@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <!-- GeoBlazor-inspired color palette -->
+    <Color x:Key="PrimaryColor">#1A73E8</Color>
+    <Color x:Key="PrimaryDarkColor">#0D47A1</Color>
+    <Color x:Key="SecondaryColor">#34A853</Color>
+    <Color x:Key="OnPrimaryColor">#FFFFFF</Color>
+    <Color x:Key="OnSecondaryColor">#FFFFFF</Color>
+    <Color x:Key="SurfaceColor">#FAFAFA</Color>
+    <Color x:Key="OnSurfaceColor">#1C1B1F</Color>
+    <Color x:Key="BackgroundColor">#FFFFFF</Color>
+
+</ResourceDictionary>
