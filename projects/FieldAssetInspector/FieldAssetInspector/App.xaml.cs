@@ -1,5 +1,6 @@
 using System.Reflection;
 using dymaptic.GeoBlazor.Core;
+using FieldAssetInspector.Razor;
 using Microsoft.Extensions.Configuration;
 using Application = Microsoft.Maui.Controls.Application;
 
@@ -41,14 +42,16 @@ public partial class App : Microsoft.UI.Xaml.Application
                 maui.Services.AddSingleton<IConfiguration>(appConfig);
                 maui.Services.AddMauiBlazorWebView();
                 maui.Services.AddGeoBlazor(appConfig);
+                maui.Services.AddSingleton<AssetSelectionService>();
 #if DEBUG
                 maui.Services.AddBlazorWebViewDeveloperTools();
 #endif
             });
 
-        appBuilder.Build();
+        var host = appBuilder.Build();
 
-        appBuilder.Window.Content = new MainPage();
+        var selection = host.Services.GetRequiredService<AssetSelectionService>();
+        appBuilder.Window.Content = new MainPage(selection);
         appBuilder.Window.Activate();
     }
 }

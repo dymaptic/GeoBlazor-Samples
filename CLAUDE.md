@@ -56,19 +56,19 @@ Official GeoBlazor sample apps, split into Core and Pro. These target **net10.0*
 
 Independent demo apps with varying .NET versions and hosting models:
 
-| Project | Target | Hosting Model | GeoBlazor |
-|---------|--------|---------------|-----------|
-| ShipmentTracker | net9.0 | Blazor Web App (Server + WASM) | Pro 4.1.0 |
-| SimpleSearch | net9.0 | Blazor Web App (Server + WASM) | Core (latest) |
-| NationFinder | net9.0 | Blazor Web App (Server + WASM) | Core (latest) |
-| NationFinder2 | net9.0 | Blazor Server | Core (latest) |
-| CustomPopups | net8.0 | Blazor Server | Core 3.0.1 |
-| CustomPopupsJS | net8.0 | Blazor Server | Core 3.0.1 |
-| DesMoineBusRoutes | net8.0 | Blazor Server | Core 3.0.1 |
-| MuseumsOfChicago | net8.0 | Blazor Web App | Core (latest) |
-| PointsOnAMapBlog | net8.0 | Blazor WASM | Core 3.0.1 |
-| SolarTracker | net8.0 | Blazor WASM | Core 3.0.1 |
-| FieldAssetInspector | net9.0 | Uno Platform + MAUI Embedding (BlazorWebView) | Pro (latest) |
+| Project | Target  | Hosting Model | GeoBlazor     |
+|---------|---------|---------------|---------------|
+| ShipmentTracker | net9.0  | Blazor Web App (Server + WASM) | Pro 4.1.0     |
+| SimpleSearch | net9.0  | Blazor Web App (Server + WASM) | Core (latest) |
+| NationFinder | net9.0  | Blazor Web App (Server + WASM) | Core (latest) |
+| NationFinder2 | net9.0  | Blazor Server | Core (latest) |
+| CustomPopups | net8.0  | Blazor Server | Core 3.0.1    |
+| CustomPopupsJS | net8.0  | Blazor Server | Core 3.0.1    |
+| DesMoineBusRoutes | net8.0  | Blazor Server | Core 3.0.1    |
+| MuseumsOfChicago | net8.0  | Blazor Web App | Core (latest) |
+| PointsOnAMapBlog | net8.0  | Blazor WASM | Core 3.0.1    |
+| SolarTracker | net8.0  | Blazor WASM | Core 3.0.1    |
+| FieldAssetInspector | net10.0 | Uno Platform + MAUI Embedding (BlazorWebView) | Core (latest) |
 
 ## Configuration
 

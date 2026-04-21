@@ -5,16 +5,19 @@ namespace FieldAssetInspector;
 
 public sealed partial class MainPage : Page
 {
-    public MainPage()
+    private readonly AssetSelectionService _selection;
+
+    public MainPage(AssetSelectionService selection)
     {
+        _selection = selection;
         this.InitializeComponent();
 
-        AssetSelectionService.Instance.AssetSelected += OnAssetSelected;
-        AssetSelectionService.Instance.SelectionCleared += OnSelectionCleared;
+        _selection.AssetSelected += OnAssetSelected;
+        _selection.SelectionCleared += OnSelectionCleared;
         Unloaded += (_, _) =>
         {
-            AssetSelectionService.Instance.AssetSelected -= OnAssetSelected;
-            AssetSelectionService.Instance.SelectionCleared -= OnSelectionCleared;
+            _selection.AssetSelected -= OnAssetSelected;
+            _selection.SelectionCleared -= OnSelectionCleared;
         };
     }
 
@@ -49,14 +52,21 @@ public sealed partial class MainPage : Page
 
             // Build editable TextBoxes for each attribute
             AttributeFieldsPanel.Children.Clear();
-            foreach (var (key, value) in asset.Attributes)
+            foreach ((string key, object? value) in asset.Attributes)
             {
-                var textBox = new TextBox
+                if (key == asset.ObjectIdField)
+                {
+                    // we already posted the ObjectID at the top
+                    continue;
+                }
+                
+                TextBox textBox = new()
                 {
                     Header = key,
                     Text = value?.ToString() ?? string.Empty,
                     PlaceholderText = "—"
                 };
+                
                 AttributeFieldsPanel.Children.Add(textBox);
             }
         });

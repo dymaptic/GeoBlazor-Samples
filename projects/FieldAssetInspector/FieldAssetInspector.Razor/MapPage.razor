@@ -1,4 +1,5 @@
 @namespace FieldAssetInspector.Razor
+@inject AssetSelectionService Selection
 
 <div class="map-container">
     @* Center on Oklahoma area with railroad infrastructure data *@
@@ -14,7 +15,8 @@
                 <BasemapStyle Name="BasemapStyleName.ArcgisStreets"/>
             </Basemap>
 
-            <FeatureLayer OutFields="@(["*"])"
+            <FeatureLayer @ref="_bridgesLayer" 
+                          OutFields="@(["*"])"
                           Title="Railroad Bridges">
                 <PortalItem PortalItemId="c553cf96679d4454b1d60aa0b6a268f9" />
                 <SimpleRenderer>
@@ -33,30 +35,34 @@
 
 @code {
     private MapView? _mapView;
+    private FeatureLayer? _bridgesLayer;
 
     private async Task OnMapClick(ClickEvent clickEvent)
     {
         if (_mapView is null) return;
+
+        string objectIdField = _bridgesLayer?.ObjectIdField ?? "OBJECTID";
 
         HitTestResult hitTestResult = await _mapView.HitTest(clickEvent);
         ViewHit? hit = hitTestResult.Results.FirstOrDefault();
 
         if (hit is GraphicHit graphicHit)
         {
-            var graphic = graphicHit.Graphic;
-            var asset = new FieldAsset
+            Graphic graphic = graphicHit.Graphic;
+            FieldAsset asset = new()
             {
-                ObjectId = graphic.Attributes.TryGetValue("objectid", out var oid)
+                ObjectIdField = objectIdField,
+                ObjectId = graphic.Attributes.TryGetValue(objectIdField, out object? oid)
                     ? oid?.ToString() ?? "Unknown"
                     : "Unknown",
                 AssetType = "Railroad Bridge",
                 Attributes = graphic.Attributes.ToDictionary()
             };
-            AssetSelectionService.Instance.Select(asset);
+            Selection.Select(asset);
         }
         else
         {
-            AssetSelectionService.Instance.Clear();
+            Selection.Clear();
         }
     }
 }

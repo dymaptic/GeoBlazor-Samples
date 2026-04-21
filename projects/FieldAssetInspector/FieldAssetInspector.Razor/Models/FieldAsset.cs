@@ -6,6 +6,7 @@ namespace FieldAssetInspector.Razor.Models;
 /// </summary>
 public class FieldAsset
 {
+    public string ObjectIdField { get; set; } = string.Empty;
     public string ObjectId { get; set; } = string.Empty;
     public string AssetType { get; set; } = string.Empty;
     public Dictionary<string, object?> Attributes { get; set; } = new();
