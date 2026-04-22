@@ -75,7 +75,7 @@
 
 @code {
 
-    private async Task OnClick(ClickEvent clickEvent)
+    private async Task OnClick(ViewClickEvent clickEvent)
     {
         await ClearMap();
         await QueryFeatures(clickEvent.MapPoint);

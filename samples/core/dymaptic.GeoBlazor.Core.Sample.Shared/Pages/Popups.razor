@@ -55,12 +55,12 @@
             <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails_Styled/FeatureServer/0"
                           OutFields="@(new[] { "TRL_NAME", "ELEV_GAIN" })">
                 <PopupTemplate Title="Trail Information">
-                    <MediaPopupContent>
+                    <MediaContent>
                         <ColumnChartMediaInfo Caption="">
                             <ChartMediaInfoValue Fields="@(new[] { "ELEV_MIN", "ELEV_MAX" })"
                                                  TooltipField="Min and max elevation values" />
                         </ColumnChartMediaInfo>
-                    </MediaPopupContent>
+                    </MediaContent>
                 </PopupTemplate>
             </FeatureLayer>
         }
@@ -69,7 +69,7 @@
             <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Parks_and_Open_Space_Styled/FeatureServer/0"
                           OutFields="@(new[] { "TYPE", "PARK_NAME", "AGNCY_NAME", "ACCESS_TYP", "GIS_ACRES", "TRLS_MI", "TOTAL_GOOD", "TOTAL_FAIR", "TOTAL_POOR" })">
                 <PopupTemplate Title="{PARK_NAME}">
-                    <FieldsPopupContent>
+                    <FieldsContent>
                         <FieldInfo FieldName="AGNCY_NAME" Label="Agency" IsEditable="true" Tooltip="" Visible="true"
                                    StringFieldOption="StringFieldOption.TextBox" />
                         <FieldInfo FieldName="TYPE" Label="Type" IsEditable="true" Tooltip="" Visible="true"
@@ -80,7 +80,7 @@
                                    StringFieldOption="StringFieldOption.TextBox">
                             <FieldInfoFormat Places="2" DigitSeparator="true" />
                         </FieldInfo>
-                    </FieldsPopupContent>
+                    </FieldsContent>
                 </PopupTemplate>
             </FeatureLayer>
         }

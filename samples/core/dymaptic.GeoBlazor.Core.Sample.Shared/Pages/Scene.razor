@@ -48,13 +48,13 @@
 </div>
 <SceneView @ref="_view" Longitude="_longitude" Latitude="_latitude" Class="map-view"
            ZIndex="2000" Tilt="76" OnViewRendered="OnViewRendered">
-    <Map Ground="world-elevation">
+    <Map Ground="@("world-elevation")">
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisImageryStandard" />
         </Basemap>
         <GraphicsLayer @ref="_graphicsLayer">
             <Graphic @ref="_polygonGraphic" Attributes="_graphic1Attributes">
-                <Polygon Rings="@(new[] { _mapRings })" />
+                <Polygon Rings="@([_mapRings])" />
                 <SimpleFillSymbol Color="@(new MapColor(81, 46, 132, 0.8))">
                     <Outline Color="@(new MapColor(255, 255, 255))" Width="1" />
                 </SimpleFillSymbol>

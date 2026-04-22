@@ -149,7 +149,7 @@
 
 @code {
 
-    private async Task OnMapClick(ClickEvent clickEvent)
+    private async Task OnMapClick(ViewClickEvent clickEvent)
     {
         _clickJson = BuildViewableJson(clickEvent);
         ScreenPoint? screenPoint = await _view!.ToScreen(clickEvent.MapPoint);
@@ -170,52 +170,52 @@
         _clickJson += $", MapPoint: {mapPoint.X}, {mapPoint.Y}";
     }
 
-    private void OnMapDoubleClick(ClickEvent clickEvent)
+    private void OnMapDoubleClick(ViewDoubleClickEvent clickEvent)
     {
         _doubleClickJson = BuildViewableJson(clickEvent);
     }
 
-    private void OnMapHold(ClickEvent holdEvent)
+    private void OnMapHold(ViewHoldEvent holdEvent)
     {
         _holdJson = BuildViewableJson(holdEvent);
     }
 
-    private void OnMapBlur(BlurEvent blurEvent)
+    private void OnMapBlur(ViewBlurEvent blurEvent)
     {
         _blurJson = BuildViewableJson(blurEvent);
     }
 
-    private void OnMapFocus(FocusEvent focusEvent)
+    private void OnMapFocus(ViewFocusEvent focusEvent)
     {
         _focusJson = BuildViewableJson(focusEvent);
     }
 
-    private void OnMapDrag(DragEvent dragEvent)
+    private void OnMapDrag(ViewDragEvent dragEvent)
     {
         _dragJson = BuildViewableJson(dragEvent);
     }
 
-    private void OnMapPointerEnter(PointerEvent pointerEvent)
+    private void OnMapPointerEnter(ViewPointerEnterEvent pointerEvent)
     {
         _pointerEnterJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerLeave(PointerEvent pointerEvent)
+    private void OnMapPointerLeave(ViewPointerLeaveEvent pointerEvent)
     {
         _pointerLeaveJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerDown(PointerEvent pointerEvent)
+    private void OnMapPointerDown(ViewPointerDownEvent pointerEvent)
     {
         _pointerDownJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerUp(PointerEvent pointerEvent)
+    private void OnMapPointerUp(ViewPointerUpEvent pointerEvent)
     {
         _pointerUpJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerMove(PointerEvent pointerEvent)
+    private void OnMapPointerMove(ViewPointerMoveEvent pointerEvent)
     {
         _pointerMoveJson = BuildViewableJson(pointerEvent);
     }
@@ -225,17 +225,17 @@
         _extentJson = BuildViewableJson(extent);
     }
 
-    private void OnMapKeyDown(KeyDownEvent keyDownEvent)
+    private void OnMapKeyDown(ViewKeyDownEvent keyDownEvent)
     {
         _keyDownJson = BuildViewableJson(keyDownEvent);
     }
 
-    private void OnMapKeyUp(KeyUpEvent keyUpEvent)
+    private void OnMapKeyUp(ViewKeyUpEvent keyUpEvent)
     {
         _keyUpJson = BuildViewableJson(keyUpEvent);
     }
 
-    private void OnMapMouseWheel(MouseWheelEvent mouseWheelEvent)
+    private void OnMapMouseWheel(ViewMouseWheelEvent mouseWheelEvent)
     {
         _mouseWheelJson = BuildViewableJson(mouseWheelEvent);
     }

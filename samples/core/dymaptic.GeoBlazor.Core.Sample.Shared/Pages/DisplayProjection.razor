@@ -107,16 +107,20 @@
 
     private async Task DisplayCoordinates(Point? center)
     {
-        var popupOptions = new PopupOptions(new PopupDockOptions(buttonEnabled: false),
-            new PopupVisibleElements(false, false));
+        PopupWidget popup = (await View!.GetPopup())!;
+        await popup.SetDockOptions(new PopupDockOptions(buttonEnabled: false));
+        await popup.SetVisibleElements(new PopupVisibleElements(false, false));
 
-        var popupTemplate = new PopupTemplate($"WKID: {center!.SpatialReference!.Wkid}",
+        PopupTemplate popupTemplate = new PopupTemplate($"WKID: {center!.SpatialReference!.Wkid}",
             $"<b>X:</b> {center.X!.Value.ToString("N5", CultureInfo.CurrentCulture)} | <b>Y:</b> {center.Y!.Value.ToString("N5", CultureInfo.CurrentCulture)}");
 
-        var graphic = new Graphic(center, popupTemplate: popupTemplate);
+        Graphic graphic = new Graphic(center, popupTemplate: popupTemplate);
 
         _coordinatesSet = true;
-        await InvokeAsync(async () => await View!.ShowPopupWithGraphic(graphic, popupOptions));
+
+        PopupViewOpenPopupOptions options =
+            new(Features: [graphic]);
+        await InvokeAsync(async () => await View!.OpenPopup(options));
     }
     
     private async Task UpdateSpatialReference(ChangeEventArgs args)

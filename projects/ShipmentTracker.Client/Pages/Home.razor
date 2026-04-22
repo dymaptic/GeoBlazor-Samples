@@ -129,14 +129,14 @@
                             <Point Latitude="@shipment.Latitude" Longitude="@shipment.Longitude"/>
                             <SimpleMarkerSymbol Color="CategoryColors.AllColors[shipment.Category]"/>
                             <PopupTemplate Title="@shipment.Name">
-                                <FieldsPopupContent>
+                                <FieldsContent>
                                     <FieldInfo FieldName="@nameof(Shipment.Category)"/>
                                     <FieldInfo FieldName="@nameof(Shipment.SubCategory)"/>
                                     <FieldInfo FieldName="@nameof(Shipment.Latitude)"/>
                                     <FieldInfo FieldName="@nameof(Shipment.Longitude)"/>
                                     <FieldInfo FieldName="@nameof(Shipment.Quantity)"/>
                                     <FieldInfo FieldName="@nameof(Shipment.Weight)"/>
-                                </FieldsPopupContent>
+                                </FieldsContent>
                             </PopupTemplate>
                         </Graphic>
                         <Graphic @ref="_warehouseGraphic">

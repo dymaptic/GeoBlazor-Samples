@@ -137,7 +137,7 @@
 
     private async Task ToggleLayer(Layer layer)
     {
-        if (_view!.Map!.Layers.Contains(layer))
+        if (_view!.Map!.Layers!.Contains(layer))
         {
             await _view.RemoveLayer(layer);
         }
@@ -178,7 +178,7 @@
                 new MapColor("yellow"), 12))
     ]);
 
-    private async void On3Click(ClickEvent clickEvent)
+    private async void On3Click(ViewClickEvent clickEvent)
     {
         await _view3!.SetExtent(
             new Extent(4120960.074670904, -3412935.278412999, 8963926.222211033, 6049459.93475111));

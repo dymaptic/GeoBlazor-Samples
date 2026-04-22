@@ -25,7 +25,7 @@
                                      "route_shortname", 
                                      "route_long", 
                                      "trip_headsign" ])">
-            <PopupTemplate Title="{trip_headsign}" ContentFunction="BuildPopupContent">
+            <PopupTemplate Title="{trip_headsign}" ContentFunction="BuildContent">
                 <ActionButton Image="@(_isPaused ? "images/play.jpg" : "images/pause.jpg")"
                     Title="@(_isPaused ? "Play" : "Pause")"
                     Id="play"
@@ -152,7 +152,7 @@
         // StateHasChanged();
     }
 
-    private async ValueTask<PopupContent[]> BuildPopupContent(Graphic graphic)
+    private async ValueTask<PopupContent[]> BuildContent(Graphic graphic)
     {
         List<PopupContent> popupContents = new();
         if (_currentStopId is null)
@@ -173,9 +173,9 @@
         TimeOnly stopTime = TimeOnly.Parse(currentStopTime.ArrivalTime);
         string stopName = currentStop.Attributes["stop_name"]!.ToString()!;
         Point stopPoint = (Point)currentStop.Geometry!;
-        popupContents.Add(new TextPopupContent($"Stop #{currentStopTime.StopSequence}: {stopName}, {stopTime}"));
-        popupContents.Add(new TextPopupContent($"Coordinates: LAT: {stopPoint.Latitude:N2}, LONG: {stopPoint.Longitude:N2}"));
-        popupContents.Add(new TextPopupContent("<a href='https://www.ridedart.com/mydart/trip-planner'>Plan your trip</a>"));
+        popupContents.Add(new TextContent($"Stop #{currentStopTime.StopSequence}: {stopName}, {stopTime}"));
+        popupContents.Add(new TextContent($"Coordinates: LAT: {stopPoint.Latitude:N2}, LONG: {stopPoint.Longitude:N2}"));
+        popupContents.Add(new TextContent("<a href='https://www.ridedart.com/mydart/trip-planner'>Plan your trip</a>"));
 
         return popupContents.ToArray();
     }

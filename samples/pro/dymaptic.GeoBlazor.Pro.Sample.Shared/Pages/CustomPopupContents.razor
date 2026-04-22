@@ -9,10 +9,10 @@
 </div>
 <p class="instructions">
     This sample demonstrates how to work with custom content elements within the PopupTemplate's content. 
-    There are five types of popup elements: <code>FieldsPopupContent</code>, <code>MediaPopupContent</code>, <code>TextPopupContent</code>, <code>AttachmentsPopupContent</code>, and <code>CustomPopupContent</code>. 
-    The <code>CustomPopupContent</code>'s value is set via the <code>CreatorFunction</code> property, or by providing child content inside the component. 
+    There are five types of popup elements: <code>FieldsContent</code>, <code>MediaContent</code>, <code>TextContent</code>, <code>AttachmentsContent</code>, and <code>CustomContent</code>. 
+    The <code>CustomContent</code>'s value is set via the <code>CreatorFunction</code> property, or by providing child content inside the component. 
     The <code>CreatorFunction</code> property has an event parameter with the selected <code>Feature</code> graphic, and returns
-    an HTML string value to be rendered. The child content of <code>CustomPopupContent</code> can be either HTML content or a GeoBlazor <code>Widget</code>.
+    an HTML string value to be rendered. The child content of <code>CustomContent</code> can be either HTML content or a GeoBlazor <code>Widget</code>.
     In this sample, we combine three different types of custom content elements: an image, a <code>SearchWidget</code>, 
     and a <code>CreatorFunction</code> that parses the selected graphic for data.
 </p>
@@ -31,12 +31,12 @@
                       PopupEnabled="true">
             <PopupTemplate OutFields="@( ["*"])"
                            Title="State: {state_name}">
-                <CustomPopupContent>
+                <CustomContent>
                     <img src="@_logoUrl"
                          width="150"
                          alt="GeoBlazor Logo" />
-                </CustomPopupContent>
-                <CustomPopupContent>
+                </CustomContent>
+                <CustomContent>
                     <SearchWidget IncludeDefaultSources="false"
                                   LocationEnabled="false"
                                   PopupEnabled="true"
@@ -51,8 +51,8 @@
                                            Name="State name"
                                            Placeholder="Search by state" />
                     </SearchWidget>
-                </CustomPopupContent>
-                <CustomPopupContent CreatorFunction="@GenerateContent"
+                </CustomContent>
+                <CustomContent CreatorFunction="@GenerateContent"
                                     OutFields="@( ["*"])" />
             </PopupTemplate>
         </FeatureLayer>

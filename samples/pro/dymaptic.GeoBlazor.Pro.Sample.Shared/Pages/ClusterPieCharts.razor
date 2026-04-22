@@ -62,14 +62,14 @@
             .ToList();
         List<string> fieldNames = fieldInfos.Select(fi => fi.FieldName!).ToList();
 
-        PopupTemplate popupTemplate = new(content: new List<PopupContent>
+        PopupTemplate popupTemplate = new(content: new List<Content>
         {
-            new TextPopupContent("This cluster represents <b>{cluster_count}</b> features."),
-            new MediaPopupContent(mediaInfos:
+            new TextContent("This cluster represents <b>{cluster_count}</b> features."),
+            new MediaContent(mediaInfos:
             [
                 new PieChartMediaInfo("311 Reports", value: new ChartMediaInfoValue(fieldNames))
             ]),
-            new FieldsPopupContent()
+            new FieldsContent()
         }, fieldInfos: fieldInfos);
         Dimension? minSize = labelScheme.ClusterMinSize is null ? null : new Dimension(labelScheme.ClusterMinSize.Value); 
         return new FeatureReductionCluster(clusterMinSize: minSize,

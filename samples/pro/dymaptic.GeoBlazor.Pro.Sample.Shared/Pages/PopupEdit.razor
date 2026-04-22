@@ -62,10 +62,10 @@
 </MapView>
 
 @code {
-    private ValueTask<PopupContent[]?> DifficultyLevel(Graphic graphic)
+    private ValueTask<Content[]?> DifficultyLevel(Graphic graphic)
     {
-        AttachmentsPopupContent attachmentsElement = 
-            new AttachmentsPopupContent(displayType: AttachmentsPopupContentDisplayType.List);
+        AttachmentsContent attachmentsElement = 
+            new AttachmentsContent(displayType: AttachmentsContentDisplayType.List);
         string level = graphic.Attributes["difficulty"]!.ToString()!;
         string green = $"<b><span style='color:green'>{level}</span></b>.";
         string purple = $"<b><span style='color:purple'>{level}</span></b>.";
@@ -76,9 +76,9 @@
             "hard" => $"The {{trailName}} trail has a difficulty level of {red}",
             _ => throw new NotImplementedException()
             };
-        TextPopupContent textElement = new TextPopupContent(text);
+        TextContent textElement = new TextContent(text);
 
-        return new ValueTask<PopupContent[]?>([textElement, attachmentsElement]);
+        return new ValueTask<Content[]?>([textElement, attachmentsElement]);
     }
     
     private async Task EditThis()

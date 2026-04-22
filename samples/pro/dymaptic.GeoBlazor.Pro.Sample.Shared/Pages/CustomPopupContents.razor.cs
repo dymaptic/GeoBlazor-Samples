@@ -10,14 +10,13 @@ using dymaptic.GeoBlazor.Core.Options;
 using dymaptic.GeoBlazor.Core.Results;
 using dymaptic.GeoBlazor.Pro.Events;
 using dymaptic.GeoBlazor.Pro.Components.Logic;
-using dymaptic.GeoBlazor.Pro.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 
 namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;
 
-public partial class CustomPopupContents
+public partial class CustomContents: ComponentBase
 {
     [Inject]
     public required QueryService QueryService { get; set; }
@@ -111,9 +110,9 @@ public partial class CustomPopupContents
         {
             // we have to reload the graphic to ensure that the popup has refreshed and can be reused
             // if you check the ArcGIS JS sample, you can see that it won't work after the first search
-            HitTestResult hitTestResult = await _mapView!.HitTest(((Polygon)resultGraphic.Geometry!).Centroid!);
+            HitTestResult? hitTestResult = await _mapView!.HitTest(((Polygon)resultGraphic.Geometry!).Centroid!);
 
-            await _popupWidget!.Open(new PopupOpenOptions(Features: hitTestResult.Results
+            await _popupWidget!.Open(new PopupOpenOptions(Features: hitTestResult?.Results
                 .Where(r => r is GraphicHit)
                 .Select(g => ((GraphicHit)g).Graphic)
                 .ToArray(), ShouldFocus: true));

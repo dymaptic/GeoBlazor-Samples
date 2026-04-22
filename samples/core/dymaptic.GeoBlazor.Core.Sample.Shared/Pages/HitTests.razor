@@ -55,14 +55,14 @@
         }
     }
 
-    private async Task OnPointerMoveOrDown(PointerEvent pointerEvent)
+    private async Task OnPointerMoveOrDown(ViewPointerMoveEvent pointerEvent)
     {
         if (_evaluatingPointer) return;
 
         _evaluatingPointer = true;
         try
         {
-            HitTestOptions options = new()
+            MapViewHitTestOptions options = new()
                 {
                     IncludeByGeoBlazorId = [_hurricaneLayer!.Id]
                 };

@@ -29,7 +29,7 @@
                                      Width="12" />
             </SimpleRenderer>
             <PopupTemplate Title="{Park}">
-                <FieldsPopupContent>
+                <FieldsContent>
                     <FieldInfo FieldName="TOTAL"
                                Label="Total visits">
                         <FieldInfoFormat Places="0" DigitSeparator="true" />
@@ -46,7 +46,7 @@
                                Label="2020">
                         <FieldInfoFormat Places="0" DigitSeparator="true" />
                     </FieldInfo>
-                </FieldsPopupContent>
+                </FieldsContent>
             </PopupTemplate>
         </FeatureLayer>
     </Map>
@@ -124,10 +124,10 @@
                 @if (_results is not null)
                 {
                     <h5 class="heading" id="resultsHeading" slot="header-content">
-                        Results: @_results!.Features!.Count parks
+                        Results: @_results!.Features!.Length parks
                     </h5>
                     <div id="results">
-                        @for (var i = 0; i < _results.Features!.Count; i++)
+                        @for (var i = 0; i < _results.Features!.Length; i++)
                         {
                             Graphic result = _results.Features![i];
                             int index = i;
@@ -185,11 +185,8 @@
     private async Task OnParkResultClicked(int index)
     {
         Graphic feature = _results!.Features![index];
-        var options = new PopupOpenOptions
-        {
-            Location = await feature.GetGeometry() as Point,
-            Features = [feature]
-        };
+        PopupViewOpenPopupOptions options = 
+            new(Features: [feature], Location: await feature.GetGeometry() as Point);
         await _mapView!.ClosePopup();
         await _mapView!.OpenPopup(options);
     }

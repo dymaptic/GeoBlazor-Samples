@@ -303,11 +303,11 @@ private string? currentStopId;
 - Rather than setting a constant value or attribute values to the popup, we can generate all the content "on the fly" with a `ContentFunction`.
 
 ```html
-<PopupTemplate @ref="popupTemplate" Title="{trip_headsign}" ContentFunction="BuildPopupContent">
+<PopupTemplate @ref="popupTemplate" Title="{trip_headsign}" ContentFunction="BuildContent">
 ```
 
 ```csharp
-private ValueTask<PopupContent[]> BuildPopupContent(Graphic graphic)
+private ValueTask<PopupContent[]> BuildContent(Graphic graphic)
 {
     List<PopupContent> popupContents = new();
     if (currentStopId is null)
@@ -318,8 +318,8 @@ private ValueTask<PopupContent[]> BuildPopupContent(Graphic graphic)
     var currentStop = stopData!.First(s => s.stop_id == currentStopId);
     var currentStopTime = stopTimeData!.First(s => s.stop_id == currentStopId);
     var stopTime = TimeOnly.Parse(currentStopTime.arrival_time);
-    popupContents.Add(new TextPopupContent($"Stop #{currentStopTime.stop_sequence}: {currentStop.stop_name}, {stopTime}"));
-    popupContents.Add(new TextPopupContent($"Coordinates: LAT: {currentStop.stop_lat}, LONG: {currentStop.stop_lon}"));
+    popupContents.Add(new TextContent($"Stop #{currentStopTime.stop_sequence}: {currentStop.stop_name}, {stopTime}"));
+    popupContents.Add(new TextContent($"Coordinates: LAT: {currentStop.stop_lat}, LONG: {currentStop.stop_lon}"));
 
     return ValueTask.FromResult(popupContents.ToArray());
 }
@@ -330,7 +330,7 @@ private ValueTask<PopupContent[]> BuildPopupContent(Graphic graphic)
 - Place `play.png` and `pause.png` in `wwwroot/images`
 
 ```html
-<PopupTemplate @ref="popupTemplate" Title="{trip_headsign}" ContentFunction="BuildPopupContent">
+<PopupTemplate @ref="popupTemplate" Title="{trip_headsign}" ContentFunction="BuildContent">
     <ActionButton Image="@(isPaused ? "images/play.jpg" : "images/pause.jpg")"
                     Title="@(isPaused ? "Play" : "Pause")"
                     Id="play"

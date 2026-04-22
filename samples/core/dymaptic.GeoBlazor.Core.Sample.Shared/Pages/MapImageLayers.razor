@@ -313,12 +313,7 @@
 
     private async Task OnSliderThumbDrag(SliderThumbDragEvent dragEvent)
     {
-        if (dragEvent.Value is null)
-        {
-            return;
-        }
-
-        _selectedPopulation = dragEvent.Value.Value;
+        _selectedPopulation = dragEvent.Value;
 
         if (dragEvent.State == SliderThumbDragState.Stop)
         {
