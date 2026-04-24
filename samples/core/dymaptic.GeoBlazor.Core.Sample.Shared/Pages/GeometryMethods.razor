@@ -5,27 +5,33 @@
 
 <div class="form-group">
     <h2>Extent Methods</h2>
-    <code>Extent extent = new Extent(xmax: 4120960.074670904, xmin: -3412935.278412999, ymax: 8963926.222211033, ymin: 6049459.93475111)</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+Extent extent = new Extent(
+    xmax: 4120960.074670904, 
+    xmin: -3412935.278412999, 
+    ymax: 8963926.222211033, 
+    ymin: 6049459.93475111);
+")" />
     <label>
         Center Extent At Point Long: <input type="number" @bind="_centerLong" /> Lat: <input type="number" @bind="_centerLat" />
         <button type="button" class="btn btn-primary" @onclick="CenterExtent">Center</button>
     </label>
     <label>
-        Centered Extent: <code>@_centeredExtent</code>
+        Centered Extent: <input type="text" value="@_centeredExtent" disabled />
     </label>
     <label>
         Expand Extent by factor: <input type="number" @bind="_expandFactor" />
         <button type="button" class="btn btn-secondary" @onclick="ExpandExtent">Expand</button>
     </label>
     <label>
-        Expanded Extent: <code>@_expandedExtent</code>
+        Expanded Extent: <input type="text" value="@_expandedExtent" disabled />
     </label>
     <label>
         Offset Extent by distance X: <input type="number" @bind="_dx" /> Y: <input type="number" @bind="_dy" />
         <button type="button" class="btn btn-accent" @onclick="OffsetExtent">Offset</button>
     </label>
     <label>
-        Offset Extent: <code>@_offsetExtent</code>
+        Offset Extent: <input type="text" value="@_offsetExtent" disabled />
     </label>
 </div>
 <div class="form-group">
@@ -33,23 +39,25 @@
     <p>
         <i>JSON methods are avaible for all geometry types</i>
     </p>
-    <code>Point point = new Point(longitude: -117.08, latitude: 34.1)</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+Point point = new Point(longitude: -117.08, latitude: 34.1);
+")" />
     <label>
         Point to JSON: <button type="button" class="btn btn-primary" @onclick="PointToJson">Convert</button>
     </label>
     <label>
-        JSON: <code>@_pointJson</code>
+        JSON: <input type="text" value="@_pointJson" disabled />
     </label>
     <label>
         JSON to Point: <button type="button" class="btn btn-secondary" disabled="@(_pointJson is null)" @onclick="JsonToPoint">Convert</button>
     </label>
     <label>
-        C# Point: <code>@_jsonToPointSuccess</code>
+        C# Point: <input type="text" value="@_jsonToPointSuccess" disabled />
     </label>
 </div>
 <div class="form-group">
     <h2>PolyLine Methods</h2>
-    <code>
+    <CodeHighlight Language="csharp" Code="@(@"
         PolyLine polyline = new PolyLine(new[]
         {
             new MapPath(new MapPoint(11, 52),
@@ -59,42 +67,48 @@
                 new MapPoint(10.5, 51),
                 new MapPoint(11, 56))
         });
-    </code>
+")" />
     <label>
         Add Path: <button type="button" class="btn btn-primary" @onclick="AddPath">Add Path</button>
     </label>
     <label>
-        New Path: <code>@_addedPath</code>
+        New Path: <input type="text" value="@_addedPath" disabled />
     </label>
     <label>
         Get Point: <button type="button" class="btn btn-secondary" @onclick="GetLinePoint">Get Point</button>
     </label>
     <label>
-        Point: <code>@_linePoint</code>
+        Point: <input type="text" value="@_linePoint" disabled />
     </label>
-    <code>
+    <CodeHighlight Language="csharp" Code="@(@"
         Polygon _polygon = new(new MapPath[]
         {
-        new MapPath
-        {
-        new(8.4598, 48.5621),
-        new(1.6279, 59.3947),
-        new(20.0018, 42.6334),
-        new(-4.2473, 42.7392),
-        new(8.4598, 48.5621)
-        }
+            new MapPath
+            {
+                new(8.4598, 48.5621),
+                new(1.6279, 59.3947),
+                new(20.0018, 42.6334),
+                new(-4.2473, 42.7392),
+                new(8.4598, 48.5621)
+            }
         });
-    </code>
+")" />
     <label>
         Insert Point: <button type="button" class="btn btn-accent" @onclick="InsertPoint">Insert Point</button>
     </label>
     <label>
-        New Polygon: <code>@_insertPoint</code>
+        New Polygon: <input type="text" value="@_insertPoint" disabled />
     </label>
 </div>
 <div class="form-group">
     <h2>Polygon Methods</h2>
-    <code>Extent extent = new Extent(xmax: 4120960.074670904, xmin: -3412935.278412999, ymax: 8963926.222211033, ymin: 6049459.93475111)</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+Extent extent = new Extent(
+    xmax: 4120960.074670904, 
+    xmin: -3412935.278412999, 
+    ymax: 8963926.222211033, 
+    ymin: 6049459.93475111);
+")" />
     <label>
         Polygon from Extent: <button type="button" class="btn btn-primary" @onclick="PolygonFromExtent">Convert</button>
     </label>
@@ -105,7 +119,7 @@
         Check if Clockwise: <button type="button" class="btn btn-secondary" @onclick="IsClockwise">Check</button>
     </label>
     <label>
-        Is Clockwise: <code>@_isClockwise</code>
+        Is Clockwise: <input type="text" value="@_isClockwise" disabled />
     </label>
 </div>
 

@@ -645,6 +645,10 @@ body { /* body tag added to help overwrite Bootstrap */
         font-size: 1rem;
         font-weight: 200;
     }
+    
+    input:disabled {
+        background-color: #999999;
+    }
 
     select,
     textarea {
@@ -737,7 +741,7 @@ form {
     
     .form-group {
         min-height: 4rem;
-        max-height: 10rem;
+        max-height: 100vh;
         flex: 1 1 5rem;
     }
     
@@ -826,6 +830,59 @@ form {
     .modal__content .form-row {
         flex-direction: column;
         gap: 0;
+    }
+
+    input[type="text"], input[type="number"] {
+        width: 5.5rem;
+    }
+
+    .links-div {
+        flex-direction: column;
+    }
+
+    .spaced-row {
+        flex-direction: column;
+        align-items: center;
+
+        label:not(.radio-container),
+        label:not(.radio-container):has(+ input[type="checkbox"]),
+        label:not(.radio-container):has(+ .radio-container) {
+            display: block;
+            width: 8rem;
+            max-width: 100%;
+            min-width: 4rem;
+            max-height: 8rem;
+            min-height: 2rem;
+            flex: 0 1 auto;
+            text-align: center;
+        }
+
+        input:not([type="checkbox"]):not([type="radio"]),
+        select, .btn {
+            max-width: 100%;
+            width: 16rem;
+            min-width: 8rem;
+            flex: unset;
+        }
+        
+        .form-group {
+            max-width: 96%;
+            width: 96%;
+            min-width: 8rem;
+            flex: unset;
+        }
+
+        .radio-container {
+            flex: unset;
+            width: 1.25rem;
+            min-width: 1.25rem;
+        }
+    }
+
+    body {
+        .btn {
+            padding: 1rem;
+        }
     }
 }
 
@@ -943,16 +1000,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 .main-header {
     background-color: unset;
     border-bottom: unset;
-}
-
-.main-links .btn {
-    width: 18rem;
-    min-width: 8rem;
-    max-width: 18rem;
-    flex: 1 1 18rem;
-    height: fit-content;
-    max-height: fit-content;
-    margin: 0;
 }
 
 .site-logo {
@@ -1151,14 +1198,22 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 }
 
 .search-input-wrap {
-    position: relative;
+    position: absolute;
     width: 18rem;
-    min-width: 14rem;
-    height: 48px;
+    height: 3rem;
+    top: 6.5rem;
+    left: calc(50% - 9rem);
 }
 
 @media (min-width: 1075px) {
 
+    .search-input-wrap {
+        position: relative;
+        margin-left: 1rem;
+        top: unset;
+        left: unset;
+    }
+    
     body {
         overflow: hidden;
         height: 100vh;
@@ -1388,54 +1443,6 @@ input:checked[type=checkbox] {
 
 .esri-view .esri-view-surface:focus:after {
     z-index: 0;
-}
-
-@media (max-width: 49.9rem) {
-    input[type="text"], input[type="number"] {
-        width: 5.5rem;
-    }
-
-    .links-div {
-        flex-direction: column;
-    }
-
-    .spaced-row {
-        flex-direction: column;
-        align-items: center;
-
-        label:not(.radio-container),
-        label:not(.radio-container):has(+ input[type="checkbox"]),
-        label:not(.radio-container):has(+ .radio-container) {
-            display: block;
-            width: 8rem;
-            max-width: 100%;
-            min-width: 4rem;
-            max-height: 8rem;
-            min-height: 2rem;
-            flex: 0 1 auto;
-            text-align: center;
-        }
-
-        input:not([type="checkbox"]), input:not([type="radio"]),
-        select, .form-group, .btn {
-            max-width: 100%;
-            width: 16rem;
-            min-width: 8rem;
-            flex: unset;
-        }
-
-        .radio-container {
-            flex: unset;
-            width: 1.25rem;
-            min-width: 1.25rem;
-        }
-    }
-
-    body {
-        .btn {
-            padding: 1rem;
-        }
-    }
 }
 
 /*noinspection CssInvalidMediaFeature*/

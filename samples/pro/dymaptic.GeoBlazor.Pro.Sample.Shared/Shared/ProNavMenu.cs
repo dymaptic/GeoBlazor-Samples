@@ -3,7 +3,7 @@ using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 
 namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Shared;
 
-public partial class ProNavMenu : NavMenu
+public class ProNavMenu : NavMenu
 {
     public override PageLink[] Pages =>
     [
@@ -12,7 +12,7 @@ public partial class ProNavMenu : NavMenu
             {
                 var href = p.Href;
 
-                if ((p.Href == "widgets") || (p.Href == "bookmarks"))
+                if (p.Href == "widgets" || p.Href == "bookmarks")
                 {
                     href = $"pro-{href}";
                 }
@@ -47,18 +47,4 @@ public partial class ProNavMenu : NavMenu
         // not ready, bug in Column.Width JsonConverter
         // new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true)
     ];
-    protected override bool CollapseNavMenu { get; set; } = true;
-    private string LowerNavMenuCssClass => _lowerNavMenuOpen ? "" : "lower-collapse";
-
-    private void ToggleLowerNavMenu()
-    {
-        _lowerNavMenuOpen = !_lowerNavMenuOpen;
-    }
-
-    private void ToggleUpperNavMenu()
-    {
-        CollapseNavMenu = !CollapseNavMenu;
-    }
-
-    private bool _lowerNavMenuOpen;
 }

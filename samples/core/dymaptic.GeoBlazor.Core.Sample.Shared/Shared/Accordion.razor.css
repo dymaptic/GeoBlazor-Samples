@@ -3,10 +3,11 @@
 }
 
 .accordion-title:hover {
-    background-color: var(--text-emphasis);
+    color: var(--text-emphasis);
+    background-color: var(--background-grey-3);
 }
 
 .accordion-title .oi {
     margin-left: 0.5rem;
-    margin-top: 0.25rem;
+    vertical-align: middle;
 }

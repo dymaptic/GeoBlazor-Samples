@@ -55,3 +55,39 @@ window.initializeGeoBlazor = (core) => {
     Core = core;
     arcGisObjectRefs = Core.arcGisObjectRefs;
 }
+
+window.copyCode = function(button) {
+    const wrapper = button.closest('.code-highlight-wrapper');
+    const copyIcon = button.querySelector('.copy-icon');
+    const checkIcon = button.querySelector('.check-icon');
+
+    // Find the visible code block (light or dark theme)
+    const lightTheme = wrapper.querySelector('.code-light-theme');
+    const darkTheme = wrapper.querySelector('.code-dark-theme');
+
+    // Determine which theme is currently visible
+    const visibleTheme = window.getComputedStyle(lightTheme).display !== 'none' ? lightTheme : darkTheme;
+    const codeElement = visibleTheme.querySelector('pre');
+
+    if (codeElement) {
+        // Get the text content
+        const code = codeElement.textContent;
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(code).then(() => {
+            // Show success feedback
+            copyIcon.style.display = 'none';
+            checkIcon.style.display = 'block';
+            button.classList.add('copied');
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                copyIcon.style.display = 'block';
+                checkIcon.style.display = 'none';
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy code:', err);
+        });
+    }
+}

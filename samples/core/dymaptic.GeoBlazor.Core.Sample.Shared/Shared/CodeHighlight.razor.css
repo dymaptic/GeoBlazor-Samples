@@ -1,0 +1,107 @@
+.code-highlight-wrapper {
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--code-shadow);
+    overflow: auto;
+    position: relative;
+}
+
+.copy-code-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--code-button-bg);
+    border: 1px solid var(--code-button-border);
+    border-radius: 6px;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+    color: var(--code-button-text);
+    outline: none;
+}
+
+.copy-code-button:hover {
+    background: var(--code-button-bg-hover);
+    border-color: var(--code-button-border-hover);
+}
+
+.copy-code-button:active {
+    transform: scale(0.95);
+}
+
+.copy-code-button:focus {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.copy-code-button.copied {
+    background: var(--code-button-bg-success);
+    border-color: var(--code-button-border-success);
+}
+
+.code-highlight-wrapper ::deep pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: pre;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.code-highlight-wrapper ::deep pre span,
+.code-highlight-wrapper ::deep pre code {
+    line-height: inherit;
+}
+
+.code-highlight-wrapper ::deep code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Show light theme in light mode, hide dark theme */
+@media (prefers-color-scheme: light) {
+    .code-light-theme {
+        display: block;
+    }
+
+    .code-dark-theme {
+        display: none;
+    }
+}
+
+/* Show dark theme in dark mode, hide light theme */
+@media (prefers-color-scheme: dark) {
+    .code-light-theme {
+        display: none;
+    }
+
+    .code-dark-theme {
+        display: block;
+    }
+}
+
+/* Scrollbar styling for code blocks */
+.code-highlight-wrapper ::deep pre::-webkit-scrollbar {
+    height: 8px;
+}
+
+.code-highlight-wrapper ::deep pre::-webkit-scrollbar-track {
+    background: var(--code-scrollbar-track);
+    border-radius: 4px;
+}
+
+.code-highlight-wrapper ::deep pre::-webkit-scrollbar-thumb {
+    background: var(--code-scrollbar-thumb);
+    border-radius: 4px;
+}
+
+.code-highlight-wrapper ::deep pre::-webkit-scrollbar-thumb:hover {
+    background: var(--code-scrollbar-thumb-hover);
+}

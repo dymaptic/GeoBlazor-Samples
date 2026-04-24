@@ -31,7 +31,23 @@
                     <FieldInfoFormat DateFormat="DateFormat.ShortDateShortTime"/>
                 </FieldInfo>
             </PopupTemplate>
-            <UniqueValueRenderer Field="Category" @ref="_renderer"/>
+            <UniqueValueRenderer Field="Category">
+                <UniqueValueInfo Value="1">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[0]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="2">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[1]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="3">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[2]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="4">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[3]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="5">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[4]}")" />
+                </UniqueValueInfo>
+            </UniqueValueRenderer>
         </CSVLayer>
     </Map>
     <ExpandWidget Position="OverlayPosition.TopLeft">
@@ -47,22 +63,6 @@
         new("https://arcgis.github.io/arcgis-samples-javascript/sample-data/hurricanes.csv", "NOAA Hurricanes CSV"),
         new("https://www.arcgis.com/home/item.html?id=3113eacc129942b4abde490a51aeb33f", "Stereographic Basemap")
     ];
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            List<UniqueValueInfo> uniqueValueInfos = [];
-            for (int i = 0; i < _fireFlyImages.Length; i++)
-            {
-                string image = _fireFlyImages[i];
-                uniqueValueInfos.Add(new UniqueValueInfo(value: $"{i + 1}", 
-                    symbol: new PictureMarkerSymbol(_baseUrl + image)));
-            }
-            
-            _renderer!.UniqueValueInfos = uniqueValueInfos;
-        }
-    }
 
     private void OnViewRendered()
     {
@@ -88,7 +88,6 @@
     private MapView? _view;
 
     private bool _viewRendered;
-    private UniqueValueRenderer? _renderer;
 
     private string[] _fireFlyImages =
     [

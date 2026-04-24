@@ -1,0 +1,86 @@
+name: Samples Production Release Deployment Script
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [ ubuntu-latest ]
+    timeout-minutes: 90
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+          
+      - name: Ensure wasm tools are installed
+        run: dotnet workload install wasm-tools
+
+      # Add appsettings.json to apps
+      - name: Add appsettings.json
+        shell: pwsh
+        run: |
+          dotnet ./samples/build-tools/linux-x64/BuildAppSettings.dll `
+            -k "${{ secrets.ARCGISAPIKEY }}" `
+            -l "${{ secrets.SAMPLES_GEOBLAZOR_LICENSE_KEY }}" `
+            -b "${{ secrets.SAMPLES_API_BYPASS_KEY }}" `
+            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.json" `
+            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.Production.json" `
+            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.json" `
+            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.Production.json"
+        
+        # Loads all NuGet dependencies
+      - name: Restore Samples
+        run: dotnet restore ./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.csproj
+
+        # Builds the Samples project 
+      - name: Build Samples
+        run: dotnet build ./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.csproj -c Release --no-restore
+        
+      # Publishes the Samples project
+      - name: Publish Samples
+        shell: pwsh
+        run: |
+          dotnet publish ./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.csproj `
+          -c Release `
+          --no-restore `
+          /p:RunAOT=true `
+          /m `
+          --output samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/published
+      
+      - name: Upload Samples Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/published
+  
+  
+  # This step will deploy the Pro Blazor Samples app to Azure
+  deploy:
+    runs-on: [ ubuntu-latest ]
+    needs: [ build ]
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: published
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.DY_GEOBLAZOR_AZURE_DEPLOY_ID }}
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: dy-blazor-samples-server
+          package: published
+          slot-name: staging
+          startup-command: 'dotnet dymaptic.GeoBlazor.Pro.Sample.WebApp.dll'

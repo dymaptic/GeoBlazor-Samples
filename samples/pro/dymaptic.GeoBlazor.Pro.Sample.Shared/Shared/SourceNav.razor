@@ -1,12 +1,10 @@
-<div class="source-nav">
-    @if (!NavigationManager.Uri.Contains("source-code") &&
-         NavigationManager.Uri != NavigationManager.BaseUri &&
-         !NavigationManager.Uri.Contains("about"))
-    {
-        <a class="btn btn-primary" @onclick="ViewPageSource">Source Code</a>
-    }
-    <a class="btn btn-secondary" @onclick="ViewRepositorySource">GitHub Repo</a>
-</div>
+@if (!NavigationManager.Uri.Contains("source-code") &&
+     NavigationManager.Uri != NavigationManager.BaseUri &&
+     !NavigationManager.Uri.Contains("about"))
+{
+    <a class="btn btn-primary" @onclick="ViewPageSource">Source<br/>Code</a>
+}
+<a class="btn btn-secondary" @onclick="ViewRepositorySource">GitHub<br/>Repo</a>
 
 @code {
     

@@ -12,15 +12,13 @@ public partial class NavMenu
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
     public required JsModuleManager JsModuleManager { get; set; }
-    [Parameter]
-    public string? SearchText { get; set; }
-    [Parameter]
-    public bool EnterKeyPressed { get; set; }
 
-    protected string? NavMenuCssClass => CollapseNavMenu ? "collapse" : null;
-    protected IEnumerable<PageLink> FilteredPages => string.IsNullOrWhiteSpace(SearchText)
+    private string? NavMenuCssClass => CollapseNavMenu ? "lower-collapse" : null;
+    private string? GlobalNavMenuCssClass => CollapseGlobalNavMenu ? "upper-collapse" : null;
+
+    private IEnumerable<PageLink> FilteredPages => string.IsNullOrWhiteSpace(_searchText)
         ? Pages
-        : Pages.Where(p => p.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+        : Pages.Where(p => p.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -44,21 +42,32 @@ public partial class NavMenu
             
             StateHasChanged();
         }
-
-        if (EnterKeyPressed)
+    }
+    
+    protected void OnSearchFilter(string searchText)
+    {
+        _searchText = searchText;
+        CollapseNavMenu = false;
+        StateHasChanged();
+    }
+    
+    protected void OnFullSearch(string searchText)
+    {
+        if (FilteredPages.Count() == 1)
         {
-            EnterKeyPressed = false;
-
-            if (FilteredPages.Count() == 1)
-            {
-                NavigationManager.NavigateTo(FilteredPages.First().Href);
-            }
+            CollapseNavMenu = true;
+            NavigationManager.NavigateTo(FilteredPages.First().Href);
         }
     }
 
     protected void ToggleNavMenu()
     {
         CollapseNavMenu = !CollapseNavMenu;
+    }
+    
+    protected void ToggleGlobalNavMenu()
+    {
+        CollapseGlobalNavMenu = !CollapseGlobalNavMenu;
     }
 
     protected async Task NavigateTo(string href)
@@ -79,8 +88,11 @@ public partial class NavMenu
         });
     }
 
-    protected virtual bool CollapseNavMenu { get; set; } = true;
-    protected ElementReference? Navbar;
+    protected bool CollapseNavMenu { get; set; } = true;
+    protected bool CollapseGlobalNavMenu { get; set; } = true;
+    protected ElementReference? Navbar { get; set; }
+    private string _searchText = string.Empty;
+    
     public virtual PageLink[] Pages =>
     [
         new("", "Home", "oi-home"),

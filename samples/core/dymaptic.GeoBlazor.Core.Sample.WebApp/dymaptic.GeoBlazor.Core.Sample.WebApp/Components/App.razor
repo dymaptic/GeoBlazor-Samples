@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <base href="/" />
         <link rel="icon" href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/favicon.ico"]" />
+        <link rel="stylesheet" href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/bootstrap/bootstrap.min.css"]" />
         <link href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/site.css"]" rel="stylesheet" />
         <link href="@Assets["dymaptic.GeoBlazor.Core.Sample.WebApp.styles.css"]" rel="stylesheet" />
         <link href="@Assets["_content/dymaptic.GeoBlazor.Core"]" />
@@ -13,23 +14,39 @@
         <script src="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/functions.js"]"></script>
         <script src="@Assets["https://js.arcgis.com/calcite-components/3.2.1/calcite.esm.js"]"
                 type="module"></script>
+        <link href="/esri/themes/dark/main.css"/>
         <ImportMap />
 
+        @{
+#if DEBUG
+        }
         <HeadOutlet @rendermode="@_configuredRenderMode" />
+        @{
+#else
+        }
+        <HeadOutlet @rendermode="@InteractiveAuto" />
+        @{
+#endif
+        }
         
     </head>
 
     <body>
     @{
 #if DEBUG
-        // This should always be set to Server mode so that it can toggle on the server.
     }
-        <RenderModeSelector @rendermode="@InteractiveServer" />
-    @{
-#endif
-    }
+        @* This should always be set to Server mode so that it can toggle on the server. *@
+        <RenderModeSelector @rendermode="InteractiveServer" />
         <Routes @rendermode="@_configuredRenderMode" />
-        <script src="_framework/blazor.web.js"></script>
+        @{
+#else
+        }
+        <Routes @rendermode="@InteractiveAuto" />
+        @{
+#endif
+        }
+        
+        <script src="@Assets["_framework/blazor.web.js"]"></script>
     </body>
 </html>
 
@@ -50,7 +67,7 @@
             _ => null
         };
     }
-#endif
-
+    
     private IComponentRenderMode? _configuredRenderMode = InteractiveAuto;
+#endif
 }
