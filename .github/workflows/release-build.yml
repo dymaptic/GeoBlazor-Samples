@@ -13,8 +13,6 @@ jobs:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
