@@ -1,0 +1,30 @@
+<div class="source-nav">
+    @if (!NavigationManager.Uri.Contains("source-code") &&
+         NavigationManager.Uri != NavigationManager.BaseUri &&
+         !NavigationManager.Uri.Contains("about"))
+    {
+        <a class="btn btn-primary" @onclick="ViewPageSource">Source Code</a>
+    }
+    <a class="btn btn-secondary" @onclick="ViewRepositorySource">GitHub Repo</a>
+</div>
+
+@code {
+    
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+    
+    [CascadingParameter(Name="PageRouteData")]
+    public required RouteData RouteData { get; set; }
+
+    private void ViewPageSource()
+    {
+        string currentPageName = RouteData.PageType.Name;
+        NavigationManager.NavigateTo($"source-code/{currentPageName}");
+    }
+
+    private void ViewRepositorySource()
+    {
+        NavigationManager.NavigateTo("https://github.com/dymaptic/GeoBlazor");
+    }
+
+}

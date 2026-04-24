@@ -1,0 +1,37 @@
+.source-nav {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 50%;
+    min-width: 0;
+    max-width: 50%;
+    max-height: 50%;
+    gap: 1rem;
+}
+
+.source-nav>a.btn {
+    max-width: 100%;
+    flex: 1 1 50%;
+    width: 18rem;
+    min-width: 8rem;
+}
+
+@media (min-width: 1400px) {
+
+    .source-nav {
+        flex-direction: column;
+        width: 18rem;
+        max-width: 18rem;
+    }
+    
+    .source-nav>a.btn {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .source-nav {
+        width: 18rem;
+        max-width: 18rem;
+    }
+}
