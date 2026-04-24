@@ -1,11 +1,8 @@
 ﻿@page "/server-side-queries"
+@inherits SamplePage
 <PageTitle>Server Side Queries</PageTitle>
 <h1>Server Side Queries</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryFeatures">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=234d2e3f6f554e0e84757662469c26d3">SF Crimes by Block Group</a>
-</div>
 <p class="instructions">
     This sample demonstrates a query on a feature layer that lives on a server. On the click action, the feature layer is queried to find which features were clicked, and then the results are used to open a custom popup.
 </p>
@@ -50,7 +47,13 @@
 </MapView>
 
 @code {
-    
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryFeatures", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=234d2e3f6f554e0e84757662469c26d3", "SF Crimes by Block Group")
+    ];
+
     [Inject]
     public required IJSRuntime JsRuntime { get; set; }
 

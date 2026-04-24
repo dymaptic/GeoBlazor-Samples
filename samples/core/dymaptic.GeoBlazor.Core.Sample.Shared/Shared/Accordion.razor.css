@@ -1,0 +1,12 @@
+.accordion-title {
+    cursor: pointer;
+}
+
+.accordion-title:hover {
+    background-color: var(--text-emphasis);
+}
+
+.accordion-title .oi {
+    margin-left: 0.5rem;
+    margin-top: 0.25rem;
+}

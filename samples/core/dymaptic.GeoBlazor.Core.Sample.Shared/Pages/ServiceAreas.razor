@@ -1,9 +1,7 @@
 ﻿@page "/service-areas"
+@inherits SamplePage
 <PageTitle>Service Areas</PageTitle>
 <h1>Service Areas</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/find-service-areas/">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     Click on any point on the map to be shown a set of "Service Areas". Service Areas are drivable distances in 5, 10, and 15 minute bands.
 </p>
@@ -20,6 +18,11 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/find-service-areas/", "ArcGIS Maps SDK for JavaScript"),
+     ];
 
     private async Task OnClick(ClickEvent clickEvent)
     {

@@ -42,7 +42,7 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        _configuredRenderMode = Configuration.GetValue<string?>("RenderMode", "Auto") switch
+        _configuredRenderMode = Configuration.GetValue("RenderMode", "Auto") switch
         {
             "Server" => InteractiveServer,
             "WebAssembly" => InteractiveWebAssembly,

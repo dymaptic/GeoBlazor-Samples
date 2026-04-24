@@ -5,6 +5,7 @@ using dymaptic.GeoBlazor.Core.Components.Widgets;
 using dymaptic.GeoBlazor.Core.Events;
 using dymaptic.GeoBlazor.Core.Model;
 using dymaptic.GeoBlazor.Core.Options;
+using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Pro.Components.Layers;
 using Microsoft.AspNetCore.Components;
 
@@ -13,6 +14,12 @@ namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;
 
 public partial class StyledGeoJSONLayers
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://wiki.openstreetmap.org/wiki/Geojson_CSS", "GeoJSON CSS Spec"),
+        new("https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0", "Mapbox SimpleStyle Spec")
+    ];
+
     [Inject]
     public required GeometryEngine GeometryEngine { get; set; }
 
@@ -38,19 +45,27 @@ public partial class StyledGeoJSONLayers
 
     private async Task GoToLocation(Graphic feature)
     {
-        if (_highlightHandle is not null)
+        try
         {
-            await _highlightHandle.Remove();
+            if (_highlightHandle is not null)
+            {
+                await _highlightHandle.Remove();
+            }
+
+            GeoJSONLayerView layerView = _layerViews[(ProGeoJSONLayer)feature.Layer!];
+            _highlightHandle = await layerView.Highlight(feature);
+            // create a buffer around the feature geometry
+            Polygon buffer = (await GeometryEngine.GeodesicBuffer(feature.Geometry!, 100))!;
+            await _popupWidget!.Close();
+            await _mapView!.GoTo(_initialExtent!);
+            await Task.Delay(200);
+            await _mapView.GoTo(buffer.Extent!);
+            await _popupWidget.Open(new PopupOpenOptions(Features: [feature], UpdateLocationEnabled: true));
         }
-        GeoJSONLayerView layerView = _layerViews[(ProGeoJSONLayer)feature.Layer!];
-        _highlightHandle = await layerView.Highlight(feature);
-        // create a buffer around the feature geometry
-        Polygon buffer = (await GeometryEngine.GeodesicBuffer(feature.Geometry!, 100))!;
-        await _popupWidget!.Close();
-        await _mapView!.GoTo(_initialExtent!);
-        await Task.Delay(200);
-        await _mapView.GoTo(buffer.Extent!);
-        await _popupWidget.Open(new PopupOpenOptions(Features: [feature], UpdateLocationEnabled: true));
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
     
     private async Task ToggleLayerVisibility(string layerId)

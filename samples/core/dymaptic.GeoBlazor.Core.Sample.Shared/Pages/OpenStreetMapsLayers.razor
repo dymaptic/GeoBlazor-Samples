@@ -1,9 +1,7 @@
 ﻿@page "/osm-layer"
+@inherits SamplePage
 <PageTitle>Open Street Maps Layer</PageTitle>
 <h1>Open Street Maps Layer</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-OpenStreetMapLayer.html">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     A simple demo of displaying an Open Street Map layer.
 </p>
@@ -13,3 +11,11 @@
         <OpenStreetMapLayer />
     </Map>
 </SceneView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-OpenStreetMapLayer.html", "ArcGIS Maps SDK for JavaScript"),
+     ];
+}

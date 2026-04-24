@@ -1,49 +1,39 @@
-﻿@using System.Text.Json.Serialization
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
+@implements IDisposable
 
 <PageTitle>GeoBlazor Samples</PageTitle>
 
 <div class="page">
-    <div class="side-bar">
-        <NavMenu SearchText="@_searchText" EnterKeyPressed="_enterKeyPressed" />
-    </div>
-
-        <main>
-            <div class="top-row px-4">
-                <div class="search-input-wrap">
-                    <input type="search" id="search-input"
-                           placeholder="Search for sample..."
-                           @oninput="UpdateSearchFilter"
-                           @onkeyup="SearchFilterKeyUp" />
-                    <label for="search-input" class="search-label">
-                        <img src="/_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/search.svg" alt="Search" />
-                    </label>
-                </div>
-                @{
-                    string? apiKey = Configuration["ArcGISApiKey"];
-                    string? loggedIn = Configuration["LoggedIn"];
-                    string? clientId = Configuration["ClientId"];
-                }
-                @if (string.IsNullOrWhiteSpace(apiKey))
-                {
-                    <label>Enter ArcGIS API Key:<input id="api-key-field" type="text" @bind="ApiKey" /></label>
-                    <button id="api-key-go" @onclick="StateHasChanged">GO</button>
-
-                    if (!string.IsNullOrWhiteSpace(clientId))
-                    {
-                        <span>&nbsp;OR&nbsp;</span>
-                        <button @onclick="LoginToArcGis">Login to ArcGIS</button>
-                    }
-                }
-                else if ((loggedIn != "true") && !string.IsNullOrWhiteSpace(clientId))
-                {
-                    <button @onclick="LoginToArcGis">Login to ArcGIS</button>
-                }
+    <DynamicComponent Type="NavMenuType" Parameters="_navMenuParams" />
+    <main>
+        <div class="main-links">
+            <div class="search-input-wrap">
+                <input type="search" id="search-input"
+                       placeholder="Search for sample..."
+                       @oninput="UpdateSearchFilter"
+                       @onkeyup="SearchFilterKeyUp"/>
+                <label for="search-input" class="search-label">
+                    <img src="/_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/search.svg" alt="Search"/>
+                </label>
             </div>
+            @if (AdditionalLinksType is not null)
+            {
+                <DynamicComponent Type="AdditionalLinksType"/>
+            }
+            @if (LayoutService.CurrentPage is not null)
+            {
+                for (int i = 0; i < LayoutService.CurrentPage.PageLinks.Count; i++)
+                {
+                    NavMenu.PageLink pageLink = LayoutService.CurrentPage.PageLinks[i];
+                    string btnType = _btnTypes[i % _btnTypes.Length];
+                    <a class="btn @btnType" target="_blank" rel="noopener" href="@pageLink.Href">@pageLink.Title</a>
+                }
+            }
+        </div>
 
-            <article class="content px-4">
-                @Body
-            </article>
+        <article class="content">
+            @Body
+        </article>
     </main>
 </div>
 
@@ -60,43 +50,32 @@
     [Inject]
     public required IJSRuntime JsRuntime { get; set; }
     
+    [Inject]
+    public required JsModuleManager JsModuleManager { get; set; }
+    
+    [Inject]
+    public required AuthenticationManager AuthenticationManager { get; set; }
+    
+    [Inject]
+    public required LayoutService LayoutService { get; set; }
+    
     [CascadingParameter(Name="PageRouteData")]
     public required RouteData RouteData { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        string uri = NavigationManager.Uri;
-        if (uri.Contains("code="))
+    protected override void OnInitialized()
         {
-            string code = uri[(uri.IndexOf("code=", StringComparison.OrdinalIgnoreCase) + 5)..];
-            string callbackUri = uri[..uri.IndexOf("?", StringComparison.Ordinal)];
-            HttpResponseMessage response = await HttpClient.PostAsync("https://www.arcgis.com/sharing/rest/oauth2/token/",
-                new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["client_id"] = Configuration["ClientId"]!,
-                    ["grant_type"] = "authorization_code",
-                    ["redirect_uri"] = callbackUri,
-                    ["code"] = code
-                }));
-            TokenResponse? tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
-            Configuration["ArcGISApiKey"] = tokenResponse?.AccessToken.Trim('.');
-            Configuration["LoggedIn"] = "true";
-            NavigationManager.NavigateTo(callbackUri);
-        }
+        base.OnInitialized();
+        _navMenuParams = new()
+        {
+            ["SearchText"] = _searchText,
+            ["EnterKeyPressed"] = _enterKeyPressed
+        };
+        
+        LayoutService.OnPageChanged += StateHasChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (string.IsNullOrEmpty(ApiKey))
-        {
-            string localStorageCopy = await JsRuntime.InvokeAsync<string>("loadApiKeyFromLocalStorage");
-            if (!string.IsNullOrWhiteSpace(localStorageCopy))
-            {
-                Configuration["ArcGISApiKey"] = localStorageCopy;
-                StateHasChanged();
-            }
-        }
-
         if (firstRender)
         {
             bool isDarkMode = await JsRuntime.InvokeAsync<bool>("isDarkMode");
@@ -104,33 +83,16 @@
             StateHasChanged();
         }
     }
+    
+    protected virtual Type NavMenuType => typeof(NavMenu);
+    protected virtual Type? AdditionalLinksType => null;
 
-    private string ApiKey
-    {
-        get => Configuration["ArcGISApiKey"] ?? string.Empty;
-        set
-        {
-            Configuration["ArcGISApiKey"] = value;
-            if (JsRuntime is IJSInProcessRuntime)
-            {
-                JsRuntime.InvokeVoidAsync("saveApiKeyToLocalStorage", value);
-            }
-
-            NavigationManager.NavigateTo(NavigationManager.Uri, true);
-        }
-    }
-
-    private void LoginToArcGis()
-    {
-        string callback = NavigationManager.Uri;
-        string loginUrl = $"https://www.arcgis.com/sharing/rest/oauth2/authorize?client_id={Configuration["ClientId"]}" +
-            $"&response_type=code&expiration=3600&redirect_uri={callback}";
-        NavigationManager.NavigateTo(loginUrl);
-    }
+    private Dictionary<string, object>? _navMenuParams;
     
     private void UpdateSearchFilter(ChangeEventArgs arg)
     {
         _searchText = arg.Value?.ToString() ?? string.Empty;
+        _navMenuParams!["SearchText"] = _searchText;
     }
 
     private void SearchFilterKeyUp(KeyboardEventArgs arg)
@@ -141,7 +103,14 @@
         }
     }
 
-    private record TokenResponse([property: JsonPropertyName("access_token")] string AccessToken);
     private string _searchText = string.Empty;
     private bool _enterKeyPressed;
+    private readonly string[] _btnTypes = ["btn-primary", "btn-secondary", "btn-accent"];
+
+    public void Dispose()
+    {
+        HttpClient.Dispose();
+        LayoutService.OnPageChanged -= StateHasChanged;
+    }
+
 }

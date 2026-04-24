@@ -1,4 +1,5 @@
 @page "/wmslayers"
+@inherits SamplePage
 
 
 <h3>WMS Layers</h3>
@@ -13,10 +14,6 @@
 @* *  (c) Great Lakes Bathymetry by NGDC (http://www.ngdc.noaa.gov/mgg/greatlakes/) *@
 @* *  (c) SRTM 30m by NASA EOSDIS Land Processes Distributed Active Archive Center (LP DAAC, https://lpdaac.usgs.gov/) *@
 @* *********************************/ *@
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-wms/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://ows.terrestris.de/osm/service">OpenStreetMap WMS</a>
-</div>
 <p class="instructions">
     This sample shows how to access a WMS Service using WMSLayer and add it to a scene as a Basemap. The WMSLayer is used to create layers based on OGC Web Map Services (WMS).
 </p>
@@ -31,3 +28,12 @@
         </Basemap>
     </Map>
 </SceneView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wms/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://ows.terrestris.de/osm/service", "OpenStreetMap WMS")
+    ];
+}

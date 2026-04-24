@@ -1,14 +1,11 @@
 @page "/length-and-area"
+@inherits SamplePage
 
 @inject GeometryEngine GeometryEngine
 
 <PageTitle>Length and Area</PageTitle>
 <h1>Length and Area</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/find-length-and-area/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=867895a71a1840399476fc717e76bb43">Mid-Century BaseMap</a>
-</div>
 <p class="instructions">
     Use the Sketch Widget to draw a polygon or line, and the area or length will be 
     calculated for both Planar and Geodesic units.
@@ -56,6 +53,12 @@
 
 @code
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/find-length-and-area/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=867895a71a1840399476fc717e76bb43", "Mid-Century BaseMap")
+    ];
+
     private async Task OnViewRendered()
     {
         if (!_firstRender)

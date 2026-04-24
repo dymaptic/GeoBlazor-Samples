@@ -1,10 +1,9 @@
 ﻿@page "/basemap-projections"
+@inherits SamplePage
 
 <h1>Basemap Projections</h1>
 <PageTitle>Basemap Projections</PageTitle>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/basemaps-portal/">ArcGIS API for JavaScript</a>
-</div>
+
 <p class="instructions">
     Click on the Expand Widget in the top right, select a Basemap, and the Spatial Reference is listed in the bottom left corner.
 </p>
@@ -33,6 +32,11 @@
 
 @code {
     private CustomOverlay? Overlay { get; set; }
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/basemaps-portal/", "ArcGIS Maps SDK for JavaScript"),
+     ];
 
     private Task OnSpatialReferenceChanged(SpatialReference spatialReference)
     {

@@ -44,7 +44,8 @@ public partial class ProNavMenu : NavMenu
         new("custom-popup-content", "PRO: Custom Popup Content", null, "customPopup.svg", true),
         new("geojson-styles", "PRO: GeoJSON Styles", "oi-brush", null, true),
         new("web-style-symbols", "PRO: Web Style Symbols", "oi-brush", null, true),
-        new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true)
+        // not ready, bug in Column.Width JsonConverter
+        // new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true)
     ];
     protected override bool CollapseNavMenu { get; set; } = true;
     private string LowerNavMenuCssClass => _lowerNavMenuOpen ? "" : "lower-collapse";

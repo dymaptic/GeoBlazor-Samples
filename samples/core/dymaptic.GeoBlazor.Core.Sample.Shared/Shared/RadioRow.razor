@@ -1,0 +1,66 @@
+@typeparam T
+
+<div class="spaced-row" @attributes="AdditionalAttributes">
+    <label for="@Id" @onclick="@(() => SetValue(Value))">
+        @Label
+    </label>
+    <label for="@Id" class="radio-container"
+           @onclick="@(() => SetValue(Value))">
+        <div class="@BoxClass"></div>
+    </label>
+    @ChildContent
+</div>
+
+@code {
+    [CascadingParameter(Name=nameof(RadioGroup<>))]
+    public required RadioGroup<T> RadioGroup { get; set; }
+    
+    [Parameter]
+    [EditorRequired]
+    public required string Label { get; set; }
+    
+    [Parameter]
+    [EditorRequired]
+    public required T Value { get; set; }
+    
+    [Parameter]
+    [EditorRequired]
+    public required string Id { get; set; }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; } = [];
+
+    public void Refresh()
+    {
+        StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        RadioGroup.Rows.Add(this);
+    }
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        bool selected = RadioGroup.Value?.Equals(Value) == true;
+        if (selected != _isChecked)
+        {
+            _isChecked = selected;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SetValue(T value)
+    {
+        _isChecked = true;
+        await RadioGroup.SetValue(value);
+    }
+    
+    private string BoxClass => _isChecked ? "radio-box checked" : "radio-box";
+
+    private bool _isChecked;
+}

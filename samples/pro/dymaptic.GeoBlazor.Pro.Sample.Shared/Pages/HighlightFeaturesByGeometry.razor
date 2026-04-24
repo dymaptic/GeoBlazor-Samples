@@ -1,4 +1,5 @@
 @page "/highlight-features-by-geometry"
+@inherits SamplePage
 @using dymaptic.GeoBlazor.Core.Interfaces
 
 @inject GeometryEngine GeometryEngine
@@ -6,10 +7,6 @@
 <PageTitle>Highlight Features by Geometry</PageTitle>
 <h1>Highlight Features by Geometry</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d72ab790752142bd9dfb190c79d6582b">National Park Service Establishments</a>
-</div>
 <p class="instructions">
     Use the Sketch Widget's rectangle tool to draw a selection area on the map.
     Features that intersect the rectangle will be highlighted and shown in the
@@ -61,6 +58,7 @@
             Clear Selection
         </button>
     </CustomOverlay>
+    @* ReSharper disable once GeoBlazor_Untested *@
     @if (_npsLayer is not null)
     {
         <FeatureTableWidget @ref="_featureTable"
@@ -75,7 +73,15 @@
 
 <div id="feature-table-container" style="height: 40%; min-height: 200px; width: 100%; margin-bottom: 4rem;"></div>
 
+@* ReSharper disable once GeoBlazor_Untested *@
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=d72ab790752142bd9dfb190c79d6582b", "National Park Service Establishments")
+    ];
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

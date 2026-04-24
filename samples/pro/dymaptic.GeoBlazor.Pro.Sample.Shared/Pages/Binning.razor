@@ -1,18 +1,14 @@
 ﻿@page "/binning"
+@inherits SamplePage
 
 <PageTitle>Binning</PageTitle>
 <h1>Binning</h1>
 
 <PageTitle>Clustering</PageTitle>
     <h1>Clustering</h1>
-    
-    <div class="links-div">
-        <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-binning/">ArcGIS API for JavaScript Reference</a>
-        <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/NYC_motor_crashes/FeatureServer/0">NYC Motor Crashes</a>
-    </div>
     <p class="instructions">
-        This sample demonstrates how to enable binning on a FeatureLayer. 
-        Binning is a method of aggregating points in a FeatureLayer, CSVLayer, or GeoJSONLayer by grouping them in predefined bins. 
+        This sample demonstrates how to enable binning on a FeatureLayer.
+        Binning is a method of aggregating points in a FeatureLayer, CSVLayer, or GeoJSONLayer by grouping them in predefined bins.
         Bins are generated using geohashes.
     </p>
 
@@ -77,6 +73,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-binning/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/NYC_motor_crashes/FeatureServer/0", "NYC Motor Crashes")
+    ];
+
     private async Task ToggleBinning()
     {
         _binning = !_binning;

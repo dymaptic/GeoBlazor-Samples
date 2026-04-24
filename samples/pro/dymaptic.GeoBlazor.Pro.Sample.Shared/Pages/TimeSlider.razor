@@ -1,10 +1,7 @@
 ﻿@page "/time-slider"
+@inherits SamplePage
 <PageTitle>Time Slider</PageTitle>
 <h1>Time Slider</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=f9e9283b9c9741d09aad633f68758bf6">National Weather Service Precipitation Forecast</a>
-</div>
 <p class="instructions">
     A Map is created with a feature layer and the Extent of the Time Slider Widget is set after load.
 </p>
@@ -32,6 +29,12 @@
 </FeatureLayer>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=f9e9283b9c9741d09aad633f68758bf6", "National Weather Service Precipitation Forecast")
+    ];
 
     private async Task OnViewRendered()
     {

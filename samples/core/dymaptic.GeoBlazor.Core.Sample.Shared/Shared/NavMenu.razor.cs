@@ -137,5 +137,5 @@ public partial class NavMenu
         new("search-multi-source", "Search Multiple Sources", "oi-magnifying-glass"),
         new("reverse-geolocator", "GeoLocator", "oi-arrow-circle-bottom")
     ];
-    public record PageLink(string Href, string Title, string? IconClass, string? ImageFile = null, bool Pro = false);
+    public record PageLink(string Href, string Title, string? IconClass = null, string? ImageFile = null, bool Pro = false);
 }

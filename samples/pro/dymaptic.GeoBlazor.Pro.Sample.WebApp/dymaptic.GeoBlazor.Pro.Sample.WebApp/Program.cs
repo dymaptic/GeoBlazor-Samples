@@ -1,4 +1,5 @@
 using dymaptic.GeoBlazor.Core.Sample.Shared.Pages;
+using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Pro;
 using dymaptic.GeoBlazor.Pro.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Pro.Sample.WebApp;
@@ -16,6 +17,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddProxyHttpClient();
 
 builder.Services.AddGeoBlazorPro(builder.Configuration);
+builder.Services.AddScoped<LayoutService>();
 builder.Configuration.AddInMemoryCollection();
 builder.Services.AddOutputCache();
 builder.Services.AddMemoryCache();

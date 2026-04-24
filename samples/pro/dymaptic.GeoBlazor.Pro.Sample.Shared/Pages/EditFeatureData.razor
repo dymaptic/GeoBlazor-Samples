@@ -1,12 +1,9 @@
 ﻿@page "/edit-feature-data"
+@inherits SamplePage
 
 <PageTitle>Edit Feature Data</PageTitle>
 <h1>Edit Feature Data</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/edit-feature-data/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=979c6cc89af9449cbeb5342a439c6a76">Light Gray Canvas BaseMap</a>
-</div>
 <p class="instructions">
     The Editor Widget has two modes. "Select" allows you to select, edit, and delete
     an existing feature. Clicking "New Feature" allows you to add a feature to the map.
@@ -31,4 +28,10 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/edit-feature-data/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=979c6cc89af9449cbeb5342a439c6a76", "Light Gray Canvas BaseMap")
+    ];
 }

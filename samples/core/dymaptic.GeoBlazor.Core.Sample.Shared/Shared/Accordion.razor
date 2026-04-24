@@ -1,0 +1,20 @@
+<div class="form-group">
+    <h2 class="accordion-title" @onclick="@(() => _isOpen = !_isOpen)">
+        @Title
+        <span class="oi @(_isOpen ? "oi-chevron-bottom" : "oi-chevron-right")"></span>
+    </h2>
+    <div class="@(_isOpen ? "" : "collapse")">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public required string Title { get; set; }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }   
+    
+    private bool _isOpen;
+}

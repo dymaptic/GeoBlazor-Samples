@@ -1,16 +1,8 @@
 ﻿@page "/clustering"
+@inherits SamplePage
 <PageTitle>Clustering</PageTitle>
 <h1>Clustering</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank"
-       href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster/">ArcGIS API for
-        JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank"
-       href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson">Earthquake GeoJSON Layer</a>
-    <a class="btn btn-primary" target="https://www.arcgis.com/home/item.html?id=2b93b06dc0dc4e809d3c8db5cb96ba69">World
-        Countries Generalized Layer</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to enable point clustering on a GeoJSONLayer. Clustering is a method of reducing points
     in a FeatureLayer, CSVLayer, GeoJSONLayer, WFSLayer, or OGCFeatureLayer by grouping them based on their spatial
@@ -87,6 +79,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson", "Earthquake GeoJSON Layer"),
+        new("https://www.arcgis.com/home/item.html?id=2b93b06dc0dc4e809d3c8db5cb96ba69", "World Countries Generalized Layer")
+    ];
 
     private async Task ToggleClustering()
     {

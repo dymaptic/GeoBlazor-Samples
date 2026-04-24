@@ -1,11 +1,8 @@
 @page "/ogc-feature-layers"
+@inherits SamplePage
 
 <h3>OGC Feature Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-ogcfeaturelayer/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://demo.ldproxy.net/vineyards">Vineyards in Rhineland-Palatinate, Germany</a>
-</div>
 <p class="instructions">
     This sample shows how to access an <a target="_blank" href="https://www.ogc.org/standards/ogcapi-features">OGC API Features service</a> 
     using an OGCFeatureLayer. Since this layer type brings the data in as features, you can perform your own rendering, 
@@ -75,6 +72,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-ogcfeaturelayer/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://demo.ldproxy.net/vineyards", "Vineyards in Rhineland-Palatinate, Germany")
+    ];
 
     private async Task OnViewRendered()
     {

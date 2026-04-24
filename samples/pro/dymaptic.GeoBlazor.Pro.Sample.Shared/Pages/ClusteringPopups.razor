@@ -1,12 +1,9 @@
 ﻿@page "/clustering-popups"
+@inherits SamplePage
 
 <PageTitle>Clustering Popups</PageTitle>
 <h1>Clustering Popups</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-filter/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Places_of_Worship_India/FeatureServer/0">Places of Worship</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to generate a default PopupTemplate and labels for point clusters enabled in a MapView. 
     To generate a PopupTemplate, use the injectable <code>PopupTemplateCreator</code> class and the <code>GetTemplates</code> method. 
@@ -58,6 +55,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-filter/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Places_of_Worship_India/FeatureServer/0", "Places of Worship")
+    ];
+
     [Inject]
     public required PopupTemplateGenerator PopupTemplateGenerator { get; set; }
     [Inject]
@@ -87,7 +91,7 @@
     {
         PopupTemplateResults templateResults = await PopupTemplateGenerator.GetClusterTemplates(_featureLayer!);
         PopupTemplate popupTemplate = templateResults.PrimaryTemplate.Value;
-        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!)).PrimaryScheme!;
+        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!, _mapView!.Id)).PrimaryScheme;
         Dimension? minSize = labelScheme.ClusterMinSize is null ? null : new Dimension(labelScheme.ClusterMinSize.Value);
         return new FeatureReductionCluster(clusterMinSize: minSize,
             labelingInfo: labelScheme.LabelingInfo, popupTemplate: popupTemplate, maxScale: 50000);
