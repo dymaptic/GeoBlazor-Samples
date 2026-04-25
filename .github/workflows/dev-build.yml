@@ -33,10 +33,10 @@ jobs:
             -k "${{ secrets.ARCGISAPIKEY }}" `
             -l "${{ secrets.SAMPLES_GEOBLAZOR_DEV_LICENSE_KEY }}" `
             -b "${{ secrets.SAMPLES_API_BYPASS_KEY }}" `
-            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.json" `
-            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.Production.json" `
-            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.json" `
-            -o "./GeoBlazor-Samples/samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.Production.json"
+            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.json" `
+            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.Production.json" `
+            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.json" `
+            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.Production.json"
         
         # Publishes the Samples project
         # DON'T PRE-RESTORE, PRE-BUILD, IT BREAKS IN DOCKER -- SEE https://github.com/dotnet/aspnetcore/issues/63962
