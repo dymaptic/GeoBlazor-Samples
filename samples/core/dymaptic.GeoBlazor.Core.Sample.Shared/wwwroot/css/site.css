@@ -1405,6 +1405,15 @@ input:checked[type=checkbox] {
     border-color: var(--geoblazor-accent-emphasis);
 }
 
+input:focus[type=checkbox] {
+    border-color: var(--geoblazor-accent-emphasis);
+    box-shadow: 0 0 0 0.25rem
+}
+
+input:hover[type=checkbox] {
+    border-color: var(--geoblazor-accent-hover);
+}
+
 .form-check-input:checked[type=checkbox] {
     background-image: unset;
     border-color: var(--geoblazor-accent-emphasis);
