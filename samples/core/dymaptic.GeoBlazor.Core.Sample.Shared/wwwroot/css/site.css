@@ -1078,9 +1078,7 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 }
 
 .nav-list .nav-list-item:has(> .nav-list-link.active) {
-    background-color: var(--background-grey-1);
-    border-left: 3px solid transparent;
-    border-image: var(--geoblazor-gradient-vertical) 1;
+    background-color: var(--background-grey-3);
 }
 
 .nav-list .nav-list-item .nav-list-link.active {
@@ -1099,9 +1097,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 .nav-list .nav-list-item.nav-pinned {
     padding: 0.5rem 0.75rem;
     margin-bottom: 0.25rem;
-    border-bottom: 1px solid var(--background-grey-3);
-    border-radius: 0;
-    padding-bottom: 0.75rem;
 }
 
 /* Group headers */
@@ -1145,11 +1140,9 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 }
 
 .nav-group-title {
-    font-family: 'Aller', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
 }
 
 .nav-list .nav-list-item .nav-list-expander svg {
