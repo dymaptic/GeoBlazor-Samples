@@ -1,10 +1,8 @@
 ﻿@page "/projection-tool"
+@inherits SamplePage
 @inject ProjectionEngine ProjectionEngine
 
 <h1>Projection</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-projection.html">ArcGIS API for JavaScript</a>
-</div>
 <p class="instructions">
     Most mapping projections are handled automatically by <code>SpatialReferences</code> built into basemaps, feature layers,
     and graphics. However, there is also a tool you can call directly to "Project" or "GetTransformation" between several
@@ -14,30 +12,61 @@
     Not all values will render properly with this GeoJSON map.
 </p>
 
-<h2>Starting Point</h2>
-<div style="margin-bottom: 0.5rem;">
-    <label>
+<div class="form-group">
+    <h2>Starting Point</h2>
+    <div class="spaced-row">
+        <label for="long-input">
         Longitude:
-        <input type="number" step="0.01" @bind="StartingLong" />
-    </label>
-    <label>
-        Latitutde:
-        <input type="number" step="0.01" @bind="StartingLat" />
-    </label>
+        </label>
+            <input id="long-input" type="number" step="0.01" @bind="StartingLong" />
+        
+        <label for="lat-input">
+        Latitude:
+        </label>
+            <input id="lat-input" type="number" step="0.01" @bind="StartingLat" />
+        
+    </div>
 </div>
 
-<div class="map-row">
-    <div class="map-section">
-        <div style="margin-bottom: 0.5rem;">
-            Wkid: <input type="number" step="1" value="@_wkid1" @onchange="UpdateWkid1" />
+<div class="spaced-row">
+    <div class="form-group" style="height: fit-content;">
+        <div class="spaced-row">
+            <label for="wkid-select-1">
+                Wkid:
+            </label>
+            <select id="wkid-select-1" @onchange="UpdateWkid1">
+                <option value="3857" disabled>Select a projection</option>
+                <optgroup label="Equidistant (maintain length)">
+                    <option value="4326" selected="@(_wkid1 = 4326)">4326: WGS84 (GCS) -> pseudo Plate Carrée (Cylindrical)</option>
+                    <option value="54028" selected="@(_wkid1 = 54028)">54028: World Cassini (Cylindrical)</option>
+                    <option value="54027" selected="@(_wkid1 = 54027)">54027: World Equidistant conic (Conic)</option>
+                </optgroup>
+                <optgroup label="Conformal (maintain angles)">
+                    <option value="54026" selected="@(_wkid1 = 54026)">54026: World Stereographic (Azimuthal)</option>
+                </optgroup>
+                <optgroup label="Equal-area (maintain area)">
+                    <option value="54010" selected="@(_wkid1 = 54010)">54010: World Eckert VI (Pseudocylindrical)</option>
+                    <option value="54008" selected="@(_wkid1 = 54008)">54008: World Sinusoidal (Pseudocylindrical)</option>
+                </optgroup>
+                <optgroup label="Gnomonic (distances)">
+                    <option value="102034" selected="@(_wkid1 = 102034)">102034: North Pole Gnomonic (Azimuthal)</option>
+                </optgroup>
+                <optgroup label="Compromise (distort all)">
+                    <option value="3857" selected="@(_wkid1 = 3857)">3857: Web Mercator Auxiliary Sphere (Cylindrical)</option>
+                    <option value="54016" selected="@(_wkid1 = 54016)">54016: World Gall Stereographic (Cylindrical)</option>
+                    <option value="54042" selected="@(_wkid1 = 54042)">54042: World Winkel Tripel (Pseudoazimuthal)</option>
+                    <option value="54050" selected="@(_wkid1 = 54050)">54050: World Fuller / Dymaxion map (Polyhedral)</option>
+                </optgroup>
+            </select>
         </div>
-        @if (_startX.HasValue && _startY.HasValue)
-        {
-            <label>X: @_startX.Value.ToString("N2")</label>
-            <label>Y: @_startY.Value.ToString("N2")</label>
-        }
-        <MapView @ref="_view1" Longitude="_startingLong" Latitude="_startingLat" Zoom="10" Class="map-view"
-                 OnViewRendered="View1Rendered" Style="background-color: lightblue; height: 300px;">
+        <div class="spaced-row">
+            <label>X: @_startX?.ToString("N2")</label>
+            <label>Y: @_startY?.ToString("N2")</label>
+        </div>
+        
+        <MapView @ref="_view1" Longitude="_startingLong" Latitude="_startingLat" Zoom="10"
+                 OnViewRendered="View1Rendered" Style="background-color: lightblue;"
+                 Class="map-view">
             <SpatialReference Wkid="@_wkid1" />
             <Map>
                 <GeoJSONLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0/query?where=1%3D1&outFields=*&f=geojson">
@@ -57,17 +86,44 @@
             </Map>
         </MapView>
     </div>
-    <div class="map-section">
-        <div>
-            Wkid: <input type="number" step="1" value="@_wkid2" @onchange="UpdateWkid2" />
+    <div class="form-group" style="height: fit-content;">
+        <div class="spaced-row">
+            <label for="wkid-select-2">
+                Wkid:
+            </label>
+            <select id="wkid-select-2" @onchange="UpdateWkid2">
+                <option value="3857" disabled>Select a projection</option>
+                <optgroup label="Equidistant (maintain length)">
+                    <option value="4326" selected="@(_wkid2 = 4326)">4326: WGS84 (GCS) -> pseudo Plate Carrée (Cylindrical)</option>
+                    <option value="54028" selected="@(_wkid2 = 54028)">54028: World Cassini (Cylindrical)</option>
+                    <option value="54027" selected="@(_wkid2 = 54027)">54027: World Equidistant conic (Conic)</option>
+                </optgroup>
+                <optgroup label="Conformal (maintain angles)">
+                    <option value="54026" selected="@(_wkid2 = 54026)">54026: World Stereographic (Azimuthal)</option>
+                </optgroup>
+                <optgroup label="Equal-area (maintain area)">
+                    <option value="54010" selected="@(_wkid2 = 54010)">54010: World Eckert VI (Pseudocylindrical)</option>
+                    <option value="54008" selected="@(_wkid2 = 54008)">54008: World Sinusoidal (Pseudocylindrical)</option>
+                </optgroup>
+                <optgroup label="Gnomonic (distances)">
+                    <option value="102034" selected="@(_wkid2 = 102034)">102034: North Pole Gnomonic (Azimuthal)</option>
+                </optgroup>
+                <optgroup label="Compromise (distort all)">
+                    <option value="3857" selected="@(_wkid2 = 3857)">3857: Web Mercator Auxiliary Sphere (Cylindrical)</option>
+                    <option value="54016" selected="@(_wkid2 = 54016)">54016: World Gall Stereographic (Cylindrical)</option>
+                    <option value="54042" selected="@(_wkid2 = 54042)">54042: World Winkel Tripel (Pseudoazimuthal)</option>
+                    <option value="54050" selected="@(_wkid2 = 54050)">54050: World Fuller / Dymaxion map (Polyhedral)</option>
+                </optgroup>
+            </select>
+            <div class="spaced-row">
+                <label>X: @_endX?.ToString("N2")</label>
+                <label>Y: @_endY?.ToString("N2")</label>
+            </div>
         </div>
-        @if (_endX.HasValue && _endY.HasValue)
-        {
-            <label>X: @_endX.Value.ToString("N2")</label>
-            <label>Y: @_endY.Value.ToString("N2")</label>
-        }
-        <MapView @ref="_view2" Longitude="_startingLong" Latitude="_startingLat" Zoom="3" Class="map-view"
-                 OnViewRendered="View2Rendered" Style="background-color: lightblue; height: 300px;">
+        
+        <MapView @ref="_view2" Longitude="_startingLong" Latitude="_startingLat" Zoom="3"
+                 OnViewRendered="View2Rendered" Style="background-color: lightblue;"
+                 Class="map-view">
             <SpatialReference Wkid="@_wkid2" />
             <Map>
                 <GeoJSONLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/ArcGIS/rest/services/World_Countries_(Generalized)/FeatureServer/0/query?where=1%3D1&outFields=*&f=geojson">
@@ -89,25 +145,45 @@
     </div>
 </div>
 
-<h2>Get Transformation</h2>
-<div>Starting Projection (Wkid): @_view1SpatialReference?.Wkid</div>
-<label>Transformation Steps</label>
-@if (_transformation?.Steps is not null)
-{
-    for (var i = 0; i < _transformation.Steps.Length; i++)
-    {
-        GeographicTransformationStep step = _transformation.Steps[i];
-        <div>@(i + 1): @step.Wkid</div>
-    }
-}
-else
-{
-    <div>None</div>
-}
+<div class="form-group">
+    <h2>Get Transformation</h2>
+    <div class="spaced-row">
+        <label>
+            Starting Projection (Wkid):
+        </label>
+        <input type="number" value="@_view1SpatialReference?.Wkid" disabled="@true" />
+    </div>
+        <label>Transformation Steps</label>
+        @if (_transformation?.Steps is not null)
+        {
+            for (var i = 0; i < _transformation.Steps.Length; i++)
+            {
+                GeographicTransformationStep step = _transformation.Steps[i];
+                <div class="spaced-row">
+                    <label>@(i + 1):</label>
+                    <input type="number" value="@step.Wkid" disabled="@true" />
+                </div>
+            }
+        }
+        else
+        {
+            <label>None</label>
+        }
 
-<div>Ending Projection (Wkid): @_view2SpatialReference?.Wkid</div>
+    <div class="spaced-row">
+        <label>
+            Ending Projection (Wkid):
+        </label>
+        <input type="number" value="@_view2SpatialReference?.Wkid" disabled="@true" />
+    </div>
+</div>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-projection.html", "ArcGIS Maps SDK for JavaScript"),
+     ];
 
     private MapView? _view1;
     private MapView? _view2;
@@ -192,6 +268,7 @@ else
         _endY = endPoint.Y;
         Extent? view1Extent = await _view1!.GetExtent();
         _transformation = await ProjectionEngine.GetTransformation(_view1SpatialReference!, _view2SpatialReference!, view1Extent!);
+        Console.WriteLine($"Transformation: {JsonSerializer.Serialize(_transformation)}");
         StateHasChanged();
     }
 

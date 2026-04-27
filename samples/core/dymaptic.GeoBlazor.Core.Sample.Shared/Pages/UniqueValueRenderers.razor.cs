@@ -4,12 +4,19 @@ using dymaptic.GeoBlazor.Core.Components.Symbols;
 using dymaptic.GeoBlazor.Core.Enums;
 using dymaptic.GeoBlazor.Core.Extensions;
 using dymaptic.GeoBlazor.Core.Model;
+using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 
 
 namespace dymaptic.GeoBlazor.Core.Sample.Shared.Pages;
 
 public partial class UniqueValueRenderers
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-renderers-UniqueValueRenderer.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://arcgis.com/home/item.html?id=7afec250e02845868db89c83949a672f", "OpenStreetMap Highways for North America")
+    ];
+
     private static readonly Dictionary<string, SimpleLineSymbol> roadTypes = new()
     {
         // Major highways - wide, bold colors
@@ -60,7 +67,7 @@ public partial class UniqueValueRenderers
         ["proposed"] = new SimpleLineSymbol(new MapColor(192, 192, 192), 1.5, SimpleLineSymbolStyle.Dot)
     };
     private readonly UniqueValueRenderer _uniqueValueRenderer = new(uniqueValueInfos: roadTypes
-            .Select(r => new UniqueValueInfo(r.Key.ToUpperFirstChar().Replace("_", " "), r.Value, r.Key))
+            .Select(r => new UniqueValueInfo(string.Concat(r.Key[0].ToString().ToUpperInvariant(), r.Key.AsSpan(1)).Replace("_", " "), r.Value, r.Key))
             .ToArray(),
         field: "highway", defaultLabel: "Service",
         legendOptions: new UniqueValueRendererLegendOptions("Route Type"));

@@ -1,10 +1,7 @@
 ﻿@page "/group-layers"
+@inherits SamplePage
 <PageTitle>Group Layers</PageTitle>
 <h1>Group Layers</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/effect-blur-shadow/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9">World Imagery Tile Layer</a>
-</div>
 <p class="instructions">
     This sample uses a combination of layer effects and layer blending on multiple layers to make a country stand out from the rest of the map. 
     When the app loads, you will see the country of France will stand out from the rest. The user can then click on any country to highlight that country on the map.
@@ -47,6 +44,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/effect-blur-shadow/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9", "World Imagery Tile Layer")
+    ];
 
     private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {

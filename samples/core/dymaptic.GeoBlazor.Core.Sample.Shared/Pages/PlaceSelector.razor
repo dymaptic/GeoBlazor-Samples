@@ -1,11 +1,8 @@
 ﻿@page "/place-selector"
+@inherits SamplePage
 <PageTitle>Place Selector</PageTitle>
 <h1>Place Selector</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/find-places/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=00f90f3f3c9141e4bea329679b257142">Streets (with Relief) BaseMap</a>
-</div>
 <p class="instructions">
     Use the dropdown in the top-right of the map to select a type of location to display.
     Click on a rendered point on the map to get details.
@@ -34,6 +31,13 @@
 <PopupTemplate @ref="Popup" Title="{PlaceName}" StringContent="{Place_addr}" />
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/find-places/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=00f90f3f3c9141e4bea329679b257142", "Streets (with Relief) BaseMap")
+    ];
+
     public MapView? View { get; set; }
     public SimpleMarkerSymbol? Symbol { get; set; }
     public PopupTemplate? Popup { get; set; }

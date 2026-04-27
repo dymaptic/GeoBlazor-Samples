@@ -1,14 +1,11 @@
 ﻿@page "/spatial-relationships"
+@inherits SamplePage
 
 @inject GeometryEngine GeometryEngine
 
 <PageTitle>Spatial Relationships</PageTitle>
 <h1>Spatial Relationships</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/find-spatial-relationships/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=358ec1e175ea41c3bf5c68f0da11ae2b">Dark Gray Canvas BaseMap</a>
-</div>
 <p class="instructions">
     Drag the rectangle or line to see the Spatial Relationship legend update. You
     can also draw a new shape with the Sketch Tool.
@@ -70,6 +67,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/find-spatial-relationships/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=358ec1e175ea41c3bf5c68f0da11ae2b", "Dark Gray Canvas BaseMap")
+    ];
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

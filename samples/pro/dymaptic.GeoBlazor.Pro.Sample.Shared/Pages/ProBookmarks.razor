@@ -1,12 +1,8 @@
 @page "/pro-Bookmarks"
+@inherits SamplePage
 
 <PageTitle>Bookmarks and Bookmarks Widget</PageTitle>
 <h1>Bookmarks Widget</h1>
-
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-bookmarks/">Bookmarks Sample</a>
-    <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html">ArcGIS API for JavaScript WebMap reference</a>
-</div>
 
 <p class="instructions">
     Sample demonstrates the use of the Bookmarks widget and Bookmark actions.
@@ -51,6 +47,12 @@
 
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-bookmarks/", "Bookmarks Sample"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html", "ArcGIS Maps SDK for JavaScript WebMap reference")
+    ];
 
     private async Task OnViewRendered()
     {

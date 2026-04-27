@@ -1,11 +1,8 @@
 @page "/wfslayers"
+@inherits SamplePage
 
 <h3>WFS Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about">Office for National Statistics (UK)</a>
-</div>
 <p class="instructions">
     To create a WFSLayer, all you need is the URL to a WFS service that supports WFS 2.0.0 and has GeoJSON output format enabled. Optionally, you can set the name to the FeatureType you want to access in the service. If no name is provided, the layer will default to the first FeatureType in the service.
 </p>
@@ -31,3 +28,12 @@
     <LayerListWidget Position="OverlayPosition.BottomLeft" />
     <PopupWidget DefaultPopupTemplateEnabled="true" />
 </MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about", "Office for National Statistics (UK)")
+    ];
+}

@@ -1,0 +1,117 @@
+@page "/legends"
+@inherits SamplePage
+
+<PageTitle>Legend</PageTitle>
+<h1>Legend</h1>
+
+<p class="instructions">
+    The Legend widget describes the symbols used to represent layers in the map. Enable the layers
+    to see the legend populate automatically. The legend reflects each layer's renderer and symbology.
+</p>
+
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="census-layer-checkbox">
+            Show Census Layer:
+        </label>
+        <input id="census-layer-checkbox" 
+               type="checkbox" 
+               class="form-check-input" 
+               @onchange="@(() => _showCensusLayer = !_showCensusLayer)">
+    </div>
+    <div class="spaced-row">
+        <label for="trails-layer-checkbox">
+            Show Trails Layer:
+        </label>
+        <input id="trails-layer-checkbox" 
+               type="checkbox" 
+               class="form-check-input" 
+               @onchange="@(() => _showTrailsLayer = !_showTrailsLayer)">
+    </div>
+    <div class="spaced-row">
+        <label for="parks-layer-checkbox">
+            Show Parks Layer:
+        </label>
+        <input id="parks-layer-checkbox" 
+               type="checkbox" 
+               class="form-check-input" 
+               @onchange="@(() => _showParksLayer = !_showParksLayer)">
+    </div>
+</div>
+
+<MapView Longitude="-118.805" Latitude="34.027" Zoom="12" Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+
+        @if (_showCensusLayer)
+        {
+            <FeatureLayer @ref="_censusLayer"
+                          Title="Census Block Points"
+                          Url="https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2"
+                          Opacity="0.6">
+                <SimpleRenderer>
+                    <SimpleMarkerSymbol Color="@(new MapColor(0, 112, 255, 0.6))"
+                                        Size="4"
+                                        Style="SimpleMarkerSymbolStyle.Circle">
+                        <Outline Color="@(new MapColor(0, 0, 0, 0.4))" Width="0.5" />
+                    </SimpleMarkerSymbol>
+                    <SizeVariable Field="B03002_001E"
+                                  MinDataValue="0"
+                                  MaxDataValue="5000"
+                                  MinSize="2"
+                                  MaxSize="12" />
+                </SimpleRenderer>
+            </FeatureLayer>
+        }
+
+        @if (_showTrailsLayer)
+        {
+            <FeatureLayer Title="Trails"
+                          Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails/FeatureServer/0">
+                <UniqueValueRenderer Field="USE_BIKE">
+                    <UniqueValueInfo Value="Yes" Label="Bike Allowed">
+                        <SimpleLineSymbol Color="@(new MapColor("#27ae60"))"
+                                          Style="SimpleLineSymbolStyle.Solid"
+                                          Width="2.5" />
+                    </UniqueValueInfo>
+                    <UniqueValueInfo Value="No" Label="No Bikes">
+                        <SimpleLineSymbol Color="@(new MapColor("#e74c3c"))"
+                                          Style="SimpleLineSymbolStyle.Dash"
+                                          Width="1.5" />
+                    </UniqueValueInfo>
+                </UniqueValueRenderer>
+            </FeatureLayer>
+        }
+
+        @if (_showParksLayer)
+        {
+            <FeatureLayer Title="Parks and Open Space"
+                          Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0">
+                <SimpleRenderer>
+                    <SimpleFillSymbol Color="@(new MapColor(56, 168, 0, 0.5))"
+                                      Style="SimpleFillSymbolStyle.Solid">
+                        <Outline Color="@(new MapColor(56, 168, 0, 0.8))" Width="1" />
+                    </SimpleFillSymbol>
+                </SimpleRenderer>
+            </FeatureLayer>
+        }
+    </Map>
+
+    <LegendWidget Position="OverlayPosition.BottomRight" />
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/legend/", "ArcGIS Sample"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Legend.html", "Legend API Reference")
+    ];
+
+    private bool _showCensusLayer;
+    private bool _showTrailsLayer;
+    private bool _showParksLayer;
+    private FeatureLayer? _censusLayer;
+}

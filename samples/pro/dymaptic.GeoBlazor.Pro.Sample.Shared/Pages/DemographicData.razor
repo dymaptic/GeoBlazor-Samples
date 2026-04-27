@@ -1,4 +1,5 @@
 ﻿@page "/demographic-data"
+@inherits SamplePage
 
 @inject LocationService LocationService;
 @inject ArcGISRest ArcGISRest;
@@ -7,10 +8,6 @@
 <PageTitle>Demographic Data</PageTitle>
 <h1>Demographic Data</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/get-demographic-data/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b">Navigation BaseMap</a>
-</div>
 <p class="instructions">
     Zoom in and click on a city, or use the Search Widget to find a city, 
     and you will see a popup with population data for a 1-mile radius buffer 
@@ -41,6 +38,12 @@
 </SimpleFillSymbol>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/get-demographic-data/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b", "Navigation BaseMap")
+    ];
 
     private MapView? View { get; set; }
     private Symbol? BufferSymbol { get; set; }

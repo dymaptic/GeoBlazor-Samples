@@ -1,12 +1,9 @@
 ﻿@page "/popup-edit"
+@inherits SamplePage
 
 <PageTitle>Popup with Edit Action</PageTitle>
 <h1>Popup with Edit Action</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/popup-editaction/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3">Topographic Vector BaseMap</a>
-</div>
 <p class="instructions">
     The sample makes use of both Popups and the Editor widget. It does this by demonstrating how to add a 
     custom edit action to a PopupTemplate displayed in a Popup. The popup displays a custom Edit feature action. 
@@ -62,6 +59,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/popup-editaction/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3", "Topographic Vector BaseMap")
+    ];
+
     private ValueTask<PopupContent[]?> DifficultyLevel(Graphic graphic)
     {
         AttachmentsPopupContent attachmentsElement = 

@@ -1,4 +1,5 @@
 ﻿@page "/search-custom-source"
+@inherits SamplePage
 @using System.Net
 @inject ArcGISRest Rest
 @inject GeometryEngine GeometryEngine
@@ -6,10 +7,6 @@
 <PageTitle>Search with Custom Source</PageTitle>
 <h1>Search with Custom Source</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-customsource/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=55ebf90799fa4a3fa57562700a68c405">Streets BaseMap</a>
-</div>
 <p class="instructions">
     Demonstrates how to create your own custom search sources. Also uses the Pro <code>ArcGISRest</code> service to query the ArcGIS REST API.
 </p>
@@ -32,6 +29,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-customsource/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=55ebf90799fa4a3fa57562700a68c405", "Streets BaseMap")
+    ];
 
     private void OnExtentChanged(Extent extent)
     {

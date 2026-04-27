@@ -1,49 +1,79 @@
 ﻿@page "/widgets"
+@inherits SamplePage
 
 <PageTitle>Widgets</PageTitle>
 <h1>Widgets</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-support-widget.html">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b">Navigation BaseMap</a>
-</div>
 <p class="instructions">
     Use the checkboxes to toggle various widgets on/off. Notice that Widgets can be placed on top of the map,
     or outside the map, as in the case of the Basemap Gallery.
 </p>
-<div id="control-set">
-    <div class="form-group">
-        <label>Locator: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(LocateWidget)))"></label>
+<div class="form-group">
+    <div class="form-group spaced-row">
+        <label for="locator-input">
+            Locator:
+        </label>
+        <input id="locator-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(LocateWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Search: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(SearchWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="search-input">
+            Search:
+        </label>
+        <input id="search-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(SearchWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Basemap Toggle: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(BasemapToggleWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="basemap Toggle-input">
+            Basemap Toggle:
+        </label>
+        <input id="basemap Toggle-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(BasemapToggleWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Basemap Gallery: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(BasemapGalleryWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="basemap Gallery-input">
+            Basemap Gallery:
+        </label>
+        <input id="basemap Gallery-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(BasemapGalleryWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Legend: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(LegendWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="legend-input">
+            Legend:
+        </label>
+        <input id="legend-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(LegendWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Scale Bar: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(ScaleBarWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="scale Bar-input">
+            Scale Bar:
+        </label>
+        <input id="scale Bar-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(ScaleBarWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Home: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(HomeWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="home-input">
+            Home:
+        </label>
+        <input id="home-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(HomeWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Compass: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(CompassWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="compass-input">
+            Compass:
+        </label>
+        <input id="compass-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(CompassWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Bookmarks: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(BookmarksWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="bookmarks-input">
+            Bookmarks:
+        </label>
+        <input id="bookmarks-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(BookmarksWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Distance Measurement: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(MeasurementWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="distance Measurement-input">
+            Distance Measurement:
+        </label>
+        <input id="distance Measurement-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(MeasurementWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Area Measurement 2D: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(AreaMeasurement2DWidget)))"></label>
+    <div class="form-group spaced-row">
+        <label for="area Measurement 2D-input">
+            Area Measurement 2D:
+        </label>
+        <input id="area Measurement 2D-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(AreaMeasurement2DWidget)))"/>
     </div>
         
 </div>
@@ -110,6 +140,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-support-widget.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b", "Navigation BaseMap")
+    ];
+
     private MapView? MapView { get; set; }
 
     private async Task ToggleWidget(string widgetTypeName)

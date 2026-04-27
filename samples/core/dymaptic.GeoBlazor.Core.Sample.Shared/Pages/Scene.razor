@@ -1,42 +1,37 @@
 @page "/scene"
+@inherits SamplePage
 @using System.Globalization
 @using System.Diagnostics.CodeAnalysis
 
 <PageTitle>Scene</PageTitle>
 <h1>Scene</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-scene/">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     A simple demo of a 3D Scene View with a basemap from ArcGIS Online, a polygon graphic rendered in markup, and a small point (to the left) rendered in C#. Click on either graphic to see the popup and your changes.
 </p>
 <h1>Attributes</h1>
-<div class="links-div">
-    <a class="btn btn-accent" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html#attributes">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     The popup template is bound to the graphic's attributes. The attributes are updated when the input fields are changed.
 </p>
 
 <div class="form-group">
-    <div class="row">
-        <label>Popup Title:</label><input disabled="@(!_rendered)" width="300px;" type="text" value="@(_graphic1Attributes["Name"])" @onchange="@(v => UpdateAttribute(v, "Name"))" />
+    <div class="spaced-row">
+        <label for="title-input">Popup Title:</label>
+        <input id="title-input" disabled="@(!_rendered)" width="300px;" type="text" value="@(_graphic1Attributes["Name"])" @onchange="@(v => UpdateAttribute(v, "Name"))" />
+        <label for="description-input">Popup Description:</label>
+        <input id="description-input" disabled="@(!_rendered)" width="300px;" type="text" value="@(_graphic1Attributes["Description"])" @onchange="@(v => UpdateAttribute(v, "Description"))" />
     </div>
-    <div class="row">
-        <label>Popup Description:</label><input disabled="@(!_rendered)" width="300px;" type="text" value="@(_graphic1Attributes["Description"])" @onchange="@(v => UpdateAttribute(v, "Description"))" />
+    <div class="spaced-row">
+        <label for="date-input">Popup Date:</label>
+        <input id="date-input" disabled="@(!_rendered)" width="100px;" type="date" value="@(((DateTime)_graphic1Attributes["Date"]!).ToString("yyyy-MM-dd"))" @onchange="@(v => UpdateAttribute(v, "Date"))" />
+        <label for="time-input">Popup Time:</label>
+        <input id="time-input" disabled="@(!_rendered)" width="100px;" type="time" value="@(((DateTime)_graphic1Attributes["Date"]!).ToString("HH:mm"))" @onchange="@(v => UpdateAttribute(v, "Time"))" />
     </div>
-    <div class="row">
-        <label>Popup Number:</label><input disabled="@(!_rendered)" width="60px;" type="number" value="@(_graphic1Attributes["Number"])" @onchange="@(v => UpdateAttribute(v, "Number"))" />
-    </div>
-    <div class="row">
-        <label>Popup Date:</label><input disabled="@(!_rendered)" width="100px;" type="date" value="@(((DateTime)_graphic1Attributes["Date"]!).ToString("yyyy-MM-dd"))" @onchange="@(v => UpdateAttribute(v, "Date"))" />
-    </div>
-    <div class="row">
-        <label>Popup Time:</label><input disabled="@(!_rendered)" width="100px;" type="time" value="@(((DateTime)_graphic1Attributes["Date"]!).ToString("HH:mm"))" @onchange="@(v => UpdateAttribute(v, "Time"))" />
-    </div>
-    <div class="row">
-        <label>Popup Boolean:</label><input disabled="@(!_rendered)" type="checkbox" class="form-check-input" checked="@(_graphic1Attributes["Boolean"])" @onchange="@(v => UpdateAttribute(v, "Boolean"))" />
+    <div class="spaced-row">
+        <label for="number-input">Popup Number:</label>
+        <input id="number-input" disabled="@(!_rendered)" width="60px;" type="number" value="@(_graphic1Attributes["Number"])" @onchange="@(v => UpdateAttribute(v, "Number"))" />
+        <label for="boolean-input">Popup Boolean:</label>
+        <input id="boolean-input" disabled="@(!_rendered)" type="checkbox" class="form-check-input" checked="@(_graphic1Attributes["Boolean"])" @onchange="@(v => UpdateAttribute(v, "Boolean"))" />
     </div>
 </div>
 <div class="form-group" style="margin-top: 2rem;">
@@ -67,6 +62,12 @@
 
 @code
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-scene/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html#attributes", "Graphic Attributes Reference")
+    ];
+
     private async Task OnViewRendered()
     {
         if (!_rendered)

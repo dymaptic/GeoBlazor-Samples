@@ -1,0 +1,96 @@
+@using ColorCode
+@using ColorCode.Common
+@using ColorCode.Styling
+
+<div class="code-highlight-wrapper">
+    <button class="copy-code-button" onclick="copyCode(this)" title="Copy code">
+        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    </button>
+    <div class="code-light-theme">
+        @((MarkupString)HighlightedHtmlLight)
+    </div>
+    <div class="code-dark-theme">
+        @((MarkupString)HighlightedHtmlDark)
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Code { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string Language { get; set; } = "csharp";
+
+    protected override void OnInitialized()
+    {
+        darkThemeDict[ScopeName.HtmlElementName].Foreground = GeoblazorAccent;
+        darkThemeDict[ScopeName.HtmlAttributeName].Foreground = GeoblazorAccentEmphasis;
+        lightThemeDict[ScopeName.HtmlElementName].Foreground = GeoblazorAccent;
+        lightThemeDict[ScopeName.HtmlAttributeName].Foreground = GeoBlazorAccentDark;
+    }
+
+    private string HighlightedHtmlLight => GenerateHighlightedHtml(lightThemeDict);
+    private string HighlightedHtmlDark => GenerateHighlightedHtml(darkThemeDict);
+
+    private string GenerateHighlightedHtml(StyleDictionary theme)
+    {
+        if (string.IsNullOrWhiteSpace(Code))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            // Get the language
+            var language = GetLanguageById(Language.ToLowerInvariant());
+            if (language == null)
+            {
+                return $"<pre><code>{System.Net.WebUtility.HtmlEncode(Code)}</code></pre>";
+            }
+
+            // Use the specified theme
+            var formatter = new HtmlFormatter(theme);
+            var highlightedCode = formatter.GetHtmlString(Code, language);
+
+            return highlightedCode;
+        }
+        catch
+        {
+            // Fallback to plain text if highlighting fails
+            return $"<pre><code>{System.Net.WebUtility.HtmlEncode(Code)}</code></pre>";
+        }
+    }
+    
+    private StyleDictionary darkThemeDict = StyleDictionary.DefaultDark;
+    private StyleDictionary lightThemeDict = StyleDictionary.DefaultLight;
+    private const string GeoblazorAccent = "#E76439";
+    private const string GeoblazorAccentEmphasis = "#ff7c39";
+    private const string GeoBlazorAccentDark = "#934A38";
+
+    private ILanguage? GetLanguageById(string languageId)
+    {
+        return languageId switch
+        {
+            "csharp" or "cs" or "c#" => Languages.CSharp,
+            "javascript" or "js" => Languages.JavaScript,
+            "typescript" or "ts" => Languages.JavaScript, // TypeScript maps to JavaScript
+            "html" => Languages.Html,
+            "css" => Languages.Css,
+            "xml" => Languages.Xml,
+            "json" => Languages.JavaScript, // JSON is similar to JS
+            "sql" => Languages.Sql,
+            "java" => Languages.Java,
+            "cpp" or "c++" => Languages.Cpp,
+            "python" or "py" => Languages.Python,
+            "razor" => Languages.AspxCs,
+            "bash" or "shell" or "sh" => Languages.PowerShell, // Close enough
+            _ => null
+        };
+    }
+}

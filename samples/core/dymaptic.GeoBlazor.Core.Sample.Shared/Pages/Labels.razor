@@ -1,11 +1,8 @@
 ﻿@page "/labels"
+@inherits SamplePage
 <PageTitle>Labels</PageTitle>
 <h1>Labels</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/labels-basic/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=372b7caa8fe340b0a6300df93ef18a7e">Labels BaseMap</a>
-</div>
 <p class="instructions">
     Demonstrates how to add labels to a map.
 </p>
@@ -33,3 +30,12 @@
         </FeatureLayer>
     </WebMap>
 </MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/labels-basic/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=372b7caa8fe340b0a6300df93ef18a7e", "Labels BaseMap")
+    ];
+}

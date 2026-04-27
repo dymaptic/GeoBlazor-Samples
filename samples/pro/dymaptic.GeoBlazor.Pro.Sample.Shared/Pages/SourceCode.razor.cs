@@ -1,5 +1,3 @@
-using ColorCode.Styling;
-using Markdig;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
@@ -17,10 +15,6 @@ public partial class SourceCode
     public required IJSRuntime JsRuntime { get; set; }
     [Inject]
     public required IConfiguration Configuration { get; set; }
-    private MarkdownPipeline Pipeline => new MarkdownPipelineBuilder()
-        .UseAdvancedExtensions()
-        .UseSyntaxHighlighting(_isDarkMode ? StyleDictionary.DefaultDark : StyleDictionary.DefaultLight)
-        .Build();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -35,43 +29,18 @@ public partial class SourceCode
 
         if (firstRender)
         {
-            _isDarkMode = await JsRuntime.InvokeAsync<bool>("isDarkMode");
-            var docsUrl = Configuration["DocsUrl"] ?? "https://docs.geoblazor.com";
+            string docsUrl = Configuration["DocsUrl"] ?? "https://docs.geoblazor.com";
             HttpClient.BaseAddress ??= new Uri(docsUrl);
-            var pageUrl = $"assets/samples/{PageUrl}.razor.txt";
-            var markupContent = await HttpClient.GetStringAsync(pageUrl);
-
-            _pageContent = $"""
-                            ```html
-                            {markupContent}
-                            ```
-                            """;
+            string pageUrl = $"assets/samples/{PageUrl}.razor.txt";
+            _razorContent = await HttpClient.GetStringAsync(pageUrl);
 
             // split apart the markup section and the code section so the highlighting can be language-specific
             // for HTML and C#, since there is no widely accepted Razor syntax highlighting
-            if (markupContent.Contains("@code"))
+            if (_razorContent.Contains("@code"))
             {
-                var codeIndex = markupContent.IndexOf("@code", StringComparison.Ordinal);
-                var codeContent = markupContent[codeIndex..].Trim();
-                markupContent = markupContent[..codeIndex].Trim();
-
-                _pageContent = $"""
-                                ```html
-                                {markupContent}
-                                ```
-
-                                ```csharp
-                                {codeContent}
-                                ```
-                                """;
-            }
-            else
-            {
-                _pageContent = $"""
-                                ```html
-                                {markupContent}
-                                ```
-                                """;
+                int codeIndex = _razorContent.IndexOf("@code", StringComparison.Ordinal);
+                _codeContent = _razorContent[codeIndex..].Trim();
+                _razorContent = _razorContent[..codeIndex].Trim();
             }
 
             // check for code-behind file
@@ -79,22 +48,20 @@ public partial class SourceCode
 
             try
             {
-                var result = await HttpClient.GetAsync(pageUrl);
+                HttpResponseMessage result = await HttpClient.GetAsync(pageUrl);
 
                 if (result.IsSuccessStatusCode)
                 {
-                    var codeContent = await result.Content.ReadAsStringAsync();
+                    _codeContent = $"""
+                                    ## {PageUrl}.razor.cs
+                                    
+                                    {await result.Content.ReadAsStringAsync()}
+                                    """;
 
-                    _pageContent = $"""
+                    _razorContent = $"""
                                     ## {PageUrl}.razor
 
-                                    {_pageContent}
-
-                                    ## {PageUrl}.razor.cs
-
-                                    ```csharp
-                                    {codeContent}
-                                    ```
+                                    {_razorContent}
                                     """;
                 }
             }
@@ -107,6 +74,6 @@ public partial class SourceCode
         }
     }
 
-    private string _pageContent = string.Empty;
-    private bool _isDarkMode;
+    private string _razorContent = string.Empty;
+    private string _codeContent = string.Empty;
 }

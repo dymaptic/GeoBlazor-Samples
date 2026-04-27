@@ -7,7 +7,13 @@
 <div class="form-group">
 
     <h2>Addresses To Locations method</h2>
-    <code>var locations = await Location.AddressesToLocations([new Address("380 New York Street", "Redlands", "CA", "92373"), new Address("400 New York Street", "Redlands", "CA", "92373")]);</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+List<AddressCandidate> locations = await Location.AddressesToLocations(
+    [
+        new Address(""380 New York Street"", ""Redlands"", ""CA"", ""92373""), 
+        new Address(""400 New York Street"", ""Redlands"", ""CA"", ""92373"")
+    ]);
+")" />
     <label>
 
         <button type="button" class="btn btn-primary" @onclick="AddressesToLocations">Addresses To Locations</button>
@@ -21,21 +27,27 @@
 <div class="form-group">
 
     <h2>Address To Locations method</h2>
-    <code>var locations = await Locator.AddressToLocations(new Address("380 New York Street", "Redlands", "CA", "92373"), outFields:new(){"*"});</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+List<AddressCandidate> locations = await Locator.AddressToLocations(
+    new Address(""380 New York Street"", ""Redlands"", ""CA"", ""92373""), 
+    outFields: [""*""]);
+")" />
     <label>
 
         <button type="button" class="btn btn-secondary" @onclick="AddressToLocations">Address To Locations</button>
         <b>Address Candidates:</b>
         @foreach (var location in _locations1)
         {
-            <div>@location?.Address  @location?.Score - @location?.Location?.Latitude,@location?.Location?.Longitude</div>
+            <div>@location.Address  @location?.Score - @location?.Location?.Latitude,@location?.Location?.Longitude</div>
         }
     </label>
 </div>
 <div class="form-group">
 
     <h2>Location To Address method</h2>
-    <code>var address = await Location.LocationToAddress(new Point(longitude: -111.93, latitude: 40.74));</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+AddressCandidate? address = await Location.LocationToAddress(new Point(longitude: -111.93, latitude: 40.74));
+")" />
     <label>
 
         <button type="button" class="btn btn-accent" @onclick="LocationToAddress">Location To Address</button>
@@ -45,7 +57,10 @@
 </div>
 <div class="form-group">
     <h2>Suggest Locations method</h2>
-    <code>List&lt;SuggestionResult&gt; results = await Location.SuggestLocations(new Point(longitude: -111.93, latitude: 40.74), "1");</code>
+    <CodeHighlight Language="csharp" Code="@(@"
+List<SuggestionResult> results = await Location.SuggestLocations(
+    new Point(longitude: -111.93, latitude: 40.74), ""1"");
+")" />
     <label>
         <button type="button" class="btn btn-primary" @onclick="SuggestLocations">Suggest Locations</button>
         <b>Suggestions:</b>
@@ -58,10 +73,10 @@
 </div>
 @code {
 
-    List<SuggestionResult> _suggestions = new();
-    AddressCandidate? _address = null;
-    List<AddressCandidate> _locations1 = new();
-    List<AddressCandidate> _locations2 = new();
+    List<SuggestionResult> _suggestions = [];
+    AddressCandidate? _address;
+    List<AddressCandidate> _locations1 = [];
+    List<AddressCandidate> _locations2 = [];
 
 
 

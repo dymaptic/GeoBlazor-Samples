@@ -1,12 +1,9 @@
 @page "/wmtslayers"
+@inherits SamplePage
 
 
 <h3>WMTS Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-wmts/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.ign.es/web/ign/portal">Instituto Geográfico Nacional</a>
-</div>
 <p class="instructions">
     This sample shows how to add an instance of WMTSLayer. The WMTSLayer is used to create layers based on OGC Web Map Tile Service (WMTS). Typically, a WMTS service acts as a directory of WMTS layers, you can set a specific layer using the activeLayer property, (or else it will default to the first sublayer). The WMTSLayer initially executes a WMTS GetCapabilities request, which might require CORS or a proxy page.
 </p>
@@ -36,6 +33,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wmts/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.ign.es/web/ign/portal", "Instituto Geográfico Nacional")
+    ];
+
     private Basemap? _plainIGNBasemap;
     private Basemap? _orthoIGNBasemap;
 }

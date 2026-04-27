@@ -1,11 +1,8 @@
 ﻿@page "/query-related-features"
+@inherits SamplePage
 <PageTitle>Query Related Features</PageTitle>
 <h1>Query Related Features</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryRelatedFeatures">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=https://www.arcgis.com/home/item.html?id=7a301e848a7c4bfcaefdac4fe98a7f99">Aggregation of Major US Cities</a>
-</div>
 <p class="instructions">
     This sample demonstrates querying related features on a layer that lives on a server. On the click action, the feature layer is queried to find which features were clicked, and then the results are used to update the population table.
 </p>
@@ -74,6 +71,12 @@
 
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryRelatedFeatures", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=https://www.arcgis.com/home/item.html?id=7a301e848a7c4bfcaefdac4fe98a7f99", "Aggregation of Major US Cities")
+    ];
 
     private async Task OnClick(ClickEvent clickEvent)
     {
