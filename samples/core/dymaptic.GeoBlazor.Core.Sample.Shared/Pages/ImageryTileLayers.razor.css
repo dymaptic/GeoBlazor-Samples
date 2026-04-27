@@ -1,3 +1,11 @@
 #land-type-subheader {
     margin: 0.5rem 0;
 }
+
+calcite-label span {
+    cursor: pointer;
+}
+
+#projectionDiv b {
+    cursor: pointer;
+}

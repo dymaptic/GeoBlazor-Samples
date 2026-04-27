@@ -1,139 +1,152 @@
 ﻿@page "/events"
+@inherits SamplePage
 @using System.Text.Json.Serialization
 @using Environment = System.Environment
 
 <PageTitle>Events</PageTitle>
 <h1>Events</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html#events-summary">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=3d355e34cbd3405dbb3f031286f7b39b">Daily Planet Imagery Web Map</a>
-</div>
 <p class="instructions">
     Sample demonstrates simple event listeners attached to the MapView.
 </p>
 
-<div id="control-set">
-    <div class="form-group">
-        <label class="react-label">
-            Click:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_clickJson ?? ""))</b>
+<Accordion Title="Click/Drag/Focus Events">
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Click:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_clickJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Double Click:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_doubleClickJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Hold:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_holdJson)</b>
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="react-label">
-            Double Click:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_doubleClickJson ?? ""))</b>
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Drag:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_dragJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Blur:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_blurJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Focus:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_focusJson)</b>
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="react-label">
-            Hold:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_holdJson ?? ""))</b>
+</Accordion>
+<Accordion Title="Pointer Events">
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Pointer Down:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerDownJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Pointer Up:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerUpJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Pointer Enter:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerEnterJson)</b>
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="react-label">
-            Drag:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_dragJson ?? ""))</b>
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Pointer Leave:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerLeaveJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Pointer Move:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerMoveJson)</b>
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="react-label">
-            Blur:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_blurJson ?? ""))</b>
+</Accordion>
+<Accordion Title="Key/Mouse Events">
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Key Down:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_keyDownJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Key Up:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_keyUpJson)</b>
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="react-label">
-            Focus:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_focusJson ?? ""))</b>
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Mouse Wheel:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_mouseWheelJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Extent:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_extentJson)</b>
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="react-label">
-            Pointer Down:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_pointerDownJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Pointer Up:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_pointerUpJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Pointer Enter:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_pointerEnterJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Pointer Leave:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_pointerLeaveJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Pointer Move:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_pointerMoveJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Key Down:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_keyDownJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Key Up:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_keyUpJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Mouse Wheel:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_mouseWheelJson ?? ""))</b>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="react-label">
-            Extent:
-        </label>
-        <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-            <b>@((MarkupString)(_extentJson ?? ""))</b>
-        </div>
-    </div>
-</div>
+</Accordion>
 
 <MapView @ref="_view" Class="map-view" OnClick="OnMapClick" OnDoubleClick="OnMapDoubleClick"
          OnHold="OnMapHold" OnBlur="OnMapBlur" OnFocus="OnMapFocus" OnDrag="OnMapDrag"
@@ -148,6 +161,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html#events-summary", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=3d355e34cbd3405dbb3f031286f7b39b", "Daily Planet Imagery Web Map")
+    ];
 
     private async Task OnMapClick(ClickEvent clickEvent)
     {
@@ -236,21 +255,21 @@
     }
 
     private MapView? _view;
-    private string? _clickJson;
-    private string? _doubleClickJson;
-    private string? _holdJson;
-    private string? _blurJson;
-    private string? _focusJson;
-    private string? _dragJson;
-    private string? _pointerEnterJson;
-    private string? _pointerLeaveJson;
-    private string? _pointerDownJson;
-    private string? _pointerUpJson;
-    private string? _pointerMoveJson;
-    private string? _extentJson;
-    private string? _keyDownJson;
-    private string? _keyUpJson;
-    private string? _mouseWheelJson;
+    private string _clickJson = string.Empty;
+    private string _doubleClickJson = string.Empty;
+    private string _holdJson = string.Empty;
+    private string _blurJson = string.Empty;
+    private string _focusJson = string.Empty;
+    private string _dragJson = string.Empty;
+    private string _pointerEnterJson = string.Empty;
+    private string _pointerLeaveJson = string.Empty;
+    private string _pointerDownJson = string.Empty;
+    private string _pointerUpJson = string.Empty;
+    private string _pointerMoveJson = string.Empty;
+    private string _extentJson = string.Empty;
+    private string _keyDownJson = string.Empty;
+    private string _keyUpJson = string.Empty;
+    private string _mouseWheelJson = string.Empty;
     private readonly JsonSerializerOptions _options = new()
     {
         WriteIndented = true,

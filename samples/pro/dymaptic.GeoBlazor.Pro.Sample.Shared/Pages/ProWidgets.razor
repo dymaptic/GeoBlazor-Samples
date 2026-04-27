@@ -1,81 +1,127 @@
 ﻿@page "/pro-widgets"
+@inherits SamplePage
 
 <PageTitle>Widgets</PageTitle>
 <h1>Widgets</h1>
 
 @if (_showHeaders)
 {
-    <div class="links-div">
-        <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-support-widget.html">ArcGIS API for JavaScript Reference</a>
-        <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b">Navigation BaseMap</a>
-    </div>
     <p class="instructions">
         Use the checkboxes to toggle various widgets on/off. Notice that Widgets can be placed on top of the map,
         or outside the map, as in the case of the Basemap Gallery.
     </p>
 }
-<div id="control-set">
-    <div class="form-group">
-        <label>Locator: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(LocateWidget)))"></label>
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="basemap Toggle-input">
+            Basemap Toggle:
+        </label>
+        <input id="basemap Toggle-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(BasemapToggleWidget)))"/>
+        <label for="basemap Gallery-input">
+            Basemap Gallery:
+        </label>
+        <input id="basemap Gallery-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(BasemapGalleryWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Search: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(SearchWidget)))"></label>
+    <div class="spaced-row">
+        <label for="srch-input">
+            Search:
+        </label>
+        <input id="srch-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(SearchWidget)))"/>
+        <label for="legend-input">
+            Legend:
+        </label>
+        <input id="legend-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(LegendWidget)))"/>
+        <label for="scale Bar-input">
+            Scale Bar:
+        </label>
+        <input id="scale Bar-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(ScaleBarWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Basemap Toggle: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(BasemapToggleWidget)))"></label>
+    <div class="spaced-row">
+        <label for="home-input">
+            Home:
+        </label>
+        <input id="home-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(HomeWidget)))"/>
+        <label for="locator-input">
+            Locator:
+        </label>
+        <input id="locator-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(LocateWidget)))"/>
+        <label for="compass-input">
+            Compass:
+        </label>
+        <input id="compass-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(CompassWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Basemap Gallery: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(BasemapGalleryWidget)))"></label>
+    <div class="spaced-row">
+        <label for="bookmarks-input">
+            Bookmarks:
+        </label>
+        <input id="bookmarks-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(BookmarksWidget)))"/>
+        <label for="distance Measurement-input">
+            Distance Measurement:
+        </label>
+        <input id="distance Measurement-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(MeasurementWidget)))"/>
+        <label for="area Measurement 2D-input">
+            Area Measurement 2D:
+        </label>
+        <input id="area Measurement 2D-input" type="checkbox" class="form-check-input"
+               @onchange="@(() => ToggleWidget(nameof(AreaMeasurement2DWidget)))"/>
     </div>
-    <div class="form-group">
-        <label>Legend: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(LegendWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Scale Bar: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(ScaleBarWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Home: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(HomeWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Compass: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(CompassWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Bookmarks: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(BookmarksWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Measurement: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(MeasurementWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Distance Measurement: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(DistanceMeasurement2DWidget)))"></label>
-    </div>
-    <div class="form-group">
-        <label>Area Measurement 2D: <input type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(AreaMeasurement2DWidget)))"></label>
-    </div>
+
     @if (_showHeaders)
     {
-        <div style="border: 1px solid black; margin: 0.5rem; padding: 0.5rem;">
-            <h2 style="font-size: 1.2rem;">Available in our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> package</h2>
-            <div class="form-group">
-                <label>Editor: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(EditorWidget)))"></label>
-            </div>
-            <div class="form-group">
-                <label>Sketch: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(SketchWidget)))"></label>
-            </div>
-            <div class="form-group">
-                <label>Track: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(TrackWidget)))"></label>
+        <div class="form-group">
+            <h2>Available in our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a>
+                package</h2>
+            <div class="spaced-row">
+                <label for="editor-input">
+                    Editor:
+                </label>
+                <input id="editor-input" type="checkbox" class="form-check-input"
+                       @onchange="@(() => ToggleWidget(nameof(EditorWidget)))"/>
+                <label for="sketch-input">
+                    Sketch:
+                </label>
+                <input id="sketch-input" type="checkbox" class="form-check-input"
+                       @onchange="@(() => ToggleWidget(nameof(SketchWidget)))"/>
+                <label for="track-input">
+                    Track:
+                </label>
+                <input id="track-input" type="checkbox" class="form-check-input"
+                       @onchange="@(() => ToggleWidget(nameof(TrackWidget)))"/>
             </div>
         </div>
     }
     else
     {
-        <div class="form-group">
-            <label>Editor: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(EditorWidget)))"></label>
+        <div class="form-group spaced-row">
+            <label for="editor-input">
+                Editor:
+            </label>
+            <input id="editor-input" type="checkbox" class="form-check-input"
+                   @onchange="@(() => ToggleWidget(nameof(EditorWidget)))"/>
         </div>
-        <div class="form-group">
-            <label>Sketch: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(SketchWidget)))"></label>
+        <div class="form-group spaced-row">
+            <label for="sketch-input">
+                Sketch:
+            </label>
+            <input id="sketch-input" type="checkbox" class="form-check-input"
+                   @onchange="@(() => ToggleWidget(nameof(SketchWidget)))"/>
         </div>
-        <div class="form-group">
-            <label>Track: <input type="checkbox" class="form-check-input" @onchange="@(() => ToggleWidget(nameof(TrackWidget)))"></label>
+        <div class="form-group spaced-row">
+            <label for="track-input">
+                Track:
+            </label>
+            <input id="track-input" type="checkbox" class="form-check-input"
+                   @onchange="@(() => ToggleWidget(nameof(TrackWidget)))"/>
         </div>
     }
 </div>
@@ -85,85 +131,94 @@
 <MapView Longitude="-40" Latitude="28" Zoom="2" Class="map-view">
     <Map>
         <Basemap>
-            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation"/>
         </Basemap>
-        <GraphicsLayer @ref="_graphicsLayer" />
+        <GraphicsLayer @ref="_graphicsLayer"/>
         @if (_showEditor)
         {
-            <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/my_points/FeatureServer/0" />
+            <FeatureLayer
+                Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/my_points/FeatureServer/0"/>
         }
     </Map>
     @if (_showLocate)
     {
-        <LocateWidget Scale="1500" 
-                      Position="OverlayPosition.TopLeft" />
+        <LocateWidget Scale="1500"
+                      Position="OverlayPosition.TopLeft"/>
     }
     @if (_showSearch)
     {
-        <SearchWidget Position="OverlayPosition.TopRight" />
+        <SearchWidget Position="OverlayPosition.TopRight"/>
     }
     @if (_showBasemapToggle)
     {
-        <BasemapToggleWidget NextBasemapStyle="BasemapStyleName.ArcgisImagery" 
-                             Position="OverlayPosition.BottomRight" />
+        <BasemapToggleWidget NextBasemapStyle="BasemapStyleName.ArcgisImagery"
+                             Position="OverlayPosition.BottomRight"/>
     }
     @if (_showBasemapGallery)
     {
-        <BasemapGalleryWidget ContainerId="gallery-box" />
+        <BasemapGalleryWidget ContainerId="gallery-box"/>
     }
     @if (_showScaleBar)
     {
-        <ScaleBarWidget Position="OverlayPosition.BottomLeft" />
+        <ScaleBarWidget Position="OverlayPosition.BottomLeft"/>
     }
     @if (_showLegend)
     {
-        <LegendWidget Position="OverlayPosition.TopRight" />
+        <LegendWidget Position="OverlayPosition.TopRight"/>
     }
     @if (_showHome)
     {
-        <HomeWidget Position="OverlayPosition.TopLeft" />
+        <HomeWidget Position="OverlayPosition.TopLeft"/>
     }
     @if (_showCompass)
     {
-        <CompassWidget Position="OverlayPosition.TopLeft" />
+        <CompassWidget Position="OverlayPosition.TopLeft"/>
     }
     @if (_showEditor)
     {
-        <EditorWidget Position="OverlayPosition.TopRight" />
+        <EditorWidget Position="OverlayPosition.TopRight"/>
     }
     @if (_showSketch)
     {
-        <SketchWidget GraphicsLayerId="@_graphicsLayer!.Id" Position="OverlayPosition.TopRight" />
+        <SketchWidget GraphicsLayerId="@_graphicsLayer!.Id" Position="OverlayPosition.TopRight"/>
     }
     @if (_showTrack)
     {
-        <TrackWidget Position="OverlayPosition.TopLeft" />
+        <TrackWidget Position="OverlayPosition.TopLeft"/>
     }
     @if (_showMeasurement)
     {
-        <MeasurementWidget ActiveTool="ActiveTool.Distance" Label="Measure" 
-                           LinearUnit="SystemOrLengthUnit.NauticalMiles" 
-                           AreaUnit="SystemOrAreaUnit.SquareInches" Position="OverlayPosition.TopLeft" />
+        <MeasurementWidget ActiveTool="ActiveTool.Distance" Label="Measure"
+                           LinearUnit="SystemOrLengthUnit.NauticalMiles"
+                           AreaUnit="SystemOrAreaUnit.SquareInches" Position="OverlayPosition.TopLeft"/>
     }
     @if (_showDistanceMeasurement)
     {
-        <MeasurementWidget ActiveTool="ActiveTool.Distance" Label="Measure Widget" LinearUnit="SystemOrLengthUnit.NauticalMiles" Position="OverlayPosition.TopLeft" />
+        <MeasurementWidget ActiveTool="ActiveTool.Distance" Label="Measure Widget"
+                           LinearUnit="SystemOrLengthUnit.NauticalMiles" Position="OverlayPosition.TopLeft"/>
     }
     @if (_showAreaMeasurement)
     {
-        <MeasurementWidget ActiveTool="ActiveTool.Area" Label="Test Area" AreaUnit="SystemOrAreaUnit.SquareMeters" Position="OverlayPosition.TopLeft"/>
+        <MeasurementWidget ActiveTool="ActiveTool.Area" Label="Test Area" AreaUnit="SystemOrAreaUnit.SquareMeters"
+                           Position="OverlayPosition.TopLeft"/>
     }
     @if (_showBookmarks)
     {
         <BookmarksWidget Position="OverlayPosition.TopRight" @ref="_bookmarkWidget" DragEnabled="true">
-            <BookmarksVisibleElements EditBookmarkButton="true" AddBookmarkButton="true" />
+            <BookmarksVisibleElements EditBookmarkButton="true" AddBookmarkButton="true"/>
         </BookmarksWidget>
     }
 </MapView>
 
 @code {
-    [Inject]    
-    public required NavigationManager NavigationManager { get; set; }
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-support-widget.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b", "Navigation BaseMap")
+    ];
+
+    [Inject] public required NavigationManager NavigationManager { get; set; }
 
     private async Task ToggleWidget(string widgetTypeName)
     {
@@ -220,21 +275,23 @@
                     {
                         await Task.Delay(100);
                     }
-                    
+
                     await Task.Delay(500);
-                    
+
                     await InvokeAsync(async () =>
                     {
                         await _bookmarkWidget!.SetBookmarks(_bookmarks);
                         StateHasChanged();
                     });
                 }
+
                 break;
         }
     }
-    
+
     protected override void OnInitialized()
     {
+        base.OnInitialized();
         string uri = NavigationManager.Uri;
 
         if (uri.Contains("no-nav"))

@@ -1,23 +1,28 @@
 @page "/navigation"
+@inherits SamplePage
 @using Environment = System.Environment
 
 <PageTitle>Navigation</PageTitle>
 <h1>Navigation</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-map/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=826498a48bd0424f9c9315214f2165d4">Colored Pencil BaseMap</a>
-</div>
 
 <p class="instructions">
     Change the values for latitude, longitude, zoom, and rotation to see the map update in real time.
     Note that once a user drags or zooms the map manually, the Razor Markup bindings to our input fields must be ignored, otherwise the map would "snap back".
     You can always call <code>MapView.SetExtent</code> to set the extent again, or <code>MapView.Refresh</code> to re-enable bindings.
 </p>
-<div class="form-group spaced-row">
-    <label>Latitude:&nbsp;<input type="number" step="0.01" @bind="_latitude" /></label>
-    <label>Longitude:&nbsp;<input type="number" step="0.01" @bind="_longitude" /></label>
-    <label>Zoom:&nbsp;<input type="number" @bind="_zoom" /></label>
-    <label>Rotation (deg):&nbsp;<input type="number" @bind="_rotation" /></label>
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="latitude-input">Latitude:</label>
+        <input id="latitude-input" type="number" step="0.01" @bind="_latitude" />
+        <label for="longitude-input">Longitude:</label>
+        <input id="longitude-input" type="number" step="0.01" @bind="_longitude" />
+    </div>
+    <div class="spaced-row">
+        <label for="zoom-input">Zoom:</label>
+        <input id="zoom-input" type="number" @bind="_zoom" />
+        <label for="rotation-input">Rotation (deg):</label>
+        <input id="rotation-input" type="number" @bind="_rotation" />
+    </div>
 </div>
 
 <MapView @ref="_mapView"
@@ -45,6 +50,12 @@
 
 @code
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-map/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=826498a48bd0424f9c9315214f2165d4", "Colored Pencil BaseMap")
+    ];
+
     private void OnViewRendered()
     {
         Console.WriteLine("View Rendered");

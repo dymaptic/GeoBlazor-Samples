@@ -12,15 +12,13 @@ public partial class NavMenu
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
     public required JsModuleManager JsModuleManager { get; set; }
-    [Parameter]
-    public string? SearchText { get; set; }
-    [Parameter]
-    public bool EnterKeyPressed { get; set; }
 
-    protected string? NavMenuCssClass => CollapseNavMenu ? "collapse" : null;
-    protected IEnumerable<PageLink> FilteredPages => string.IsNullOrWhiteSpace(SearchText)
+    private string? NavMenuCssClass => CollapseNavMenu ? "lower-collapse" : null;
+    private string? GlobalNavMenuCssClass => CollapseGlobalNavMenu ? "upper-collapse" : null;
+
+    private IEnumerable<PageLink> FilteredPages => string.IsNullOrWhiteSpace(_searchText)
         ? Pages
-        : Pages.Where(p => p.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+        : Pages.Where(p => p.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -44,21 +42,32 @@ public partial class NavMenu
             
             StateHasChanged();
         }
-
-        if (EnterKeyPressed)
+    }
+    
+    protected void OnSearchFilter(string searchText)
+    {
+        _searchText = searchText;
+        CollapseNavMenu = false;
+        StateHasChanged();
+    }
+    
+    protected void OnFullSearch(string searchText)
+    {
+        if (FilteredPages.Count() == 1)
         {
-            EnterKeyPressed = false;
-
-            if (FilteredPages.Count() == 1)
-            {
-                NavigationManager.NavigateTo(FilteredPages.First().Href);
-            }
+            CollapseNavMenu = true;
+            NavigationManager.NavigateTo(FilteredPages.First().Href);
         }
     }
 
     protected void ToggleNavMenu()
     {
         CollapseNavMenu = !CollapseNavMenu;
+    }
+    
+    protected void ToggleGlobalNavMenu()
+    {
+        CollapseGlobalNavMenu = !CollapseGlobalNavMenu;
     }
 
     protected async Task NavigateTo(string href)
@@ -79,8 +88,11 @@ public partial class NavMenu
         });
     }
 
-    protected virtual bool CollapseNavMenu { get; set; } = true;
-    protected ElementReference? Navbar;
+    protected bool CollapseNavMenu { get; set; } = true;
+    protected bool CollapseGlobalNavMenu { get; set; } = true;
+    protected ElementReference? Navbar { get; set; }
+    private string _searchText = string.Empty;
+    
     public virtual PageLink[] Pages =>
     [
         new("", "Home", "oi-home"),
@@ -106,6 +118,7 @@ public partial class NavMenu
         new("basemap-layer-lists", "Basemap Layer Lists", "oi-spreadsheet"),
         new("csv-layer", "CSV Layers", "oi-grid-four-up"),
         new("kmllayers", "KML Layers", "oi-excerpt"),
+        new("geojson-layers", "GeoJSON Layers", null, "geojson.svg"),
         new("georss-layer", "GeoRSS Layer", "oi-rss"),
         new("osm-layer", "OpenStreetMaps Layer", null, "osm.webp"),
         new("wcslayers", "WCS Layers", "oi-project"),
@@ -131,6 +144,7 @@ public partial class NavMenu
         new("projection", "Display Projection", "oi-sun"),
         new("projection-tool", "Projection Tool", "oi-cog"),
         new("basemap-projections", "Basemap Projections", "oi-bullhorn"),
+        new("legends", "Legend", null, "legend.svg"),
         new("unique-value", "Unique Renderers", "oi-eyedropper"),
         new("marker-rotation", "Marker Rotation", "oi-loop-circular"),
         new("graphic-tracking", "Graphic Tracking", "oi-move"),
@@ -139,5 +153,5 @@ public partial class NavMenu
         new("search-multi-source", "Search Multiple Sources", "oi-magnifying-glass"),
         new("reverse-geolocator", "GeoLocator", "oi-arrow-circle-bottom")
     ];
-    public record PageLink(string Href, string Title, string? IconClass, string? ImageFile = null, bool Pro = false);
+    public record PageLink(string Href, string Title, string? IconClass = null, string? ImageFile = null, bool Pro = false);
 }

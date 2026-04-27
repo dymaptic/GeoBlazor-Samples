@@ -1,13 +1,10 @@
 ﻿@page "/search-multi-source"
+@inherits SamplePage
 @inject AuthenticationManager AuthenticationManager
 
 <PageTitle>Search with Multiple Sources</PageTitle>
 <h1>Search with Multiple Sources</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=1970c1995b8f44749f4b9b6e81b5ba45">Dark Gray BaseMap</a>
-</div>
 <p class="instructions">
     Demonstrates how to use the Search Widget with multiple sources.
 </p>
@@ -55,3 +52,12 @@
                              Url="https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer" />
     </SearchWidget>
 </MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=1970c1995b8f44749f4b9b6e81b5ba45", "Dark Gray BaseMap")
+    ];
+}

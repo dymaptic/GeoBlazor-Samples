@@ -1,10 +1,7 @@
 ﻿@page "/print-widget"
+@inherits SamplePage
 <PageTitle>Print Widget</PageTitle>
 <h1>Print Widget</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-print/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d6d830a7184f4971b8a2f42cd774d9a7">Missing Migrants Around the Globe Class Breaks Web Map</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to add a Print widget for a 2D MapView. The widget can preserve map scale or map extent in the printout. By default, the map extent is preserved. Use TemplateOptions.scaleEnabled to preserve scale instead. The widget also prints a localized date in the printout.
 </p>
@@ -24,5 +21,9 @@
 
 @code {
 
-    
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-print/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=d6d830a7184f4971b8a2f42cd774d9a7", "Missing Migrants Around the Globe Class Breaks Web Map")
+    ];
 }

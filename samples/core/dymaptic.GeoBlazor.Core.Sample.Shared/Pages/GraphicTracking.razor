@@ -1,11 +1,8 @@
 ﻿@page "/graphic-tracking"
+@inherits SamplePage
 <PageTitle>Graphic Tracking</PageTitle>
 
 <h1>Graphic Tracking</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d582a9e953c44c09bb998c7d9b66f8d4">Charted Territory BaseMap</a>
-</div>
 <p class="instructions">
     Some applications require real-time updates of graphics on a map. This sample renders ten points with a random offset,
     which updates quickly in a loop. Use the buttons to start, stop, reset, and center the view on the points.
@@ -27,6 +24,12 @@
 
 @code
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=d582a9e953c44c09bb998c7d9b66f8d4", "Charted Territory BaseMap")
+    ];
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

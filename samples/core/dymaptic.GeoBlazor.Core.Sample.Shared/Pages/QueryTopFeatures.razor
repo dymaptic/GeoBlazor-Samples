@@ -1,12 +1,9 @@
 ﻿@page "/query-top-features"
+@inherits SamplePage
 @inject IJSRuntime JsRuntime
 <PageTitle>Query Top Features</PageTitle>
 <h1>Query Top Features</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryTopFeatures">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_National_Parks_Annual_Visitation/FeatureServer/0">US National Parks Annual Visitation</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to use the QueryTopFeatures() method on a FeatureLayer to query the most or the least visited national parks in each state for a given year or total of all time.
 </p>
@@ -150,6 +147,12 @@
 
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryTopFeatures", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_National_Parks_Annual_Visitation/FeatureServer/0", "US National Parks Annual Visitation")
+    ];
 
     private void OnLayerViewCreate(LayerViewCreateEvent evt)
     {

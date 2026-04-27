@@ -1,13 +1,10 @@
 ﻿@page "/reverse-geolocator"
+@inherits SamplePage
 @inject LocationService LocationService
 
 <PageTitle>Reverse Geolocator</PageTitle>
 <h1>Reverse Geolocator</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/reverse-geocode/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=8dda0e7b5e2d4fafa80132d59122268c">Streets (WGS84) BaseMap</a>
-</div>
 <p class="instructions">
     Click on any location on the map, and the popup will show the latitude and logitude, 
     as well as an address.
@@ -34,6 +31,13 @@
 <PopupTemplate @ref="Popup" Title="@($"{_longitude}, {_latitude}")" StringContent="@_address" />
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/reverse-geocode/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=8dda0e7b5e2d4fafa80132d59122268c", "Streets (WGS84) BaseMap")
+    ];
+
     public MapView? View { get; set; }
     public PopupTemplate? Popup { get; set; }
 

@@ -1,22 +1,23 @@
 ﻿@page "/imagerylayer"
+@inherits SamplePage
 
 <h3>Imagery Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-ImageryLayer.html">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer">National Ground Land Cover: 2001</a>
-</div>
 <p class="instructions">
     The sample Imagery Layer depicts the land cover classification rasters of the conterminous U.S.
 </p>
-<div class="spaced-row">
-    <label for="imagery-url">Enter Imagery Layer URL:</label>
-    <input type="text" id="imagery-url" @bind="_imageryLayerUrl" style="width: 100%;" />
-</div>
-<p>Click the buttons below to see the different ways to display a Imagery layer</p>
-<div class="spaced-row">
-    <button type="button" class="btn btn-primary" disabled="@(!_mapRendered)" @onclick="AddRemoveImageryLayer">Add or Remove Imagery Layer in code</button>
-    <button type="button" class="btn btn-accent" disabled="@(!_mapRendered)" @onclick="()=>_markup = !_markup">Add new Imagery Layer in Markup</button>
+<p>Click the buttons below to see the different ways to display a Imagery layer.</p>
+
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="imagery-url">Enter Imagery Layer URL:</label>
+        <input type="text" id="imagery-url" @bind="_imageryLayerUrl" style="width: 100%;" />
+    </div>
+    
+    <div class="spaced-row">
+        <button type="button" class="btn btn-primary" disabled="@(!_mapRendered)" @onclick="AddRemoveImageryLayer">Add or Remove Imagery Layer in code</button>
+        <button type="button" class="btn btn-accent" disabled="@(!_mapRendered)" @onclick="()=>_markup = !_markup">Add new Imagery Layer in Markup</button>
+    </div>
 </div>
 
 <MapView @ref="_view" class="map-view" 
@@ -36,6 +37,12 @@
 
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-ImageryLayer.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer", "National Ground Land Cover: 2001")
+    ];
 
     private void OnViewRendered() => _mapRendered = true;
 

@@ -1,0 +1,33 @@
+@typeparam T
+
+<div class="radio-group" @attributes="AdditionalAttributes">
+    <CascadingValue Name="@nameof(RadioGroup<>)" Value="this">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter]
+    public T? Value { get; set; }
+
+    [Parameter] 
+    public EventCallback<T> ValueChanged { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public async Task SetValue(T value)
+    {
+        Console.WriteLine($"Value changed: {value}");
+        await ValueChanged.InvokeAsync(value);
+        foreach (RadioRow<T> row in Rows)
+        {
+            row.Refresh();
+        }
+    }
+
+    public readonly HashSet<RadioRow<T>> Rows = [];
+}

@@ -1,10 +1,8 @@
 ﻿@page "/web-map"
+@inherits SamplePage
 
 <PageTitle>WebMap</PageTitle>
 <h1>WebMap</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-web-map/">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     A simple demo of loading a complete WebMap from ArcGIS Online, including layers, icons, popups, and widgets.
 </p>
@@ -62,6 +60,11 @@
 }
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-web-map/", "ArcGIS Maps SDK for JavaScript"),
+     ];
 
     private async Task LoadLayer(FeatureLayer? featureLayer)
     {

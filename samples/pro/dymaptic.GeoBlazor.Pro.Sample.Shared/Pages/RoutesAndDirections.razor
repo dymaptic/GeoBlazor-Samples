@@ -1,12 +1,9 @@
 ﻿@page "/routes"
+@inherits SamplePage
 
 <PageTitle>Routes</PageTitle>
 <h1>Routes</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/route/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=4f2e99ba65e34bb8af49733d9778fb8e">Human Geography Dark BaseMap</a>
-</div>
 <p class="instructions">
     Click on two points on the map to designate starting point and destination. You will see a popup with
     driving directions!
@@ -38,6 +35,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/route/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=4f2e99ba65e34bb8af49733d9778fb8e", "Human Geography Dark BaseMap")
+    ];
+
     [Inject]
     public required RouteService RouteService { get; set; }
     

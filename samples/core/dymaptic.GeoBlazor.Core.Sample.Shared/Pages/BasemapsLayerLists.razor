@@ -1,32 +1,35 @@
 ﻿@page "/basemap-layer-lists"
+@inherits SamplePage
 
 
 @inject IJSRuntime JsRuntime
 
 <PageTitle>BasemapLayerLists</PageTitle>
 <h1>Basemap and Reference LayerLists</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapLayerList.html">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=bfefe7a603c94fc29edca0f4a6662b44">City of Bend 3D Scene</a>
-</div>
 <p class="instructions">
     A simple demo of loading multiple layers into the BaseMapLayerList widget.
     Select the right arrow to open the sublayers within the BaseMapLayerList.
     Select the "eye" icons to toggle a layer's visibility on the basemap.
 </p>
 
-<div id="control-set">
-    <div class="form-group">
-        <label>
-            Toggle Reference Layers Visibility in Widget
-            <input type="checkbox" class="form-check-input" checked @onchange="ToggleReferenceLayersVisibility" />
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="reference-layers-visibility">
+        Toggle Reference Layers Visibility in Widget
         </label>
+        <input id="reference-layers-visibility" 
+               type="checkbox" class="form-check-input" 
+               checked @onchange="ToggleReferenceLayersVisibility" />
+        
     </div>
-    <div class="form-group">
-        <label>
+    <div class="spaced-row">
+        <label for="base-layers-visibility">
             Toggle Base Layers Visibility in Widget
-            <input type="checkbox" class="form-check-input" checked @onchange="ToggleBaseLayersVisibility" />
         </label>
+        <input id="base-layers-visibility" 
+               type="checkbox" class="form-check-input" 
+               checked @onchange="ToggleBaseLayersVisibility" />
+        
     </div>
 </div>
 
@@ -54,6 +57,12 @@
 }
 
 @code {
+    
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapLayerList.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=bfefe7a603c94fc29edca0f4a6662b44", "City of Bend 3D Scene")
+    ];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

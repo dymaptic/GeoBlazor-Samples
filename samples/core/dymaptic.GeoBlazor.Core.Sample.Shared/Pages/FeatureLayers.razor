@@ -1,44 +1,43 @@
 ﻿@page "/feature-layers"
+@inherits SamplePage
 <PageTitle>Feature Layers</PageTitle>
 <h1>Feature Layers</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/add-a-feature-layer/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3">Topographic BaseMap</a>
-</div>
 <p class="instructions">
     Use the radio buttons to toggle various feature layers.
 </p>
 <div>
-    <div class="form-group">
-        <label>Show Trailheads Points Layer: <input type="checkbox" class="form-check-input" @onchange="@(() => _showPointsLayer = !_showPointsLayer)"></label>
+    <div class="form-group spaced-row">
+        <label for="trailheads-points-layer">
+            Show Trailheads Points Layer:
+        </label>
+        <input id="trailheads-points-layer" type="checkbox" class="form-check-input" 
+               @onchange="@(() => _showPointsLayer = !_showPointsLayer)">
     </div>
     <div class="form-group">
-        <EditForm Model="this">
-            <InputRadioGroup Name="points" @bind-Value="_showLinesLayer">
-                <label class="radio-container">
-                    Show Trailheads Lines Layer:
-                    <InputRadio Name="points" Value="1" />
-                    <div class="radio-box" />
-                </label>
-                <label class="radio-container">
-                    Show Trailheads Lines With Elevation Style Renderer:
-                    <InputRadio Name="points" Value="2" />
-                    <div class="radio-box" />
-                </label>
-                <label class="radio-container">
-                    Show Trailheads Lines With Bike Trails Styled:
-                    <InputRadio Name="points" Value="3" />
-                    <div class="radio-box" />
-                </label>
-            </InputRadioGroup>
-        </EditForm>
+        <RadioGroup @bind-Value="_showLinesLayer">
+            <RadioRow Value="1" 
+                      Label="Show Trailheads Lines Layer:" 
+                      Id="trailheads-lines-layer" />
+            <RadioRow Value="2" 
+                      Label="Show Trailheads Polylines Layer:" 
+                      Id="trailheads-polylines-layer" />
+            <RadioRow Value="3" 
+                      Label="Show Trailheads Polylines with Polygon Layer:" 
+                      Id="trailheads-polylines-with-polygon-layer" />
+        </RadioGroup>
     </div>
-    <div class="form-group">
-        <label>Show Trailheads Polygons Layer: <input type="checkbox" class="form-check-input" @onchange="@(() => _showPolygonLayer = !_showPolygonLayer)"></label>
+    <div class="form-group spaced-row">
+        <label for="trailhead-polygons-layer">
+            Show Trailheads Polygons Layer:
+        </label>
+        <input id="trailhead-polygons-layer" type="checkbox" class="form-check-input" @onchange="@(() => _showPolygonLayer = !_showPolygonLayer)">
     </div>
-    <div class="form-group">
-        <label>Show Client-Side Graphics Layer: <input type="checkbox" class="form-check-input" @onchange="@(() => _showGraphics = !_showGraphics)"></label>
+    <div class="form-group spaced-row">
+        <label for="client-side-graphics-layer">
+            Show Client-Side Graphics Layer:
+        </label>
+        <input id="client-side-graphics-layer" type="checkbox" class="form-check-input" @onchange="@(() => _showGraphics = !_showGraphics)">
     </div>
 </div>
 
@@ -113,6 +112,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/add-a-feature-layer/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3", "Topographic BaseMap")
+    ];
+
     private bool _showPointsLayer;
     private int _showLinesLayer;
     private bool _showPolygonLayer;

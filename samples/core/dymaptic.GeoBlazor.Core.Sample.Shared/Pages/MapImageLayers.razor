@@ -1,68 +1,52 @@
 ﻿@page "/map-image-layers"
-@using dymaptic.GeoBlazor.Core.Extensions
-@using dymaptic.GeoBlazor.Core.Functions
+@inherits SamplePage
 <PageTitle>Map Image Layers</PageTitle>
 <h1>Map Image Layers</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-mapimagelayer/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d7892b3c13b44391992ecd42bfa92d01">City Pool Permits Map</a>
-</div>
 <p class="instructions">
-    MapImageLayer allows you to display and analyze data from sublayers defined in a map service, exporting images instead of features. Map service images are dynamically generated on the server based on a request.
+    MapImageLayer allows you to display and analyze data from sublayers defined in a map service, exporting images
+    instead of features. Map service images are dynamically generated on the server based on a request.
 </p>
 <p class="instructions">
     Use the radio buttons to toggle various Map Image layers.
 </p>
 <div>
     <div class="form-group">
-        <EditForm Model="this">
-            <InputRadioGroup Name="points" @bind-Value="_layerIndex">
-                <label class="radio-container">
-                    Show Static Pool Permits Layer:
-                    <InputRadio Name="points" Value="1" />
-                    <div class="radio-box"></div>
-                </label>
-                <label class="radio-container">
-                    Show Toggleable Highways, Cities, Railroad Layers:
-                    <InputRadio Name="points" Value="2" />
-                    <div class="radio-box"></div>
-                </label>
-                <label class="radio-container">
-                    Show Cities Layer by Population with Slider:
-                    <InputRadio Name="points" Value="3" />
-                    <div class="radio-box"></div>
-                </label>
-                <label class="radio-container">
-                    Show Sublayers with Custom Renderers:
-                    <InputRadio Name="points" Value="4" />
-                    <div class="radio-box"></div>
-                </label>
-                <label class="radio-container">
-                    Show Sublayers with Custom Labels:
-                    <InputRadio Name="points" Value="5" />
-                    <div class="radio-box"></div>
-                </label>
-            </InputRadioGroup>
-        </EditForm>
+        <RadioGroup Name="points" @bind-Value="_layerIndex">
+            <RadioRow Value="1"
+                      Label="Show Static Pool Permits Layer:"
+                      Id="static-pool-permits-layer" />
+            <RadioRow Value="2"
+                      Label="Show Toggleable Highways, Cities, Railroad Layers:"
+                      Id="highways-cities-railroad-layer" />
+            <RadioRow Value="3"
+                      Label="Show Cities Layer by Population with Slider:"
+                      Id="layer-by-population" />
+            <RadioRow Value="4"
+                      Label="Show Sublayers with Custom Renderers:"
+                      Id="custom-renderers" />
+            <RadioRow Value="5"
+                      Label="Show Sublayers with Custom Labels:"
+                      Id="custom-labels" />
+        </RadioGroup>
     </div>
 </div>
 
-<SceneView @ref="_view" Class="map-view" 
+<SceneView @ref="_view" Class="map-view"
            OnLayerViewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
-            <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray" />
+            <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray"/>
         </Basemap>
         @switch (_layerIndex)
         {
             case 1:
                 <Basemap>
-                    <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray" />
+                    <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray"/>
                 </Basemap>
 
                 <MapImageLayer @key="_layerIndex">
-                    <PortalItem PortalItemId="d7892b3c13b44391992ecd42bfa92d01" />
+                    <PortalItem PortalItemId="d7892b3c13b44391992ecd42bfa92d01"/>
                 </MapImageLayer>
 
                 break;
@@ -71,13 +55,14 @@
             case 4:
             case 5:
 
-                <MapImageLayer @key="_layerIndex" Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer">
+                <MapImageLayer @key="_layerIndex"
+                               Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer">
                     @switch (_layerIndex)
                     {
                         case 2:
-                            <Sublayer @ref="_states" 
-                                      SublayerId="2" 
-                                      Visible="@StatesVisible" />
+                            <Sublayer @ref="_states"
+                                      SublayerId="2"
+                                      Visible="@StatesVisible"/>
                             <Sublayer @ref="_railroads"
                                       SublayerId="4"
                                       Visible="@RailroadsVisible"
@@ -85,33 +70,33 @@
                                 <SimpleRenderer>
                                     <SimpleLineSymbol Color="@(new MapColor(255, 255, 255, 0.5))"
                                                       Width="@(new Dimension(0.75))"
-                                                      Style="@SimpleLineSymbolStyle.LongDashDotDot" />
+                                                      Style="@SimpleLineSymbolStyle.LongDashDotDot"/>
                                 </SimpleRenderer>
                                 <DynamicDataLayer>
                                     <TableDataSource WorkspaceId="MyDatabaseWorkspaceIDSSR2"
-                                                     DataSourceName="ss6.gdb.Railroads" />
+                                                     DataSourceName="ss6.gdb.Railroads"/>
                                 </DynamicDataLayer>
                             </Sublayer>
                             <Sublayer @ref="_highways"
                                       SublayerId="1"
-                                      Visible="@HighwaysVisible" />
+                                      Visible="@HighwaysVisible"/>
                             <Sublayer @ref="_cities"
                                       SublayerId="0"
-                                      Visible="@CitiesVisible" />
+                                      Visible="@CitiesVisible"/>
 
                             break;
                         case 3:
-                            <Sublayer @ref="_states" 
-                                      SublayerId="2" 
-                                      Visible="true" />
+                            <Sublayer @ref="_states"
+                                      SublayerId="2"
+                                      Visible="true"/>
                             <Sublayer @ref="_highways"
                                       SublayerId="1"
-                                      Visible="true" />
+                                      Visible="true"/>
                             <Sublayer @ref="_cities"
                                       SublayerId="0"
                                       Visible="true"
-                                      DefinitionExpression="@_cityDefinitionExpression" />
-                            
+                                      DefinitionExpression="@_cityDefinitionExpression"/>
+
                             break;
                         case 4:
                             <Sublayer @ref="_states"
@@ -121,7 +106,7 @@
                                 <SimpleRenderer Label="State boundaries">
                                     <SimpleFillSymbol Style="SimpleFillSymbolStyle.None">
                                         <Outline Width="@(0.5)"
-                                                 Color="@(new MapColor("gray"))" />
+                                                 Color="@(new MapColor("gray"))"/>
                                     </SimpleFillSymbol>
                                 </SimpleRenderer>
                             </Sublayer>
@@ -132,7 +117,7 @@
                                 <SimpleRenderer Label="Interstate highway">
                                     <SimpleLineSymbol Style="SimpleLineSymbolStyle.None"
                                                       Width="@(0.7)"
-                                                      Color="@(new MapColor("white"))" />
+                                                      Color="@(new MapColor("white"))"/>
                                 </SimpleRenderer>
                             </Sublayer>
                             <Sublayer @ref="_cities"
@@ -144,13 +129,13 @@
                                                         Color="@(new MapColor("white"))"
                                                         Style="@SimpleMarkerSymbolStyle.Circle">
                                         <Outline Width="@(0.5)"
-                                                 Color="@(new MapColor("gray"))" />
+                                                 Color="@(new MapColor("gray"))"/>
                                     </SimpleMarkerSymbol>
                                 </SimpleRenderer>
                             </Sublayer>
-                            
+
                             break;
-                            
+
                         case 5:
                             <Sublayer SublayerId="3"
                                       Visible="true"
@@ -158,7 +143,7 @@
                                 <SimpleRenderer Label="County boundaries">
                                     <SimpleFillSymbol Style="SimpleFillSymbolStyle.None">
                                         <Outline Width="@(0.5)"
-                                                 Color="@(new MapColor("white"))" />
+                                                 Color="@(new MapColor("white"))"/>
                                     </SimpleFillSymbol>
                                 </SimpleRenderer>
                                 <Label LabelExpression="[name]"
@@ -168,7 +153,7 @@
                                     <TextSymbol Color="@(new MapColor("red"))"
                                                 HaloColor="@(new MapColor(0, 0, 0, 0.7))"
                                                 HaloSize="@(1)">
-                                        <MapFont Size="@(11)" />
+                                        <MapFont Size="@(11)"/>
                                     </TextSymbol>
                                 </Label>
                             </Sublayer>
@@ -178,7 +163,7 @@
                                 <SimpleRenderer Label="State boundaries">
                                     <SimpleFillSymbol Style="SimpleFillSymbolStyle.None">
                                         <Outline Width="@(2)"
-                                                 Color="@(new MapColor("white"))" />
+                                                 Color="@(new MapColor("white"))"/>
                                     </SimpleFillSymbol>
                                 </SimpleRenderer>
                                 <Label LabelExpression="[state_abbr]"
@@ -186,7 +171,7 @@
                                        MinScale="18_500_000"
                                        MaxScale="9_250_000">
                                     <TextSymbol Color="@(new MapColor("blue"))">
-                                        <MapFont Size="@(16)" />
+                                        <MapFont Size="@(16)"/>
                                     </TextSymbol>
                                 </Label>
                                 <Label LabelExpression="[_state_name]"
@@ -196,7 +181,7 @@
                                     <TextSymbol Color="@(new MapColor(255, 255, 255, 0.85))"
                                                 HaloColor="@(new MapColor("blue"))"
                                                 HaloSize="@(1)">
-                                        <MapFont Size="@(14)" Weight="FontWeight.Bold" />
+                                        <MapFont Size="@(14)" Weight="FontWeight.Bold"/>
                                     </TextSymbol>
                                 </Label>
                             </Sublayer>
@@ -204,7 +189,7 @@
                                 <SimpleRenderer Label="Cities">
                                     <SimpleMarkerSymbol Style="@SimpleMarkerSymbolStyle.Circle"
                                                         Size="@(0.5)"
-                                                        Color="@(new MapColor("white"))" />
+                                                        Color="@(new MapColor("white"))"/>
                                 </SimpleRenderer>
                                 <Label Where="pop2000 > 500000"
                                        LabelExpression="[areaname]"
@@ -213,7 +198,7 @@
                                        MaxScale="4_800_000">
                                     <TextSymbol Color="@(new MapColor("yellow"))"
                                                 BackgroundColor="@(new MapColor(0, 0, 0, 0.5))">
-                                        <MapFont Size="@(10)" />
+                                        <MapFont Size="@(10)"/>
                                     </TextSymbol>
                                 </Label>
                                 <Label Where="pop2000 > 500000"
@@ -222,7 +207,7 @@
                                        MinScale="4_800_000">
                                     <TextSymbol Color="@(new MapColor("yellow"))"
                                                 BackgroundColor="@(new MapColor(0, 0, 0, 0.5))">
-                                        <MapFont Size="@(16)" />
+                                        <MapFont Size="@(16)"/>
                                     </TextSymbol>
                                 </Label>
                                 <Label Where="pop2000 <= 500000"
@@ -231,14 +216,14 @@
                                        MinScale="4_800_000">
                                     <TextSymbol Color="@(new MapColor("yellow"))"
                                                 BackgroundColor="@(new MapColor(0, 0, 0, 0.5))">
-                                        <MapFont Size="@(7)" />
+                                        <MapFont Size="@(7)"/>
                                     </TextSymbol>
                                 </Label>
                             </Sublayer>
 
                             break;
                     }
-                    
+
                 </MapImageLayer>
 
                 break;
@@ -246,7 +231,7 @@
     </Map>
 </SceneView>
 
-@if ((_layerIndex == 2) && _railroads is not null)
+@if (_layerIndex == 2 && _railroads is not null)
 {
     <div class="footer">
         <div class="sublayers esri-widget">
@@ -273,21 +258,28 @@
 @if (_layerIndex == 3)
 {
     <div id="footer" class="esri-widget">
-        <div>Cities with Population greater than <span id="population-display">@(_selectedPopulation.ToString("N0"))</span></div>
+        <div>Cities with Population greater than <span
+                id="population-display">@(_selectedPopulation.ToString("N0"))</span></div>
         <div id="population-slider"></div>
     </div>
 
     <SliderWidget ContainerId="population-slider"
                   Min="0"
                   Max="1_000_000"
-                  Values="@( [_selectedPopulation])"
+                  Values="@([_selectedPopulation])"
                   StepInterval="10_000"
                   SnapOnClickEnabled="false"
                   OnThumbDrag="OnSliderThumbDrag"
-                  MapView="_view" />
+                  MapView="_view"/>
 }
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-mapimagelayer/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=d7892b3c13b44391992ecd42bfa92d01", "City Pool Permits Map")
+    ];
 
     private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
