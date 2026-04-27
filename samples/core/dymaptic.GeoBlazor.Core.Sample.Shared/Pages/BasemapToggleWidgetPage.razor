@@ -1,12 +1,9 @@
 @page "/basemap-toggle-widget"
+@inherits SamplePage
 
 <PageTitle>Basemap Toggle Widget</PageTitle>
 <h1>Basemap Toggle Widget</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-basemaptoggle/">ArcGIS Sample</a>
-    <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapToggle.html">BasemapToggle API Reference</a>
-</div>
 <p class="instructions">
     The Basemap Toggle widget allows switching between two basemap styles with a single click.
     Select a basemap pair below, then click the toggle button in the bottom-right corner of the map
@@ -35,6 +32,12 @@
 </MapView>
 
 @code {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-basemaptoggle/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapToggle.html", "Basemap Toggle API Reference")
+    ];
+    
     private int _pairIndex;
 
     private readonly (BasemapStyleName Primary, BasemapStyleName Secondary)[] _pairs =
