@@ -55,7 +55,7 @@ public partial class NavMenu
 
     protected bool IsGroupExpanded(string groupName)
     {
-        if (!string.IsNullOrWhiteSpace(SearchText))
+        if (!string.IsNullOrWhiteSpace(_searchText))
             return true;
 
         return ExpandedGroups.Contains(groupName);

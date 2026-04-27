@@ -37,22 +37,6 @@
     <SearchBox Filter="OnSearchFilter" FullSearch="OnFullSearch" />
     <div id="lower-nav-container" @ref="Navbar" class="@NavMenuCssClass" @onclick="ToggleNavMenu">
         <ul class="nav-list">
-            @foreach (PageLink page in FilteredPages)
-            {
-                string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
-                <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
-                    <NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
-                        @if (page.IconClass is not null)
-                        {
-                            <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
-                        }
-                        else
-                        {
-                            <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
-                        }
-                    </NavLink>
-                </li>
-            }
             @foreach (PageLink page in UngroupedPages)
             {
                 <li class="nav-list-item nav-pinned" @onclick="@(() => NavigateTo(page.Href))">
@@ -87,19 +71,22 @@
     </div>
 </nav>
 
-@{
-RenderFragment RenderNavLink(PageLink page)
-{
-string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
-return@<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
-    @if (page.IconClass is not null)
+@code {
+    RenderFragment RenderNavLink(PageLink page)
     {
-    <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
+        string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
+        return @<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
+                   @if (page.IconClass is not null)
+                   {
+                       <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span
+                               class="nav-item-title">@(page.Title)</span></text>
+                   }
+                   else
+                   {
+                       <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)"
+                                                   alt="@(page.Title)"/></span><span
+                               class="nav-item-title">@(page.Title)</span></text>
+                   }
+               </NavLink>;
     }
-    else
-    {
-    <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
-    }
-</NavLink>;
-}
 }
