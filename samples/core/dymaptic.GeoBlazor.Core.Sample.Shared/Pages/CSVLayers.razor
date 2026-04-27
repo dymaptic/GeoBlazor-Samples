@@ -1,34 +1,68 @@
 ﻿@page "/csv-layer"
+@inherits SamplePage
 <h3>CSV Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-csv/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest//sample-code/layers-csv/live/earthquakes.csv">CSV Earthquakes</a>
-    <a class="btn" target="_blank" href="https://www.arcgis.com/home/item.html?id=a467ef1140de4e88acf34d38df9fb869">Web Scene</a>
-</div>
 <p class="instructions">
-    This sample shows a CSV layer of earthquake data. You can add a new CSV layer by entering a CSV url in the input below.
+    This sample shows a CSV layer of hurricane data from NOAA. It also demonstrates a Stereographic projection. You can add a new CSV layer by entering a CSV url in the input below.
 </p>
-<div class="spaced-row">
-    <label>Enter CSV Layer URL:</label>
-    <InputText @bind-Value="_csvLayerUrl"></InputText>
+<div class="form-group spaced-row">
+    <label for="csv-input">
+        Enter CSV Layer URL:
+    </label>
+    <input id="csv-input" type="text" @bind="_csvLayerUrl" />
     <button type="button" class="btn btn-accent" disabled="@(!_viewRendered)" @onclick="AddLayer">Add new CSV Layer!</button>
 </div>
 
 
-<SceneView @ref="_view" class="map-view" OnViewRendered="OnViewRendered">
-    <WebScene>
-        <PortalItem PortalItemId="a467ef1140de4e88acf34d38df9fb869" />
-        <CSVLayer Url="https://developers.arcgis.com/javascript/latest//sample-code/layers-csv/live/earthquakes.csv" Title="Earth Quakes" Copyright="USGS Earthquakes">
-            <PopupTemplate Title="Earthquake Info" StringContent="Magnitude {mag} {type} hit {place} on {time}." />
-            <SimpleRenderer>
-                <SimpleMarkerSymbol Color="@(new MapColor(255, 84, 54))" Size="5" />
-            </SimpleRenderer>
+<MapView @ref="_view" class="map-view" OnViewRendered="OnViewRendered">
+    <Map>
+        <Basemap>
+            <PortalItem PortalItemId="3113eacc129942b4abde490a51aeb33f"/>
+        </Basemap>
+        <CSVLayer Url="https://arcgis.github.io/arcgis-samples-javascript/sample-data/hurricanes.csv"
+                  Title="Hurricanes" Copyright="NOAA">
+            <PopupTemplate Title="{Name}">
+                <TextPopupContent Text="Category {Category} storm with that occurred at {ISO_time}."/>
+                <FieldsPopupContent>
+                    <FieldInfo FieldName="wmo_pres" Label="Pressure"/>
+                    <FieldInfo FieldName="wmo_wind" Label="Wind Speed (mph)"/>
+                </FieldsPopupContent>
+                <FieldInfo FieldName="ISO_time">
+                    <FieldInfoFormat DateFormat="DateFormat.ShortDateShortTime"/>
+                </FieldInfo>
+            </PopupTemplate>
+            <UniqueValueRenderer Field="Category">
+                <UniqueValueInfo Value="1">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[0]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="2">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[1]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="3">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[2]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="4">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[3]}")" />
+                </UniqueValueInfo>
+                <UniqueValueInfo Value="5">
+                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[4]}")" />
+                </UniqueValueInfo>
+            </UniqueValueRenderer>
         </CSVLayer>
-    </WebScene>
-</SceneView>
+    </Map>
+    <ExpandWidget Position="OverlayPosition.TopLeft">
+        <LegendWidget />
+    </ExpandWidget>
+</MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-csv-projection/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://arcgis.github.io/arcgis-samples-javascript/sample-data/hurricanes.csv", "NOAA Hurricanes CSV"),
+        new("https://www.arcgis.com/home/item.html?id=3113eacc129942b4abde490a51aeb33f", "Stereographic Basemap")
+    ];
 
     private void OnViewRendered()
     {
@@ -54,4 +88,12 @@
     private MapView? _view;
 
     private bool _viewRendered;
+
+    private string[] _fireFlyImages =
+    [
+        "cat1.png", "cat2.png", "cat3.png", "cat4.png", "cat5.png"
+    ];
+    
+    private string _baseUrl = "https://arcgis.github.io/arcgis-samples-javascript/sample-data/";
+
 }

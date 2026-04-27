@@ -17,10 +17,7 @@ window.hasSmallWidth = function () {
     return window.innerWidth <= 1075;
 }
 
-window.setInterceptors = (core, wfsServers) => {
-    if (!wfsServers) {
-        return;
-    }
+window.setInterceptors = (core) => {
     core.esriConfig.request.interceptors.push({
         before: (params) => {
             let service = getCaseInsensitive(params.requestOptions.query, 'service');

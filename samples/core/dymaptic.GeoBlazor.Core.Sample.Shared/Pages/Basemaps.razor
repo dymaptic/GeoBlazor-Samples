@@ -1,73 +1,50 @@
 ﻿@page "/basemaps"
+@inherits SamplePage
 
 <PageTitle>Basemaps</PageTitle>
 <h1>Basemaps</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-custom-basemap-style/">ArcGIS API for JavaScript Reference</a>
-</div>
+
 <p class="instructions">
     By default, GeoBlazor will give you an OpenStreetMap basemap. With your 
     <a href="https://docs.geoblazor.com/pages/authentication.html#arcgis-authentication">ArcGIS API key or App Id</a>, 
     you can access the ArcGIS Basemap Style Service as well as hundreds of ArcGIS Online Basemaps and TileLayers.
 </p>
-<div class="flex-column">
-    <div class="toggle-row">
-        <label class="radio-container">
-            Default Basemap
-            <input type="radio" checked
-                   name="basemap-type" @onclick="@(() => SetBasemap(0))" />
-            <div class="radio-box" />
-        </label>
-        <a class="btn btn-secondary" target="_blank" href="https://wiki.openstreetmap.org/wiki/Main_Page">OpenStreetMap.org</a>
-    </div>
-    <div class="toggle-row">
-        <label class="radio-container">
-            2D Map Styles
-            <input type="radio" 
-                   name="basemap-type" @onclick="@(() => SetBasemap(1))" />
-            <div class="radio-box" />
-        </label>
-        @if (_basemapType == 1)
-        {
-            <select @onchange="SelectStyleMapChanged">
+<div class="form-group">
+    <RadioGroup @bind-Value="_basemapType">
+        <RadioRow Value="0"
+                  Label="Default Basemap"
+                  Id="default-basemap">
+            <select style="visibility: hidden"></select>
+            <a class="btn btn-secondary" target="_blank" href="https://wiki.openstreetmap.org/wiki/Main_Page">OpenStreetMap.org</a>
+        </RadioRow>
+        <RadioRow Value="1"
+                  Label="2D Map Styles"
+                  Id="2d-basemap">
+            <select @onchange="SelectStyleMapChanged" style="@(_basemapType == 1 ? "": "visibility: hidden")">
                 @foreach (BasemapStyleName style in Enum.GetValues(typeof(BasemapStyleName)))
                 {
                     <option value="@style">@style</option>
                 }
             </select>
-        }
-        <a class="btn btn-primary" target="_blank"
-           href="https://developers.arcgis.com/javascript/latest/api-reference/esri-support-BasemapStyle.html">Basemap
-            Style Service</a>
-    </div>
-    <div class="toggle-row">
-        <label class="radio-container">
-            3D Scene Styles
-            <input type="radio"
-                   name="basemap-type" @onclick="@(() => SetBasemap(2))"/>
-            <div class="radio-box"/>
-        </label>
-        @if (_basemapType == 2)
-        {
-            <select @onchange="SelectSceneStyleMapChanged">
+            <a class="btn btn-primary" target="_blank"
+               href="https://developers.arcgis.com/javascript/latest/api-reference/esri-support-BasemapStyle.html">Basemap
+                Style Service</a>
+        </RadioRow>
+        <RadioRow Value="2"
+                  Label="3D Scene Styles"
+                  Id="3d-basemap">
+            <select @onchange="SelectSceneStyleMapChanged" style="@(_basemapType == 2 ? "": "visibility: hidden")">
                 @foreach (BasemapStyleName style in Enum.GetValues(typeof(BasemapStyleName)))
                 {
                     <option value="@style">@style</option>
                 }
             </select>
-        }
-        <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-support-BasemapStyle.html">Basemap Style Service</a>
-    </div>
-    <div class="toggle-row">
-        <label class="radio-container">
-            From Portal Id
-            <input type="radio"
-                   name="basemap-type" @onclick="@(() => SetBasemap(3))"/>
-            <div class="radio-box"></div>
-        </label>
-        @if (_basemapType == 3)
-        {
-            <select @onchange="SelectPortalMapChanged">
+            <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-support-BasemapStyle.html">Basemap Style Service</a>
+        </RadioRow>
+        <RadioRow Value="3"
+                  Label="From Portal Id"
+                  Id="portal-basemap">
+            <select @onchange="SelectPortalMapChanged" style="@(_basemapType == 3 ? "": "visibility: hidden")">
                 <option value="55ebf90799fa4a3fa57562700a68c405">Default-Street</option>
                 <option value="da10cf4ba254469caf8016cd66369157">Satellite</option>
                 <option value="86265e5a4bbb4187a59719cf134e0018">Hybrid</option>
@@ -79,20 +56,18 @@
                 <option value="9053b6cd38d54e65bb0967f355a232df">Streets Night</option>
                 <option value="c50de463235e4161b206d000587af18b">Streets Navigation</option>
             </select>
-        }
-        <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/group.html?id=702026e41f6641fb85da88efe79dc166&view=list#content">ArcGIS Online Basemaps</a>
-    </div>
-    <div class="toggle-row">
-        <label class="radio-container">
-            From Tile Layers
-            <input type="radio"
-                   name="basemap-type" @onclick="@(() => SetBasemap(4))"/>
-            <div class="radio-box" />
-        </label>
-        <a class="btn btn-secondary" target="_blank" href="https://www.arcgis.com/home/item.html?id=1b243539f4514b6ba35e7d995890db1d">World Hillshade Tile Layer</a>
-        &nbsp;&nbsp;
-        <a class="btn btn-accent" target="_blank" href="https://www.arcgis.com/home/item.html?id=6976148c11bd497d8624206f9ee03e30">Forest and Parks Canvas Tile Layer</a>
-    </div>
+            <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/group.html?id=702026e41f6641fb85da88efe79dc166&view=list#content">ArcGIS Online Basemaps</a>
+        </RadioRow>
+        <RadioRow Value="4"
+                  Label="From Tile Layers"
+                  Id="tile-layers-basemap">
+            <select style="visibility: hidden"></select>
+            <div class="flex-column">
+                <a class="btn btn-secondary" target="_blank" href="https://www.arcgis.com/home/item.html?id=1b243539f4514b6ba35e7d995890db1d">World Hillshade Tile Layer</a>
+                <a class="btn btn-accent" target="_blank" href="https://www.arcgis.com/home/item.html?id=6976148c11bd497d8624206f9ee03e30">Forest and Parks Canvas Tile Layer</a>
+            </div>
+        </RadioRow>
+    </RadioGroup>
 </div>
 
 @switch (_basemapType)
@@ -148,6 +123,11 @@
 }
 
 @code {
+    
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-custom-basemap-style/", "ArcGIS Maps SDK for JavaScript"),
+     ];
 
     private void SetBasemap(int val)
     {

@@ -1,14 +1,7 @@
 @page "/web-style-symbols"
+@inherits SamplePage
 <h3>WebStyleSymbols</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank"
-       href="https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-2d/">ArcGIS API for
-        JavaScript</a>
-    <a class="btn btn-primary" target="_blank"
-       href="http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/LA_County_Points_of_Interest/FeatureServer/0">LA
-        County Points of Interest</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to style feature layer with 2D Web Style Symbols using UniqueValueRenderer in 2D
     MapView.
@@ -84,6 +77,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-2d/", "ArcGIS Maps SDK for JavaScript"),
+        new("http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/LA_County_Points_of_Interest/FeatureServer/0", "LA County Points of Interest")
+    ];
 
     private UniqueValueInfo[] RendererInfos => _symbolCats.Select(symCat =>
             new UniqueValueInfo(symCat,

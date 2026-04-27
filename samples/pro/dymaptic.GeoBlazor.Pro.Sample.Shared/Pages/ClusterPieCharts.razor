@@ -1,17 +1,14 @@
 ﻿@page "/cluster-pie-charts"
+@inherits SamplePage
 
 <PageTitle>Clusters as Pie Charts</PageTitle>
 <h1>Clusters as Pie Charts</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-pie-charts/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=433b5f7f524a4d1ebf3a9f8e1bd49ee0">311 Calls</a>
-</div>
 <p class="instructions">
-    
+
 </p>
 
-<MapView Class="map-view" OnLayerViewCreate="OnLayerViewCreate">
+<MapView @ref="_mapView" Class="map-view" OnLayerViewCreate="OnLayerViewCreate">
     <WebMap>
         <PortalItem PortalItemId="433b5f7f524a4d1ebf3a9f8e1bd49ee0" />
     </WebMap>
@@ -25,9 +22,16 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/featurereduction-cluster-pie-charts/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=433b5f7f524a4d1ebf3a9f8e1bd49ee0", "311 Calls")
+    ];
+
     [Inject]
     public required LabelGenerator LabelGenerator { get; set; }
-    
+
     [Inject]
     public required PieChartGenerator PieChartGenerator { get; set; }
 
@@ -44,7 +48,7 @@
     
     private async Task<FeatureReductionCluster> GenerateClusterConfig()
     {
-        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!)).PrimaryScheme!;
+        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!, _mapView!.Id)).PrimaryScheme;
         
         TextSymbol labelSymbol = (TextSymbol)labelScheme.LabelingInfo.First().Symbol!;
 #pragma warning disable BL0005
@@ -78,4 +82,5 @@
     }
 
     private FeatureLayer? _featureLayer;
+    private MapView? _mapView;
 }

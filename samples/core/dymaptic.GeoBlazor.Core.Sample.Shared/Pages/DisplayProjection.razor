@@ -1,12 +1,10 @@
 @page "/projection"
+@inherits SamplePage
 @using System.Globalization
 @inject IJSRuntime JsRuntime
 
 <PageTitle>Projection</PageTitle>
 <h1>Projection</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-projected-geometries/">ArcGIS API for JavaScript</a>
-</div>
 <p class="instructions">
     Hover over the map to see a buffer that shows the distortion of various
     sections of the map projection. Use the dropdown menu in the top right
@@ -77,6 +75,11 @@
 
 @code
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-projected-geometries/", "ArcGIS Maps SDK for JavaScript"),
+     ];
+
     private Symbol? PolySym { get; set; }
     private Symbol? PointSym { get; set; }
     private MapView? View { get; set; }
@@ -107,10 +110,11 @@
 
     private async Task DisplayCoordinates(Point? center)
     {
-        var popupOptions = new PopupOptions(new PopupDockOptions(buttonEnabled: false),
+        var popupOptions = new PopupOptions(new PopupDockOptions(
+                PopupDockPosition.BottomLeft, true, boolBreakpoint: true),
             new PopupVisibleElements(false, false));
 
-        var popupTemplate = new PopupTemplate($"WKID: {center!.SpatialReference!.Wkid}",
+        var popupTemplate = new PopupTemplate($"WKID {center!.SpatialReference!.Wkid} Center",
             $"<b>X:</b> {center.X!.Value.ToString("N5", CultureInfo.CurrentCulture)} | <b>Y:</b> {center.Y!.Value.ToString("N5", CultureInfo.CurrentCulture)}");
 
         var graphic = new Graphic(center, popupTemplate: popupTemplate);

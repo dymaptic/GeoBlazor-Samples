@@ -1,11 +1,8 @@
 ﻿@page "/apply-edits"
+@inherits SamplePage
 <PageTitle>Update FeatureLayer with ApplyEdits</PageTitle>
 <h1>Update FeatureLayer with ApplyEdits</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/editing-applyedits/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/IncidentsReport/FeatureServer/0">Incidents Report</a>
-</div>
 <p class="instructions">
     Select a feature to begin editing
 </p>
@@ -76,6 +73,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/editing-applyedits/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/IncidentsReport/FeatureServer/0", "Incidents Report")
+    ];
 
     private async Task OnClick(ClickEvent clickEvent)
     {

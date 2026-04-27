@@ -8,6 +8,7 @@ using dymaptic.GeoBlazor.Core.Events;
 using dymaptic.GeoBlazor.Core.Model;
 using dymaptic.GeoBlazor.Core.Options;
 using dymaptic.GeoBlazor.Core.Results;
+using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Pro.Events;
 using dymaptic.GeoBlazor.Pro.Model;
 using Microsoft.AspNetCore.Components;
@@ -18,6 +19,12 @@ namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;
 
 public partial class CustomPopupContents
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/popup-customcontent/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/OverlaySchools/FeatureServer/0", "Private and Public US Schools")
+    ];
+
     [Inject]
     public required QueryService QueryService { get; set; }
     

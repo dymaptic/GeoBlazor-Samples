@@ -28,15 +28,13 @@ public partial class NavMenu
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
     public required JsModuleManager JsModuleManager { get; set; }
-    [Parameter]
-    public string? SearchText { get; set; }
-    [Parameter]
-    public bool EnterKeyPressed { get; set; }
 
-    protected string? NavMenuCssClass => CollapseNavMenu ? "collapse" : null;
-    protected IEnumerable<PageLink> FilteredPages => string.IsNullOrWhiteSpace(SearchText)
+    private string? NavMenuCssClass => CollapseNavMenu ? "lower-collapse" : null;
+    private string? GlobalNavMenuCssClass => CollapseGlobalNavMenu ? "upper-collapse" : null;
+
+    private IEnumerable<PageLink> FilteredPages => string.IsNullOrWhiteSpace(_searchText)
         ? Pages
-        : Pages.Where(p => p.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+        : Pages.Where(p => p.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase));
 
     protected IEnumerable<PageLink> UngroupedPages => FilteredPages.Where(p => p.Category is null);
 
@@ -92,21 +90,32 @@ public partial class NavMenu
 
             StateHasChanged();
         }
-
-        if (EnterKeyPressed)
+    }
+    
+    protected void OnSearchFilter(string searchText)
+    {
+        _searchText = searchText;
+        CollapseNavMenu = false;
+        StateHasChanged();
+    }
+    
+    protected void OnFullSearch(string searchText)
+    {
+        if (FilteredPages.Count() == 1)
         {
-            EnterKeyPressed = false;
-
-            if (FilteredPages.Count() == 1)
-            {
-                NavigationManager.NavigateTo(FilteredPages.First().Href);
-            }
+            CollapseNavMenu = true;
+            NavigationManager.NavigateTo(FilteredPages.First().Href);
         }
     }
 
     protected void ToggleNavMenu()
     {
         CollapseNavMenu = !CollapseNavMenu;
+    }
+    
+    protected void ToggleGlobalNavMenu()
+    {
+        CollapseGlobalNavMenu = !CollapseGlobalNavMenu;
     }
 
     protected async Task NavigateTo(string href)
@@ -127,8 +136,11 @@ public partial class NavMenu
         });
     }
 
-    protected virtual bool CollapseNavMenu { get; set; } = true;
-    protected ElementReference? Navbar;
+    protected bool CollapseNavMenu { get; set; } = true;
+    protected bool CollapseGlobalNavMenu { get; set; } = true;
+    protected ElementReference? Navbar { get; set; }
+    private string _searchText = string.Empty;
+    
     public virtual PageLink[] Pages =>
     [
         new("", "Home", "oi-home"),
@@ -143,6 +155,7 @@ public partial class NavMenu
         new("vector-layer", "Vector Layer", "oi-arrow-right", Category: Categories.Layers),
         new("csv-layer", "CSV Layers", "oi-grid-four-up", Category: Categories.Layers),
         new("kmllayers", "KML Layers", "oi-excerpt", Category: Categories.Layers),
+        new("geojson-layers", "GeoJSON Layers", null, "geojson.svg", Category: Categories.Layers),
         new("georss-layer", "GeoRSS Layer", "oi-rss", Category: Categories.Layers),
         new("osm-layer", "OpenStreetMaps Layer", null, "osm.webp", Category: Categories.Layers),
         new("wcslayers", "WCS Layers", "oi-project", Category: Categories.Layers),
@@ -161,6 +174,7 @@ public partial class NavMenu
         new("popup-actions", "Popup Actions", "oi-bullhorn", Category: Categories.Widgets),
         new("bookmarks", "Bookmarks", "oi-bookmark", Category: Categories.Widgets),
         new("layer-lists", "Layer Lists", "oi-list", Category: Categories.Widgets),
+        new("legends", "Legend", null, "legend.svg", Category: Categories.Widgets),
         new("basemap-layer-lists", "Basemap Layer Lists", "oi-spreadsheet", Category: Categories.Widgets),
         new("measurement-widgets", "Measurement Widgets", null, "ruler.svg", Category: Categories.Widgets),
         new("search-multi-source", "Search Multiple Sources", "oi-magnifying-glass", Category: Categories.Widgets),
@@ -191,6 +205,6 @@ public partial class NavMenu
     ];
 
     public record PageLink(
-        string Href, string Title, string? IconClass,
+        string Href, string Title, string? IconClass = null,
         string? ImageFile = null, bool Pro = false, string? Category = null);
 }

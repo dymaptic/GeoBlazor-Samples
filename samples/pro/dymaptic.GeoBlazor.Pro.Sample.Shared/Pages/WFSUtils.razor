@@ -1,11 +1,8 @@
 @page "/wfsutils"
+@inherits SamplePage
 
 <h3>WFS Utils</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about">Office for National Statistics (UK)</a>
-</div>
 <p class="instructions">
     This sample shows how you can use the wfsUtils class to browse FeatureTypes in the WFS service before adding them to your map. To do this, we use wfsUtils.getCapabilities, which executes the GetCapabilities request on the WFS service and returns the feature types.
 </p>
@@ -54,6 +51,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about", "Office for National Statistics (UK)")
+    ];
+
     [Inject]
     public required WfsUtils Utils { get; set; }
 

@@ -1,0 +1,90 @@
+@page "/geojson-layers"
+@inherits SamplePage
+
+<PageTitle>GeoJSON Layers</PageTitle>
+<h1>GeoJSON Layers</h1>
+
+<p class="instructions">
+    Load GeoJSON data directly from a URL. Toggle the checkbox to display recent earthquake data from the USGS,
+    styled by magnitude with an interactive popup. Click any earthquake to see its details.
+</p>
+
+<div>
+    <div class="form-group">
+        <div class="spaced-row">
+            <label for="earthquakes-checkbox">
+                Show Earthquakes:
+            </label>
+            <input id="earthquakes-checkbox" 
+                   type="checkbox" 
+                   class="form-check-input"
+                   @onchange="@(() => _showEarthquakes = !_showEarthquakes)">
+            <label for="earthquakes-source">
+                Data Source:
+            </label>
+            <select id="earthquakes-source" 
+                    @onchange="OnSourceChanged">
+                <option value="month">Past Month</option>
+                <option value="week">Past Week</option>
+                <option value="day">Past Day</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<MapView Longitude="-150" Latitude="30" Zoom="2" Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray" />
+        </Basemap>
+
+        @if (_showEarthquakes)
+        {
+            <GeoJSONLayer @key="_dataUrl"
+                          Url="@_dataUrl"
+                          Title="USGS Earthquakes"
+                          Copyright="USGS Earthquakes"
+                          OrderBy="@(new[] { new OrderByInfo("mag", SortOrder.Descending) })">
+                <PopupTemplate Title="Earthquake Info"
+                               StringContent="<b>Magnitude:</b> {mag}<br><b>Type:</b> {type}<br><b>Location:</b> {place}<br><b>Time:</b> {time}" />
+                <SimpleRenderer>
+                    <SimpleMarkerSymbol Color="@(new MapColor(226, 119, 40))"
+                                        Size="6"
+                                        Style="SimpleMarkerSymbolStyle.Circle">
+                        <Outline Color="@(new MapColor(255, 255, 255))" Width="0.5" />
+                    </SimpleMarkerSymbol>
+                    <SizeVariable Field="mag"
+                                  MinDataValue="2.5"
+                                  MaxDataValue="8"
+                                  MinSize="4"
+                                  MaxSize="40" />
+                </SimpleRenderer>
+            </GeoJSONLayer>
+        }
+    </Map>
+    <LegendWidget Position="OverlayPosition.BottomRight" />
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-geojson/", "ArcGIS Sample"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GeoJSONLayer.html", "GeoJSONLayer API Reference"),
+        new("https://www.usgs.gov/programs/earthquake-hazards/earthquakes", "USGS Earthquake Hazards Program")
+    ];
+
+    private bool _showEarthquakes;
+    private string _dataUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
+
+    private void OnSourceChanged(ChangeEventArgs e)
+    {
+        string period = e.Value?.ToString() ?? "month";
+        _dataUrl = period switch
+        {
+            "week" => "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson",
+            "day" => "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+            _ => "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
+        };
+    }
+}

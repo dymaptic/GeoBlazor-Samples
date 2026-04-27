@@ -1,18 +1,21 @@
 ﻿@page "/reactive-utils"
-@using dymaptic.GeoBlazor.Core.Functions
+@inherits SamplePage
 @using System.Text.Json.Serialization
-@using Environment = System.Environment
+@using Environment = Environment
 <PageTitle>Reactive Utils</PageTitle>
 <h1>Reactive Utils</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=0614ea1f9dd043e9ba157b9c20d3c538">Paris 3D Web Scene</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to use the <code>ReactiveUtils</code> to react to various user interactions.
-    <a target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html#watch">Watchers</a> watch a component property and report back any updates.
-    <a target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html#on">Listeners</a> attach to events on components.
-    <a target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html#when">Waiters</a> return when a value evaluates to "<a target="_blank" href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy">truthy</a>".
+    <a target="_blank"
+       href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html#watch">Watchers</a>
+    watch a component property and report back any updates.
+    <a target="_blank"
+       href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html#on">Listeners</a>
+    attach to events on components.
+    <a target="_blank"
+       href="https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html#when">Waiters</a>
+    return when a value evaluates to "<a target="_blank"
+                                         href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy">truthy</a>".
 </p>
 
 @if (_listItemsCreated < 2)
@@ -21,178 +24,199 @@
 }
 else
 {
-    <div id="control-set">
-        <div class="control-subset">
-            <h2 @onclick="@(() => _showWatcherSection = !_showWatcherSection)">
-                Add Watchers
-                <span class="oi @(_showWatcherSection ? "oi-chevron-top" : "oi-chevron-bottom")"></span>
-            </h2>
-            <div class="@(_showWatcherSection ? "" : "collapse")">
-                <div class="form-group">
-                    <label class="react-label">
+    <Accordion Title="Add Watchers">
+        <div class="spaced-row">
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label for="open-popup">
                         Popup is open:
-                        <input type="checkbox" class="form-check-input" @onclick="TogglePopupHandler" />
                     </label>
-                    <div style="margin-left: 1rem;">
-                        <b>@(_handlePopups ? _popupOpen : "")</b>
-                    </div>
+                    <input id="open-popup" type="checkbox"
+                           class="form-check-input" @onclick="TogglePopupHandler"/>
                 </div>
-                <div class="form-group">
-                    <label class="react-label">
+
+                <div class="response-line">
+                    <b>@(_handlePopups ? _popupOpen : "")</b>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label for="center-check">
                         Center:
-                        <input type="checkbox" class="form-check-input" @onclick="ToggleCenterHandler" />
                     </label>
-                    <div style="margin-left: 1rem;">
-                        @if (_handleCenter)
-                        {
-                            if (_center is null)
-                            {
-                                <b>Drag or Zoom to load</b>
-                            }
-                            else
-                            {
-                                <b>@_center?.X!.Value.ToString("N2") X / @_center?.Y!.Value.ToString("N2") Y </b>
-                            }
-                        }
-                    </div>
+                    <input id="center-check" type="checkbox" class="form-check-input"
+                           @onclick="ToggleCenterHandler"/>
                 </div>
-                <div class="form-group">
-                    <label class="react-label">
-                        Spatial Reference:
-                    </label>
-                    <div style="margin-left: 1rem;">
-                        @if (_handleCenter)
-                        {
-                            if (_center is null)
-                            {
-                                <b>Drag or Zoom to load</b>
-                            }
-                            else
-                            {
-                                <b>@_center?.SpatialReference!.Wkid</b>
-                            }
-                        }
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="react-label">
-                        Extent:
-                        <input type="checkbox" class="form-check-input" @onclick="ToggleExtentHandler" />
-                    </label>
-                    <div style="margin-left: 1rem;">
-                        @if (_handleExtent)
-                        {
-                            if (_extent is null)
-                            {
-                                <b>Drag or Zoom to load</b>
-                            }
-                            else
-                            {
-                                <b>
-                                    @_extent?.Xmin.ToString("N2") X Min / @_extent?.Xmax.ToString("N2") X Max /
-                                    @_extent?.Ymin.ToString("N2") Y Min / @_extent?.Ymax.ToString("N2") Y Max
-                                </b>
-                            }
-                        }
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="react-label">
-                        Layers:
-                        <input type="checkbox" class="form-check-input" @onclick="ToggleLayerHandler" />
-                    </label>
-                    <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-                        @if (_handleLayers)
-                        {
-                            if (_layers is null)
-                            {
-                                <b>Click to hide/show a layer in the LayerList Widget</b>
-                            }
-                            else
-                            {
-                                <b>@((MarkupString)(_layers is null ? "" : string.Join("<br>", _layers)))</b>
-                            }
-                        }
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="react-label">
-                        One-Time Zoom Watcher:
-                        <input type="checkbox" class="form-check-input" @bind="_zoomWatcherAttached" @onclick="AttachZoomWatcher" />
-                    </label>
-                    <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-                        <b>Zoom Value: @_zoomValue</b>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="control-subset">
-            <h2 @onclick="@(() => _showListenerSection = !_showListenerSection)">
-                Add Listeners
-                <span class="oi @(_showListenerSection ? "oi-chevron-top" : "oi-chevron-bottom")"></span>
-            </h2>
-            <div class="@(_showListenerSection ? "" : "collapse")">
-                <div class="form-group">
-                    <label class="react-label">
-                        Click:
-                        <input type="checkbox" class="form-check-input" @onclick="ToggleClickHandler" />
-                    </label>
-                    <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-                        @if (_handleClicks)
-                        {
-                            <b>@((MarkupString)(_clickedReturnValue ?? ""))</b>
-                        }
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="react-label">
-                        Drag:
-                        <input type="checkbox" class="form-check-input" @onclick="ToggleDragHandler" />
-                    </label>
-                    <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-                        @if (_handleDrags)
-                        {
-                            <b>@((MarkupString)(_dragReturnValue ?? ""))</b>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="control-subset">
-            <h2 @onclick="@(() => _showWaiterSection = !_showWaiterSection)">
-                Add Waiters
-                <span class="oi @(_showWaiterSection ? "oi-chevron-top" : "oi-chevron-bottom")"></span>
-            </h2>
-            <div class="form-group @(_showWaiterSection ? "" : "collapse")">
-                <label class="react-label">
-                    Track Home Widget:
-                    <input type="checkbox" class="form-check-input" @onclick="ToggleHomeWaiter" />
-                </label>
-                <label>
-                    Show Home Widget:
-                    <input type="checkbox" class="form-check-input" @onclick="ShowHomeWidget" />
-                </label>
-                <div style="margin-left: 1rem; max-height: 6rem; overflow-y: auto;">
-                    @if (_handleHomeWidget)
+                <div class="response-line">
+                    @if (_handleCenter)
                     {
-                        <b>@(_homeWidgetVisible ? "Widget now visible" : "Widget not visible")</b>
+                        if (_center is null)
+                        {
+                            <b>Drag or Zoom to load</b>
+                        }
+                        else
+                        {
+                            <b>@_center?.X!.Value.ToString("N2") X / @_center?.Y!.Value.ToString("N2") Y </b>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    Spatial Reference:
+                </label>
+                <div class="response-line">
+                    @if (_handleCenter)
+                    {
+                        if (_center is null)
+                        {
+                            <b>Drag or Zoom to load</b>
+                        }
+                        else
+                        {
+                            <b>@_center?.SpatialReference!.Wkid</b>
+                        }
                     }
                 </div>
             </div>
         </div>
-    </div>
+            
+        <div class="spaced-row">
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label for="extent-check">
+                        Extent:
+                    </label>
+                    <input id="extent-check" type="checkbox" class="form-check-input" @onclick="ToggleExtentHandler"/>
+                </div>
+                        
+                <div class="response-area">
+                    @if (_handleExtent)
+                    {
+                        if (_extent is null)
+                        {
+                            <b>Drag or Zoom to load</b>
+                        }
+                        else
+                        {
+                            <b>
+                                @_extent?.Xmin.ToString("N2") X Min / @_extent?.Xmax.ToString("N2") X Max /
+                                @_extent?.Ymin.ToString("N2") Y Min / @_extent?.Ymax.ToString("N2") Y Max
+                            </b>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label for="layers-check">
+                        Layers:
+                    </label>
+                    <input id="layers-check" type="checkbox" class="form-check-input" @onclick="ToggleLayerHandler"/>
+                </div>
+                        
+                <div class="response-area">
+                    @if (_handleLayers)
+                    {
+                        if (_layers is null)
+                        {
+                            <b>Click to hide/show a layer in the LayerList Widget</b>
+                        }
+                        else
+                        {
+                            <b>@((MarkupString)(_layers is null ? "" : string.Join("<br>", _layers)))</b>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label>
+                        One-Time Zoom Watcher:
+                    </label>
+                    <input type="checkbox" class="form-check-input" @bind="_zoomWatcherAttached"
+                           @onclick="AttachZoomWatcher"/>
+                </div>
+                        
+                <div class="response-area">
+                    <b>Zoom Value: @_zoomValue</b>
+                </div>
+            </div>
+        </div>
+    </Accordion>
+    <Accordion Title="Add Listeners">
+        <div class="spaced-row">
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label for="click-checkbox">
+                        Click:
+                    </label>
+                    <input id="click-checkbox" type="checkbox" class="form-check-input" @onclick="ToggleClickHandler"/>
+                </div>
+                    
+                <div class="response-area">
+                    @if (_handleClicks)
+                    {
+                        <b>@((MarkupString)(_clickedReturnValue ?? ""))</b>
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="spaced-row">
+                    <label for="drag-checkbox">
+                        Drag:
+                    </label>
+                    <input id="drag-checkbox" type="checkbox" class="form-check-input" @onclick="ToggleDragHandler"/>
+                </div>
+                <div class="response-area">
+                    @if (_handleDrags)
+                    {
+                        <b>@((MarkupString)(_dragReturnValue ?? ""))</b>
+                    }
+                </div>
+            </div>
+        </div>
+    </Accordion>
+    <Accordion Title="Add Waiters">
+        <div class="spaced-row">
+            <label for="home-track">
+                Track Home Widget:
+            </label>
+            <input id="home-track" type="checkbox" class="form-check-input" @onclick="ToggleHomeWaiter"/>
+                
+            <label for="home-show">
+                Show Home Widget:
+            </label>
+            <input id="home-show" type="checkbox" class="form-check-input" @onclick="ShowHomeWidget"/>
+            <div class="response-line">
+                @if (_handleHomeWidget)
+                {
+                    <b>@(_homeWidgetVisible ? "Widget now visible" : "Widget not visible")</b>
+                }
+            </div>
+            @* spacer *@
+            <div class="btn" style="visibility: hidden"></div>
+        </div>
+    </Accordion>
 }
 
 <SceneView @ref="_view" Class="map-view" OnViewRendered="OnViewRendered"
            OnLayerViewCreate="OnLayerViewCreate">
     <WebScene>
-        <PortalItem PortalItemId="0614ea1f9dd043e9ba157b9c20d3c538" />
+        <PortalItem PortalItemId="0614ea1f9dd043e9ba157b9c20d3c538"/>
     </WebScene>
-    <LayerListWidget Position="OverlayPosition.TopRight" OnListItemCreatedHandler="OnListItemCreated" />
-    <HomeWidget @ref="_homeWidget" Position="OverlayPosition.TopLeft" />
+    <LayerListWidget Position="OverlayPosition.TopRight" OnListItemCreatedHandler="OnListItemCreated"/>
+    <HomeWidget @ref="_homeWidget" Position="OverlayPosition.TopLeft"/>
 </SceneView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-core-reactiveUtils.html", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=0614ea1f9dd043e9ba157b9c20d3c538", "Paris 3D Web Scene")
+    ];
 
     private async Task OnViewRendered()
     {
@@ -257,7 +281,7 @@ else
     private async Task TogglePopupHandler()
     {
         _handlePopups = !_handlePopups;
-        var expression = "view?.popup?.visible";
+        string expression = "view?.popup?.visible";
         if (_handlePopups)
         {
             await _view!.AddReactiveWatcher<bool>(expression, PopupWatchHandler);
@@ -267,7 +291,7 @@ else
             await _view!.RemoveReactiveWatcher(expression);
         }
     }
-    
+
     // hook to `MapView.OnLayerViewCreate`
     private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
@@ -277,12 +301,9 @@ else
         {
             return;
         }
-        
-        await layer.AddReactiveWatcher<bool>($"{layer.Title}?.visible", 
-            v => 
-        {
-            Console.WriteLine($"Layer {layer.Title} visibility = {v}");
-        }, layer.Title);
+
+        await layer.AddReactiveWatcher<bool>($"{layer.Title}?.visible",
+            v => { Console.WriteLine($"Layer {layer.Title} visibility = {v}"); }, layer.Title);
     }
 
     private void PopupWatchHandler(bool value)
@@ -293,7 +314,7 @@ else
     private async Task ToggleCenterHandler()
     {
         _handleCenter = !_handleCenter;
-        var expression = "view?.center";
+        string expression = "view?.center";
         if (_handleCenter)
         {
             await _view!.AddReactiveWatcher<Point>(expression, CenterWatchHandler);
@@ -312,7 +333,7 @@ else
     private async Task ToggleExtentHandler()
     {
         _handleExtent = !_handleExtent;
-        var expression = "view?.extent";
+        string expression = "view?.extent";
         if (_handleExtent)
         {
             await _view!.AddReactiveWatcher<Extent>(expression, ExtentWatchHandler);
@@ -331,7 +352,7 @@ else
     private async Task ToggleLayerHandler()
     {
         _handleLayers = !_handleLayers;
-        var expression = "view?.map?.allLayers?.filter(layer => layer.visible)";
+        string expression = "view?.map?.allLayers?.filter(layer => layer.visible)";
         if (_handleLayers)
         {
             await _view!.AddReactiveWatcher<ViewableLayer[]?>(expression, LayerWatchHandler);
@@ -344,7 +365,7 @@ else
 
     private void LayerWatchHandler(ViewableLayer[]? values)
     {
-    // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         _layers = values?.Where(l => l.Title is not null).Select(l => l.Title).ToArray();
         StateHasChanged();
     }
@@ -411,12 +432,10 @@ else
     private bool _showHomeWidget;
     private bool _homeWidgetVisible;
     private HomeWidget? _homeWidget;
-    private bool _showWatcherSection;
-    private bool _showListenerSection;
-    private bool _showWaiterSection;
     private double? _zoomValue;
     private bool _zoomWatcherAttached;
 
     private record ViewableLayer(string Title);
+
     private int _listItemsCreated;
 }

@@ -1,9 +1,7 @@
 ﻿@page "/marker-rotation"
+@inherits SamplePage
 <PageTitle>Marker Rotation</PageTitle>
 <h1>Marker Rotation</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-web-map/">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     Loading a <code>PictureMarkerSymbol</code> from an image url, this sample also demonstrates rotation and size of icons
     varying based on data fields, to demonstrate wind direction and speed.
@@ -28,3 +26,11 @@
         </FeatureLayer>
     </Map>
 </MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-web-map/", "ArcGIS Maps SDK for JavaScript"),
+     ];
+}

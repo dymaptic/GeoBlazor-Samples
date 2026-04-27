@@ -1,13 +1,10 @@
 ﻿@page "/calculate-geometries"
+@inherits SamplePage
 @inject GeometryEngine GeometryEngine
 
 <PageTitle>Calculate Geometries</PageTitle>
 <h1>Calculate Geometries</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/calculate-geometries/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d582a9e953c44c09bb998c7d9b66f8d4">Charted Territory BaseMap</a>
-</div>
 <p class="instructions">
     Use the buttons in the top right to see a demonstration of drawing a
     buffer around a point, finding the intersection between two graphics,
@@ -54,6 +51,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/calculate-geometries/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=d582a9e953c44c09bb998c7d9b66f8d4", "Charted Territory BaseMap")
+    ];
 
     private async Task CreateBuffer()
     {

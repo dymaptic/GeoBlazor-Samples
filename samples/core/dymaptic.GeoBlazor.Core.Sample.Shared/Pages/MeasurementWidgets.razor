@@ -1,11 +1,8 @@
 ﻿@page "/measurement-widgets"
+@inherits SamplePage
 <PageTitle>Measurement Widgets</PageTitle>
 <h1>Measurement Widgets</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-measurement-2d/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=990d0191f2574db495c4304a01c3e65b">NFL Stadiums in the USA</a>
-</div>
 <p class="instructions">
     This sample shows how to use the measurement widgets in 2D. The measurement widgets can also be used with all types of layers.
 </p>
@@ -62,7 +59,13 @@
 
 
 @code {
-    
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-measurement-2d/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=990d0191f2574db495c4304a01c3e65b", "NFL Stadiums in the USA")
+    ];
+
     private async Task OnDistanceButtonClicked()
     {
         await SetActiveWidget("distance");

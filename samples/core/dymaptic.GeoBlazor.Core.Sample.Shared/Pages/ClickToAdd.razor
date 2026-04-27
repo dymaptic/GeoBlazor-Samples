@@ -1,9 +1,7 @@
 ﻿@page "/click-to-add"
+@inherits SamplePage
 <PageTitle>Click to Add Points</PageTitle>
 <h1>Click To Add Points</h1>
-<div class="links-div">
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=1e126e7520f9466c9ca28b8f28b5e500">World Ocean Basemap</a>
-</div>
 
 <p class="instructions">
     Click anywhere to see a point added to the map. Click on the point again to see a popup. Click on the popup action to add the point to the list below.
@@ -29,6 +27,12 @@
 </div>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://www.arcgis.com/home/item.html?id=1e126e7520f9466c9ca28b8f28b5e500", "World Ocean Basemap"),
+     ];
+
     private async Task OnClick(ClickEvent arg)
     {
         Point point = arg.MapPoint;
@@ -47,12 +51,12 @@
             await _graphicsLayer!.Add(_graphic);
         }
 
-        SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(new Outline(new MapColor("blue")),
+        SimpleMarkerSymbol symbol = new(new Outline(new MapColor("blue")),
             new MapColor("yellow"), 10);
         
-        ActionButton actionButton = new ActionButton("Click to Add to List",
+        ActionButton actionButton = new("Click to Add to List",
             "./_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/dymaptic_logo.webp", "test-1", AddPoint);
-        PopupTemplate popupTemplate = new PopupTemplate(
+        PopupTemplate popupTemplate = new(
             $"New Point at Long: {point.Longitude!.Value:N2} Lat: {point.Latitude!.Value:N2}", 
             actions: [actionButton]);
         

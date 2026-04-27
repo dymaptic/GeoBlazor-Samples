@@ -1,60 +1,105 @@
-<div class="top-row navbar">
-    <div class="container-fluid">
-        <div class="navbar__logo" aria-label="GeoBlazor Logo"></div>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+﻿<nav>
+    <div class="navbar__container">
+        <div class="navbar__logo-container">
+            <a href="https://geoblazor.com">
+                <div class="navbar__logo" aria-label="GeoBlazor Logo"></div>
+            </a>
+        </div>
+        <div class="navbar__menu-container" @onclick="ToggleGlobalNavMenu">
+            <i class="icon hamburger-icon"></i>
+        </div>
+        <div class="navbar__menu-item-container @GlobalNavMenuCssClass">
+            <a id="features__link" class="navbar__menu-item" href="https://docs.geoblazor.com/pages/features" target="_blank">
+                <span class="navbar__menu-item__text">Features</span>
+            </a>
+            <a class="navbar__menu-item" href="https://docs.geoblazor.com">
+                <span class="navbar__menu-item__text desktop">Documentation</span>
+                <span class="navbar__menu-item__text mobile">Docs</span>
+            </a>
+            <a class="navbar__menu-item" href="" @onclick="ToggleGlobalNavMenu">
+                <span class="navbar__menu-item__text">Samples</span>
+            </a>
+            <a class="navbar__menu-item" href="https://geoblazor.com/pricing">
+                <span class="navbar__menu-item__text">Pricing</span>
+            </a>
+            <a class="navbar__menu-item" href="https://geoblazor.com/blog">
+                <span class="navbar__menu-item__text">Blog</span>
+            </a>
+            <a id="signin__link" class="btn btn-signin" href="https://licensing.dymaptic.com">
+                Sign In
+            </a>
+        </div>
     </div>
-</div>
-<hr>
-<div id="nav-container" @ref="Navbar" class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav-list">
-        @foreach (PageLink page in UngroupedPages)
-        {
-            <li class="nav-list-item nav-pinned" @onclick="@(() => NavigateTo(page.Href))">
-                @RenderNavLink(page)
-            </li>
-        }
+    <button id="lower-nav-toggle" type="button" class="btn btn-lower-nav-toggle" @onclick="ToggleNavMenu">
+        <span>Samples</span>
+        <span class="oi oi-chevron-down" aria-hidden="true"></span>
+    </button>
+    <SearchBox Filter="OnSearchFilter" FullSearch="OnFullSearch" />
+    <div id="lower-nav-container" @ref="Navbar" class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <ul class="nav-list">
+            @foreach (PageLink page in FilteredPages)
+            {
+                string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
+                <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
+                    <NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
+                        @if (page.IconClass is not null)
+                        {
+                            <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
+                        }
+                        else
+                        {
+                            <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
+                        }
+                    </NavLink>
+                </li>
+            }
+            @foreach (PageLink page in UngroupedPages)
+            {
+                <li class="nav-list-item nav-pinned" @onclick="@(() => NavigateTo(page.Href))">
+                    @RenderNavLink(page)
+                </li>
+            }
 
-        @foreach (var (groupName, pages) in GroupedFilteredPages)
-        {
-            bool expanded = IsGroupExpanded(groupName);
-            <li class="nav-list-item nav-group @(expanded ? "active" : "")">
-                <button type="button" class="nav-list-expander" aria-expanded="@expanded" @onclick="@(() => ToggleGroup(groupName))" @onclick:stopPropagation="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                        <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
-                    </svg>
-                    <span class="nav-group-title">@groupName</span>
-                </button>
-                @if (expanded)
-                {
+            @foreach (var (groupName, pages) in GroupedFilteredPages)
+            {
+                bool expanded = IsGroupExpanded(groupName);
+                <li class="nav-list-item nav-group @(expanded ? "active" : "")">
+                    <button type="button" class="nav-list-expander" aria-expanded="@expanded" @onclick="@(() => ToggleGroup(groupName))" @onclick:stopPropagation="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                            <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
+                        </svg>
+                        <span class="nav-group-title">@groupName</span>
+                    </button>
+                    @if (expanded)
+                    {
                     <ul class="nav-list nav-sublist">
                         @foreach (PageLink page in pages)
                         {
-                            <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
-                                @RenderNavLink(page)
-                            </li>
+                        <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
+                            @RenderNavLink(page)
+                        </li>
                         }
                     </ul>
-                }
-            </li>
-        }
-    </ul>
-</div>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+</nav>
 
 @{
-    RenderFragment RenderNavLink(PageLink page)
+RenderFragment RenderNavLink(PageLink page)
+{
+string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
+return@<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
+    @if (page.IconClass is not null)
     {
-        string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
-        return@<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
-            @if (page.IconClass is not null)
-            {
-                <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
-            }
-            else
-            {
-                <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
-            }
-        </NavLink>;
+    <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
     }
+    else
+    {
+    <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
+    }
+</NavLink>;
+}
 }

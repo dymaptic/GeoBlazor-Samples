@@ -1,11 +1,8 @@
 ﻿@page "/update-feature-attributes"
+@inherits SamplePage
 <PageTitle>Update Feature Attributes</PageTitle>
 <h1>Update Feature Attributes</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/editing-groupedfeatureform/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=449887ea7d60429fbf6f0c67881f2758">Building Damage Assessments</a>
-</div>
 <p class="instructions">
     Select a feature to begin editing
 </p>
@@ -72,6 +69,12 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/editing-groupedfeatureform/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=449887ea7d60429fbf6f0c67881f2758", "Building Damage Assessments")
+    ];
 
     private async Task OnClick(ClickEvent clickEvent)
     {

@@ -8,6 +8,8 @@
 
 body {
     background-color: var(--background-grey-1);
+    height: 100vw;
+    overflow: hidden;
 }
 
 footer {
@@ -23,22 +25,27 @@ summary a {
     margin-left: -2rem;
 }
 
-.esri-feature-templates {
+.esri-widget.esri-feature-templates {
     background: unset;
 }
 
-.esri-feature-form {
+.esri-widget.esri-feature-form {
     background-color: var(--background-grey-1);
 }
 
 .esri-widget:not(.esri-feature-table) {
-    color: unset;
+    color: var(--text-emphasis);
+    background-color: var(--background-grey-2);
 }
 
 .esri-button {
     color: unset;
     background-color: unset;
     border: 0.125rem solid transparent;
+}
+
+.esri-grid {
+    background-color: #fff;
 }
 
 .esri-button:hover {
@@ -65,6 +72,12 @@ summary a {
 
 .nav-link:hover {
     color: unset;
+}
+
+article .oi {
+    width: 2rem;
+    font-size: 1.1rem;
+    top: -2px;
 }
 
 .nav-list-link .oi {
@@ -235,7 +248,7 @@ body { /* body tag added to help overwrite Bootstrap */
         align-items: center;
         padding: 1rem 2rem;
         margin: 0.5rem;
-        text-wrap: pretty;
+        text-wrap: balance;
 
         i.icon {
             margin-right: 0.5rem;
@@ -377,27 +390,201 @@ body { /* body tag added to help overwrite Bootstrap */
 
 }
 
+.flex-column {
+    display: flex;
+    
+    .spaced-row .btn {
+        flex: unset;
+    }
+}
+
+input[type="radio"] {
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+    min-width: 1.25rem;
+    max-width: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.radio-container {
+    position: relative;
+    height: 1.25rem;
+    width: 1.25rem;
+}
+
 .spaced-row {
-    margin: 1rem 0;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
-    background: linear-gradient(var(--background-grey-1), var(--background-grey-1)) padding-box,
-    var(--geoblazor-gradient-horizontal) border-box;
-    border: 0.125rem solid transparent;
-    border-radius: var(--box-radius);
-    color: var(--text);
-    font-family: 'Roboto', sans-serif;
-    font-size: 1rem;
-    font-weight: 200;
-    padding: 0.5rem 2rem;
+    padding: 1rem;
     min-width: 8rem;
 
-    label {
+    label:not(.radio-container) {
         display: block;
+        width: 8rem;
+        max-width: calc(30% / var(--row-count, 1));
+        min-width: 4rem;
+        flex: 1 1 8rem;
+        vertical-align: middle;
+        text-align: right;
+        padding-right: 0.5rem;
     }
+
+    label:not(.radio-container):has(+ input[type="checkbox"]), label:not(.radio-container):has(+ .radio-container) {
+        flex: 2 1 8rem;
+        max-width: calc(60% / var(--row-count, 1));
+    }
+    
+    .radio-container {
+        flex: 1 1 4rem;
+        min-width: 4rem;
+        max-width: calc(30% / var(--row-count, 1));
+    }
+    
+    .flex-column .btn {
+        flex: unset;
+    }
+    
+    .btn {
+        flex: 1 1 12rem;
+        min-width: 8rem;
+        max-width: 18rem;
+    }
+    
+    input[type="checkbox"] {
+        flex:1 1 auto;
+        min-width: 1.25rem;
+        max-width: 1.25rem;
+    }
+    
+    input:not([type="checkbox"]):not([type="radio"]), select {
+        max-width: calc(60% / var(--row-count, 1));
+        min-width: 8rem;
+        flex: 2 1 16rem;
+    }
+    
+    .form-group {
+        max-width: calc(96% / var(--row-count, 1));
+        min-width: 16rem;
+        flex: 4 1 16rem;
+    }
+
+    .form-group:not(:has(>.spaced-row)) {
+               
+        label:not(.radio-container),
+        label:not(.radio-container):has(+ input[type="checkbox"]), 
+        label:not(.radio-container):has(+ .radio-container) {
+            display: block;
+            width: 8rem;
+            max-width: 100%;
+            min-width: 4rem;
+            max-height: 8rem;
+            min-height: 2rem;
+            flex: 0 1 auto;
+            text-align: center;
+        }
+
+        input:not([type="checkbox"]), input:not([type="radio"]), 
+        select, .form-group, .btn {
+            max-width: 100%;
+            width: 16rem;
+            min-width: 8rem;
+            flex: unset;
+        }
+
+        .radio-container {
+            flex: unset;
+            width: 1.25rem;
+            min-width: 1.25rem;
+        }
+    }
+}
+
+.spaced-row:has(input:last-child:nth-child(2)) {
+    --row-count: 1;
+}
+
+.spaced-row:has(input:last-child:nth-child(4)) {
+    --row-count: 2;
+}
+
+.spaced-row:has(input:last-child:nth-child(6)) {
+    --row-count: 3;
+}
+
+.spaced-row:has(input:last-child:nth-child(8)) {
+    --row-count: 4;
+}
+
+.spaced-row:has(select:last-child:nth-child(2)) {
+    --row-count: 1;
+}
+
+.spaced-row:has(select:last-child:nth-child(4)) {
+    --row-count: 2;
+}
+
+.spaced-row:has(select:last-child:nth-child(6)) {
+    --row-count: 3;
+}
+
+.spaced-row:has(select:last-child:nth-child(8)) {
+    --row-count: 4;
+}
+
+.spaced-row:has(.btn:last-child:nth-child(2)) {
+    --row-count: 1;
+}
+
+.spaced-row:has(.btn:last-child:nth-child(3)) {
+    --row-count: 1;
+}
+
+.spaced-row:has(.btn:last-child:nth-child(4)) {
+    --row-count: 2;
+}
+
+.spaced-row:has(.btn:last-child:nth-child(6)) {
+    --row-count: 3;
+}
+
+.spaced-row:has(.btn:last-child:nth-child(8)) {
+    --row-count: 4;
+}
+
+.spaced-row:has(.radio-container:last-child:nth-child(2)) {
+    --row-count: 1;
+}
+
+.spaced-row:has(.radio-container:last-child:nth-child(4)) {
+    --row-count: 2;
+}
+
+.spaced-row:has(.radio-container:last-child:nth-child(6)) {
+    --row-count: 3;
+}
+
+.spaced-row:has(.radio-container:last-child:nth-child(8)) {
+    --row-count: 4;
+}
+
+.spaced-row:has(div:last-child:nth-child(2)) {
+    --row-count: 1;
+}
+
+.spaced-row:has(div:last-child:nth-child(4)) {
+    --row-count: 2;
+}
+
+.spaced-row:has(div:last-child:nth-child(6)) {
+    --row-count: 3;
+}
+
+.spaced-row:has(div:last-child:nth-child(8)) {
+    --row-count: 4;
 }
 
 .highlight {
@@ -458,6 +645,10 @@ body { /* body tag added to help overwrite Bootstrap */
         font-size: 1rem;
         font-weight: 200;
     }
+    
+    input:disabled {
+        background-color: #999999;
+    }
 
     select,
     textarea {
@@ -465,7 +656,7 @@ body { /* body tag added to help overwrite Bootstrap */
         min-width: 8rem;
     }
 
-    input:not([type="checkbox"]) {
+    input:not([type="checkbox"]):not([type="radio"]) {
         padding: 0.5rem 2rem;
         min-width: 8rem;
     }
@@ -521,9 +712,6 @@ body { /* body tag added to help overwrite Bootstrap */
 
 /*** FORMS ***/
 form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     width: 100%;
 }
 
@@ -550,6 +738,47 @@ form {
     label {
         display: block;
     }
+    
+    .form-group {
+        min-height: 4rem;
+        max-height: 100vh;
+        flex: 1 1 5rem;
+    }
+    
+    .response-area, .response-line {
+        width: 100%;
+    }
+    
+    .map-view {
+        max-width: 100%;
+        max-height: 24rem;
+        height: 20rem;
+        width: 20rem;
+        min-width: 12rem;
+        min-height: 12rem;
+        flex: 1 1 12rem;
+        margin: 0 auto;
+    }
+}
+
+.form-group:has(>.response-area), .form-group:has(>.response-line) {
+    display: flex;
+    flex-direction: column;
+    min-height: 12rem;
+    height: 12rem;
+    max-height: 20rem;
+    flex: 1 1 12rem;
+    padding: 0;
+}
+
+.form-group:has(>.map-view) {
+    display: flex;
+    flex-direction: column;
+    min-height: 16rem;
+    height: 16rem;
+    max-height: 24rem;
+    flex: 4 1 12rem;
+    padding: 0;
 }
 
 .form-group__tooltip-field {
@@ -561,6 +790,27 @@ form {
 .form-group__tooltip-field i.icon {
     width: 2rem;
     height: 2rem;
+}
+
+.response-area {
+    padding: 0.5rem;
+    height: 10rem;
+    max-height: 18rem;
+    max-width: 100%;
+    width: 12rem;
+    min-width: 12rem;
+    flex: 2 1 10rem;
+    overflow-y: auto;
+}
+
+.response-line {
+    padding: 0.25rem 0.5rem;
+    height: 2rem;
+    max-height: 4rem;
+    max-width: 100%;
+    width: 12rem;
+    min-width: 12rem;
+    flex: 2 1 2rem;
 }
 
 /* container query for forms inside Split Layout that couldn't be selected
@@ -580,6 +830,59 @@ form {
     .modal__content .form-row {
         flex-direction: column;
         gap: 0;
+    }
+
+    input[type="text"], input[type="number"] {
+        width: 5.5rem;
+    }
+
+    .links-div {
+        flex-direction: column;
+    }
+
+    .spaced-row {
+        flex-direction: column;
+        align-items: center;
+
+        label:not(.radio-container),
+        label:not(.radio-container):has(+ input[type="checkbox"]),
+        label:not(.radio-container):has(+ .radio-container) {
+            display: block;
+            width: 8rem;
+            max-width: 100%;
+            min-width: 4rem;
+            max-height: 8rem;
+            min-height: 2rem;
+            flex: 0 1 auto;
+            text-align: center;
+        }
+
+        input:not([type="checkbox"]):not([type="radio"]),
+        select, .btn {
+            max-width: 100%;
+            width: 16rem;
+            min-width: 8rem;
+            flex: unset;
+        }
+        
+        .form-group {
+            max-width: 96%;
+            width: 96%;
+            min-width: 8rem;
+            flex: unset;
+        }
+
+        .radio-container {
+            flex: unset;
+            width: 1.25rem;
+            min-width: 1.25rem;
+        }
+    }
+
+    body {
+        .btn {
+            padding: 1rem;
+        }
     }
 }
 
@@ -606,6 +909,10 @@ body {
             color: var(--text);
         }
     }
+}
+
+.table {
+    display: block;
 }
 
 a,
@@ -896,9 +1203,11 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     display: none;
 }
 
-.top-row.navbar {
+.main-links.navbar {
     height: 6rem;
 }
+
+
 
 .side-bar > hr {
     border-bottom: 0.25rem solid var(--geoblazor-primary);
@@ -940,6 +1249,7 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 }
 
 .search-label {
+    transition: padding-left linear 200ms;
     position: absolute;
     display: flex;
     height: 20px;
@@ -952,16 +1262,31 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 #search-input {
     width: 100%;
     height: 100%;
-    padding: 0.5rem 2rem 0.5rem 3.5rem;
+    padding: 0.5rem 1.5rem 0.5rem 2.5rem;
 }
 
 .search-input-wrap {
-    position: relative;
-    width: 340px;
-    height: 48px;
+    position: absolute;
+    width: 18rem;
+    height: 3rem;
+    top: 6.5rem;
+    left: calc(50% - 9rem);
 }
 
-@media (min-width: 66.5rem) {
+@media (min-width: 1075px) {
+
+    .search-input-wrap {
+        position: relative;
+        margin-left: 1rem;
+        top: unset;
+        left: unset;
+    }
+    
+    body {
+        overflow: hidden;
+        height: 100vh;
+    }
+    
     .side-bar {
         width: 20rem;
     }
@@ -994,7 +1319,7 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
         background-color: unset;
     }
 
-    .top-row.navbar {
+    .main-links.navbar {
         height: 8rem;
     }
 
@@ -1005,12 +1330,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     .site-nav {
         padding: 0.5rem;
     }
-
-    .search-label {
-        padding-left: 2rem;
-        transition: padding-left linear 200ms;
-    }
-
     .nav-list .nav-list-item {
         font-size: 1.25rem !important;
     }
@@ -1037,11 +1356,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
         padding: 0.2rem;
     }
 
-    .page {
-        height: 100vh;
-        overflow: hidden;
-    }
-
     .side-bar {
         position: sticky;
         height: 100vh;
@@ -1064,12 +1378,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 
     .breadcrumb-nav-list-item {
         font-size: 1rem !important;
-    }
-}
-
-@media (max-width: 799px) {
-    main .top-row.px-4 {
-        display: none;
     }
 }
 
@@ -1167,6 +1475,15 @@ input:checked[type=checkbox] {
     border-color: var(--geoblazor-accent-emphasis);
 }
 
+input:focus[type=checkbox] {
+    border-color: var(--geoblazor-accent-emphasis);
+    box-shadow: 0 0 0 0.25rem
+}
+
+input:hover[type=checkbox] {
+    border-color: var(--geoblazor-accent-hover);
+}
+
 .form-check-input:checked[type=checkbox] {
     background-image: unset;
     border-color: var(--geoblazor-accent-emphasis);
@@ -1193,40 +1510,6 @@ input:checked[type=checkbox] {
     color: red;
 }
 
-.radio-container {
-    position: relative;
-    padding-right: 1rem;
-}
-
-.radio-box {
-    display: inline;
-    height: 1.25rem;
-    width: 1.25rem;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 0.25rem;
-    position: absolute;
-    right: 0;
-    background: linear-gradient(var(--background-grey-1), var(--background-grey-1)) padding-box,
-    var(--geoblazor-gradient-horizontal) border-box;
-}
-
-.radio-container input:checked ~ .radio-box {
-    background: var(--geoblazor-accent);
-    border-color: var(--geoblazor-accent-emphasis)
-}
-
-.radio-container input:focus ~ .radio-box {
-    border-color: var(--geoblazor-accent-emphasis)
-}
-
-.radio-container input:hover ~ .radio-box {
-    border-color: var(--geoblazor-accent-hover)
-}
-
-input[type=radio] {
-    visibility: hidden;
-}
-
 .demo-select {
     width: 200px;
     font-family: 'Avenir Next W00';
@@ -1239,26 +1522,6 @@ input[type=radio] {
 
 .esri-view .esri-view-surface:focus:after {
     z-index: 0;
-}
-
-@media (max-width: 49.9rem) {
-    input[type="text"], input[type="number"] {
-        width: 5.5rem;
-    }
-
-    .links-div {
-        flex-direction: column;
-    }
-
-    .spaced-row {
-        flex-direction: column;
-    }
-
-    body {
-        .btn {
-            padding: 1rem;
-        }
-    }
 }
 
 /*noinspection CssInvalidMediaFeature*/

@@ -1,41 +1,28 @@
 ﻿@page "/popups"
+@inherits SamplePage
 
 <PageTitle>Popups</PageTitle>
 <h1>Popups</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-pop-up/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=f35ef07c9ed24020aadd65c8a65d3754">Modern Antique BaseMap</a>
-</div>
 <p class="instructions">
     Use the radio buttons to toggle features with three different types of popups.
     Once the features are rendered, click on a feature to see the popup.
 </p>
-<EditForm Model="this">
-    <InputRadioGroup disabled="@(MapView is null)" Name="points" @bind-Value="_showPopupOption" @bind:after="@(() => MapView!.ClosePopup())">
-        <div class="form-group">
-            <label class="radio-container">
-                Display Attributes Popup:
-                <InputRadio Name="points" Value="1" />
-                <div class="radio-box"></div>
-            </label>
-        </div>
-        <div class="form-group">
-            <label class="radio-container">
-                Display Elevation Chart Popup:
-                <InputRadio Name="points" Value="2" />
-                <div class="radio-box"></div>
-            </label>
-        </div>
-        <div class="form-group">
-            <label class="radio-container">
-                Display Table Popup:
-                <InputRadio Name="points" Value="3" />
-                <div class="radio-box"></div>
-            </label>
-        </div>
-    </InputRadioGroup>
-</EditForm>
+<div class="form-group">
+    <RadioGroup disabled="@(MapView is null)"
+                @bind-Value="_showPopupOption"
+                @bind:after="@(() => MapView!.ClosePopup())">
+        <RadioRow Value="1"
+                  Label="Display Attributes Popup"
+                  Id="display-attributes-popup" />
+        <RadioRow Value="2"
+                  Label="Display Elevation Chart Popup"
+                  Id="display-elevation-popup" />
+        <RadioRow Value="3"
+                  Label="Display Table Popup"
+                  Id="display-table-popup" />
+    </RadioGroup>
+</div>
 
 <MapView @ref="MapView" Longitude="-118.80543" Latitude="34.02700" Zoom="13" Class="map-view">
     <Map>
@@ -88,6 +75,13 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-pop-up/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=f35ef07c9ed24020aadd65c8a65d3754", "Modern Antique BaseMap")
+    ];
+
     private MapView? MapView { get; set; }
 
     private int _showPopupOption;
