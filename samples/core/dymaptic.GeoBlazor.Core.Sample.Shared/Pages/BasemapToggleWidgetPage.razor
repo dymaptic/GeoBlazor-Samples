@@ -10,17 +10,21 @@
     to switch between the two styles.
 </p>
 
-<div class="form-group" style="margin-bottom: 1rem;">
-    <label>Basemap Pair:
-        <select class="form-select" style="display:inline-block; width: auto;" value="@_pairIndex" @onchange="OnPairChanged">
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="pair-select">Basemap Pair:</label>
+        <select id="pair-select" @bind="_pairIndex">
             <option value="0">Satellite / Streets</option>
             <option value="1">Topographic / Dark Gray</option>
             <option value="2">Navigation / Imagery</option>
             <option value="3">OSM Standard / Terrain</option>
         </select>
-    </label>
+    </div>
 </div>
 
+@* @key forces the MapView to remount when the basemap pair changes. The primary
+   <BasemapStyle Name="..."> swap inside <Map> is not propagated reactively today,
+   so a remount is the simplest way to demonstrate different pairs. *@
 <MapView @key="@_pairIndex" Longitude="-118.24" Latitude="34.05" Zoom="12" Class="map-view">
     <Map>
         <Basemap>
@@ -37,7 +41,7 @@
         new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-basemaptoggle/", "ArcGIS Maps SDK for JavaScript"),
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapToggle.html", "Basemap Toggle API Reference")
     ];
-    
+
     private int _pairIndex;
 
     private readonly (BasemapStyleName Primary, BasemapStyleName Secondary)[] _pairs =
@@ -47,9 +51,4 @@
         (BasemapStyleName.ArcgisNavigation, BasemapStyleName.ArcgisImagery),
         (BasemapStyleName.OsmStandard, BasemapStyleName.ArcgisTerrain),
     ];
-
-    private void OnPairChanged(ChangeEventArgs e)
-    {
-        _pairIndex = int.Parse(e.Value?.ToString() ?? "0");
-    }
 }

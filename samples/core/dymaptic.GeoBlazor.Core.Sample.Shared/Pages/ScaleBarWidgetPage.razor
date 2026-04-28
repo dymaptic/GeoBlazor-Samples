@@ -1,39 +1,34 @@
 @page "/scale-bar-widget"
+@inherits SamplePage
 
 <PageTitle>Scale Bar Widget</PageTitle>
 <h1>Scale Bar Widget</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/widgets-scalebar/">ArcGIS Sample</a>
-    <a class="btn btn-primary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-ScaleBar.html">ScaleBar API Reference</a>
-</div>
 <p class="instructions">
     The Scale Bar widget displays a bar or line indicating the map scale at the current zoom level.
     Zoom in and out to see the scale bar update. Use the controls below to change the unit system
     and visual style.
 </p>
 
-<div style="display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-bottom: 1rem;">
-    <div class="form-group">
-        <label>Unit:
-            <select class="form-select" style="display:inline-block; width: auto;" value="@_unit" @onchange="OnUnitChanged">
-                <option value="Imperial">Imperial (miles/feet)</option>
-                <option value="Metric">Metric (km/m)</option>
-                <option value="Dual">Dual (both)</option>
-            </select>
-        </label>
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="unit-select">Unit:</label>
+        <select id="unit-select" @bind="_unit">
+            <option value="@ScaleUnit.Imperial">Imperial (miles/feet)</option>
+            <option value="@ScaleUnit.Metric">Metric (km/m)</option>
+            <option value="@ScaleUnit.Dual">Dual (both)</option>
+        </select>
     </div>
-    <div class="form-group">
-        <label>Style:
-            <select class="form-select" style="display:inline-block; width: auto;" value="@_style" @onchange="OnStyleChanged">
-                <option value="Ruler">Ruler</option>
-                <option value="Line">Line</option>
-            </select>
-        </label>
+    <div class="spaced-row">
+        <label for="style-select">Style:</label>
+        <select id="style-select" @bind="_style">
+            <option value="@ScaleBarWidgetStyle.Ruler">Ruler</option>
+            <option value="@ScaleBarWidgetStyle.Line">Line</option>
+        </select>
     </div>
 </div>
 
-<MapView @key="@_widgetKey" Longitude="-98.5" Latitude="39.8" Zoom="4" Class="map-view">
+<MapView Longitude="-98.5" Latitude="39.8" Zoom="4" Class="map-view">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
@@ -45,19 +40,12 @@
 </MapView>
 
 @code {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-scalebar/", "ArcGIS Sample"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-ScaleBar.html", "ScaleBar API Reference")
+    ];
+
     private ScaleUnit _unit = ScaleUnit.Imperial;
     private ScaleBarWidgetStyle _style = ScaleBarWidgetStyle.Ruler;
-    private int _widgetKey;
-
-    private void OnUnitChanged(ChangeEventArgs e)
-    {
-        _unit = Enum.Parse<ScaleUnit>(e.Value?.ToString() ?? "Imperial");
-        _widgetKey++;
-    }
-
-    private void OnStyleChanged(ChangeEventArgs e)
-    {
-        _style = Enum.Parse<ScaleBarWidgetStyle>(e.Value?.ToString() ?? "Ruler");
-        _widgetKey++;
-    }
 }
