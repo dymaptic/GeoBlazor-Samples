@@ -37,22 +37,56 @@
     <SearchBox Filter="OnSearchFilter" FullSearch="OnFullSearch" />
     <div id="lower-nav-container" @ref="Navbar" class="@NavMenuCssClass" @onclick="ToggleNavMenu">
         <ul class="nav-list">
-            @foreach (PageLink page in FilteredPages)
+            @foreach (PageLink page in UngroupedPages)
             {
-                string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
-                <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
-                    <NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
-                        @if (page.IconClass is not null)
+                <li class="nav-list-item nav-pinned" @onclick="@(() => NavigateTo(page.Href))">
+                    @RenderNavLink(page)
+                </li>
+            }
+
+            @foreach (var (groupName, pages) in GroupedFilteredPages)
+            {
+                bool expanded = IsGroupExpanded(groupName);
+                <li class="nav-list-item nav-group @(expanded ? "active" : "")">
+                    <button type="button" class="nav-list-expander" aria-expanded="@expanded" @onclick="@(() => ToggleGroup(groupName))" @onclick:stopPropagation="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                            <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
+                        </svg>
+                        <span class="nav-group-title">@groupName</span>
+                    </button>
+                    @if (expanded)
+                    {
+                    <ul class="nav-list nav-sublist">
+                        @foreach (PageLink page in pages)
                         {
-                            <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span class="nav-item-title">@(page.Title)</span></text>
+                        <li class="nav-list-item" @onclick="@(() => NavigateTo(page.Href))">
+                            @RenderNavLink(page)
+                        </li>
                         }
-                        else
-                        {
-                            <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)" alt="@(page.Title)" /></span><span class="nav-item-title">@(page.Title)</span></text>
-                        }
-                    </NavLink>
+                    </ul>
+                    }
                 </li>
             }
         </ul>
     </div>
 </nav>
+
+@code {
+    RenderFragment RenderNavLink(PageLink page)
+    {
+        string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
+        return @<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
+                   @if (page.IconClass is not null)
+                   {
+                       <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span
+                               class="nav-item-title">@(page.Title)</span></text>
+                   }
+                   else
+                   {
+                       <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)"
+                                                   alt="@(page.Title)"/></span><span
+                               class="nav-item-title">@(page.Title)</span></text>
+                   }
+               </NavLink>;
+    }
+}
