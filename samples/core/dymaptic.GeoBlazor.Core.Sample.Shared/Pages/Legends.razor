@@ -47,8 +47,7 @@
 
         @if (_showCensusLayer)
         {
-            <FeatureLayer @ref="_censusLayer"
-                          Title="Census Block Points"
+            <FeatureLayer Title="Census Block Points"
                           Url="https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2"
                           Opacity="0.6">
                 <SimpleRenderer>
@@ -106,12 +105,11 @@
 
     public override List<NavMenu.PageLink> PageLinks =>
     [
-        new("https://developers.arcgis.com/javascript/latest/sample-code/legend/", "ArcGIS Sample"),
+        new("https://developers.arcgis.com/javascript/latest/sample-code/legend/", "ArcGIS Maps SDK for JavaScript"),
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Legend.html", "Legend API Reference")
     ];
 
     private bool _showCensusLayer;
     private bool _showTrailsLayer;
     private bool _showParksLayer;
-    private FeatureLayer? _censusLayer;
 }
