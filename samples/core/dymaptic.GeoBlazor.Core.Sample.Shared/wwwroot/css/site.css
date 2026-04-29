@@ -81,8 +81,12 @@ article .oi {
 }
 
 .nav-list-link .oi {
-    top: 2px;
+    top: -2px;
     height: 18px;
+}
+
+.nav-list-link .oi img {
+    vertical-align: top;
 }
 
 .container {
@@ -1019,12 +1023,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     background-color: var(--background-grey-2);
 }
 
-#nav-container {
-    overflow-y: auto;
-    height: calc(100vh - 6rem);
-    padding: 0.5rem 0;
-}
-
 .nav-list {
     flex: 1 1 auto;
     display: flex;
@@ -1316,10 +1314,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
         height: 8rem;
     }
 
-    #nav-container {
-        height: calc(100vh - 8rem);
-    }
-
     .site-nav {
         padding: 0.5rem;
     }
@@ -1388,10 +1382,12 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
         background-color: var(--background-grey-3);
     }
 
-    .nav-list .nav-list-item:has(> .nav-list-link.active) {
+    .nav-list .nav-list-item .nav-list-expander:hover {
         background-color: var(--background-grey-3);
-        border-left: 3px solid transparent;
-        border-image: var(--geoblazor-gradient-vertical) 1;
+    }
+
+    .nav-list .nav-list-item:has(> .nav-list-link.active) {
+        background-color: var(--background-grey-4);
     }
 
     .oi img:not(.pro .oi img) {
