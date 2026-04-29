@@ -1,0 +1,61 @@
+@page "/compass-widget"
+@inherits SamplePage
+
+<PageTitle>Compass Widget</PageTitle>
+<h1>Compass Widget</h1>
+
+<p class="instructions">
+    The Compass widget indicates the map's current orientation relative to north.
+    Use the buttons below to rotate the map, then click the compass to reset to north.
+    The compass only appears when the map is rotated away from north.
+</p>
+
+<div class="form-group spaced-row">
+    <label>Rotate Map:</label>
+    <button class="btn btn-secondary btn-small" @onclick="@(() => SetRotation(45))">45&deg;</button>
+    <button class="btn btn-secondary btn-small" @onclick="@(() => SetRotation(90))">90&deg;</button>
+    <button class="btn btn-secondary btn-small" @onclick="@(() => SetRotation(180))">180&deg;</button>
+    <button class="btn btn-secondary btn-small" @onclick="@(() => SetRotation(270))">270&deg;</button>
+    <button class="btn btn-accent btn-small" @onclick="@(() => SetRotation(0))">Reset North</button>
+    <span>Current: @(_rotation)&deg;</span>
+</div>
+
+<MapView @ref="_mapView" Longitude="-118.805" Latitude="34.027" Zoom="13" Rotation="@_rotation"
+         OnExtentChanged="OnViewExtentChanged" Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+        </Basemap>
+    </Map>
+    <CompassWidget Position="OverlayPosition.TopLeft" />
+</MapView>
+
+@code {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-compass/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Compass.html", "Compass API Reference")
+    ];
+
+    private MapView? _mapView;
+    private double _rotation;
+
+    private async Task SetRotation(double degrees)
+    {
+        _rotation = degrees;
+        if (_mapView is not null)
+        {
+            await _mapView.SetRotation(degrees);
+        }
+    }
+
+    private async Task OnViewExtentChanged(Extent _)
+    {
+        if (_mapView is not null)
+        {
+            double? current = await _mapView.GetRotation();
+            _rotation = current ?? 0;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,52 @@
+@page "/locate-widget"
+@inherits SamplePage
+
+<PageTitle>Locate Widget</PageTitle>
+<h1>Locate Widget</h1>
+
+<p class="instructions">
+    The Locate widget uses the browser's Geolocation API to find and navigate to your current position.
+    Click the <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" class="inline-icon" aria-hidden="true" focusable="false">
+        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+        <line x1="8" y1="0" x2="8" y2="3" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="8" y1="13" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="0" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="13" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/>
+    </svg> button (top-left of the map) to fly to your location. Most browsers will show an
+    "Allow" permissions dialog the first time &mdash; accept it to share your location with the page.
+    Change the scale below, then click the button again to see the difference.
+</p>
+
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="scale-select">Scale:</label>
+        <select id="scale-select" @bind="_scale">
+            <option value="1500">1,500 (Street level)</option>
+            <option value="5000">5,000 (Neighborhood)</option>
+            <option value="25000">25,000 (City)</option>
+            <option value="100000">100,000 (Region)</option>
+        </select>
+    </div>
+</div>
+
+<MapView Longitude="-98.5" Latitude="39.8" Zoom="4" Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+        </Basemap>
+    </Map>
+    <LocateWidget Position="OverlayPosition.TopLeft"
+                  Scale="@_scale"
+                  PopupEnabled="true" />
+</MapView>
+
+@code {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-locate/", "ArcGIS Sample"),
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Locate.html", "Locate API Reference")
+    ];
+
+    private int _scale = 1500;
+}
