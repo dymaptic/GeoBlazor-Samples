@@ -1247,6 +1247,7 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     padding-left: 1rem;
     top: 14px;
     left: 0;
+    pointer-events: none;
 }
 
 #search-input {
