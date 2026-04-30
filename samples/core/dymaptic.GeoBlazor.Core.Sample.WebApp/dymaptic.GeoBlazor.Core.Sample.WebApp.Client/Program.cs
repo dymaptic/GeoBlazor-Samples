@@ -9,5 +9,6 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.H
 builder.Services.AddGeoBlazor(builder.Configuration);
 builder.Services.AddSingleton<IConfiguration>(_ => builder.Configuration);
 builder.Services.AddScoped<LayoutService>();
+builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 
 await builder.Build().RunAsync();

@@ -14,5 +14,6 @@ builder.Services.AddScoped<HttpClient>();
 
 builder.Services.AddGeoBlazorPro(builder.Configuration);
 builder.Services.AddScoped<LayoutService>();
+builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 
 await builder.Build().RunAsync();
