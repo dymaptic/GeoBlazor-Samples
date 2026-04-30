@@ -42,4 +42,9 @@
     <ItemGroup>
       <AdditionalFiles Include="Shared\RenderModeSelector.razor" />
     </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Pages\**\*.razor" LogicalName="SampleSource/%(Filename)%(Extension)" />
+      <EmbeddedResource Include="Pages\**\*.razor.cs" LogicalName="SampleSource/%(Filename)%(Extension)" />
+    </ItemGroup>
 </Project>

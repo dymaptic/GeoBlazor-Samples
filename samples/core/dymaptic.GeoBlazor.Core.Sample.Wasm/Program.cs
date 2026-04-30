@@ -11,6 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddGeoBlazor(builder.Configuration);
 builder.Services.AddScoped<LayoutService>();
+builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 builder.Configuration.AddInMemoryCollection();
 builder.Services.AddScoped<HttpClient>();
 

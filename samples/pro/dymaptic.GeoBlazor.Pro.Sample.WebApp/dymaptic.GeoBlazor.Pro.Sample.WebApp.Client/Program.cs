@@ -8,6 +8,7 @@ builder.Configuration.AddInMemoryCollection();
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddGeoBlazorPro(builder.Configuration);
 builder.Services.AddScoped<LayoutService>();
+builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 builder.Services.AddSingleton<IConfiguration>(_ => builder.Configuration);
 
 await builder.Build().RunAsync();

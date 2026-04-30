@@ -38,6 +38,7 @@ public static class MauiProgram
         builder.Configuration.AddConfiguration(config);
         builder.Services.AddGeoBlazorPro(builder.Configuration);
         builder.Services.AddScoped<LayoutService>();
+        builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 
         return builder.Build();
     }

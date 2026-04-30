@@ -38,4 +38,9 @@
     <Target Name="Copy Razor Files" BeforeTargets="Build" Condition="'$(UseProjectReferences)' == 'true'">
         <Exec Command="dotnet $(ProGBBuildToolsPath)/RazorCopy.dll"/>
     </Target>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Pages\**\*.razor" LogicalName="SampleSource/%(Filename)%(Extension)" />
+      <EmbeddedResource Include="Pages\**\*.razor.cs" LogicalName="SampleSource/%(Filename)%(Extension)" />
+    </ItemGroup>
 </Project>
