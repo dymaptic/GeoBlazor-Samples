@@ -8,10 +8,7 @@
     <main>
         <div class="main-links">
             
-            @if (AdditionalLinksType is not null)
-            {
-                <DynamicComponent Type="AdditionalLinksType"/>
-            }
+            <SourceNav />
             @if (LayoutService.CurrentPage is not null)
             {
                 for (int i = 0; i < LayoutService.CurrentPage.PageLinks.Count; i++)
@@ -72,7 +69,6 @@
     }
     
     protected virtual Type NavMenuType => typeof(NavMenu);
-    protected virtual Type? AdditionalLinksType => typeof(SourceNav);
     
     private readonly string[] _btnTypes = ["btn-primary", "btn-secondary", "btn-accent"];
 

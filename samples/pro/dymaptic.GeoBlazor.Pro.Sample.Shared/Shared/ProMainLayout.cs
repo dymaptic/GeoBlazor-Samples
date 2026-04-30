@@ -16,5 +16,4 @@ public class ProMainLayout: MainLayout
     }
     
     protected override Type NavMenuType => typeof(ProNavMenu);
-    protected override Type AdditionalLinksType => typeof(SourceNav);
 }
