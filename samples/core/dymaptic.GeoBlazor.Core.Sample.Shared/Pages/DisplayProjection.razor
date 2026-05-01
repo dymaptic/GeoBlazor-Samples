@@ -80,6 +80,23 @@
         new("https://developers.arcgis.com/javascript/latest/display-projected-geometries/", "ArcGIS Maps SDK for JavaScript"),
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates how the same geometry " +
+        "looks under different map projections, using GeoBlazor's MapView and SpatialReference Razor components " +
+        "together with the ArcGIS Maps SDK for JavaScript GeoJSONLayer and a custom JavaScript hook into the " +
+        "GeometryEngine. The page shows a 2D world map of country polygons (from an Esri-hosted GeoJSON service) " +
+        "drawn over a light-blue background with a dashed rectangular extent outline. In the upper-right corner " +
+        "of the map a CustomOverlay holds a grouped projection dropdown organized by category (Equidistant, " +
+        "Conformal, Equal-area, Gnomonic, Compromise) listing options such as WGS84, World Cassini, World " +
+        "Equidistant Conic, World Stereographic, World Eckert VI, World Sinusoidal, North Pole Gnomonic, Web " +
+        "Mercator, World Gall Stereographic, World Winkel Tripel, and the Fuller / Dymaxion polyhedral map. " +
+        "Selecting a projection calls MapView.SetSpatialReference and the entire view reprojects on the fly. " +
+        "Hovering over the map invokes a custom JS extension that draws a 1000-kilometer geodesic buffer at the " +
+        "pointer so the user can see how distance and area distort across the chosen projection, and a popup in " +
+        "the lower-left corner shows the WKID and X/Y of the view center. The sample is intended to demonstrate " +
+        "live spatial-reference switching and JS interop in a Blazor application without writing JavaScript " +
+        "for the main page logic.";
+
     private Symbol? PolySym { get; set; }
     private Symbol? PointSym { get; set; }
     private MapView? View { get; set; }

@@ -41,6 +41,19 @@
         new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_National_Parks_Annual_Visitation/FeatureServer/0", "USGS Earthquake Hazards Program Monitoring Center")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates loading a KML layer " +
+        "from the ArcGIS Maps SDK for JavaScript via GeoBlazor's KMLLayer Razor component. " +
+        "The page shows a 2D world map rendered with the dark gray basemap style. " +
+        "Above the map is an editable text input pre-filled with a USGS earthquake feed URL " +
+        "(KML data for major earthquakes of magnitude 5.8 or greater over the last 30 days), " +
+        "alongside two buttons: 'Add or Remove KML Layer in code' which imperatively toggles a " +
+        "KMLLayer instance on the MapView via AddLayer/RemoveLayer, and 'Add new KML Layer in Markup' " +
+        "which toggles a declarative KMLLayer element rendered inside the Map markup. " +
+        "When a layer is loaded, earthquake locations are plotted as KML placemarks on top of the basemap. " +
+        "The sample is intended to demonstrate two equivalent ways to consume KML data in a Blazor " +
+        "application without writing JavaScript.";
+
     private void OnViewRendered() => _mapRendered = true;
 
     // ReSharper disable once InconsistentNaming

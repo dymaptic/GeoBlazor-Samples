@@ -3,6 +3,22 @@
 
 <PageTitle>GeoBlazor Samples</PageTitle>
 
+<HeadContent>
+    <meta name="description" content="@MetaDescription" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@MetaTitle" />
+    <meta property="og:description" content="@MetaDescription" />
+    <meta property="og:url" content="@NavigationManager.Uri" />
+    <meta property="og:site_name" content="GeoBlazor Samples" />
+    <meta property="og:image" content="https://geoblazor.com/images/logos/GeoBlazor-Icon_250px.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="@MetaTitle" />
+    <meta name="twitter:description" content="@MetaDescription" />
+    <meta name="twitter:image" content="https://geoblazor.com/images/logos/GeoBlazor-Icon_250px.png" />
+</HeadContent>
+
+<script type="application/ld+json">@((MarkupString)SchemaGraphJson)</script>
+
 <div class="page">
     <DynamicComponent Type="NavMenuType" />
     <main>
@@ -25,14 +41,24 @@
 
         <article class="content">
             @Body
+            @if (LayoutService.CurrentPage is { Description: { Length: > 0 } description })
+            {
+                <details class="sample-description">
+                    <summary>About this sample</summary>
+                    <p>@description</p>
+                </details>
+            }
         </article>
     </main>
 </div>
 
 @code {
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions =
+        new() { WriteIndented = false };
+
     [Inject]
     public required IConfiguration Configuration { get; set; }
-    
+
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
     
@@ -75,6 +101,167 @@
     protected virtual Type? AdditionalLinksType => null;
     
     private readonly string[] _btnTypes = ["btn-primary", "btn-secondary", "btn-accent"];
+
+    private const string DefaultMetaDescription =
+        "Live, runnable GeoBlazor code samples — interactive maps, layers, widgets, and geospatial analysis " +
+        "in Blazor for .NET developers, powered by the ArcGIS Maps SDK for JavaScript.";
+
+    private string CurrentSlug
+    {
+        get
+        {
+            string slug = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            int hashIndex = slug.IndexOf('#');
+            if (hashIndex >= 0) slug = slug[..hashIndex];
+            int queryIndex = slug.IndexOf('?');
+            if (queryIndex >= 0) slug = slug[..queryIndex];
+            return slug;
+        }
+    }
+
+    private string MetaTitle
+    {
+        get
+        {
+            string slug = CurrentSlug;
+            return string.IsNullOrEmpty(slug)
+                ? "GeoBlazor Samples"
+                : $"{SlugToTitle(slug)} — GeoBlazor Sample";
+        }
+    }
+
+    private string MetaDescription
+    {
+        get
+        {
+            string? d = LayoutService.CurrentPage?.Description;
+            if (string.IsNullOrWhiteSpace(d))
+            {
+                return DefaultMetaDescription;
+            }
+
+            const int maxLen = 160;
+            if (d.Length <= maxLen) return d;
+
+            int cut = d.LastIndexOf(' ', maxLen);
+            if (cut < 80) cut = maxLen;
+            return d[..cut].TrimEnd(',', ';', '.', ' ') + "…";
+        }
+    }
+
+    private string SchemaGraphJson
+    {
+        get
+        {
+            string pageUrl = NavigationManager.Uri;
+            string siteUrl = NavigationManager.BaseUri.TrimEnd('/');
+            string slug = NavigationManager.ToBaseRelativePath(pageUrl);
+            int hashIndex = slug.IndexOf('#');
+            if (hashIndex >= 0) slug = slug[..hashIndex];
+            int queryIndex = slug.IndexOf('?');
+            if (queryIndex >= 0) slug = slug[..queryIndex];
+            string pageName = string.IsNullOrEmpty(slug) ? "GeoBlazor Samples" : SlugToTitle(slug);
+
+            List<object> graph =
+            [
+                new Dictionary<string, object?>
+                {
+                    ["@type"] = "WebSite",
+                    ["@id"] = $"{siteUrl}/#website",
+                    ["url"] = $"{siteUrl}/",
+                    ["name"] = "GeoBlazor Samples",
+                    ["description"] = "Live, runnable code samples for GeoBlazor — interactive maps, layers, widgets, and geospatial analysis in Blazor.",
+                    ["publisher"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#organization" }
+                },
+                new Dictionary<string, object?>
+                {
+                    ["@type"] = "Organization",
+                    ["@id"] = "https://geoblazor.com/#organization",
+                    ["name"] = "GeoBlazor",
+                    ["url"] = "https://geoblazor.com",
+                    ["logo"] = "https://geoblazor.com/images/logos/GeoBlazor-Icon_250px.png",
+                    ["sameAs"] = new[]
+                    {
+                        "https://github.com/dymaptic/GeoBlazor",
+                        "https://www.nuget.org/packages/dymaptic.GeoBlazor.Core",
+                        "https://discord.com/invite/x4QbXWb5"
+                    }
+                },
+                new Dictionary<string, object?>
+                {
+                    ["@type"] = "SoftwareApplication",
+                    ["@id"] = "https://geoblazor.com/#software",
+                    ["name"] = "GeoBlazor",
+                    ["description"] = "Native Blazor components for building interactive maps and GIS applications in .NET. Integrate the full power of ArcGIS into your Blazor WebAssembly and Server applications without JavaScript.",
+                    ["applicationCategory"] = "DeveloperApplication",
+                    ["applicationSubCategory"] = "Mapping API",
+                    ["operatingSystem"] = ".NET 8, .NET 9, .NET 10",
+                    ["url"] = "https://geoblazor.com",
+                    ["downloadUrl"] = "https://www.nuget.org/packages/dymaptic.GeoBlazor.Core",
+                    ["codeRepository"] = "https://github.com/dymaptic/GeoBlazor",
+                    ["publisher"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#organization" }
+                },
+                new Dictionary<string, object?>
+                {
+                    ["@type"] = "WebPage",
+                    ["@id"] = $"{pageUrl}#webpage",
+                    ["url"] = pageUrl,
+                    ["name"] = pageName,
+                    ["isPartOf"] = new Dictionary<string, object?> { ["@id"] = $"{siteUrl}/#website" },
+                    ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" }
+                }
+            ];
+
+            string? pageDescription = LayoutService.CurrentPage?.Description;
+            if (!string.IsNullOrWhiteSpace(pageDescription))
+            {
+                ((Dictionary<string, object?>)graph[^1])["description"] = pageDescription;
+            }
+
+            if (LayoutService.CurrentPage is not null)
+            {
+                Dictionary<string, object?> sourceCode = new()
+                {
+                    ["@type"] = "SoftwareSourceCode",
+                    ["@id"] = $"{pageUrl}#code",
+                    ["url"] = pageUrl,
+                    ["name"] = $"{pageName} — GeoBlazor Sample",
+                    ["programmingLanguage"] = new[] { "C#", "Blazor" },
+                    ["codeRepository"] = "https://github.com/dymaptic/GeoBlazor-Samples",
+                    ["isPartOf"] = new Dictionary<string, object?> { ["@id"] = $"{pageUrl}#webpage" },
+                    ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" }
+                };
+
+                if (!string.IsNullOrWhiteSpace(pageDescription))
+                {
+                    sourceCode["description"] = pageDescription;
+                }
+
+                graph.Add(sourceCode);
+            }
+
+            Dictionary<string, object?> root = new()
+            {
+                ["@context"] = "https://schema.org",
+                ["@graph"] = graph
+            };
+
+            return System.Text.Json.JsonSerializer.Serialize(root, JsonOptions);
+        }
+    }
+
+    private static string SlugToTitle(string slug)
+    {
+        string[] parts = slug.Split('-', StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < parts.Length; i++)
+        {
+            if (parts[i].Length > 0)
+            {
+                parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i][1..];
+            }
+        }
+        return string.Join(' ', parts);
+    }
 
     public void Dispose()
     {

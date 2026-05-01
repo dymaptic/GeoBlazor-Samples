@@ -66,6 +66,22 @@
         new("https://www.arcgis.com/home/item.html?id=990d0191f2574db495c4304a01c3e65b", "NFL Stadiums in the USA")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates 2D measurement tools " +
+        "from the ArcGIS Maps SDK for JavaScript via GeoBlazor's DistanceMeasurement2DWidget and " +
+        "AreaMeasurement2DWidget Razor components. " +
+        "The page shows a 2D web map of NFL stadium locations across the United States loaded from an " +
+        "ArcGIS Online portal item. In the top-right corner of the map, a custom overlay labeled 'Measure Tools' " +
+        "displays two icon buttons: a measure-area button and a measure-line button, which highlight when active. " +
+        "Clicking the line button starts the DistanceMeasurement2D widget so the user clicks on the map to " +
+        "drop points and double-clicks to finish, displaying the horizontal distance between points; clicking " +
+        "the area button starts the AreaMeasurement2D widget for polygon area measurement. " +
+        "A 'Show Details' button in the bottom-left corner toggles between a compact mode (where the widget UI " +
+        "is hidden in an off-map container) and a full panel anchored to the bottom-right of the map that " +
+        "exposes options to change measurement units. " +
+        "The sample is intended to demonstrate interactive measurement tooling in a Blazor application " +
+        "without writing JavaScript.";
+
     private async Task OnDistanceButtonClicked()
     {
         await SetActiveWidget("distance");

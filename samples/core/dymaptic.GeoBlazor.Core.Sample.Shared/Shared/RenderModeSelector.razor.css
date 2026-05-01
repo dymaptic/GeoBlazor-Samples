@@ -20,8 +20,3 @@ select {
     border: 1px solid black;
 }
 
-@media (min-width: 1075px) {
-    .render-mode-selector-row {
-        left: 20rem;
-    }
-}

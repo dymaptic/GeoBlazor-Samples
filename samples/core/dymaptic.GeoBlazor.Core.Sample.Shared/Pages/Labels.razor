@@ -38,4 +38,17 @@
         new("https://developers.arcgis.com/javascript/latest/sample-code/labels-basic/", "ArcGIS Maps SDK for JavaScript"),
         new("https://www.arcgis.com/home/item.html?id=372b7caa8fe340b0a6300df93ef18a7e", "Labels BaseMap")
     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates feature labeling " +
+        "from the ArcGIS Maps SDK for JavaScript using GeoBlazor's Label and TextSymbol Razor components. " +
+        "The page shows a 2D web map centered on the Joshua Tree area of southern California, " +
+        "loaded from an ArcGIS Online portal item. Overlaid on top is a FeatureLayer of trail markers, " +
+        "rendered as small dark green circles. Each marker is automatically labeled above its center " +
+        "with the value of the MARKER_ACTIVITY field, drawn in bold green Playfair Display font on a " +
+        "translucent lavender background with a green border. The label text, placement, font, and " +
+        "background styling are all configured declaratively through the Label, TextSymbol, MapFont, " +
+        "and LabelExpressionInfo components. There are no interactive controls — the user simply pans " +
+        "and zooms the map. The sample is intended to demonstrate how to attach data-driven labels to " +
+        "feature layers in a Blazor application without writing JavaScript.";
 }

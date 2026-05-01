@@ -66,6 +66,20 @@
         new("https://developers.arcgis.com/javascript/latest/display-a-web-map/", "ArcGIS Maps SDK for JavaScript"),
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates loading a WebMap by " +
+        "PortalItem id from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's WebMap, " +
+        "PortalItem, ScaleBarWidget, and LegendWidget Razor components. The page shows a 2D MapView " +
+        "loaded from a hosted ArcGIS Online WebMap, including all of the WebMap's preconfigured layers, " +
+        "icons, popups, and styling. A ScaleBarWidget appears in the lower-left corner of the map and a " +
+        "LegendWidget appears in the upper-right corner. Below the map a Layers heading is followed by a " +
+        "table that lists every Layer in the WebMap with its type, title, and a Features cell. For each " +
+        "FeatureLayer the Features cell starts with a Load Features button; clicking it issues a " +
+        "QueryFeatures call with where 1=1 and OutFields *, then replaces the button with a scrollable " +
+        "list of feature names extracted from each graphic's attributes. The sample is intended to " +
+        "demonstrate displaying a hosted WebMap and inspecting its layers and features in a Blazor " +
+        "application without writing JavaScript.";
+
     private async Task LoadLayer(FeatureLayer? featureLayer)
     {
         if (featureLayer is null)

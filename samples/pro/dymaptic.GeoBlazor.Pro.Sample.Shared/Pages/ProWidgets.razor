@@ -218,6 +218,18 @@
         new("https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b", "Navigation BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates a gallery of map widgets " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's BasemapToggleWidget, BasemapGalleryWidget, " +
+        "SearchWidget, LegendWidget, ScaleBarWidget, HomeWidget, LocateWidget, CompassWidget, BookmarksWidget, " +
+        "MeasurementWidget, and Pro's EditorWidget, SketchWidget, and TrackWidget Razor components. Above the map " +
+        "is a grid of labeled checkboxes grouped into Core widgets and a separate GeoBlazor Pro section (Editor, " +
+        "Sketch, Track). Toggling a checkbox adds or removes the corresponding widget on the 2D navigation basemap " +
+        "centered on the Atlantic, demonstrating overlay positioning at the four corners; the BasemapGallery is " +
+        "rendered into a separate gallery-box container outside the map to show off-map placement. The Bookmarks " +
+        "checkbox seeds three preset Angeles National Forest bookmarks. The sample is intended to demonstrate the " +
+        "breadth of widgets available in GeoBlazor and how each can be enabled or repositioned independently.";
+
     [Inject] public required NavigationManager NavigationManager { get; set; }
 
     private async Task ToggleWidget(string widgetTypeName)

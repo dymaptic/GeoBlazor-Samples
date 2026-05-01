@@ -54,6 +54,21 @@
         new("https://www.arcgis.com/home/item.html?id=234d2e3f6f554e0e84757662469c26d3", "SF Crimes by Block Group")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates server-side " +
+        "FeatureLayer queries (queryFeatures) from the ArcGIS Maps SDK for JavaScript exposed through " +
+        "GeoBlazor's FeatureLayer.CreateQuery, QueryFeatures, and PopupWidget Razor components. The page " +
+        "shows a 2D dark-gray basemap of San Francisco overlaid with a crimes-by-block-group FeatureLayer. " +
+        "A LegendWidget for the crime layer sits in the lower-left corner of the map. In the upper-right " +
+        "a CustomOverlay panel contains a dropdown labeled Basic Query or Query By Distance. The user " +
+        "picks a query type and clicks anywhere on the map; the click point is sent as the query geometry " +
+        "(with a half-mile distance buffer when Query By Distance is selected) and the matching features " +
+        "are returned from the server. A blue marker is drawn at the click point, an optional buffer " +
+        "polygon is drawn for distance queries, and the docked PopupWidget at the bottom-right is " +
+        "populated with the returned features so the user can page through them. The sample is intended " +
+        "to demonstrate executing spatial queries against a hosted FeatureLayer in a Blazor application " +
+        "without writing JavaScript.";
+
     [Inject]
     public required IJSRuntime JsRuntime { get; set; }
 

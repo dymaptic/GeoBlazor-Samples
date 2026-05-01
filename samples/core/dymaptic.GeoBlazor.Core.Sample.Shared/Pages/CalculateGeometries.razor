@@ -58,6 +58,20 @@
         new("https://www.arcgis.com/home/item.html?id=d582a9e953c44c09bb998c7d9b66f8d4", "Charted Territory BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates client-side geometry " +
+        "operations powered by the ArcGIS Maps SDK for JavaScript GeometryEngine, exposed through GeoBlazor's " +
+        "injectable GeometryEngine service. The page shows a 2D Charted Territory basemap zoomed in over the " +
+        "Santa Monica Mountains in southern California, with a purple Point, a purple Polyline, and a " +
+        "translucent purple Polygon already drawn as Graphics on a GraphicsLayer. A small CustomOverlay panel " +
+        "in the upper-right corner of the map contains four buttons: Buffer (calls GeometryEngine.GeodesicBuffer " +
+        "to draw a 1-kilometer buffer ring around the point), Intersect (calls GeometryEngine.Intersect to " +
+        "compute and draw the overlap between the polygon and the buffer using a hatched white fill), Union " +
+        "(calls GeometryEngine.Union to draw the merged polygon), and Reset (clears the buffer and any result " +
+        "graphic). Results are drawn into a separate GraphicsLayer so they can be cleared independently. The " +
+        "sample is intended to demonstrate calling spatial-analysis operations directly from C# in a Blazor " +
+        "application without writing JavaScript.";
+
     private async Task CreateBuffer()
     {
         if (_bufferPolygon is not null) return;

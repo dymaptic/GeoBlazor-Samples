@@ -36,4 +36,18 @@
         new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/", "ArcGIS Maps SDK for JavaScript"),
         new("https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about", "Office for National Statistics (UK)")
     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the WFSLayer (OGC " +
+        "Web Feature Service) from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "WFSLayer, LayerListWidget, and PopupWidget Razor components. The page shows a 2D light-gray " +
+        "basemap centered on the United Kingdom at zoom level 5. Above the map are three short " +
+        "instruction paragraphs explaining that all you need is a WFS 2.0.0 service URL with GeoJSON " +
+        "output enabled and crediting the Office for National Statistics and Ordnance Survey. The map " +
+        "loads a single WFSLayer pointing at the May 2023 Counties of England feature type from the ONS " +
+        "WFS service, with PopupEnabled set so clicking any county opens its default popup. A " +
+        "LayerListWidget appears in the lower-left corner of the map and a generic PopupWidget with " +
+        "DefaultPopupTemplateEnabled is configured for the view. The sample is intended to demonstrate " +
+        "loading and interacting with a hosted OGC WFS service in a Blazor application without writing " +
+        "JavaScript.";
 }

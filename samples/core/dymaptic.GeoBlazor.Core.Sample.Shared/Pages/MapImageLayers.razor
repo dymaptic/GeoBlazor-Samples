@@ -281,6 +281,21 @@
         new("https://www.arcgis.com/home/item.html?id=d7892b3c13b44391992ecd42bfa92d01", "City Pool Permits Map")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the MapImageLayer " +
+        "from the ArcGIS Maps SDK for JavaScript via GeoBlazor's MapImageLayer and Sublayer Razor components. " +
+        "Unlike feature layers, MapImageLayer requests dynamically rendered images from the server rather " +
+        "than vector features. The page shows a 3D scene with a dark gray basemap. " +
+        "Above the scene is a radio group with five options: a static City Pool Permits map, a USA-services " +
+        "layer with toggleable Highways/Cities/Railroads/States sublayers (with click-to-toggle chips below the map), " +
+        "a population-filtered cities sublayer driven by a SliderWidget that updates the layer's " +
+        "DefinitionExpression as the user drags, sublayers with custom SimpleRenderers for state/highway/city " +
+        "symbols, and sublayers with custom Labels including state-name and city-name text symbols at " +
+        "different scale ranges. As the user changes the radio selection the corresponding MapImageLayer " +
+        "configuration is rendered, and the view zooms to the layer's extent or to a Chicago-area view for " +
+        "the labels demo. The sample is intended to demonstrate MapImageLayer sublayer toggling, custom " +
+        "rendering, and dynamic filtering in a Blazor application without writing JavaScript.";
+
     private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is MapImageLayer imageLayer)

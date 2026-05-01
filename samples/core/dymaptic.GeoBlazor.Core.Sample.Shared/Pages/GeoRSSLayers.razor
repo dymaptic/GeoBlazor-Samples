@@ -22,4 +22,14 @@
     [
         new("https://developers.arcgis.com/javascript/latest/sample-code/layers-georss/", "ArcGIS Maps SDK for JavaScript"),
      ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the GeoRSSLayer from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GeoRSSLayer Razor component. The page shows " +
+        "a 2D light-gray basemap centered over the western United States at a country-level zoom. A GeoRSSLayer " +
+        "is added on top of the basemap, sourced from a sample GeoRSS XML feed hosted on the ArcGIS samples " +
+        "GitHub repository; the layer auto-renders any point, line, or polygon items it parses out of the feed " +
+        "using default GeoRSS symbology. There are no controls beyond the basic map navigation (pan, zoom). The " +
+        "sample is intended to demonstrate the simplest possible declarative consumption of a GeoRSS feed in " +
+        "a Blazor application without writing JavaScript.";
 }

@@ -18,4 +18,16 @@
     [
         new("https://developers.arcgis.com/javascript/latest/display-a-web-scene/", "ArcGIS Maps SDK for JavaScript"),
      ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates loading a WebScene " +
+        "by PortalItem id from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's WebScene, " +
+        "PortalItem, SceneView, and LegendWidget Razor components. The page shows a 3D SceneView " +
+        "populated from a hosted ArcGIS Online WebScene, including all of the WebScene's preconfigured " +
+        "layers, icons, popups, ground elevation, lighting, and camera position. A LegendWidget sits in " +
+        "the upper-right corner of the scene and updates as layers come into view. There are no other " +
+        "controls above or around the map; the user can pan, zoom, tilt, and rotate the camera and " +
+        "click features to open their popups. The sample is intended to demonstrate displaying a " +
+        "complete hosted 3D WebScene with a single PortalItem reference in a Blazor application without " +
+        "writing JavaScript.";
 }

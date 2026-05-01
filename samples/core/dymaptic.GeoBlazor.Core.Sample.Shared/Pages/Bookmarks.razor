@@ -42,6 +42,20 @@
         new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-bookmarks/", "Bookmarks Sample")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Bookmarks widget " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's BookmarksWidget Razor component. " +
+        "The page shows a 2D web map of Atlantic hurricane tracks loaded from an ArcGIS Online WebMap " +
+        "PortalItem. In the upper-right corner of the map an ExpandWidget is opened by default to reveal a " +
+        "list of named hurricane bookmarks; each bookmark has a small thumbnail and can be reordered by drag, " +
+        "edited via a pencil button, or extended with the Add Bookmark button. Clicking a bookmark zooms the " +
+        "view to the saved extent and applies a FeatureEffect to the underlying FeatureLayerView, graying out " +
+        "all hurricanes whose Name does not match. Below the map a heading reads Bookmarks followed by a " +
+        "bulleted list that mirrors the widget's Bookmarks collection; the list is wired to the reactive " +
+        "bookmarks.after-add event so newly added bookmarks appear immediately. The sample is intended to " +
+        "demonstrate reactive collection binding and feature effect filtering in a Blazor application without " +
+        "writing JavaScript.";
+
     private void OnLayerViewCreate(LayerViewCreateEvent evt)
     {
         if (evt.Layer is not FeatureLayer) return;

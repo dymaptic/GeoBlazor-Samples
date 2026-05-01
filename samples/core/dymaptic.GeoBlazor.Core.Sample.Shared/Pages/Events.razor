@@ -168,6 +168,21 @@
         new("https://www.arcgis.com/home/item.html?id=3d355e34cbd3405dbb3f031286f7b39b", "Daily Planet Imagery Web Map")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the full set of MapView " +
+        "events from the ArcGIS Maps SDK for JavaScript surfaced as Razor event callbacks on GeoBlazor's MapView " +
+        "component. The page shows a 2D Daily Planet imagery WebMap loaded from an ArcGIS Online portal item. " +
+        "Above the map are three collapsible Accordion sections grouping the live event feeds: Click/Drag/Focus " +
+        "Events (Click, Double Click, Hold, Drag, Blur, Focus), Pointer Events (Pointer Down, Pointer Up, Pointer " +
+        "Enter, Pointer Leave, Pointer Move), and Key/Mouse Events (Key Down, Key Up, Mouse Wheel, Extent). Each " +
+        "field in those sections shows a live JSON dump of the most recent corresponding event payload. " +
+        "Interactions on the map (clicks, drags, key presses, scroll-wheel zooms, etc.) flow through OnClick, " +
+        "OnDoubleClick, OnHold, OnDrag, OnPointerDown, OnPointerUp, OnPointerEnter, OnPointerLeave, OnPointerMove, " +
+        "OnKeyDown, OnKeyUp, OnMouseWheel, OnExtentChanged, OnBlur, and OnFocus callbacks; OnClick additionally " +
+        "calls ToScreen and ToMap to round-trip the click point. Events are throttled with EventRateLimitInMilliseconds. " +
+        "The sample is intended to demonstrate listening to and inspecting every map event in a Blazor application " +
+        "without writing JavaScript.";
+
     private async Task OnMapClick(ClickEvent clickEvent)
     {
         _clickJson = BuildViewableJson(clickEvent);

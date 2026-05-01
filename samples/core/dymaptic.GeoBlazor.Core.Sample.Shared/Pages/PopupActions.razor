@@ -37,6 +37,21 @@
         new("https://www.arcgis.com/apps/mapviewer/index.html?url=https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/TrailRuns/FeatureServer&source=sd", "Trail Runs Feature Service")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates custom popup actions " +
+        "from the ArcGIS Maps SDK for JavaScript via GeoBlazor's PopupTemplate, ActionButton, and " +
+        "PopupWidget Razor components. " +
+        "The page shows a 2D map of the Inland Empire area near San Bernardino, California, rendered with the " +
+        "Modern Antique basemap loaded from an ArcGIS Online portal item, at zoom level 11. " +
+        "A FeatureLayer of trail-run lines is overlaid on top. There are no controls outside the map — the " +
+        "user clicks on any trail to open a popup titled 'Trail Run' that shows the trail name. The popup " +
+        "includes a custom action button labeled 'Measure Length', identified by a small ruler icon. Clicking " +
+        "the action invokes the .NET MeasureThis callback, which retrieves the selected feature's geometry, " +
+        "calls the injected GeometryEngine.GeodesicLength to compute the length in miles, and updates the " +
+        "popup content to display the rounded distance. " +
+        "The sample is intended to demonstrate adding custom buttons and .NET callbacks inside ArcGIS popups " +
+        "in a Blazor application without writing JavaScript.";
+
     private MapView? MapView { get; set; }
 
     private async Task MeasureThis()

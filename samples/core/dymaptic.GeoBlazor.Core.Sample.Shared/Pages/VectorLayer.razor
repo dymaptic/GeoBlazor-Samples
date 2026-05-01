@@ -21,4 +21,15 @@
     [
         new("https://developers.arcgis.com/javascript/latest/add-a-vector-tile-layer/", "ArcGIS Maps SDK for JavaScript"),
      ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the VectorTileLayer " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's VectorTileLayer Razor " +
+        "component. The page shows a 2D map centered on the Santa Monica Mountains in Los Angeles County " +
+        "at zoom level 13. The base layer is an ArcGIS light-gray vector basemap, and on top of it the " +
+        "sample loads a hosted Santa Monica Mountains parcels VectorTileLayer from ArcGIS Online by URL. " +
+        "There are no widgets or controls above the map; the user can pan and zoom to explore the " +
+        "vector-tiled parcel boundaries, which scale crisply at any zoom level because they are rendered " +
+        "from vector tiles rather than raster images. The sample is intended to demonstrate adding a " +
+        "vector tile layer to a map by URL in a Blazor application without writing JavaScript.";
 }
