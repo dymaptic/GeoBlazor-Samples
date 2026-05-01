@@ -8,7 +8,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="@MetaTitle" />
     <meta property="og:description" content="@MetaDescription" />
-    <meta property="og:url" content="@NavigationManager.Uri" />
+    <meta property="og:url" content="@CanonicalPageUrl" />
     <meta property="og:site_name" content="GeoBlazor Samples" />
     <meta property="og:image" content="https://geoblazor.com/images/logos/GeoBlazor-Icon_250px.png" />
     <meta name="twitter:card" content="summary" />
@@ -80,8 +80,18 @@
     protected override void OnInitialized()
         {
         base.OnInitialized();
-        
+
         LayoutService.OnPageChanged += StateHasChanged;
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        // Clear before the new page renders. If the new page inherits SamplePage,
+        // its OnInitialized will set CurrentPage again. Pages that don't inherit
+        // SamplePage (Home, NotFound, etc.) leave it null so the layout doesn't
+        // render stale per-page metadata.
+        LayoutService.ClearCurrentPage();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -102,18 +112,20 @@
         "Live, runnable GeoBlazor code samples — interactive maps, layers, widgets, and geospatial analysis " +
         "in Blazor for .NET developers, powered by the ArcGIS Maps SDK for JavaScript.";
 
-    private string CurrentSlug
+    private string CanonicalPageUrl
     {
         get
         {
-            string slug = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-            int hashIndex = slug.IndexOf('#');
-            if (hashIndex >= 0) slug = slug[..hashIndex];
-            int queryIndex = slug.IndexOf('?');
-            if (queryIndex >= 0) slug = slug[..queryIndex];
-            return slug;
+            string uri = NavigationManager.Uri;
+            int hashIndex = uri.IndexOf('#');
+            if (hashIndex >= 0) uri = uri[..hashIndex];
+            int queryIndex = uri.IndexOf('?');
+            if (queryIndex >= 0) uri = uri[..queryIndex];
+            return uri;
         }
     }
+
+    private string CurrentSlug => NavigationManager.ToBaseRelativePath(CanonicalPageUrl);
 
     private string MetaTitle
     {
@@ -149,13 +161,9 @@
     {
         get
         {
-            string pageUrl = NavigationManager.Uri;
+            string pageUrl = CanonicalPageUrl;
             string siteUrl = NavigationManager.BaseUri.TrimEnd('/');
-            string slug = NavigationManager.ToBaseRelativePath(pageUrl);
-            int hashIndex = slug.IndexOf('#');
-            if (hashIndex >= 0) slug = slug[..hashIndex];
-            int queryIndex = slug.IndexOf('?');
-            if (queryIndex >= 0) slug = slug[..queryIndex];
+            string slug = CurrentSlug;
             string pageName = string.IsNullOrEmpty(slug) ? "GeoBlazor Samples" : SlugToTitle(slug);
 
             List<object> graph =
@@ -263,6 +271,7 @@
     {
         HttpClient.Dispose();
         LayoutService.OnPageChanged -= StateHasChanged;
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 
 }
