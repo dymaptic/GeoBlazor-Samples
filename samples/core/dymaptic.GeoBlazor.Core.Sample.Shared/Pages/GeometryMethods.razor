@@ -1,4 +1,5 @@
 ﻿@page "/geometry-methods"
+@inherits SamplePage
 @inject GeometryEngine GeometryEngine
 <PageTitle>Geometry Methods</PageTitle>
 <h1>Geometry Methods</h1>
@@ -124,6 +125,23 @@ Extent extent = new Extent(
 </div>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-geometryEngine.html", "GeometryEngine API Reference")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates GeoBlazor's GeometryEngine " +
+        "service which exposes geometry-manipulation operations from the ArcGIS Maps SDK for JavaScript. The page " +
+        "is a documentation-style reference of geometry methods grouped into four sections: Extent Methods (center " +
+        "an extent at a point, expand an extent by a factor, and offset an extent by X/Y distance), Point Methods " +
+        "(serialize a Point to ArcGIS JSON and parse JSON back to a C# Point), Polyline Methods (add a path to an " +
+        "existing polyline and inspect the result), and Polygon Methods (similar add-ring operations on Polygon). " +
+        "Each section displays a syntax-highlighted C# code snippet alongside number inputs and a button that " +
+        "invokes the corresponding GeometryEngine method, then renders the resulting geometry's coordinates back " +
+        "into a read-only text field. The sample is intended to demonstrate how to perform geometry math in pure " +
+        "C# from a Blazor application without writing JavaScript.";
 
     private async Task PointToJson()
     {

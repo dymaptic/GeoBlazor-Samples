@@ -70,6 +70,18 @@
         new("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer", "World Elevation Terrain 3D")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates ImageryTileLayer rendering " +
+        "with raster stretch from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's ImageryTileLayer, " +
+        "GroupLayer, RasterStretchRenderer, and SliderWidget Razor components. The page shows a 2D map centered on " +
+        "the Tibetan Plateau with a GroupLayer that blends World Imagery underneath a World Elevation 3D ImageryTileLayer " +
+        "using a destination-in blend mode. A LayerListWidget in the upper-right corner lets the user expand the " +
+        "elevation layer and reveal a stretch-rendering panel containing a stretch-type dropdown (Min-Max or Standard " +
+        "Deviation), a two-handle SliderWidget that adjusts the active stretch values in meters or standard deviations, " +
+        "and a checkbox that toggles the GroupLayer's blend mode between DestinationIn and Normal. A BasemapToggleWidget " +
+        "in the lower-left switches between light-gray and dark-gray basemaps. The sample is intended to demonstrate " +
+        "interactive raster styling and blending of elevation data over imagery.";
+
     private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _layer!.Id 

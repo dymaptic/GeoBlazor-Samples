@@ -44,6 +44,18 @@
         new("https://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer", "National Ground Land Cover: 2001")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the ImageryLayer from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's ImageryLayer Razor component, showing two " +
+        "different ways to add the same layer: declaratively in markup and imperatively in C# code. The page " +
+        "shows a 2D light-gray basemap centered over the conterminous United States. Above the map are a text " +
+        "input pre-populated with the URL of the NLCD 2001 Land Cover image service, an Add or Remove Imagery " +
+        "Layer in code button (constructs an ImageryLayer in C# from the input URL and adds it to or removes " +
+        "it from the MapView), and an Add new Imagery Layer in Markup button (toggles a flag that conditionally " +
+        "renders an ImageryLayer element directly inside the Map at 60% opacity). Both buttons are disabled " +
+        "until the view fires OnViewRendered. The sample is intended to demonstrate equivalent declarative " +
+        "and programmatic image-service layering in a Blazor application without writing JavaScript.";
+
     private void OnViewRendered() => _mapRendered = true;
 
     public async Task AddRemoveImageryLayer()

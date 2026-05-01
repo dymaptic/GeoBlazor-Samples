@@ -48,6 +48,20 @@
         new("https://www.arcgis.com/home/item.html?id=adfad6ee6c6043238ea64e121bb6429a", "San Francisco - Urban Planning Web Scene")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the LayerList widget " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's LayerListWidget Razor component. " +
+        "The page shows a 3D San Francisco urban planning web scene loaded from an ArcGIS Online portal item, " +
+        "containing multiple layers including transit, buildings, and zoning. " +
+        "On wide screens, the LayerList widget is anchored in the upper-right corner of the SceneView; on " +
+        "narrow mobile layouts it is rendered in a separate container above the scene so the map remains fully visible. " +
+        "Inside the widget, each layer has a right-arrow toggle to reveal sublayers, an eye icon to toggle " +
+        "visibility on the basemap, and a legend icon to expand the layer's symbology. " +
+        "An OnListItemCreated handler customizes each list item by enabling visibility, attaching a legend panel, " +
+        "and prefixing 'Mass ' to any layer titled 'Transit'. " +
+        "The sample is intended to demonstrate building an interactive layer manager in a Blazor application " +
+        "without writing JavaScript.";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         int? oldWidth = _windowWidth;

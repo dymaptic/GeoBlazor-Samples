@@ -60,4 +60,18 @@
         new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-search-multiplesource/", "ArcGIS Maps SDK for JavaScript"),
         new("https://www.arcgis.com/home/item.html?id=1970c1995b8f44749f4b9b6e81b5ba45", "Dark Gray BaseMap")
     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Search widget " +
+        "configured with multiple custom sources from the ArcGIS Maps SDK for JavaScript exposed through " +
+        "GeoBlazor's SearchWidget, LayerSearchSource, and LocatorSearchSource Razor components. The page " +
+        "shows a 2D dark-gray basemap of the contiguous United States. In the upper-right corner of the " +
+        "map sits a Search widget whose source dropdown lets the user choose between Congressional " +
+        "Districts (a FeatureLayer keyed by DISTRICTID), Senators (a FeatureLayer keyed by Name or Party " +
+        "with a custom suggestion template and a senate icon picture marker symbol), the ArcGIS World " +
+        "Geocoding Service, or all three at once with the placeholder Senator or World Location Service. " +
+        "Selecting a result zooms the map and opens a PopupTemplate appropriate to that source. The " +
+        "default sources are disabled so only the configured ones appear. The sample is intended to " +
+        "demonstrate combining feature-layer search and a world geocoder behind a single search widget " +
+        "in a Blazor application without writing JavaScript.";
 }

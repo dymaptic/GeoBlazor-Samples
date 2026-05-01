@@ -50,6 +50,21 @@
         new("https://www.arcgis.com/apps/mapviewer/index.html?url=https://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer", "Hurricanes")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the MapView.HitTest API " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's MapView.HitTest method together " +
+        "with FeatureLayerView.Highlight. The page shows a 2D dark-gray basemap centered over the Atlantic " +
+        "with a FeatureLayer of historical hurricane track polylines drawn as semi-transparent thick gray " +
+        "lines (sourced from the Esri Hurricanes sample server). Hovering or clicking a track triggers an " +
+        "OnPointerMove or OnPointerDown handler that calls HitTest with a HitTestOptions filter limited to " +
+        "the hurricane layer's GeoBlazor id; the resulting Graphic's NAME, YEAR, CAT, and WIND_KTS attributes " +
+        "are read in C#. The matching storm is then highlighted in orange (configured via HighlightOptions) " +
+        "by querying the FeatureLayerView for ObjectIds with a where clause on YEAR and NAME and calling " +
+        "Highlight on the returned ids. A small CustomOverlay panel in the upper-right corner of the map " +
+        "displays the hovered storm's name, category, and wind speed in knots. Pointer events are throttled " +
+        "with EventRateLimitInMilliseconds. The sample is intended to demonstrate hit testing and feature " +
+        "highlighting in a Blazor application without writing JavaScript.";
+
     private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (_hurricaneLayer!.Id == createEvent.Layer!.Id)

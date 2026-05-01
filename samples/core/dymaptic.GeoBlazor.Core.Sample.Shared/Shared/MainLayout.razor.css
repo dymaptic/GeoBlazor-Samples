@@ -57,8 +57,9 @@ article.content {
     width: calc(100vw - 3rem);
     flex-grow: 1;
     margin: 0 auto;
-    padding-bottom: 10rem;
+    padding-bottom: 16rem;
     height: calc(100vh - 10rem);
+    overflow-y: auto;
 }
 
 @media (min-width: 1075px) {
@@ -70,7 +71,7 @@ article.content {
         flex-direction: column;
         width: calc(100vw - 20rem);
     }
-    
+
     .main-links {
         max-width: calc(100vw - 2rem);
     }
@@ -78,7 +79,7 @@ article.content {
     article.content {
         padding-left: 2rem;
         padding-right: 1.5rem;
-        overflow-y: auto;
+        padding-bottom: 14rem;
         width: calc(100vw - 23rem);
     }
 }
@@ -86,6 +87,10 @@ article.content {
 @media (min-width: 1400px) {
     main {
         flex-direction: row-reverse;
+    }
+
+    article.content {
+        padding-bottom: 4rem;
     }
 
     .main-links {
@@ -107,3 +112,56 @@ article.content {
         width: calc(100vw - 43rem);
     }
 }
+.sample-description {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--background-grey-3);
+    border-radius: var(--box-radius);
+    font-size: 0.9rem;
+}
+
+.sample-description summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-emphasis);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    list-style: none;
+    padding-left: 0.25rem;
+}
+
+.sample-description summary::-webkit-details-marker {
+    display: none;
+}
+
+.sample-description summary::marker {
+    content: "";
+}
+
+.sample-description summary::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 0.3rem solid transparent;
+    border-bottom: 0.3rem solid transparent;
+    border-left: 0.45rem solid currentColor;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.sample-description[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.sample-description[open] summary {
+    margin-bottom: 0.5rem;
+}
+
+.sample-description p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.5;
+}
+

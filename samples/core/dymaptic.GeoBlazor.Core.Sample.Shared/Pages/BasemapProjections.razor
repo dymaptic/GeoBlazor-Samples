@@ -38,6 +38,18 @@
         new("https://developers.arcgis.com/javascript/latest/sample-code/basemaps-portal/", "ArcGIS Maps SDK for JavaScript"),
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates how basemaps in different " +
+        "spatial references reproject the entire view, using the BasemapGalleryWidget and PortalBasemapsSource " +
+        "components from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's Razor component model. " +
+        "The page opens with a 2D map of the world centered roughly on North America. In the upper-right corner " +
+        "of the map an ExpandWidget shows a basemap icon; clicking it expands a Basemap Gallery panel populated " +
+        "from a curated ArcGIS Online portal group containing basemaps in a variety of projections. A small " +
+        "CustomOverlay in the lower-left corner displays the current MapView spatial reference WKID. Selecting " +
+        "any basemap from the gallery triggers the OnSpatialReferenceChanged event, the view reprojects, and " +
+        "the WKID readout updates live. The sample is intended to demonstrate how to swap basemaps and observe " +
+        "the resulting spatial-reference change reactively in a Blazor application without writing JavaScript.";
+
     private Task OnSpatialReferenceChanged(SpatialReference spatialReference)
     {
         _spatialReference = spatialReference;

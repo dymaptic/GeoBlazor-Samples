@@ -18,4 +18,15 @@
     [
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-OpenStreetMapLayer.html", "ArcGIS Maps SDK for JavaScript"),
      ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the OpenStreetMap layer " +
+        "from the ArcGIS Maps SDK for JavaScript via GeoBlazor's OpenStreetMapLayer Razor component. " +
+        "The page shows a 3D SceneView of the entire globe at zoom level 1, with world-elevation terrain " +
+        "applied to the ground. The OpenStreetMapLayer is added directly inside the Map (no portal item or " +
+        "API key required, because PromptForArcGISKey is set to false), so the user sees crowdsourced " +
+        "OpenStreetMap tiles draped over the elevation surface. There are no on-screen controls — the user " +
+        "simply pans, rotates, tilts, and zooms the globe to explore. " +
+        "The sample is intended to demonstrate using a free OpenStreetMap basemap source on a 3D scene in a " +
+        "Blazor application without writing JavaScript.";
 }

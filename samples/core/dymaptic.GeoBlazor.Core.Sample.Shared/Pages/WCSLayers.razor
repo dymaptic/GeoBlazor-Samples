@@ -56,6 +56,20 @@
         new("something", "NOAA Sea Surface Temperature Charts")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the WCSLayer (OGC " +
+        "Web Coverage Service) and RasterStretchRenderer from the ArcGIS Maps SDK for JavaScript exposed " +
+        "through GeoBlazor's WCSLayer, RasterStretchRenderer, MultipartColorRamp, AlgorithmicColorRamp, " +
+        "and DimensionalDefinition Razor components. The page shows a 2D light-gray basemap of the world. " +
+        "Above the map two buttons sit side by side and remain disabled until the map finishes rendering: " +
+        "the first toggles a colorized sea-temperature WCSLayer that is styled with a three-stop blue " +
+        "to cyan to yellow to red HSV color ramp using a standard-deviation stretch, and the second " +
+        "toggles a black-and-white version of the same layer. Both layers point at the NOAA sample " +
+        "ImageServer's WCS endpoint and are restricted to sea level (StdZ=0) at a fixed timestamp. While " +
+        "either layer is being added or removed the map cursor is set to wait. The sample is intended to " +
+        "demonstrate consuming an OGC WCS coverage and applying a custom raster color ramp in a Blazor " +
+        "application without writing JavaScript.";
+
     private void OnViewRendered() => _mapRendered = true;
 
     private async Task AddRemoveWCSLayer(bool colorized)

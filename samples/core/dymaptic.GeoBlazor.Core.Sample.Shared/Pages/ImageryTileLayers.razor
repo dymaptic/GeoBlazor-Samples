@@ -94,6 +94,22 @@
         new("https://tiledimageservices.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/NLCD_2016_Land_Cover_L48_20190424/ImageServer", "Land Cover Imagery Tile Layer")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the ImageryTileLayer and " +
+        "dynamic UniqueValueRenderer construction from the ArcGIS Maps SDK for JavaScript exposed through " +
+        "GeoBlazor's ImageryTileLayer Razor component. The page shows a 2D map of the lower-48 United States " +
+        "rendered initially in the Albers Equal Area projection. The custom basemap is a FeatureLayer of US " +
+        "states drawn as dark-gray polygons with a soft drop-shadow effect, and on top of it the NLCD 2016 " +
+        "Land Cover ImageryTileLayer paints raster land-cover tiles. In the upper-right corner of the map a " +
+        "CustomOverlay panel titled Land cover types - 2016 contains a vertical Calcite radio-button group " +
+        "with five options (Forested Areas, Developed Areas, Cultivated Areas, Hay/Pasture Areas, Wetlands) " +
+        "and a Change view's projection dropdown listing Albers Equal Area, Web Mercator, and WGS 84. " +
+        "Selecting a land-cover type rebuilds a UniqueValueRenderer in C# (one UniqueValueInfo per NLCD_Land " +
+        "category in that group, colored from a per-type palette) and applies it via SetRenderer; selecting a " +
+        "projection calls SetSpatialReference on both the states layer and the MapView. The sample is intended " +
+        "to demonstrate dynamic raster restyling and live reprojection in a Blazor application without writing " +
+        "JavaScript.";
+
     private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _layer?.Id)

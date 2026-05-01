@@ -42,6 +42,18 @@
         new("https://www.arcgis.com/home/item.html?id=4f2e99ba65e34bb8af49733d9778fb8e", "Human Geography Dark BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates routing and turn-by-turn " +
+        "directions from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's RouteService together " +
+        "with the GraphicsLayer and CustomOverlay Razor components. The page shows a 2D dark human-geography basemap " +
+        "centered on Redlands, California, with a Clear button positioned above the map. The user clicks two or " +
+        "more locations on the map; each click drops a white cross stop marker, and once at least two stops exist " +
+        "the sample calls RouteService.Solve against the world routing service and renders the resulting route as " +
+        "a translucent blue polyline. A directions panel pinned in the upper-right corner of the map lists each " +
+        "maneuver with its distance in miles, and the Clear button removes all stops, the route, and the directions. " +
+        "The sample is intended to demonstrate point-and-click route solving and step-by-step driving directions " +
+        "with the ArcGIS World Route service.";
+
     [Inject]
     public required RouteService RouteService { get; set; }
     

@@ -11,4 +11,11 @@ public class LayoutService
         CurrentPage = page;
         OnPageChanged?.Invoke();
     }
+
+    public void ClearCurrentPage()
+    {
+        if (CurrentPage is null) return;
+        CurrentPage = null;
+        OnPageChanged?.Invoke();
+    }
 }

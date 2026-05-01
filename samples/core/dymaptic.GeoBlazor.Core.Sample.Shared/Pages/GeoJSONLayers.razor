@@ -74,6 +74,19 @@
         new("https://www.usgs.gov/programs/earthquake-hazards/earthquakes", "USGS Earthquake Hazards Program")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the GeoJSONLayer from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GeoJSONLayer Razor component. The page shows " +
+        "a 2D dark-gray world basemap centered loosely on the Pacific. Above the map are a Show Earthquakes " +
+        "checkbox and a Data Source dropdown with options Past Month, Past Week, and Past Day. Toggling the " +
+        "checkbox loads a live USGS GeoJSON earthquake feed for the chosen period; the dropdown rewrites the " +
+        "feed URL and the layer reloads. Earthquakes are drawn as orange SimpleMarkerSymbol circles whose size " +
+        "is driven by a SizeVariable on the magnitude field (mag), so larger quakes appear as larger dots, and " +
+        "the layer is sorted descending by mag so big events draw on top. Clicking any earthquake opens a " +
+        "PopupTemplate showing magnitude, type, location, and time. A LegendWidget anchored to the bottom-right " +
+        "of the map documents the size ramp. The sample is intended to demonstrate consuming a remote GeoJSON " +
+        "feed with data-driven rendering in a Blazor application without writing JavaScript.";
+
     private bool _showEarthquakes;
     private string _dataUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
 

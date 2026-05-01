@@ -20,6 +20,18 @@ public partial class StyledGeoJSONLayers
         new("https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0", "Mapbox SimpleStyle Spec")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates SimpleStyle / GeoJSON CSS " +
+        "rendering of inline GeoJSON from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's " +
+        "ProGeoJSONLayer Razor component. The page shows a 2D navigation basemap centered on Seattle. Above the " +
+        "map are four checkbox toggles for the layer set: Tourist Points, Neighborhoods, Transportation Routes, " +
+        "and Public Services. Each toggle controls a ProGeoJSONLayer whose source is an embedded GeoJSON feature " +
+        "collection that uses Mapbox-style marker-color, marker-size, marker-symbol, fill, fill-opacity, stroke, " +
+        "stroke-width, and stroke-dasharray properties; the layer renders these directly when ApplyStyles is true. " +
+        "Below the map is a row of feature buttons, one per visible feature, color-matched to the styling. Clicking " +
+        "a button highlights the feature, zooms to a buffered extent of its geometry, and opens its default popup. " +
+        "The sample is intended to demonstrate styling inline GeoJSON without writing a renderer.";
+
     [Inject]
     public required GeometryEngine GeometryEngine { get; set; }
 

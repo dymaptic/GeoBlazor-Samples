@@ -64,6 +64,19 @@
         new("https://www.arcgis.com/home/item.html?id=3113eacc129942b4abde490a51aeb33f", "Stereographic Basemap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the CSVLayer from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's CSVLayer Razor component. The page shows " +
+        "a 2D world map drawn with a Stereographic projection basemap loaded from an ArcGIS Online portal item. " +
+        "On top of the basemap a CSV feed of NOAA hurricane track points is rendered through a UniqueValueRenderer " +
+        "keyed on the Category field, with each storm category (1 through 5) drawn as a distinct PictureMarkerSymbol " +
+        "firefly icon. Each point exposes a PopupTemplate showing the storm name, ISO time, pressure, and wind speed. " +
+        "Above the map is a labeled text input plus an Add new CSV Layer! button that, once the view is rendered, " +
+        "constructs an additional CSVLayer from any URL the user enters and adds it to the map at runtime. An " +
+        "ExpandWidget in the upper-left corner houses a LegendWidget that documents the hurricane category symbols. " +
+        "The sample is intended to demonstrate declarative and dynamic CSV data sources in a Blazor application " +
+        "without writing JavaScript.";
+
     private void OnViewRendered()
     {
         _viewRendered = true;

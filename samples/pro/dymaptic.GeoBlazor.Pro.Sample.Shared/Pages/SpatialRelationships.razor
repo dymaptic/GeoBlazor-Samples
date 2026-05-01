@@ -74,6 +74,18 @@
         new("https://www.arcgis.com/home/item.html?id=358ec1e175ea41c3bf5c68f0da11ae2b", "Dark Gray Canvas BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the GeometryEngine's " +
+        "topological relationship predicates from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "GeometryEngine service together with the SketchWidget Razor component. The page shows a 2D dark-gray canvas " +
+        "basemap centered on the Santa Monica Mountains, prepopulated with a polyline and a polygon graphic that " +
+        "the user can drag, reshape, or replace. A SketchWidget in the upper-right corner provides update and create " +
+        "tools (polyline, polygon, rectangle, circle) with snapping enabled. A Spatial relationships overlay docked " +
+        "in the lower-right lists every relationship from the SpatialRelationship enum (Contains, Crosses, Disjoint, " +
+        "EqualTo, Intersects, Overlaps, Touches, Within), each updating to true or false in real time as the user " +
+        "edits geometry, with currently true relationships rendered in bold. The sample is intended to demonstrate " +
+        "how GeometryEngine evaluates each topological predicate between two geometries.";
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

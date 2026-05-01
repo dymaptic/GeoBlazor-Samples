@@ -78,6 +78,23 @@
         new("https://www.arcgis.com/home/item.html?id=https://www.arcgis.com/home/item.html?id=7a301e848a7c4bfcaefdac4fe98a7f99", "Aggregation of Major US Cities")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the queryRelatedFeatures " +
+        "method from the ArcGIS Maps SDK for JavaScript via GeoBlazor's FeatureLayer.QueryRelatedFeatures, " +
+        "RelationshipQuery, and FeatureLayerView.Highlight APIs. " +
+        "The page shows a 2D map of the contiguous United States at zoom level 3, rendered from an ArcGIS " +
+        "Online basemap. A FeatureLayer of hexagonal aggregation cells, each representing a region containing " +
+        "major US cities, is overlaid on top. " +
+        "An ExpandWidget anchored in the top-right corner of the map can be opened to reveal a LegendWidget. " +
+        "A custom overlay in the bottom-left corner contains a 'US Cities' panel with instructions and an " +
+        "initially empty results table. When the user clicks any hexagon on the map, the page first queries " +
+        "the layer for the matching ObjectIds, highlights the clicked hexagon via the FeatureLayerView, then " +
+        "issues a RelationshipQuery to retrieve the related city records (NAME and SUM_POPULATION) and " +
+        "renders them as rows in the table. A 'Clear Query' button below the table removes the highlight and " +
+        "empties the results. " +
+        "The sample is intended to demonstrate spatial click-to-query plus related-record retrieval in a " +
+        "Blazor application without writing JavaScript.";
+
     private async Task OnClick(ClickEvent clickEvent)
     {
         await ClearMap();

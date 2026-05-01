@@ -129,6 +129,20 @@
         new("https://developers.arcgis.com/javascript/latest/display-a-custom-basemap-style/", "ArcGIS Maps SDK for JavaScript"),
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the various ways to " +
+        "configure a Basemap on a MapView or SceneView using GeoBlazor's Basemap, BasemapStyle, PortalItem, " +
+        "VectorTileLayer, and TileLayer Razor components, all built on top of the ArcGIS Maps SDK for JavaScript. " +
+        "Above the map is a vertical group of radio rows: Default Basemap (OpenStreetMap, no API key required), " +
+        "2D Map Styles (a dropdown of every BasemapStyleName enum value applied to a MapView), 3D Scene Styles " +
+        "(the same enum applied to a SceneView), From Portal Id (a curated dropdown of ArcGIS Online basemap " +
+        "items such as Streets, Satellite, Hybrid, Topographic, Gray, Dark Gray, and Streets Night), and From " +
+        "Tile Layers (a custom basemap stitched together from a World Hillshade tile layer with a Forest and " +
+        "Parks vector tile layer overlaid at 75% opacity). Each row exposes its dropdown only when selected, " +
+        "and changing the selection refreshes the underlying MapView or SceneView with the new basemap. The " +
+        "sample is intended to demonstrate how to source basemaps from multiple ArcGIS providers in a Blazor " +
+        "application without writing JavaScript.";
+
     private void SetBasemap(int val)
     {
         _basemapType = val;

@@ -54,6 +54,18 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html", "ArcGIS Maps SDK for JavaScript WebMap reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the Bookmarks and TimeSlider " +
+        "widgets from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's BookmarksWidget and Pro's " +
+        "TimeSliderWidget Razor components. The page loads a hurricanes-themed WebMap into a 2D MapView. An " +
+        "ExpandWidget pinned in the upper-right corner contains a draggable BookmarksWidget with edit and add-bookmark " +
+        "buttons, and another ExpandWidget in the upper-left holds a card-style LegendWidget. A TimeSliderWidget " +
+        "anchored at the bottom-left animates the hurricane data over time in a looping time-window mode. A Clear " +
+        "filter button overlays the bottom-right. Selecting a bookmark applies a FeatureEffect that grays out " +
+        "non-matching hurricane features so the named storm stands out, and a list below the map demonstrates " +
+        "reactive binding to the BookmarksCollection's after-add event. The sample is intended to demonstrate " +
+        "combining bookmarks, timeline animation, and reactive collection events in one map.";
+
     private async Task OnViewRendered()
     {
         if (!_handlerRegistered)

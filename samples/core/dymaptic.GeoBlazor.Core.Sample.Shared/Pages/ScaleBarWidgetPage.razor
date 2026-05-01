@@ -46,6 +46,19 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-ScaleBar.html", "ScaleBar API Reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Scale Bar widget from " +
+        "the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's ScaleBarWidget Razor component. The page " +
+        "shows a 2D topographic basemap of the contiguous United States with a scale bar overlay in the lower-left " +
+        "corner of the map. The scale bar reports the real-world distance corresponding to a fixed pixel length " +
+        "on the map, updating live as the user zooms in or out. Above the map are two dropdowns: a Unit selector " +
+        "that switches between Imperial (miles and feet), Metric (kilometers and meters), and Dual (both unit " +
+        "systems shown simultaneously); and a Style selector that switches the bar's appearance between Ruler " +
+        "(a graduated tick-marked bar) and Line (a simple line with end markers). Both Unit and Style are bound " +
+        "reactively to the widget's parameters, so changes update the bar in place without remounting the map. " +
+        "The sample is intended to demonstrate map-scale visualization and reactive widget configuration in a " +
+        "Blazor application without writing JavaScript.";
+
     private ScaleUnit _unit = ScaleUnit.Imperial;
     private ScaleBarWidgetStyle _style = ScaleBarWidgetStyle.Ruler;
 }
