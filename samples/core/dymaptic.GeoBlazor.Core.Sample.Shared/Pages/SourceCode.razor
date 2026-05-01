@@ -1,10 +1,14 @@
-﻿@page "/source-code"
+@page "/source-code"
 @page "/source-code/{PageUrl}"
 
 <PageTitle>Source Code</PageTitle>
 <h1>Source Code</h1>
 
-@if (string.IsNullOrWhiteSpace(_razorContent))
+@if (_notFound)
+{
+    <p>Source for <code>@PageUrl</code> is not embedded in the sample app.</p>
+}
+else if (string.IsNullOrWhiteSpace(_razorContent))
 {
     <p>Loading...</p>
 }

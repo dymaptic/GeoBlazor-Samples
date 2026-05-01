@@ -18,6 +18,7 @@ builder.Services.AddProxyHttpClient();
 
 builder.Services.AddGeoBlazorPro(builder.Configuration);
 builder.Services.AddScoped<LayoutService>();
+builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 builder.Configuration.AddInMemoryCollection();
 builder.Services.AddOutputCache();
 builder.Services.AddMemoryCache();

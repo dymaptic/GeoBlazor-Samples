@@ -7,10 +7,10 @@
 <a class="btn btn-secondary" @onclick="ViewRepositorySource">GitHub<br/>Repo</a>
 
 @code {
-    
+
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
-    
+
     [CascadingParameter(Name="PageRouteData")]
     public required RouteData RouteData { get; set; }
 

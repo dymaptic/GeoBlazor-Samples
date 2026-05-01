@@ -8,7 +8,6 @@
 //   -k, --api-key <key>        ArcGIS API key (required)
 //   -l, --license-key <key>    GeoBlazor license key (required)
 //   -o, --output <path>        Output path(s) for appsettings.json (required, can specify multiple)
-//   -d, --docs-url <url>       Documentation URL (default: https://docs.geoblazor.com)
 //   -b, --bypass-key <key>     API bypass key for samples (optional)
 //   -w, --wfs-servers <json>   Additional WFS server configuration JSON fragment (optional)
 //   -h, --help                 Display help message
@@ -22,7 +21,6 @@ using System.Text;
 string? arcGISApiKey = null;
 string? licenseKey = null;
 List<string> outputPaths = [];
-string docsUrl = "https://docs.geoblazor.com";
 string byPassApiKey = "";
 string wfsServers = "";
 bool help = false;
@@ -52,13 +50,6 @@ for (int i = 0; i < args.Length; i++)
             if (i + 1 < args.Length)
             {
                 outputPaths.Add(args[++i]);
-            }
-            break;
-        case "-d":
-        case "--docs-url":
-            if (i + 1 < args.Length)
-            {
-                docsUrl = args[++i];
             }
             break;
         case "-b":
@@ -93,7 +84,6 @@ if (help)
     Console.WriteLine("  -k, --api-key <key>        ArcGIS API key (required)");
     Console.WriteLine("  -l, --license-key <key>    GeoBlazor license key (required)");
     Console.WriteLine("  -o, --output <path>        Output path(s) for appsettings.json (required, can specify multiple)");
-    Console.WriteLine("  -d, --docs-url <url>       Documentation URL (default: https://docs.geoblazor.com)");
     Console.WriteLine("  -b, --bypass-key <key>     API bypass key for samples (optional)");
     Console.WriteLine("  -w, --wfs-servers <json>   Additional WFS server configuration JSON fragment (optional)");
     Console.WriteLine("  -h, --help                 Display this help message");
@@ -130,7 +120,6 @@ sb.AppendLine($"  \"ArcGISApiKey\": \"{EscapeJsonString(arcGISApiKey)}\",");
 sb.AppendLine("  \"GeoBlazor\": {");
 sb.AppendLine($"    \"LicenseKey\": \"{EscapeJsonString(licenseKey)}\"");
 sb.AppendLine("  },");
-sb.AppendLine($"  \"DocsUrl\": \"{EscapeJsonString(docsUrl)}\",");
 sb.Append($"  \"ByPassApiKey\": \"{EscapeJsonString(byPassApiKey)}\"");
 
 // Add WFS servers if provided

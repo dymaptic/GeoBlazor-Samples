@@ -18,7 +18,8 @@
     overflow-y: auto;
     height: calc(100vh - 10rem);
     margin: 0;
-    padding: 1rem 0 3.5rem 0;
+    padding: 1rem 1rem 3.5rem 1rem;
+    z-index: 50;
 }
  
 #lower-nav-container a {
@@ -129,7 +130,6 @@ nav {
         flex-direction: row;
         gap: 2rem;
         align-items: center;
-        margin-left: 282px;
 
         .navbar__menu-item {
             color: var(--text-emphasis);
@@ -262,6 +262,26 @@ background: var(--background-grey-3);
     }
 }
 
+@media only screen and (max-width: 1400px) {
+
+    nav {
+
+        /* Blazor doesn't always generate isolated css correctly for the first rule within nested css.
+           Putting this here to force the following rules to be generated correctly... */
+
+        #nested-css-fix {
+            display: none;
+        }
+
+        .navbar__menu-item-container {
+            position: absolute;
+            left: 300px;
+            gap: 2vw;
+        }
+    }
+}
+
+
 /***********************/
 /***  NAVBAR MOBILE  ***/
 /***********************/
@@ -279,9 +299,10 @@ background: var(--background-grey-3);
         position: relative;
         top: 0;
         bottom: 0;
+        left: 0;
         width: 100%;
-        height: calc(100vh - 10rem);
-        overflow-y: auto;
+        height: auto;
+        max-height: calc(100vh - 10rem);
         max-width: unset;
     }
 

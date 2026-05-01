@@ -42,7 +42,6 @@ jobs:
         run: |
           dotnet publish ./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.csproj `
           -c Release `
-          --no-restore `
           /p:RunAOT=true `
           /m `
           --output samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/published
