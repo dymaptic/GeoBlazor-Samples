@@ -136,6 +136,10 @@ article.content {
     display: none;
 }
 
+.sample-description summary::marker {
+    content: "";
+}
+
 .sample-description summary::before {
     content: "";
     width: 0;
