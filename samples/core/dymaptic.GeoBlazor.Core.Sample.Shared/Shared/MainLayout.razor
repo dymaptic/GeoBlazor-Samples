@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @implements IDisposable
 
 <PageTitle>GeoBlazor Samples</PageTitle>
@@ -23,13 +23,13 @@
     <DynamicComponent Type="NavMenuType" />
     <main>
         <div class="main-links">
-            
+
             <SourceNav />
-            @if (LayoutService.CurrentPage is not null)
+            @if (EffectiveCurrentPage is { } page)
             {
-                for (int i = 0; i < LayoutService.CurrentPage.PageLinks.Count; i++)
+                for (int i = 0; i < page.PageLinks.Count; i++)
                 {
-                    NavMenu.PageLink pageLink = LayoutService.CurrentPage.PageLinks[i];
+                    NavMenu.PageLink pageLink = page.PageLinks[i];
                     string btnType = _btnTypes[i % _btnTypes.Length];
                     <a class="btn @btnType" target="_blank" rel="noopener" href="@pageLink.Href">@pageLink.Title</a>
                 }
@@ -38,7 +38,7 @@
 
         <article class="content">
             @Body
-            @if (LayoutService.CurrentPage is { Description: { Length: > 0 } description })
+            @if (EffectiveCurrentPage is { Description: { Length: > 0 } description })
             {
                 <details class="sample-description">
                     <summary>About this sample</summary>
@@ -78,7 +78,7 @@
     public required RouteData RouteData { get; set; }
 
     protected override void OnInitialized()
-        {
+    {
         base.OnInitialized();
 
         LayoutService.OnPageChanged += StateHasChanged;
@@ -87,11 +87,13 @@
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        // Clear before the new page renders. If the new page inherits SamplePage,
-        // its OnInitialized will set CurrentPage again. Pages that don't inherit
-        // SamplePage (Home, NotFound, etc.) leave it null so the layout doesn't
-        // render stale per-page metadata.
-        LayoutService.ClearCurrentPage();
+        // URI-dependent metadata (title, og:url, JSON-LD @id) needs to update on
+        // every navigation, even before the next page's OnInitialized runs. We
+        // deliberately don't clear LayoutService.CurrentPage here — the
+        // EffectiveCurrentPage getter discards stale references whose URI no
+        // longer matches, which avoids a render-order race between the layout
+        // and the new SamplePage's initialization.
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -127,6 +129,19 @@
 
     private string CurrentSlug => NavigationManager.ToBaseRelativePath(CanonicalPageUrl);
 
+    // Only treat LayoutService.CurrentPage as live when its registered URI
+    // matches the URI the layout is currently rendering for. This guards
+    // against two cases:
+    //  - Stale CurrentPage from a previous SamplePage after navigating to a
+    //    non-SamplePage route (Home, NotFound, etc).
+    //  - Render-order races where the new SamplePage hasn't yet run its
+    //    OnInitialized but the layout has already started a render pass.
+    private SamplePage? EffectiveCurrentPage =>
+        LayoutService.CurrentPage is { } page &&
+        string.Equals(LayoutService.PageUri, NavigationManager.Uri, StringComparison.Ordinal)
+            ? page
+            : null;
+
     private string MetaTitle
     {
         get
@@ -134,7 +149,7 @@
             string slug = CurrentSlug;
             if (string.IsNullOrEmpty(slug)) return "GeoBlazor Samples";
             string title = SlugToTitle(slug);
-            return LayoutService.CurrentPage is not null
+            return EffectiveCurrentPage is not null
                 ? $"{title} — GeoBlazor Sample"
                 : title;
         }
@@ -144,7 +159,7 @@
     {
         get
         {
-            string? d = LayoutService.CurrentPage?.Description;
+            string? d = EffectiveCurrentPage?.Description;
             if (string.IsNullOrWhiteSpace(d))
             {
                 return DefaultMetaDescription;
@@ -166,7 +181,34 @@
             string pageUrl = CanonicalPageUrl;
             string siteUrl = NavigationManager.BaseUri.TrimEnd('/');
             string slug = CurrentSlug;
-            string pageName = string.IsNullOrEmpty(slug) ? "GeoBlazor Samples" : SlugToTitle(slug);
+            bool isHome = string.IsNullOrEmpty(slug);
+            string pageName = isHome ? "GeoBlazor Samples" : SlugToTitle(slug);
+            SamplePage? currentPage = EffectiveCurrentPage;
+
+            Dictionary<string, object?> webPage = new()
+            {
+                ["@type"] = "WebPage",
+                ["@id"] = $"{pageUrl}#webpage",
+                ["url"] = pageUrl,
+                ["name"] = pageName,
+                ["isPartOf"] = new Dictionary<string, object?> { ["@id"] = $"{siteUrl}/#website" },
+                ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" }
+            };
+
+            string? pageDescription = currentPage?.Description;
+            if (!string.IsNullOrWhiteSpace(pageDescription))
+            {
+                webPage["description"] = pageDescription;
+            }
+
+            // Per-page keywords: the page title's words combined with the site
+            // baseline. Gives each WebPage entry distinguishable content beyond
+            // url/name so crawlers see meaningful variation per sample.
+            if (currentPage is not null && !isHome)
+            {
+                webPage["keywords"] = BuildKeywords(pageName);
+                webPage["mainEntity"] = new Dictionary<string, object?> { ["@id"] = $"{pageUrl}#code" };
+            }
 
             List<object> graph =
             [
@@ -207,24 +249,10 @@
                     ["codeRepository"] = "https://github.com/dymaptic/GeoBlazor",
                     ["publisher"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#organization" }
                 },
-                new Dictionary<string, object?>
-                {
-                    ["@type"] = "WebPage",
-                    ["@id"] = $"{pageUrl}#webpage",
-                    ["url"] = pageUrl,
-                    ["name"] = pageName,
-                    ["isPartOf"] = new Dictionary<string, object?> { ["@id"] = $"{siteUrl}/#website" },
-                    ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" }
-                }
+                webPage
             ];
 
-            string? pageDescription = LayoutService.CurrentPage?.Description;
-            if (!string.IsNullOrWhiteSpace(pageDescription))
-            {
-                ((Dictionary<string, object?>)graph[^1])["description"] = pageDescription;
-            }
-
-            if (LayoutService.CurrentPage is not null)
+            if (currentPage is not null)
             {
                 Dictionary<string, object?> sourceCode = new()
                 {
@@ -235,7 +263,9 @@
                     ["programmingLanguage"] = new[] { "C#", "Blazor" },
                     ["codeRepository"] = "https://github.com/dymaptic/GeoBlazor-Samples",
                     ["isPartOf"] = new Dictionary<string, object?> { ["@id"] = $"{pageUrl}#webpage" },
-                    ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" }
+                    ["mainEntityOfPage"] = new Dictionary<string, object?> { ["@id"] = $"{pageUrl}#webpage" },
+                    ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" },
+                    ["keywords"] = BuildKeywords(pageName)
                 };
 
                 if (!string.IsNullOrWhiteSpace(pageDescription))
@@ -254,6 +284,13 @@
 
             return System.Text.Json.JsonSerializer.Serialize(root, JsonOptions);
         }
+    }
+
+    private static string[] BuildKeywords(string pageName)
+    {
+        string[] nameParts = pageName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string[] baseline = ["GeoBlazor", "Blazor", "ArcGIS", ".NET", "mapping"];
+        return [.. nameParts, .. baseline];
     }
 
     private static string SlugToTitle(string slug)
