@@ -254,6 +254,9 @@
 
             if (currentPage is not null)
             {
+                // SoftwareSourceCode intentionally does not duplicate the
+                // WebPage description — mainEntityOfPage cross-links to the
+                // WebPage where the canonical description lives.
                 Dictionary<string, object?> sourceCode = new()
                 {
                     ["@type"] = "SoftwareSourceCode",
@@ -267,11 +270,6 @@
                     ["about"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#software" },
                     ["keywords"] = BuildKeywords(pageName)
                 };
-
-                if (!string.IsNullOrWhiteSpace(pageDescription))
-                {
-                    sourceCode["description"] = pageDescription;
-                }
 
                 graph.Add(sourceCode);
             }
