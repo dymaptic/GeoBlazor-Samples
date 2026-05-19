@@ -29,20 +29,14 @@
             </ItemGroup>
         </Otherwise>
     </Choose>
-
-
+    
     <ItemGroup>
         <Content Update="wwwroot\images\dymaptic_logo.webp">
             <Color>Black</Color>
             <BaseSize>300,293</BaseSize>
         </Content>
     </ItemGroup>
-
-
-    <ItemGroup>
-      <AdditionalFiles Include="Shared\RenderModeSelector.razor" />
-    </ItemGroup>
-
+    
     <ItemGroup>
       <EmbeddedResource Include="Pages\**\*.razor" LogicalName="SampleSource/%(Filename)%(Extension)" />
       <EmbeddedResource Include="Pages\**\*.razor.cs" LogicalName="SampleSource/%(Filename)%(Extension)" />
