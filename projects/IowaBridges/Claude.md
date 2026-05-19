@@ -49,13 +49,13 @@ Other rules:
 
 ## Configuration
 
-In the `appsettings.Development.json` file (project root), use these exact values:
+After generating the application, prompt the user to update the `appsettings.Development.json` file with their ArcGIS API key and GeoBlazor Pro license key:
 
 ```json
 {
-  "ArcGISApiKey": "AAPTabcZYLzID0KRH7Z-vtj_VBA..qqAD6DDw4lhRqH8D9QLdfv191VSBewGFqLdNmLyUGkQHJZDBaCInGn9xpJEMOqdp1lZ5twyBkN0SQiAlcWnQ8IC_dkCx5B9u13jtZZJkmAZ33h3PHn5RCdCzsqBi2VninJL3bTRct0fxFrtgLG5rUvxQZutWTOA3brR4lbsQtiWCwG9TZGfZb_Bpdp13W7APDbBNQQ98v9LMUj6dqJ2peJzyBgrsPLf6heCNMu01OFV9efa5jGXxEhw87SmT2lsNAT1_eMcYnQuI",
+  "ArcGISApiKey": "YOUR_ARCGIS_API_KEY",
   "GeoBlazor": {
-    "LicenseKey": "eyJNYWpvclZlcnNpb24iOm51bGwsIkVtYWlsIjoidGltLnB1cmR1bUBkeW1hcHRpYy5jb20iLCJMaWNlbnNlVHlwZSI6IkZyZWUiLCJTb2Z0d2FyZSI6Ikdlb0JsYXpvckNvcmUiLCJSZWZlcnJlcnMiOltdLCJBcHBOYW1lcyI6W10sIkxpY2Vuc2VWZXJzaW9uIjoxfQ=="
+    "LicenseKey": "YOUR_GEOBLAZOR_PRO_LICENSE_KEY"
   }
 }
 ```
