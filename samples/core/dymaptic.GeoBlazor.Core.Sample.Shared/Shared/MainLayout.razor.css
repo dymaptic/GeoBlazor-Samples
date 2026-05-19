@@ -58,8 +58,10 @@ article.content {
     flex-grow: 1;
     margin: 0 auto;
     padding-bottom: 16rem;
-    height: calc(100vh - 10rem);
-    overflow-y: auto;
+    /* On narrow screens <main> handles scrolling; setting a fixed
+       height + overflow here too produced nested scrollbars. The wider
+       media queries below switch <main> to overflow:hidden and re-enable
+       inner scrolling on article. */
 }
 
 @media (min-width: 1075px) {
@@ -81,6 +83,8 @@ article.content {
         padding-right: 1.5rem;
         padding-bottom: 14rem;
         width: calc(100vw - 23rem);
+        height: calc(100vh - 10rem);
+        overflow-y: auto;
     }
 }
 
