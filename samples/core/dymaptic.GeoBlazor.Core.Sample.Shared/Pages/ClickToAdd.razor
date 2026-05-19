@@ -33,6 +33,19 @@
         new("https://www.arcgis.com/home/item.html?id=1e126e7520f9466c9ca28b8f28b5e500", "World Ocean Basemap"),
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates capturing map click events, " +
+        "drawing dynamic Graphics, and triggering custom popup actions using the OnClick event of GeoBlazor's " +
+        "MapView Razor component, which wraps the ArcGIS Maps SDK for JavaScript MapView and Graphic APIs. The " +
+        "page shows a low-zoom 2D world map drawn with the World Ocean basemap (a TileLayer loaded from an " +
+        "ArcGIS Online portal item). Clicking anywhere on the map runs a HitTest to detect existing graphics; " +
+        "if no graphic was hit, a yellow SimpleMarkerSymbol with a blue outline is added to a GraphicsLayer at " +
+        "the clicked location. The graphic carries a PopupTemplate that displays the longitude and latitude " +
+        "and exposes a custom ActionButton (Click to Add to List, decorated with the dymaptic logo); clicking " +
+        "the action appends the point's coordinates to a Points Clicked list rendered below the map. The sample " +
+        "is intended to demonstrate event-driven graphic creation and popup actions in a Blazor application " +
+        "without writing JavaScript.";
+
     private async Task OnClick(ClickEvent arg)
     {
         Point point = arg.MapPoint;

@@ -51,6 +51,18 @@
         new("https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9", "World Imagery Tile Layer")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates GroupLayer composition with " +
+        "blend modes and layer effects from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GroupLayer, " +
+        "TileLayer, and GraphicsLayer Razor components. The page shows a 2D world imagery basemap initially centered " +
+        "on France, with the rest of the world blurred and grayscaled while France itself is rendered crisp and " +
+        "highlighted with a soft drop shadow. The highlight is achieved by stacking a GroupLayer that contains a " +
+        "second copy of the imagery and a destination-in-blended GraphicsLayer holding the country polygon, then " +
+        "applying SetEffect to both the base imagery and the GroupLayer. A small instruction banner pinned to the " +
+        "upper-right of the map reads Click on a country; clicking anywhere queries a hidden countries FeatureLayer, " +
+        "moves the highlight to the clicked country, and re-applies the effects. The sample is intended to demonstrate " +
+        "how blend modes, effects, and grouped layers can produce visually rich spatial focus treatments.";
+
     private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _worldImagery?.Id && !_worldImageryPopupsDisabled)

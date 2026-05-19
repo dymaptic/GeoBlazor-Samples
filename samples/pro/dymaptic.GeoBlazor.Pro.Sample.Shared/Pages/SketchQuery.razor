@@ -48,6 +48,18 @@
         new("https://www.arcgis.com/home/item.html?id=867895a71a1840399476fc717e76bb43", "Mid-Century BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates spatial intersection queries " +
+        "driven by user sketches from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's SketchWidget " +
+        "and the MapView.QueryFeatures convenience method together with a FeatureLayer of LA County parcels. The " +
+        "page shows a 2D mid-century-themed basemap centered on the Santa Monica Mountains. A SketchWidget pinned " +
+        "in the upper-right corner lets the user draw and reshape a polygon on top of an empty GraphicsLayer. " +
+        "Whenever a sketch completes or is updated, the sample sets the polygon as the geometry on a Query whose " +
+        "spatial relationship is Intersects, runs it against the parcels FeatureLayer, and renders the matching " +
+        "parcels with a translucent blue fill symbol. Clicking any rendered parcel opens a popup showing its APN, " +
+        "use type, land value, and tax-rate city. The sample is intended to demonstrate spatial selection of an " +
+        "external feature service driven by free-form sketches.";
+
     public MapView? View { get; set; }
     public FeatureLayer? ParcelLayer { get; set; }
     public PopupTemplate? PopupTemplate { get; set; }

@@ -1,4 +1,5 @@
 ﻿@page "/locator-methods"
+@inherits SamplePage
 @inject LocationService LocationService
 <PageTitle>Locator Methods</PageTitle>
 <h1>Locator Methods</h1>
@@ -72,6 +73,24 @@ List<SuggestionResult> results = await Location.SuggestLocations(
 
 </div>
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-rest-locator.html", "Locator API Reference")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates GeoBlazor's LocationService " +
+        "which wraps the ArcGIS Maps SDK for JavaScript Locator REST module for geocoding and reverse geocoding. " +
+        "The page is a documentation-style reference of four LocationService methods, each presented with a " +
+        "syntax-highlighted C# code snippet, an action button, and a result panel: Addresses To Locations (batch " +
+        "forward-geocode a list of Address records to coordinates with confidence scores), Address To Locations " +
+        "(forward-geocode a single Address with extended OutFields), Location To Address (reverse-geocode a Point " +
+        "to a street address), and Suggest Locations (return autocomplete suggestions for partial input near a " +
+        "given Point). Clicking each button invokes the corresponding LocationService call against the ArcGIS " +
+        "World GeocodeServer and renders the returned AddressCandidate or SuggestionResult collection beneath the " +
+        "button. The sample is intended to demonstrate how to perform geocoding entirely in C# from a Blazor " +
+        "application without writing JavaScript.";
 
     List<SuggestionResult> _suggestions = [];
     AddressCandidate? _address;

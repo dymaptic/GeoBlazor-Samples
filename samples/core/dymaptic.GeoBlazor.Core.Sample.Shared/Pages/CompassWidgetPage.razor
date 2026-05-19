@@ -37,6 +37,19 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Compass.html", "Compass API Reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Compass widget " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's CompassWidget Razor component. " +
+        "The page shows an interactive 2D topographic map of the Santa Monica Mountains in southern California. " +
+        "Above the map is a row of buttons that rotate the view to preset bearings (45°, 90°, 180°, 270°) " +
+        "plus a Reset North button that returns the map to true north. A live readout displays the current " +
+        "rotation angle in degrees. The Compass widget itself appears in the upper-left corner of the map " +
+        "whenever the view is rotated away from north and disappears when aligned with north; clicking the " +
+        "compass icon snaps the view back to north. Map rotation is handled imperatively through " +
+        "MapView.SetRotation, and on-map gestures (such as right-click drag rotation or clicking the compass) " +
+        "synchronize the readout via the OnExtentChanged event. The sample is intended to demonstrate how to " +
+        "wire reactive map orientation controls in a Blazor application without writing JavaScript.";
+
     private MapView? _mapView;
     private double _rotation;
 

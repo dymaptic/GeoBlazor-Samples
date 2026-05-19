@@ -64,6 +64,19 @@
         new("https://www.arcgis.com/home/item.html?id=bfefe7a603c94fc29edca0f4a6662b44", "City of Bend 3D Scene")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the BasemapLayerList " +
+        "widget from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's BasemapLayerListWidget " +
+        "Razor component. The page shows a 3D scene of the City of Bend, Oregon loaded from a published " +
+        "WebScene PortalItem. Above the scene are two checkboxes labeled Toggle Reference Layers Visibility " +
+        "in Widget and Toggle Base Layers Visibility in Widget; both default to checked. The BasemapLayerList " +
+        "widget itself is anchored to the upper-right corner of the scene on desktop, or moved to a separate " +
+        "container above the scene on mobile so the map remains fully visible. The widget shows the basemap's " +
+        "base layers and reference layers grouped separately; expanding a group reveals each sublayer with " +
+        "its own visibility eye icon. Toggling either checkbox calls SetVisibleElements on the widget to hide " +
+        "or show the corresponding section of the list. The sample is intended to demonstrate granular control " +
+        "over basemap layer presentation in a Blazor application without writing JavaScript.";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         int? oldWidth = _windowWidth;

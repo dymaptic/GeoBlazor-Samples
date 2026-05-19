@@ -34,4 +34,15 @@
         new("https://developers.arcgis.com/javascript/latest/edit-feature-data/", "ArcGIS Maps SDK for JavaScript"),
         new("https://www.arcgis.com/home/item.html?id=979c6cc89af9449cbeb5342a439c6a76", "Light Gray Canvas BaseMap")
     ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the Editor widget from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's EditorWidget Razor component. The page " +
+        "shows a 2D light-gray canvas basemap centered on the Santa Monica Mountains in southern California, " +
+        "displaying a hosted point FeatureLayer of user-contributed places. The EditorWidget appears as a docked " +
+        "panel in the upper-right corner with two modes: Select, which lets the user click an existing point to " +
+        "edit its attributes or geometry or delete it, and New Feature, which guides the user through adding a " +
+        "new point and entering its attributes via the widget's built-in form. All edits are submitted directly " +
+        "to the underlying feature service. The sample is intended to demonstrate the simplest possible drop-in " +
+        "editing experience for a hosted FeatureLayer using a single GeoBlazor component.";
 }

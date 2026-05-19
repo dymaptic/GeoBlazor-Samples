@@ -1,4 +1,5 @@
 @page "/graphics-legend"
+@inherits SamplePage
 <PageTitle>Graphics Legend</PageTitle>
 <h1>Graphics Legend</h1>
 <p class="instructions">
@@ -39,7 +40,26 @@
                       Style="width: 200px;" />
 
 @code {
-    
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://docs.geoblazor.com/pages/widgets.html", "GeoBlazor Widgets Documentation")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the GraphicsLegendWidget " +
+        "exclusive to GeoBlazor Pro, which builds a legend from arbitrary user-supplied Graphics rather than " +
+        "from a Layer's renderer. The page shows a 2D topographic basemap of the contiguous United States with " +
+        "five city graphics (San Diego, Seattle, San Francisco, New York, Boston) drawn with four different " +
+        "symbols: red and blue PictureMarkerSymbol stickpins, a green SimpleMarkerSymbol, and a translucent " +
+        "purple SimpleMarkerSymbol used twice with the same legend label. Three GraphicsLegendWidget instances " +
+        "appear simultaneously: one inside an ExpandWidget pinned to the lower-right corner of the map (with " +
+        "GroupBySymbol and SelectGraphics enabled), one as an overlay in the lower-left of the map (with " +
+        "GroupBySymbol and ToggleGraphics enabled), and one positioned outside the map below the view. Each " +
+        "legend uses a GraphicLabelTemplate to format entries from the graphic's attributes. The sample is " +
+        "intended to demonstrate flexible legend authoring from custom graphics in a Blazor application without " +
+        "writing JavaScript.";
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

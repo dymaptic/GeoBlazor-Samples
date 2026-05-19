@@ -119,6 +119,20 @@
         new("https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3", "Topographic BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates several flavors of the " +
+        "FeatureLayer from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's FeatureLayer Razor " +
+        "component. The page shows a 2D topographic basemap zoomed in over the Santa Monica Mountains. Above " +
+        "the map sits a panel of toggles: a Show Trailheads Points Layer checkbox (loads the Trailheads point " +
+        "FeatureLayer with default symbology), a radio group with three options for the Trails polyline layer " +
+        "(default rendering, a custom orchid SimpleLineSymbol whose width is sized by the ELEV_GAIN field through " +
+        "a SizeVariable, or a dotted pink line filtered to bike-friendly trails via DefinitionExpression), a " +
+        "Show Trailheads Polygons checkbox (loads the Parks and Open Space polygon FeatureLayer), and a Show " +
+        "Client-Side Graphics Layer checkbox that creates a FeatureLayer in pure C# from inline Graphics with " +
+        "Calcite-icon TextSymbols, custom Field definitions, and a PopupTemplate that displays a photo via " +
+        "{url}. The sample is intended to demonstrate hosted, styled, filtered, and client-side feature layers " +
+        "side-by-side in a Blazor application without writing JavaScript.";
+
     private bool _showPointsLayer;
     private int _showLinesLayer;
     private bool _showPolygonLayer;

@@ -38,6 +38,20 @@
         new("https://www.arcgis.com/home/item.html?id=00f90f3f3c9141e4bea329679b257142", "Streets (with Relief) BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates place-category geocoding " +
+        "from the ArcGIS Maps SDK for JavaScript via GeoBlazor's MapView.FindPlaces method together with " +
+        "AddressQuery, SimpleMarkerSymbol, and PopupTemplate Razor components. " +
+        "The page shows a 2D map rendered with a streets-with-relief basemap, centered on Tromsø in northern " +
+        "Norway at zoom level 13. " +
+        "In the top-right corner of the map a dropdown lists place-type categories: Parks and Outdoors, " +
+        "Coffee shop, Gas station, Food, and Hotel. When the user selects a category, the page builds an " +
+        "AddressQuery against the ArcGIS World Geocoder service and calls FindPlaces, which renders matching " +
+        "locations as small black-with-white-outline markers across the visible area (up to 25 results). " +
+        "Clicking a marker opens a popup showing the place name and address pulled from the geocoder. " +
+        "The sample is intended to demonstrate category-based place search and result rendering in a Blazor " +
+        "application without writing JavaScript.";
+
     public MapView? View { get; set; }
     public SimpleMarkerSymbol? Symbol { get; set; }
     public PopupTemplate? Popup { get; set; }

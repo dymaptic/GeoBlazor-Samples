@@ -40,6 +40,19 @@
         new("https://www.ign.es/web/ign/portal", "Instituto Geográfico Nacional")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the WMTSLayer (OGC " +
+        "Web Map Tile Service) from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "WMTSLayer, WMTSSublayer, Basemap, and BasemapToggleWidget Razor components. The page shows a 2D " +
+        "map centered on Madrid, Spain at roughly 1:4.6 million scale. Two Basemaps are configured, both " +
+        "built from WMTSLayers served by Spain's Instituto Geografico Nacional in KVP service mode: the " +
+        "default basemap uses the IGNBase-gris gray-tone reference layer, and the alternate basemap uses " +
+        "the MTN topographic raster layer; each basemap references a thumbnail GetTile request so the " +
+        "toggle button can render its preview. A BasemapToggleWidget in the lower-left corner of the map " +
+        "lets the user switch between the two IGN WMTS basemaps. The sample is intended to demonstrate " +
+        "consuming OGC WMTS tile services and exposing them through a basemap toggle in a Blazor " +
+        "application without writing JavaScript.";
+
     private Basemap? _plainIGNBasemap;
     private Basemap? _orthoIGNBasemap;
 }

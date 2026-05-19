@@ -52,6 +52,21 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html", "ArcGIS Maps SDK for JavaScript")
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates bulk-rendering " +
+        "large numbers of Graphic objects from the ArcGIS Maps SDK for JavaScript via GeoBlazor's " +
+        "MapView, GraphicsLayer, and Graphic Razor components. " +
+        "The page shows a 2D map of Brazil and surrounding South America rendered with an OpenStreetMap basemap. " +
+        "Above the map is a form with a geometry-type dropdown (Point, Polyline, Polygon), numeric inputs for " +
+        "the number of graphics to generate (default 10,000) and the serialization chunk size (default 200, or " +
+        "100 in MAUI), and three buttons: 'Add Graphics To View' which calls MapView.AddGraphics in chunks, " +
+        "'Add Graphics To Layer' which calls GraphicsLayer.Add in chunks, and 'Clear Graphics' which removes " +
+        "everything. While generating, the controls disable to prevent overlapping requests. " +
+        "Each generated graphic carries a SimpleMarkerSymbol, SimpleLineSymbol, or SimpleFillSymbol along with " +
+        "a PopupTemplate so users can click any graphic to see its attributes. " +
+        "The sample is intended to demonstrate efficient batch graphic rendering in a Blazor application " +
+        "without writing JavaScript.";
+
     protected override void OnInitialized()
     {
         base.OnInitialized();

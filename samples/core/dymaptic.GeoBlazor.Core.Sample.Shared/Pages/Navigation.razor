@@ -56,6 +56,21 @@
         new("https://www.arcgis.com/home/item.html?id=826498a48bd0424f9c9315214f2165d4", "Colored Pencil BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates programmatic map " +
+        "navigation using GeoBlazor's MapView Razor component bound to .NET properties from the ArcGIS " +
+        "Maps SDK for JavaScript. " +
+        "The page shows a 2D map rendered with the 'Colored Pencil' basemap loaded from an ArcGIS Online " +
+        "portal item, initially centered near Thousand Oaks, California at zoom level 11. " +
+        "Above the map is a form with four numeric inputs for Latitude, Longitude, Zoom, and Rotation " +
+        "(degrees); changing any value re-binds the MapView's corresponding parameter and the map updates " +
+        "in real time. Note that once the user manually drags or zooms the map, those one-way bindings stop " +
+        "applying so the map does not snap back. " +
+        "Below the map is a 'Get Extent' button which calls MapView.GetExtent and renders the resulting " +
+        "Extent object as formatted JSON beneath the button. " +
+        "The sample is intended to demonstrate two-way reactive map navigation and extent retrieval in a " +
+        "Blazor application without writing JavaScript.";
+
     private void OnViewRendered()
     {
         Console.WriteLine("View Rendered");

@@ -36,6 +36,18 @@
         new("https://www.arcgis.com/home/item.html?id=55ebf90799fa4a3fa57562700a68c405", "Streets BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates a custom search source " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's SearchWidget and LocatorSearchSource " +
+        "Razor components combined with GeoBlazor Pro's ArcGISRest service. The page shows a 2D streets basemap " +
+        "initially centered on metropolitan France. A SearchWidget pinned in the upper-right corner exposes a single " +
+        "non-default source whose Placeholder reads example: 8 Boulevard du Port. As the user types, the sample " +
+        "calls a French national address API (api-adresse.data.gouv.fr) via ArcGISRest.Request to fetch suggestions " +
+        "biased to the current map center; selecting a result calls the same API with reverse geocoding and produces " +
+        "a SearchResult whose extent is computed by buffering the returned point with GeometryEngine.GeodesicBuffer. " +
+        "The sample is intended to demonstrate plugging a third-party REST geocoder into the SearchWidget through " +
+        "custom suggestion and result handlers.";
+
     private void OnExtentChanged(Extent extent)
     {
         _center = _view!.Center ?? _center;

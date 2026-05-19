@@ -185,6 +185,23 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-projection.html", "ArcGIS Maps SDK for JavaScript"),
      ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the ProjectionEngine " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's injected ProjectionEngine " +
+        "service together with SpatialReference and GeographicTransformation Razor components. " +
+        "The page shows two side-by-side 2D maps, each backed by a GeoJSONLayer of generalized world country " +
+        "polygons rendered as white shapes with purple outlines on a light blue background. " +
+        "Above the maps is a Starting Point form with longitude and latitude inputs (defaulting to a point in " +
+        "northeast Greenland). Each map has its own dropdown of Wkid options grouped by projection family — " +
+        "Equidistant (4326, 54028, 54027), Conformal (54026), Equal-area (54010, 54008), Gnomonic (102034), " +
+        "and Compromise (3857, 54016, 54042, 54050) — and a live readout of the projected X/Y coordinates of " +
+        "the starting point. A purple SimpleMarkerSymbol marks the starting point in each view. " +
+        "Below the maps is a 'Get Transformation' panel that calls ProjectionEngine.Project and " +
+        "ProjectionEngine.GetTransformation to display the starting Wkid, each GeographicTransformationStep, " +
+        "and the ending Wkid. " +
+        "The sample is intended to demonstrate spatial reference projection and transformation computation " +
+        "in a Blazor application without writing JavaScript.";
+
     private MapView? _view1;
     private MapView? _view2;
     private Graphic? _graphic1;

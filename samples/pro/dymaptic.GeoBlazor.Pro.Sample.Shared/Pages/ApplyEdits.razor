@@ -80,6 +80,18 @@
         new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/IncidentsReport/FeatureServer/0", "Incidents Report")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the FeatureLayer.applyEdits " +
+        "workflow from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's FeatureLayer, FeatureFormWidget, " +
+        "and FeatureTemplatesWidget Razor components. The page shows a 2D dark-gray basemap centered on Redlands, " +
+        "California, displaying an incident-report FeatureLayer. A side panel pinned to the right of the map lists " +
+        "available incident templates rendered by the FeatureTemplatesWidget; the user picks a template and clicks " +
+        "the map to add a new incident point with that classification, or clicks an existing incident to load it " +
+        "into the FeatureFormWidget for attribute editing. The panel also exposes Update Incident Info and Delete " +
+        "Incident buttons that submit the form and call FeatureLayer.ApplyEdits to add, update, or delete features " +
+        "against the live feature service. The sample is intended to demonstrate end-to-end CRUD editing of a hosted " +
+        "FeatureLayer with template-driven creation and form-driven attribute updates.";
+
     private async Task OnClick(ClickEvent clickEvent)
     {
         await UnselectFeature();

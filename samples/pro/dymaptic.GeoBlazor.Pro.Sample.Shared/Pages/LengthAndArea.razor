@@ -59,6 +59,19 @@
         new("https://www.arcgis.com/home/item.html?id=867895a71a1840399476fc717e76bb43", "Mid-Century BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates planar and geodesic " +
+        "measurement with the GeometryEngine from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "GeometryEngine service together with the SketchWidget and ScaleBarWidget Razor components. The page shows " +
+        "a 2D mid-century-themed basemap centered on the eastern Atlantic with a starting blue rectangle drawn over " +
+        "northwest Africa to seed the calculation. A SketchWidget in the upper-right corner provides Polyline, " +
+        "Polygon, and Rectangle drawing tools so the user can replace or modify the shape; a ScaleBarWidget sits in " +
+        "the lower-right corner. Whenever a sketch is created or updated, the sample calls GeometryEngine.GeodesicArea, " +
+        "PlanarArea, GeodesicLength, or PlanarLength as appropriate and writes the resulting square-kilometer or " +
+        "kilometer values into a measurements overlay docked at the bottom of the map. The sample is intended to " +
+        "demonstrate how planar and geodesic measurement diverge for large regions when calculated alongside live " +
+        "user input.";
+
     private async Task OnViewRendered()
     {
         if (!_firstRender)

@@ -120,6 +120,22 @@
         new("https://www.arcgis.com/home/item.html?id=716b600dbbac433faa4bec9220c76b3a", "Imagery with Labels BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates how to build and edit " +
+        "Point, Polyline, and Polygon geometries through GeoBlazor's Graphic, Point, Polyline, Polygon, and " +
+        "GraphicsLayer Razor components, all built on the ArcGIS Maps SDK for JavaScript Graphic API. Above the " +
+        "map are three collapsible Accordion sections (Draw a Point, Draw a Polyline, Draw a Polygon). The Point " +
+        "section has paired longitude and latitude number inputs and a Draw / Remove button that adds or removes " +
+        "a purple SimpleMarkerSymbol on the GraphicsLayer; editing either coordinate calls SetGeometry to move " +
+        "the point live. The Polyline section displays a table of vertex rows (longitude, latitude) plus Add Pt " +
+        "and Remove Pt buttons that grow or shrink the polyline; the Draw button toggles a white polyline graphic. " +
+        "The Polygon section works the same way for a translucent purple polygon and attaches a PopupTemplate so " +
+        "clicking the polygon shows a Congratulations message. Below the map (a 2D Imagery with Labels basemap " +
+        "centered over the Santa Monica Mountains) sits a row of Get Point Data, Get Polyline Data, and Get Polygon " +
+        "Data buttons that serialize the current Graphic geometry to JSON and render it underneath. The sample is " +
+        "intended to demonstrate two-way binding between C# state and live map geometry in a Blazor application " +
+        "without writing JavaScript.";
+
     private async Task DrawPoint()
     {
         _showPoint = !_showPoint;

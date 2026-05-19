@@ -218,6 +218,20 @@ else
         new("https://www.arcgis.com/home/item.html?id=0614ea1f9dd043e9ba157b9c20d3c538", "Paris 3D Web Scene")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the reactiveUtils module " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's AddReactiveWatcher, " +
+        "AddReactiveListener, and AddReactiveWaiter methods on SceneView and widget components. " +
+        "The page loads a 3D web scene of Paris into a SceneView with a HomeWidget in the upper-left and a " +
+        "LayerListWidget in the upper-right. Above the scene are three collapsible Accordion sections. " +
+        "The Add Watchers section provides checkboxes to subscribe to popup-open state, the view's center " +
+        "point, the view's extent, the visible-layer list, and a one-time zoom watcher; each prints its " +
+        "current value live as the user pans, zooms, or toggles layers. The Add Listeners section attaches " +
+        "click and drag event listeners that serialize and display each event payload as JSON. The Add " +
+        "Waiters section uses a waiter to detect when the HomeWidget becomes visible and a second checkbox " +
+        "to toggle that visibility. The sample is intended to demonstrate how to bind C# callbacks to " +
+        "reactive ArcGIS view and widget properties in a Blazor application without writing JavaScript.";
+
     private async Task OnViewRendered()
     {
         await _homeWidget!.SetVisibility(false);

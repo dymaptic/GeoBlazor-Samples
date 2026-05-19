@@ -62,6 +62,18 @@
         new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Places_of_Worship_India/FeatureServer/0", "Places of Worship")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates auto-generated cluster " +
+        "popups and labels from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's PopupTemplateGenerator " +
+        "and LabelGenerator services together with the FeatureReductionCluster Razor component. The page shows a 2D " +
+        "topographic map centered on India displaying a Places of Worship FeatureLayer aggregated into clusters. " +
+        "An ExpandWidget pinned in the upper-right corner contains a Filter by religion dropdown (All, Hindu, " +
+        "Christian, Muslim, Buddhist, Sikh, Jain), an Enable/Disable Clustering button, and a LegendWidget. Selecting " +
+        "a religion sets a feature filter on the layer view to show only matching places, and toggling clustering " +
+        "swaps the layer between aggregated and raw rendering. Clicking a cluster opens a generated popup describing " +
+        "the dominant attribute mix; clicking a single feature shows its name, religion, and denomination. The sample " +
+        "is intended to demonstrate generator-driven cluster styling with attribute filtering and popups.";
+
     [Inject]
     public required PopupTemplateGenerator PopupTemplateGenerator { get; set; }
     [Inject]

@@ -48,6 +48,21 @@
         new("https://www.arcgis.com/home/item.html?id=7e2b9be8a9c94e45b7f87857d8d168d6", "Streets (Night) BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates client-side filtering " +
+        "of a FeatureLayer through its DefinitionExpression from the ArcGIS Maps SDK for JavaScript " +
+        "exposed through GeoBlazor's FeatureLayer Razor component. The page shows a 2D night-themed " +
+        "streets basemap of the Santa Monica Mountains in Los Angeles County overlaid with a parcels " +
+        "FeatureLayer. In the upper-right corner of the map a CustomOverlay hosts a styled dropdown " +
+        "select. The dropdown's first option is the placeholder Choose a SQL where clause which maps to " +
+        "a no-results expression (1=0); the remaining options are five SQL where-clause snippets such as " +
+        "Roll_LandValue < 200000, TaxRateArea = 10853, Bedrooms5 > 0, UseType = 'Residential', and " +
+        "Roll_RealEstateExemp > 0. Selecting a clause binds it to the FeatureLayer's DefinitionExpression " +
+        "so only matching parcels are drawn on the map, and clicking any visible parcel opens a popup " +
+        "with its UseType, description, and land value. The sample is intended to demonstrate filtering " +
+        "a hosted FeatureLayer with a server-evaluated SQL expression in a Blazor application without " +
+        "writing JavaScript.";
+
     private readonly string[] _parcelLayerSql =
     {
         "Choose a SQL where clause...", "Roll_LandValue < 200000", "TaxRateArea = 10853", "Bedrooms5 > 0",
