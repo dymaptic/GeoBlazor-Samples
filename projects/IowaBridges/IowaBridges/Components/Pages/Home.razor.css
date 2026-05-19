@@ -1,0 +1,87 @@
+.app-shell {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-page);
+    color: var(--text-primary);
+}
+
+.app-header {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-elevated);
+    z-index: 10;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.title-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+}
+
+.header-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.header-meta .meta-label {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+}
+
+.header-meta .meta-value {
+    color: var(--text-mono);
+}
+
+.header-meta .meta-divider {
+    color: var(--border-strong);
+    margin: 0 0.25rem;
+}
+
+.app-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.map-pane {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+}
+
+::deep .bridge-map {
+    height: 100%;
+    width: 100%;
+    display: block;
+}
+
+::deep .esri-view {
+    background: var(--bg-page);
+}

@@ -44,7 +44,7 @@
                           Url="@_dataUrl"
                           Title="USGS Earthquakes"
                           Copyright="USGS Earthquakes"
-                          OrderBy="@(new[] { new OrderByInfo("mag", SortOrder.Descending) })">
+                          OrderBy="@([new OrderByInfo("mag", SortOrder.Descending)])">
                 <PopupTemplate Title="Earthquake Info"
                                StringContent="<b>Magnitude:</b> {mag}<br><b>Type:</b> {type}<br><b>Location:</b> {place}<br><b>Time:</b> {time}" />
                 <SimpleRenderer>
