@@ -47,6 +47,18 @@
                           OrderBy="@([new OrderByInfo("mag", SortOrder.Descending)])">
                 <PopupTemplate Title="Earthquake Info"
                                StringContent="<b>Magnitude:</b> {mag}<br><b>Type:</b> {type}<br><b>Location:</b> {place}<br><b>Time:</b> {time}" />
+                <SimpleRenderer>
+                    <SimpleMarkerSymbol Color="@(new MapColor(226, 119, 40))"
+                                        Size="6"
+                                        Style="SimpleMarkerSymbolStyle.Circle">
+                        <Outline Color="@(new MapColor(255, 255, 255))" Width="0.5" />
+                    </SimpleMarkerSymbol>
+                    <SizeVariable Field="mag"
+                                  MinDataValue="2.5"
+                                  MaxDataValue="8"
+                                  MinSize="4"
+                                  MaxSize="40" />
+                </SimpleRenderer>
             </GeoJSONLayer>
         }
     </Map>
