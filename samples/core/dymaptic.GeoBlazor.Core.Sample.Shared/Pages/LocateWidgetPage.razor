@@ -48,5 +48,18 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Locate.html", "Locate API Reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Locate widget from " +
+        "the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's LocateWidget Razor component. The page " +
+        "shows a 2D navigation basemap of the contiguous United States. A round Locate button (a circle with " +
+        "crosshairs) sits in the upper-left corner of the map. Clicking it triggers the browser's Geolocation API " +
+        "and animates the map to the user's current position; most browsers will prompt with an Allow permissions " +
+        "dialog the first time the button is clicked. Above the map is a Scale dropdown with four preset values — " +
+        "1,500 (street level), 5,000 (neighborhood), 25,000 (city), and 100,000 (region) — that controls how far " +
+        "the view zooms in when locating. Changing the scale updates the LocateWidget's Scale parameter " +
+        "reactively without remounting the map, so subsequent clicks of the Locate button fly in at the new zoom. " +
+        "The sample is intended to demonstrate browser geolocation integration and reactive widget parameter " +
+        "binding in a Blazor application without writing JavaScript.";
+
     private int _scale = 1500;
 }

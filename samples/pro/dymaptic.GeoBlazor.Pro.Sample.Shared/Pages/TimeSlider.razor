@@ -36,6 +36,18 @@
         new("https://www.arcgis.com/home/item.html?id=f9e9283b9c9741d09aad633f68758bf6", "National Weather Service Precipitation Forecast")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the TimeSlider widget from " +
+        "the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's TimeSliderWidget Razor component. The " +
+        "page shows a 2D navigation basemap centered on the contiguous United States, with a National Weather " +
+        "Service precipitation forecast FeatureLayer added programmatically when the view first renders. A " +
+        "TimeSliderWidget docked at the bottom of the map is configured for a moving time-window mode with looping " +
+        "playback, and uses a TickConfig with four percent-based tick stops at 12.5, 37.5, 62.5, and 87.5 percent " +
+        "of the slider's range. After the layer view is created, the sample reads the layer's TimeInfo and calls " +
+        "SetFullTimeExtent and SetStops with the layer's natural interval so the slider snaps to forecast steps. " +
+        "Pressing play animates the precipitation through time. The sample is intended to demonstrate driving " +
+        "temporal animation of a time-aware FeatureLayer.";
+
     private async Task OnViewRendered()
     {
         if (!_mapView!.Map!.Layers.Contains(_featureLayer!))

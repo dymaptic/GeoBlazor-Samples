@@ -79,6 +79,18 @@
         new("https://demo.ldproxy.net/vineyards", "Vineyards in Rhineland-Palatinate, Germany")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the OGC API Features " +
+        "client from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's OGCFeatureLayer Razor component, " +
+        "along with grouped ExpandWidgets. The page shows a 2D light-gray basemap zoomed into the Rhineland-Palatinate " +
+        "wine region of Germany, displaying vineyard polygons fetched from a public OGC API Features endpoint and " +
+        "rendered with a green Mangrove WebStyleSymbol and italic name labels at large scales. Two ExpandWidgets in " +
+        "the upper-left corner share a group so only one is open at a time: a question-mark button reveals a Wineries " +
+        "info panel, and a filter button reveals an area filter with three clickable rows (greater than 100 hectares, " +
+        "50-100 hectares, less than 50 hectares). Selecting a filter applies a FeatureEffect that fades out non-matching " +
+        "vineyards, and clicking a vineyard opens a docked popup describing its name, area, village, region, and " +
+        "subregion. The sample is intended to demonstrate consuming an OGC service with custom labeling and filtering.";
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

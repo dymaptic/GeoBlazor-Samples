@@ -42,6 +42,18 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-BasemapToggle.html", "Basemap Toggle API Reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Basemap Toggle widget " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's BasemapToggleWidget Razor component. " +
+        "The page shows a 2D map of Los Angeles, California. A small toggle button appears in the lower-right " +
+        "corner of the map showing a thumbnail of the alternate basemap; clicking it swaps the map's primary " +
+        "basemap with the alternate, then back again on the next click. Above the map is a dropdown for choosing " +
+        "the active pair of basemap styles: Satellite paired with Colored Pencil, Topographic paired with Dark Gray, " +
+        "Navigation paired with Imagery, or OpenStreetMap Standard paired with Terrain. Selecting a different " +
+        "pair causes the map to remount with the new primary basemap and configures the toggle to swap to the " +
+        "matching secondary style. The sample is intended to demonstrate one-click basemap switching and " +
+        "configurable basemap pairs in a Blazor application without writing JavaScript.";
+
     private int _pairIndex;
 
     private readonly (BasemapStyleName Primary, BasemapStyleName Secondary)[] _pairs =

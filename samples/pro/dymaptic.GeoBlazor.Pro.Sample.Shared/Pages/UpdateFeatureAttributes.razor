@@ -76,6 +76,19 @@
         new("https://www.arcgis.com/home/item.html?id=449887ea7d60429fbf6f0c67881f2758", "Building Damage Assessments")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates a grouped FeatureForm-driven " +
+        "attribute update workflow from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's FormTemplate, " +
+        "GroupElement, FieldElement, and Pro's FeatureFormWidget Razor components. The page shows a 2D topographic " +
+        "basemap zoomed in on a Naperville, Illinois neighborhood used for damage assessments. Initially an info " +
+        "card pinned in the upper-right corner instructs the user to select a feature; clicking a building point " +
+        "highlights the feature and replaces the card with a scrollable form panel containing four collapsible " +
+        "groups (Inspector Information, Contact Information, Insurance coverage, Insurance type information) " +
+        "rendered sequentially by the FeatureFormWidget, plus an Update Assessment button. Submitting the form " +
+        "writes the changed attribute values back through FeatureLayer.ApplyEdits. A FormTemplateExpressionInfo " +
+        "named alwaysHidden hides the inspector email field. The sample is intended to demonstrate complex grouped " +
+        "form editing tied to a single feature.";
+
     private async Task OnClick(ClickEvent clickEvent)
     {
         if (_highlightHandle is not null)

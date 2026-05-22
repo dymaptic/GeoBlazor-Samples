@@ -68,6 +68,21 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html#attributes", "Graphic Attributes Reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates a 3D SceneView, " +
+        "GraphicsLayer, and Graphic attributes binding from the ArcGIS Maps SDK for JavaScript exposed " +
+        "through GeoBlazor's SceneView, Graphic, and PopupTemplate Razor components. The page shows an " +
+        "imagery basemap with world elevation centered over the Santa Monica Mountains tilted at 76 " +
+        "degrees, with a purple polygon graphic declared in Razor markup and a smaller green point graphic " +
+        "added imperatively from C# after the view renders. Above the scene is a form group with text, " +
+        "date, time, number, and checkbox inputs that edit the polygon's Name, Description, Date, Number, " +
+        "and Boolean attributes; the inputs are disabled until the scene finishes rendering. A second " +
+        "panel below shows the C# record type used as the popup's Object attribute. Clicking either " +
+        "graphic opens a popup whose title and body are bound to the live attribute values, and changing " +
+        "any input updates both graphics' attributes through AttributesDictionary.AddOrUpdate. The sample " +
+        "is intended to demonstrate two-way binding between Blazor inputs and ArcGIS Graphic attributes " +
+        "in a 3D scene without writing JavaScript.";
+
     private async Task OnViewRendered()
     {
         if (!_rendered)

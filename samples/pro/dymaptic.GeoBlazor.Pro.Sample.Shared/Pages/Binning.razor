@@ -80,6 +80,17 @@
         new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/NYC_motor_crashes/FeatureServer/0", "NYC Motor Crashes")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the FeatureReductionBinning " +
+        "feature-reduction technique from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "FeatureReductionBinning Razor component. The page shows a 2D topographic map centered on New York City " +
+        "displaying 2020 motor-vehicle crash points aggregated into geohash bins; each bin is colored on a graduated " +
+        "ramp from light blue to dark red based on the number of crashes inside it and labeled with the crash count. " +
+        "A HomeWidget sits in the upper-left corner along with an ExpandWidget that, when opened, reveals a Toggle " +
+        "Binning button and a LegendWidget. Clicking Toggle Binning swaps the layer between the binned aggregate " +
+        "view and the raw crash points by calling FeatureLayer.SetFeatureReduction. The sample is intended to " +
+        "demonstrate how dense point data can be summarized into fixed bins for high-level pattern visualization.";
+
     private async Task ToggleBinning()
     {
         _binning = !_binning;

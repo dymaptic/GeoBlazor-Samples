@@ -30,6 +30,18 @@
         new("https://www.arcgis.com/home/item.html?id=d582a9e953c44c09bb998c7d9b66f8d4", "Charted Territory BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates real-time graphic updates " +
+        "using GeoBlazor's Graphic and GraphicsLayer Razor components on top of the ArcGIS Maps SDK for JavaScript " +
+        "Graphic API. The page shows a 2D Charted Territory basemap centered over central India at street-level " +
+        "zoom, with ten point graphics randomly scattered around the center on a GraphicsLayer. Above the map " +
+        "are three buttons: Start / Stop (toggles a tight loop that randomly nudges each graphic's geometry on " +
+        "every iteration via SetGeometry, simulating live tracking, and changes its label to Stop while moving), " +
+        "Reset (clears the layer and regenerates the ten randomly placed points), and Center (calls MapView.GoTo " +
+        "to fit the view to the current Graphics collection). The Start button is disabled until the view " +
+        "finishes initial render via OnViewRendered. The sample is intended to demonstrate high-frequency graphic " +
+        "geometry updates and view framing in a Blazor application without writing JavaScript.";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

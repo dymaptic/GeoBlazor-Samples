@@ -29,6 +29,17 @@
         new("https://www.arcgis.com/home/item.html?id=433b5f7f524a4d1ebf3a9f8e1bd49ee0", "311 Calls")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates pie-chart cluster rendering " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's PieChartGenerator service together " +
+        "with the FeatureReductionCluster, PieChartRenderer, and PieChartMediaInfo Razor components. The page loads " +
+        "a WebMap of 311 service-call points and aggregates them into clusters; each cluster is drawn as a donut-shaped " +
+        "pie chart whose slices show the proportion of call categories within that cluster, with cluster_count labels " +
+        "in the center. An ExpandWidget in the upper-left corner opens a LegendWidget that explains the slice colors, " +
+        "and a HomeWidget allows the user to reset the view. Clicking a cluster opens a popup containing the " +
+        "cluster total, an embedded pie-chart media element, and a fields list. The sample is intended to demonstrate " +
+        "how to generate rich category-aware cluster visualizations and popups using GeoBlazor Pro's helper services.";
+
     [Inject]
     public required LabelGenerator LabelGenerator { get; set; }
 

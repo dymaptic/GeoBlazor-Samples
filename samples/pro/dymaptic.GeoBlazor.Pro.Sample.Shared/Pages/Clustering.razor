@@ -87,6 +87,18 @@
         new("https://www.arcgis.com/home/item.html?id=2b93b06dc0dc4e809d3c8db5cb96ba69", "World Countries Generalized Layer")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates point clustering on a " +
+        "GeoJSONLayer from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GeoJSONLayer and " +
+        "FeatureReductionCluster Razor components. The page shows a polar 2D map (Alaska Polar Stereographic " +
+        "projection) of the world rendered in dark gray, displaying earthquake points from the USGS feed for the " +
+        "last month. Nearby earthquakes are reduced into light-blue circular clusters labeled with the count of " +
+        "events they represent, and individual quakes appear as triangles when zoomed in. A HomeWidget pinned in " +
+        "the upper-left corner returns to the starting extent, and an adjacent ExpandWidget opens a panel with an " +
+        "Enable/Disable Clustering toggle button and a LegendWidget. Clicking the toggle calls SetFeatureReduction " +
+        "to switch between aggregated clusters and raw points. The sample is intended to demonstrate spatial " +
+        "clustering of streamed GeoJSON data with custom cluster sizing and labeling.";
+
     private async Task ToggleClustering()
     {
         _cluster = !_cluster;

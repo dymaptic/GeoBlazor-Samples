@@ -82,6 +82,18 @@
         new("https://www.arcgis.com/home/item.html?id=d72ab790752142bd9dfb190c79d6582b", "National Park Service Establishments")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates spatial selection by drawn " +
+        "geometry from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's SketchWidget and " +
+        "FeatureTableWidget Razor components combined with FeatureLayerView feature effects. The page shows a 2D " +
+        "Albers Equal Area projection map of the contiguous United States with a custom cream-and-gray basemap and " +
+        "a National Park Service points-of-interest FeatureLayer overlaid. A SketchWidget pinned in the upper-left " +
+        "corner provides a rectangle drawing tool, and a Clear Selection button sits beside it. Below the map is a " +
+        "FeatureTableWidget that lists every NPS feature. When the user drags a rectangle on the map, the sample " +
+        "queries the layer view for intersecting features, blurs and dims the rest using a FeatureEffect, highlights " +
+        "the selected rows in the table, and synchronizes hovering rows with on-map highlights. The sample is " +
+        "intended to demonstrate coordinated spatial-and-tabular selection driven by user-drawn geometry.";
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

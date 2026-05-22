@@ -35,6 +35,17 @@
         new("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/WV03_Kilauea_20180519_NearInfrared/MapServer", "Near Infrared Tile Layer")
     ];
 
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the Swipe widget from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's SwipeWidget Razor component. The page shows " +
+        "a 2D topographic basemap centered on the 2018 Kilauea eruption on the Big Island of Hawaii, with two " +
+        "WorldView-3 TileLayers stacked on top: a near-infrared image and a shortwave-infrared image of the same " +
+        "scene. The SwipeWidget overlays a draggable vertical divider initially positioned at 30 percent of the " +
+        "view width; the near-infrared image fills the leading (left) side and the shortwave-infrared image fills " +
+        "the trailing (right) side. Dragging the handle reveals more of one layer or the other. An ExpandWidget in " +
+        "the upper-right corner contains a LayerListWidget for toggling layer visibility. The sample is intended " +
+        "to demonstrate side-by-side comparison of two coregistered raster layers with an interactive swipe handle.";
+
     private TileLayer? _shortWaveLayer;
     private TileLayer? _nearInfraredLayer;
 }

@@ -43,6 +43,21 @@
         new("https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b", "Navigation BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates running an ad-hoc " +
+        "SQL Query against a FeatureLayer from the ArcGIS Maps SDK for JavaScript exposed through " +
+        "GeoBlazor's MapView.QueryFeatures method, plus the FeatureLayer, SimpleFillSymbol, and " +
+        "PopupTemplate Razor components. The page shows a 2D navigation basemap centered on the Santa " +
+        "Monica Mountains in Los Angeles County. In the upper-right corner of the map a CustomOverlay " +
+        "hosts a dropdown of preset SQL where-clauses targeting the LA County parcels feature service, " +
+        "such as UseType = 'Residential', UseType = 'Government', UseType = 'Irrigated Farm', several " +
+        "TaxRateArea filters, and Roll_LandValue thresholds. Selecting a clause invokes QueryFeatures " +
+        "with that where expression, the current view extent, and a fixed set of OutFields, then renders " +
+        "the matching parcels as graphics styled with a semi-transparent blue SimpleFillSymbol and binds " +
+        "a PopupTemplate showing the parcel's APN, UseType, tax rate city, and land value. The sample is " +
+        "intended to demonstrate executing parameterized SQL queries against a hosted FeatureLayer and " +
+        "drawing the results in a Blazor application without writing JavaScript.";
+
     public MapView? View { get; set; }
     public FeatureLayer? QueryFeatureLayer { get; set; }
     public SimpleFillSymbol? Symbol { get; set; }

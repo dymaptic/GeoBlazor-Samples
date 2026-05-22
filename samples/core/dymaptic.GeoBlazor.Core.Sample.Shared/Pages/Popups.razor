@@ -82,6 +82,21 @@
         new("https://www.arcgis.com/home/item.html?id=f35ef07c9ed24020aadd65c8a65d3754", "Modern Antique BaseMap")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates three styles of feature " +
+        "popups from the ArcGIS Maps SDK for JavaScript via GeoBlazor's PopupTemplate, MediaPopupContent, " +
+        "ColumnChartMediaInfo, and FieldsPopupContent Razor components. " +
+        "The page shows a 2D map of the Santa Monica Mountains rendered with the Modern Antique basemap. " +
+        "Above the map is a radio group with three options: 'Display Attributes Popup' (renders a Trailheads " +
+        "FeatureLayer with a popup showing trail name, city, cross street, parking, and elevation as " +
+        "formatted HTML), 'Display Elevation Chart Popup' (renders a Trails FeatureLayer with a popup that " +
+        "embeds a column chart visualizing min and max elevation), and 'Display Table Popup' (renders a " +
+        "Parks and Open Space FeatureLayer with a popup that lists agency, type, access, and acreage as a " +
+        "table of editable FieldInfo entries). Selecting a radio option swaps the active FeatureLayer and " +
+        "closes any open popup; clicking a feature on the map then opens the corresponding popup style. " +
+        "The sample is intended to demonstrate text, chart, and tabular popup formats in a Blazor application " +
+        "without writing JavaScript.";
+
     private MapView? MapView { get; set; }
 
     private int _showPopupOption;

@@ -1,0 +1,74 @@
+@page "/"
+@rendermode InteractiveServer
+@using IowaBridges.Components.Bridges
+
+<PageTitle>Iowa Bridges - NBI Condition Explorer</PageTitle>
+
+<div class="app-shell">
+    <header class="app-header">
+        <div class="header-title">
+            <span class="title-eyebrow mono">FHWA / NTAD</span>
+            <h1>Iowa Bridge Inventory</h1>
+        </div>
+        <div class="header-meta mono">
+            <span class="meta-label">data</span>
+            <span class="meta-value">National Bridge Inventory</span>
+            <span class="meta-divider">|</span>
+            <span class="meta-label">state</span>
+            <span class="meta-value">19 / Iowa</span>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <BridgeSidebar Filter="_filter"
+                       AtRiskCount="_atRiskCount"
+                       OnFilterChanged="OnFilterChanged"
+                       OnFindAtRisk="OnFindAtRisk"
+                       OnClearAtRisk="OnClearAtRisk"
+                       OnCountySelected="OnCountySelected" />
+
+        <main class="map-pane">
+            <BridgeMap @ref="_bridgeMap"
+                       Filter="_filter"
+                       OnAtRiskCount="OnAtRiskCountChanged"
+                       MapStyle="height: 100%; width: 100%;" />
+        </main>
+    </div>
+</div>
+
+@code {
+    private readonly BridgeFilterState _filter = new();
+    private BridgeMap? _bridgeMap;
+    private int? _atRiskCount;
+
+    private async Task OnFilterChanged()
+    {
+        if (_bridgeMap is null) return;
+        await _bridgeMap.ApplyFilter();
+    }
+
+    private async Task OnFindAtRisk()
+    {
+        if (_bridgeMap is null) return;
+        await _bridgeMap.FindAtRiskAsync();
+    }
+
+    private async Task OnClearAtRisk()
+    {
+        if (_bridgeMap is null) return;
+        await _bridgeMap.ClearAtRiskAsync();
+        _atRiskCount = null;
+    }
+
+    private async Task OnCountySelected(string? countyFips)
+    {
+        if (_bridgeMap is null) return;
+        await _bridgeMap.ZoomToCountyAsync(countyFips);
+    }
+
+    private void OnAtRiskCountChanged(int count)
+    {
+        _atRiskCount = count;
+        StateHasChanged();
+    }
+}

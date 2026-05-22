@@ -17,6 +17,21 @@ public partial class UniqueValueRenderers
         new("https://arcgis.com/home/item.html?id=7afec250e02845868db89c83949a672f", "OpenStreetMap Highways for North America")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the UniqueValueRenderer " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's UniqueValueRenderer, " +
+        "UniqueValueInfo, SimpleLineSymbol, and OrderByInfo Razor and C# components. The page shows a 2D " +
+        "basemap centered over the Houston, Texas area at a city-block scale, overlaid with an " +
+        "OpenStreetMap North America highways FeatureLayer. The renderer color-codes each road by its " +
+        "highway attribute, mapping motorways and trunks to thick pink and orange lines, primary roads " +
+        "to yellow, secondary to green, tertiary to blue, residential and unclassified streets to neutral " +
+        "grays, and pedestrian, footway, path, track, busway, raceway, construction, and proposed roads " +
+        "to a variety of dashed earth-tone styles; features are drawn in descending maxspeed order. Below " +
+        "the map a Toggle Legend button shows or hides a LegendWidget in the lower-left corner that lists " +
+        "every road type and its symbol under the heading Route Type. The sample is intended to " +
+        "demonstrate building a rich categorical renderer against a hosted FeatureLayer in a Blazor " +
+        "application without writing JavaScript.";
+
     private static readonly Dictionary<string, SimpleLineSymbol> roadTypes = new()
     {
         // Major highways - wide, bold colors

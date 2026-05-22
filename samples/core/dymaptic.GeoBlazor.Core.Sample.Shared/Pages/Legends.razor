@@ -109,6 +109,19 @@
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Legend.html", "Legend API Reference")
     ];
 
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the Legend widget " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's LegendWidget Razor component. " +
+        "The page shows a 2D topographic map of the Santa Monica Mountains in southern California. " +
+        "Above the map is a column of three checkboxes labeled 'Show Census Layer', 'Show Trails Layer', " +
+        "and 'Show Parks Layer'. Toggling each checkbox adds or removes a corresponding FeatureLayer: " +
+        "census block points sized by population using a SizeVariable, trails colored green for bike-allowed " +
+        "and red dashed for no-bikes via a UniqueValueRenderer, and parks rendered as semi-transparent green " +
+        "polygons via a SimpleRenderer. The LegendWidget itself is anchored in the lower-right corner of the " +
+        "map and automatically updates to describe each layer's symbols and renderer categories as layers are " +
+        "added or removed. The sample is intended to demonstrate how a Legend automatically reflects layer " +
+        "symbology in a Blazor application without writing JavaScript.";
+
     private bool _showCensusLayer;
     private bool _showTrailsLayer;
     private bool _showParksLayer;
