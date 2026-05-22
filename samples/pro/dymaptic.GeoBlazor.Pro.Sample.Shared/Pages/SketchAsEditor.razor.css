@@ -1,0 +1,36 @@
+.editor-toolbar {
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+}
+
+.editor-toolbar .btn {
+    min-width: 18rem;
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.editor-toolbar .btn.btn-accent {
+    box-shadow: 0 0 0 0.2rem var(--geoblazor-accent-hover);
+    animation: editor-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes editor-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0.15rem var(--geoblazor-accent-hover);
+    }
+    50% {
+        box-shadow: 0 0 0 0.35rem var(--geoblazor-accent-hover);
+    }
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--box-radius);
+    background-color: var(--background-grey-2);
+    color: var(--text);
+    border: 1px solid var(--background-grey-3);
+    font-size: 1rem;
+    line-height: 1.2;
+}

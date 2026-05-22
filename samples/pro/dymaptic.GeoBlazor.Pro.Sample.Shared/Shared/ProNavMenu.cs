@@ -25,6 +25,7 @@ public class ProNavMenu : NavMenu
         new("popup-edit", "PRO: Popup Edit Data", "oi-pencil", null, true, Categories.Widgets),
         new("update-feature-attributes", "PRO: Update Attributes", "oi-brush", null, true, Categories.Interaction),
         new("apply-edits", "PRO: Apply Edits", "oi-check", null, true, Categories.Interaction),
+        new("sketch-as-editor", "PRO: Sketch as Editor", null, "sketchEditor.svg", true, Categories.Interaction),
         new("spatial-relationships", "PRO Relationships", "oi-link-intact", null, true, Categories.Queries),
         new("demographic-data", "PRO: Demographics", "oi-people", null, true, Categories.Location),
         new("length-and-area", "PRO: Length & Area", "oi-graph", null, true, Categories.Location),

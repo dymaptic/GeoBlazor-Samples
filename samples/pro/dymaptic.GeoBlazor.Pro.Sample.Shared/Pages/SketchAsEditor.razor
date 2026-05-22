@@ -1,0 +1,236 @@
+@page "/sketch-as-editor"
+@inherits SamplePage
+
+<PageTitle>Sketch Widget as Custom Editor</PageTitle>
+<h1>Sketch Widget as Custom Editor</h1>
+
+<p class="instructions">
+    This sample drives a <code>SketchWidget</code> programmatically from C# while presenting a fully custom UI.
+    The widget's container is parked in a hidden <code>&lt;div&gt;</code> via <code>ContainerId</code>, so its
+    built-in toolbar stays out of view and the only controls you see are the custom <strong>Move</strong>,
+    <strong>Save</strong>, and <strong>Cancel</strong> buttons below.
+</p>
+<p class="instructions">
+    Click the <strong>Move</strong> button to arm the editor, then click any polygon on the map to grab it.
+    Drag the highlighted feature to a new location, then click <strong>Save</strong> to commit the move — the new
+    geometry is sent through <code>FeatureLayer.ApplyEdits</code>, the staging graphic is cleared, and the layer
+    is refreshed so the feature redraws at its updated position. Click <strong>Cancel</strong> (or press
+    <strong>Esc</strong>) at any point to abandon the edit. If you click somewhere that isn't a feature, the
+    editor disarms and reports "No feature at that point" — click <strong>Move</strong> again to retry.
+</p>
+
+<div class="spaced-row editor-toolbar">
+    @if (_editing)
+    {
+        <button type="button" class="btn btn-primary" @onclick="SaveMove">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelMove">Cancel</button>
+    }
+    else
+    {
+        <button type="button"
+                class="btn @(_moveArmed ? "btn-accent" : "btn-primary")"
+                @onclick="ArmMove"
+                disabled="@_moveArmed">
+            @(_moveArmed ? "Click a feature… (Esc to cancel)" : "Move")
+        </button>
+    }
+    @if (_statusMessage is not null)
+    {
+        <span class="status-pill" role="status">@_statusMessage</span>
+    }
+</div>
+
+@* Host element for the SketchWidget; hidden because this sample drives the widget programmatically. *@
+<div id="sketch-as-editor-host" style="display:none;"></div>
+
+<MapView @ref="_mapView"
+         Class="map-view"
+         OnClick="OnMapClick"
+         OnKeyDown="OnKeyDown"
+         Zoom="4">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation"/>
+        </Basemap>
+        <FeatureLayer @ref="_featureLayer"
+                      Source="@(_featureSource)"
+                      GeometryType="FeatureGeometryType.Polygon"
+                      ObjectIdField="OBJECTID"
+                      Title="Editable Polygons"/>
+        <GraphicsLayer @ref="_sketchLayer"/>
+    </Map>
+    <SketchWidget @ref="_sketchWidget"
+                  GraphicsLayer="@_sketchLayer"
+                  OnUpdate="HandleSketchEvent"
+                  ContainerId="sketch-as-editor-host"/>
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/references/core/widgets/Sketch/", "ArcGIS Maps SDK for JavaScript")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates how to repurpose the " +
+        "SketchWidget as a programmatic move editor while presenting a fully custom UI. The widget's container is " +
+        "parked in a hidden div via ContainerId, so its built-in toolbar stays out of the view and the only " +
+        "controls the user sees are the custom Move, Save, and Cancel buttons. A custom Move button arms an " +
+        "OnMapClick handler that hit-tests the target FeatureLayer, stages the picked Graphic into a companion " +
+        "GraphicsLayer, and hands it to SketchWidget.Update with a SketchToolUpdateOptions configured for " +
+        "SketchTool.Move. A Save button calls SketchWidget.Complete() to finish the active update; the resulting " +
+        "SketchUpdateEvent is forwarded to FeatureLayer.ApplyEdits to persist the new geometry in the client-side " +
+        "in-memory source layer, then the staging graphic is removed and the feature layer is refreshed so it redraws " +
+        "at the updated location. The same ApplyEdits call works equally well against a hosted FeatureService — simply " +
+        "replace the in-memory Source with a Url pointing to your service and the rest of the pattern is unchanged. " +
+        "A Cancel button (and the Esc key) route through OnKeyDown to SketchWidget.Cancel(), " +
+        "which fires a Complete event with Aborted=true so ApplyEdits is skipped. The pattern is useful any time " +
+        "you need SketchViewModel's interactive move semantics inside a custom workflow with your own editor UI.";
+
+    private void ArmMove()
+    {
+        _moveArmed = true;
+        _statusMessage = null;
+    }
+
+    private async Task OnMapClick(ClickEvent evt)
+    {
+        if (!_moveArmed || _mapView is null || _featureLayer is null || _sketchWidget is null || _sketchLayer is null)
+        {
+            return;
+        }
+
+        // One-shot: disarm immediately so a missed click doesn't stay sticky.
+        _moveArmed = false;
+
+        HitTestOptions options = new()
+        {
+            IncludeByGeoBlazorId = [_featureLayer.Id]
+        };
+        HitTestResult hit = await _mapView.HitTest(evt, options);
+        Graphic? graphic = hit.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
+
+        if (graphic is null)
+        {
+            _statusMessage = "No feature at that point.";
+            return;
+        }
+
+        // Stage the picked graphic into the Sketch's own GraphicsLayer so the widget can operate on it.
+        await _sketchLayer.Add(graphic);
+        await _sketchWidget.Update([graphic], _updateOptions);
+        _editing = true;
+        _statusMessage = null;
+    }
+
+    private async Task SaveMove()
+    {
+        if (_sketchWidget is null) return;
+        // Tell SketchViewModel to finish the active update; HandleSketchEvent will run ApplyEdits.
+        await _sketchWidget.Complete();
+    }
+
+    private async Task CancelMove()
+    {
+        if (_sketchWidget is null) return;
+        await _sketchWidget.Cancel();
+    }
+
+    private async Task OnKeyDown(KeyDownEvent evt)
+    {
+        if (evt.Key != "Escape" || _sketchWidget is null) return;
+
+        if (_editing)
+        {
+            await _sketchWidget.Cancel();
+        }
+        else if (_moveArmed)
+        {
+            _moveArmed = false;
+            _statusMessage = "Cancelled.";
+        }
+    }
+
+    private async Task HandleSketchEvent(SketchUpdateEvent evt)
+    {
+        if (evt.State != SketchEventState.Complete)
+        {
+            return;
+        }
+
+        _editing = false;
+        Graphic? moved = evt.Graphics?.FirstOrDefault();
+
+        // Cancel() fires Complete with Aborted=true; skip ApplyEdits but still clean up the staging graphic.
+        if (evt.Aborted == true)
+        {
+            if (moved is not null)
+            {
+                await _sketchLayer!.Remove(moved);
+            }
+            _statusMessage = "Cancelled.";
+            StateHasChanged();
+            return;
+        }
+
+        if (moved is null || _featureLayer is null) return;
+
+        try
+        {
+            FeatureEditsResult result = await _featureLayer.ApplyEdits(new FeatureEdits
+            {
+                UpdateFeatures = [moved]
+            });
+
+            FeatureEditResult? firstError = result.UpdateFeatureResults
+                .FirstOrDefault(r => r.Error is not null);
+
+            if (firstError is not null)
+            {
+                _statusMessage = $"Edit rejected: {firstError.Error!.Message}";
+            }
+            else
+            {
+                _statusMessage = moved.Attributes.ContainsKey("OBJECTID")
+                    ? $"Moved OBJECTID {moved.Attributes["OBJECTID"]}."
+                    : "Moved.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _statusMessage = $"ApplyEdits failed: {ex.Message}";
+        }
+        finally
+        {
+            // Clean up the staging graphic and reload the feature layer so it shows the new geometry.
+            await _sketchLayer!.Remove(moved);
+            await _featureLayer.Refresh();
+            StateHasChanged();
+        }
+    }
+
+    // Configure the SketchWidget to perform a Move update; all other options use their defaults.
+    private readonly SketchToolUpdateOptions _updateOptions =
+        new(SketchTool.Move, null, null, null,
+            null, null, null,
+            null!, null!);
+
+    private MapView? _mapView;
+    private FeatureLayer? _featureLayer;
+    private GraphicsLayer? _sketchLayer;
+    private SketchWidget? _sketchWidget;
+
+    private bool _moveArmed;
+    private bool _editing;
+    private string? _statusMessage;
+
+    private readonly List<Graphic> _featureSource =
+    [
+        new(new Polygon([
+            new MapPath(new MapPoint(0, 0),
+                new MapPoint(10, 0), new MapPoint(10, 10),
+                new MapPoint(0, 10), new MapPoint(0, 0))
+        ]), attributes: new AttributesDictionary(new Dictionary<string, object?> { ["OBJECTID"] = 1 }))
+    ];
+}
