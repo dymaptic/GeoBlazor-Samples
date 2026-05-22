@@ -80,9 +80,11 @@
         "OnMapClick handler that hit-tests the target FeatureLayer, stages the picked Graphic into a companion " +
         "GraphicsLayer, and hands it to SketchWidget.Update with a SketchToolUpdateOptions configured for " +
         "SketchTool.Move. A Save button calls SketchWidget.Complete() to finish the active update; the resulting " +
-        "SketchUpdateEvent is forwarded to FeatureLayer.ApplyEdits to persist the new geometry on the feature " +
-        "service, then the staging graphic is removed and the feature layer is refreshed so it redraws at the " +
-        "updated location. A Cancel button (and the Esc key) route through OnKeyDown to SketchWidget.Cancel(), " +
+        "SketchUpdateEvent is forwarded to FeatureLayer.ApplyEdits to persist the new geometry in the client-side " +
+        "in-memory source layer, then the staging graphic is removed and the feature layer is refreshed so it redraws " +
+        "at the updated location. The same ApplyEdits call works equally well against a hosted FeatureService — simply " +
+        "replace the in-memory Source with a Url pointing to your service and the rest of the pattern is unchanged. " +
+        "A Cancel button (and the Esc key) route through OnKeyDown to SketchWidget.Cancel(), " +
         "which fires a Complete event with Aborted=true so ApplyEdits is skipped. The pattern is useful any time " +
         "you need SketchViewModel's interactive move semantics inside a custom workflow with your own editor UI.";
 
