@@ -94,7 +94,7 @@
 
     private async Task OnMapClick(ClickEvent evt)
     {
-        if (!_moveArmed || _mapView is null || _featureLayer is null || _sketchWidget is null)
+        if (!_moveArmed || _mapView is null || _featureLayer is null || _sketchWidget is null || _sketchLayer is null)
         {
             return;
         }
@@ -116,7 +116,7 @@
         }
 
         // Stage the picked graphic into the Sketch's own GraphicsLayer so the widget can operate on it.
-        await _sketchLayer!.Add(graphic);
+        await _sketchLayer.Add(graphic);
         await _sketchWidget.Update([graphic], _updateOptions);
         _editing = true;
         _statusMessage = null;
