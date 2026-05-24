@@ -1,6 +1,5 @@
 @page "/highlight-features-by-geometry"
 @inherits SamplePage
-@using dymaptic.GeoBlazor.Core.Interfaces
 
 @inject GeometryEngine GeometryEngine
 
@@ -53,8 +52,8 @@
             <SelectionTools LassoSelection="false" RectangleSelection="false" />
         </SketchWidgetVisibleElements>
     </SketchWidget>
-    <CustomOverlay Position="OverlayPosition.TopLeft">
-        <button class="esri-button" style="width: auto; margin: 5px;" @onclick="ClearSelection">
+    <CustomOverlay Position="OverlayPosition.BottomLeft">
+        <button class="esri-button btn" style="width: auto; margin: 5px;" @onclick="ClearSelection">
             Clear Selection
         </button>
     </CustomOverlay>
@@ -62,12 +61,13 @@
     @if (_npsLayer is not null)
     {
         <FeatureTableWidget @ref="_featureTable"
+                            style="height: 400px;"
                             ContainerId="feature-table-container"
                             OnCellClick="OnCellClick"
                             OnCellPointerOver="OnCellPointerOver"
                             OnCellPointerOut="OnCellPointerOut"
                             FilterBySelectionEnabled="false"
-                            Layers="@([ _npsLayer ])" />
+                            Layer="@_npsLayer" />
     }
 </MapView>
 
@@ -120,14 +120,14 @@
 
     private async Task OnCellClick()
     {
-        IReadOnlyList<IFeatureTableWidgetActiveFilters>? activeFilters = await _featureTable!.GetActiveFilters();
+        IReadOnlyList<IFeatureTableActiveFilter>? activeFilters = await _featureTable!.GetActiveFilters();
         
         if (activeFilters is null || activeFilters.Count == 0)
         {
             return;
         }
 
-        foreach (IFeatureTableWidgetActiveFilters filter in activeFilters)
+        foreach (IFeatureTableActiveFilter filter in activeFilters)
         {
             // Check if the active filter is a selection filter and if the selections have changed
             if (filter is SelectionFilter { ObjectIds: not null } selectionFilter

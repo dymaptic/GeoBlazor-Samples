@@ -63,7 +63,7 @@
         
         TextSymbol labelSymbol = (TextSymbol)labelScheme.LabelingInfo.First().Symbol!;
 #pragma warning disable BL0005
-        labelSymbol.Color = labelSymbol.HaloColor!.Clone();
+        labelSymbol.Color = labelSymbol.HaloColor is null ? null : labelSymbol.HaloColor with { };
         labelSymbol.HaloColor = new MapColor(255, 255, 255, 0.3);
         labelSymbol.Font!.Size = 10;
 

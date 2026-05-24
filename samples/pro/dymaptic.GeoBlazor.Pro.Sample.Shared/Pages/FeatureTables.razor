@@ -1,0 +1,177 @@
+@page "/feature-tables"
+@inherits SamplePage
+
+<PageTitle>Feature Table</PageTitle>
+<h1>Feature Table</h1>
+
+<p class="instructions">
+    A FeatureTableWidget is bound to a WebMap's Region layer. Use the layer dropdown
+    to switch between layers, and use the "Go to feature" action column to zoom the
+    map to a row's feature. As you pan or zoom, the table filters its rows to features
+    within the current map extent. Each layer's relationship columns are relabeled to
+    "Related to: {prefix}" based on the relationship name, and when a related table is
+    expanded a reactive waiter installs a matching zoom-to-feature action column on it.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+
+<MapView @ref="_mapView"
+         Class="map-view"
+         OnLayerViewCreate="OnLayerViewCreate"
+         OnExtentChanged="OnExtentChanged">
+    <WebMap @ref="_webMap">
+        <PortalItem PortalItemId="332e5d145bec4c2c860d65f7ca494b23" />
+    </WebMap>
+    @if (_regionLayer is not null)
+    {
+        <FeatureTableWidget @ref="_featureTable"
+                            style="height: 400px;"
+                            ContainerId="feature-table-container"
+                            Layer="@_regionLayer"
+                            ShowLayerDropdown="true"
+                            RelatedRecordsEnabled="true"
+                            HideSelectionColumn="true">
+            <ActionColumnConfig Label="Go to feature"
+                                Icon="zoom-to-object"
+                                Callback="GoToFeature" />
+        </FeatureTableWidget>
+    }
+</MapView>
+
+<div id="feature-table-container"></div>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/feature-table/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=332e5d145bec4c2c860d65f7ca494b23", "FeatureTable WebMap")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the FeatureTable widget from " +
+        "the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's FeatureTableWidget Razor component. The " +
+        "page loads a WebMap by portal item id that contains several feature layers, including a Region layer. As " +
+        "each layer view is created, the sample walks the layer's AttributeTableTemplate elements and, for every " +
+        "RelationshipElement, looks up the matching Relationship by id and rewrites the element's Label to \"Related " +
+        "to: {prefix}\" (the substring of the relationship name before the first underscore). It then captures the " +
+        "Region layer as the active table layer alongside the WebMap's other layers in the FeatureTableWidget's " +
+        "dropdown. The table is configured with related records enabled, the selection column hidden, and a custom " +
+        "ActionColumnConfig labeled \"Go to feature\" that uses the zoom-to-object Calcite icon and a callback that " +
+        "calls MapView.GoTo on the row's feature. As the user pans or zooms, OnExtentChanged updates the widget's " +
+        "FilterGeometry so the visible rows track the map extent. A reactive waiter mirrors the JS sample's " +
+        "reactiveUtils.when on table.relatedTable: when a related table appears, the sample hides its column menus " +
+        "and selection column and installs a matching zoom-to-feature action column. The sample is intended to " +
+        "demonstrate driving a docked attribute table from a WebMap with layer switching, extent-based filtering, " +
+        "related-records configuration with relabeled relationship columns, and a feature-aware row action.";
+
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.Layer is not FeatureLayer featureLayer)
+        {
+            return;
+        }
+
+        await ProcessLayerRelationships(featureLayer);
+
+        if (_regionLayer is null && featureLayer.Title == "Region" && _webMap is not null)
+        {
+            _regionLayer = featureLayer;
+            StateHasChanged();
+        }
+    }
+
+    private static async Task ProcessLayerRelationships(FeatureLayer layer)
+    {
+        if (layer.Relationships is not { Count: > 0 } relationships)
+        {
+            return;
+        }
+
+        if (layer.AttributeTableTemplate is not AttributeTableTemplate template)
+        {
+            return;
+        }
+
+        IReadOnlyList<AttributeTableTemplateElement>? elements = await template.GetElements();
+        if (elements is null)
+        {
+            return;
+        }
+
+        foreach (object element in elements)
+        {
+            if (element is not RelationshipElement { RelationshipId: { } relationshipId } relationshipElement)
+            {
+                continue;
+            }
+
+            Relationship? match = relationships.FirstOrDefault(r => r.RelationshipId == relationshipId);
+            if (match?.Name is { } name)
+            {
+                string prefix = name.Split('_')[0];
+                await relationshipElement.SetLabel($"Related to: {prefix}");
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_waiterRegistered || _featureTable is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _featureTable.AddReactiveWaiter(
+                "featureTableWidget.relatedTable",
+                OnRelatedTableReady);
+            _waiterRegistered = true;
+        }
+        catch
+        {
+            // widget JS not yet ready; retry on the next render
+        }
+    }
+
+    private async Task OnRelatedTableReady()
+    {
+        if (_featureTable?.RelatedTable is not { } relatedTable)
+        {
+            return;
+        }
+
+        await relatedTable.SetHideColumnMenus(true);
+        await relatedTable.SetHideSelectionColumn(true);
+        await relatedTable.SetActionColumnConfig(new ActionColumnConfig(
+            label: $"Go to {relatedTable.Layer?.Title ?? "related"} feature",
+            icon: "zoom-to-object",
+            callback: GoToFeature));
+    }
+
+    private async Task OnExtentChanged(Extent extent)
+    {
+        if (_featureTable is not null)
+        {
+            await _featureTable.SetFilterGeometry(extent);
+        }
+    }
+
+    private async Task GoToFeature(object parameters)
+    {
+        if (parameters is ActionColumnCallbackParams { Feature: { } feature } && _mapView is not null)
+        {
+            await _mapView.GoTo([feature]);
+        }
+    }
+
+    private MapView? _mapView;
+    private WebMap? _webMap;
+    private FeatureTableWidget? _featureTable;
+    private FeatureLayer? _regionLayer;
+    private bool _waiterRegistered;
+}
