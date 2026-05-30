@@ -25,6 +25,12 @@ summary a {
     margin-left: -2rem;
 }
 
+calcite-input-date-picker, 
+calcite-input-time-picker,
+calcite-combobox {
+    --calcite-color-foreground-1: var(--background-grey-2);
+}
+
 :root {
     --calcite-input-background-color: var(--background-grey-2);
     --calcite-input-actions-background-color: var(--background-grey-2);

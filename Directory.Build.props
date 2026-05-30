@@ -19,6 +19,7 @@
     <PropertyGroup Condition="'$(UseProjectReferences)' == 'true'">
         <CoreProjectPath Condition="'$(CoreProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor.Core</CoreProjectPath>
         <ProProjectPath Condition="'$(ProProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor.Pro\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
+        <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
     </PropertyGroup>
 
 </Project>

@@ -21,7 +21,11 @@ window.setInterceptors = (core) => {
     core.esriConfig.request.interceptors.push({
         before: (params) => {
             let service = getCaseInsensitive(params.requestOptions.query, 'service');
-            if (service === 'wfs' || service === 'wms') {
+            if (service === 'wfs' || service === 'wms'
+                || (!params.url.includes('arcgis')
+                    && params.requestOptions?.headers
+                    && Object.hasOwn(params.requestOptions.headers, 'accept')
+                    && params.requestOptions.headers['accept'].includes('json'))) {
                 let path = params.url.replace('https://', '');
                 params.url = `https://${location.host}/proxy?url=${path}`;
             }
