@@ -1,4 +1,7 @@
 <Project>
+    <!-- Import parent Directory.Build.props if it exists (e.g., when running as submodule of Pro) -->
+    <Import Project="../Directory.Build.props" 
+            Condition="Exists('$(MSBuildThisFileDirectory)../Directory.Build.props') AND '$(UseProjectReferences)' == 'true'"/>
 
     <PropertyGroup>
         <Nullable>enable</Nullable>
@@ -16,6 +19,13 @@
     <PropertyGroup Condition="'$(UseProjectReferences)' == 'true'">
         <CoreProjectPath Condition="'$(CoreProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor.Core</CoreProjectPath>
         <ProProjectPath Condition="'$(ProProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor.Pro\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
+        <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
+        <!-- Source-ref sample hosts: drop the ESBuild-emitted Core/Pro JS from the MapStaticAssets endpoint manifest so
+             they aren't fingerprinted/listed; UseStaticFiles still serves them at their _content path. Matched against
+             the served route, which for RCL assets is _content/{PackageId}/... . Retain the framework default. -->
+        <StaticWebAssetEndpointExclusionPattern>
+            $(StaticWebAssetEndpointExclusionPattern);_content/dymaptic.GeoBlazor.Core/js/**;_content/dymaptic.GeoBlazor.Pro/js/**
+        </StaticWebAssetEndpointExclusionPattern>
     </PropertyGroup>
 
 </Project>

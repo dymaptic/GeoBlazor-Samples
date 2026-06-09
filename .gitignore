@@ -22,8 +22,6 @@ appsettings.Production.json
 *.sln.docstates
 *.lscache
 
-
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

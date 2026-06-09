@@ -42,11 +42,12 @@ export function drawWithGeodesicBufferOnPointer(core, cursorSymbol, bufferSymbol
                         // ignore if they weren't created yet
                     }
                 }
-                cursorSymbolGraphic = new core.Graphic({
+                cursorSymbolGraphic = core.buildJsGraphic({
                     geometry: cursorPoint,
                     symbol: cursorSymbol
                 });
-                bufferSymbolGraphic = new core.Graphic({
+
+                bufferSymbolGraphic = core.buildJsGraphic({
                     geometry: buffer,
                     symbol: bufferSymbol
                 });

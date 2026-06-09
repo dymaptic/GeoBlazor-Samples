@@ -25,32 +25,10 @@ summary a {
     margin-left: -2rem;
 }
 
-.esri-widget.esri-feature-templates {
-    background: unset;
-}
-
-.esri-widget.esri-feature-form {
-    background-color: var(--background-grey-1);
-}
-
-.esri-widget:not(.esri-feature-table) {
-    color: var(--text-emphasis);
-    background-color: var(--background-grey-2);
-}
-
-.esri-button {
-    color: unset;
-    background-color: unset;
-    border: 0.125rem solid transparent;
-}
-
-.esri-grid {
-    background-color: #fff;
-}
-
-.esri-button:hover {
-    color: unset;
-    border-color: var(--geoblazor-accent-hover);
+calcite-input-date-picker, 
+calcite-input-time-picker,
+calcite-combobox {
+    --calcite-color-foreground-1: var(--background-grey-2);
 }
 
 :root {
@@ -62,8 +40,28 @@ summary a {
     --calcite-input-actions-icon-color: var(--text-emphasis);
     --calcite-label-text-color: var(--text-emphasis);
     --calcite-list-label-text-color: var(--text-emphasis);
+    --calcite-color-text-1: var(--text);
     --calcite-color-text-2: var(--text-emphasis);
-    --calcite-color-foreground-2: var(--background-grey-3);
+    --calcite-color-background: var(--background-grey-1);
+    --calcite-action-background-color: var(--background-grey-2);
+    --calcite-action-background-color-hover: var(--background-grey-3);
+    --calcite-color-foreground-1: var(--text);
+    --calcite-color-foreground-2: var(--text-emphasis);
+    --calcite-ui-foreground-1: var(--text);
+    --calcite-ui-brand: var(--geoblazor-primary);
+    --calcite-ui-background: var(--background-grey-1);
+    --calcite-ui-background-1: var(--background-grey-1);
+    --calcite-ui-background-2: var(--background-grey-2);
+    --calcite-ui-foreground-2: var(--text-emphasis);
+    --calcite-ui-text-1: var(--text);
+    --calcite-ui-text-2: var(--text-emphasis);
+    --calcite-panel-background-color: var(--background-grey-2);
+    --calcite-panel-header-background: var(--background-grey-2);
+    --calcite-panel-heading-text-color: var(--text-emphasis);
+    --vaadin-grid-cell-background: var(--background-grey-1);
+    --calcite-color-transparent: var(--background-grey-1);
+    --calcite-color-transparent-hover: var(--background-grey-3);
+    --bs-body-bg: var(--background-grey-1);
 }
 
 .nav-link {

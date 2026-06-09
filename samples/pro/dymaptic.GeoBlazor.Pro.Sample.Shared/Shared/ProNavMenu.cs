@@ -45,7 +45,7 @@ public class ProNavMenu : NavMenu
         new("custom-popup-content", "PRO: Custom Popup Content", null, "customPopup.svg", true, Categories.Widgets),
         new("geojson-styles", "PRO: GeoJSON Styles", "oi-brush", null, true, Categories.Visualization),
         new("web-style-symbols", "PRO: Web Style Symbols", "oi-brush", null, true, Categories.Visualization),
-        // not ready, bug in Column.Width JsonConverter
-        // new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true, Categories.Interaction)
+        new("highlight-features-by-geometry", "PRO: Highlight by Geometry", "oi-target", null, true, Categories.Interaction),
+        new("feature-tables", "PRO: Feature Tables", null, "featureTable.svg", true, Categories.Widgets)
     ];
 }

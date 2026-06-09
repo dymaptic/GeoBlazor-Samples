@@ -1,0 +1,5 @@
+<Project>
+    <!-- Import parent Directory.Build.targets if it exists (e.g., when running as submodule of Pro) -->
+    <Import Project="../Directory.Build.targets" 
+            Condition="Exists('$(MSBuildThisFileDirectory)../Directory.Build.targets') AND '$(UseProjectReferences)' == 'true'"/>
+</Project>
