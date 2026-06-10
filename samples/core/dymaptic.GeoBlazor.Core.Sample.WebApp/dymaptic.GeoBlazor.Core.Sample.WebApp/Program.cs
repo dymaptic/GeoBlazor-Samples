@@ -13,6 +13,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddGeoBlazor(builder.Configuration);
 builder.Services.AddScoped<HttpClient>();
+builder.Services.AddScoped<LayoutService>();
+builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 builder.Configuration.AddInMemoryCollection();
 
 WebApplication app = builder.Build();

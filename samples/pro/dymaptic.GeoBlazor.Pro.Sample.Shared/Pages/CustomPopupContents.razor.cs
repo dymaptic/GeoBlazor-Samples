@@ -8,6 +8,7 @@ using dymaptic.GeoBlazor.Core.Events;
 using dymaptic.GeoBlazor.Core.Model;
 using dymaptic.GeoBlazor.Core.Options;
 using dymaptic.GeoBlazor.Core.Results;
+using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Pro.Events;
 using dymaptic.GeoBlazor.Pro.Components.Logic;
 using Microsoft.AspNetCore.Components;
@@ -18,6 +19,24 @@ namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;
 
 public partial class CustomContents: ComponentBase
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/popup-customcontent/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/OverlaySchools/FeatureServer/0", "Private and Public US Schools")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates custom PopupTemplate content " +
+        "elements from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's CustomPopupContent, PopupWidget, " +
+        "and SearchWidget Razor components. The page shows a 2D topographic map of the contiguous United States " +
+        "displaying a FeatureLayer of public and private schools by state. Clicking a state opens a docked popup " +
+        "(pinned to the right edge) containing three custom content blocks: a GeoBlazor logo image at the top, an " +
+        "embedded SearchWidget that lets the user search by state name within the layer, and a dynamically generated " +
+        "HTML block that runs a server-side QueryService statistics query against a private-schools service and " +
+        "summarizes elementary, secondary, and combined private-school counts and average enrollment for the " +
+        "selected state. The sample is intended to demonstrate how to compose images, widgets, and code-driven HTML " +
+        "inside a single popup using the CreatorFunction extension point.";
+
     [Inject]
     public required QueryService QueryService { get; set; }
     

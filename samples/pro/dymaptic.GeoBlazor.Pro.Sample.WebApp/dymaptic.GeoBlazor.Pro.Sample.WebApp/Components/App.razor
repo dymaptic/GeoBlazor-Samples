@@ -7,8 +7,7 @@
         <base href="/" />
         <link rel="icon" href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/favicon.ico"]" />
         <link rel="stylesheet" href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/bootstrap/bootstrap.min.css"]" />
-        <link href="@Assets[$"_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/site.css"]" rel="stylesheet" />
-		<link href="@Assets[$"_content/dymaptic.GeoBlazor.Pro.Sample.Shared/css/site.css"]" rel="stylesheet" />
+        <link href="@Assets["_content/dymaptic.GeoBlazor.Core.Sample.Shared/css/site.css"]" rel="stylesheet" />
         <link href="@Assets["dymaptic.GeoBlazor.Pro.Sample.WebApp.styles.css"]" rel="stylesheet" />
         <link href="@Assets["_content/dymaptic.GeoBlazor.Core"]" />
         <link href="@Assets["_content/dymaptic.GeoBlazor.Pro"]" />
@@ -64,7 +63,7 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        _configuredRenderMode = Configuration.GetValue<string?>("RenderMode") switch
+        _configuredRenderMode = Configuration.GetValue("RenderMode", "Auto") switch
         {
             "Server" => InteractiveServer,
             "WebAssembly" => InteractiveWebAssembly,

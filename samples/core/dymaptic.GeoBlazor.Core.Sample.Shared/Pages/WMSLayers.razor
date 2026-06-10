@@ -1,4 +1,5 @@
 @page "/wmslayers"
+@inherits SamplePage
 
 
 <h3>WMS Layers</h3>
@@ -13,10 +14,6 @@
 @* *  (c) Great Lakes Bathymetry by NGDC (http://www.ngdc.noaa.gov/mgg/greatlakes/) *@
 @* *  (c) SRTM 30m by NASA EOSDIS Land Processes Distributed Active Archive Center (LP DAAC, https://lpdaac.usgs.gov/) *@
 @* *********************************/ *@
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-wms/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://ows.terrestris.de/osm/service">OpenStreetMap WMS</a>
-</div>
 <p class="instructions">
     This sample shows how to access a WMS Service using WMSLayer and add it to a scene as a Basemap. The WMSLayer is used to create layers based on OGC Web Map Services (WMS).
 </p>
@@ -31,3 +28,24 @@
         </Basemap>
     </Map>
 </SceneView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wms/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://ows.terrestris.de/osm/service", "OpenStreetMap WMS")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the WMSLayer (OGC " +
+        "Web Map Service) from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's WMSLayer " +
+        "and WMSSublayer Razor components. The page shows a 3D SceneView centered on Southeast Asia " +
+        "(roughly Bangladesh and Myanmar) viewed from a high altitude with a Web Mercator spatial " +
+        "reference. Instead of an ArcGIS basemap style, the basemap is built from a single WMSLayer " +
+        "pointing at the terrestris OpenStreetMap WMS service with the TOPO-WMS sublayer activated, " +
+        "rendering a topographic OpenStreetMap-derived globe. There are no controls or widgets above " +
+        "the map; the user can pan, zoom, and tilt to explore the globe. The sample is intended to " +
+        "demonstrate using an OGC WMS service as a 3D scene basemap in a Blazor application without " +
+        "writing JavaScript.";
+}

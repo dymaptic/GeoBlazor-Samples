@@ -1,22 +1,4 @@
-﻿.form-group {
-    padding: 0.5rem 0;
-    flex-direction: column;
-    display: flex;
-}
-
-::deep form {
-    align-items: start;
-}
-
-::deep .radio-container {
-    width: 525px;
-}
-
-::deep input[type=radio] {
-    visibility: hidden;
-}
-
-.footer {
+﻿.footer {
     height: 60px;
     width: 100%;
 }

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:platform.uno)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh api *)",
+      "Bash(nuget list *)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:aka.platform.uno)",
+      "WebFetch(domain:timpurdum.dev)",
+      "WebFetch(domain:geoblazor.com)"
+    ]
+  }
+}

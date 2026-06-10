@@ -1,14 +1,7 @@
 @page "/web-style-symbols"
+@inherits SamplePage
 <h3>WebStyleSymbols</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank"
-       href="https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-2d/">ArcGIS API for
-        JavaScript</a>
-    <a class="btn btn-primary" target="_blank"
-       href="http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/LA_County_Points_of_Interest/FeatureServer/0">LA
-        County Points of Interest</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to style feature layer with 2D Web Style Symbols using UniqueValueRenderer in 2D
     MapView.
@@ -84,6 +77,25 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/webstylesymbol-2d/", "ArcGIS Maps SDK for JavaScript"),
+        new("http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/LA_County_Points_of_Interest/FeatureServer/0", "LA County Points of Interest")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates 2D Web Style Symbols rendered " +
+        "through a UniqueValueRenderer from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "WebStyleSymbol, UniqueValueRenderer, SizeVariable, and BookmarksWidget Razor components. The page shows " +
+        "a 2D light-gray basemap centered on the San Fernando Valley area of Los Angeles County, displaying a " +
+        "points-of-interest FeatureLayer. A UniqueValueRenderer with a long Arcade ValueExpression maps each " +
+        "feature's category to one of twenty-five WebStyleSymbol icons (post-office, atm, place-of-worship, park, " +
+        "school, hospital, fire-station, library, museum, airport, and so on) drawn from the Esri 2D Point Symbols " +
+        "style. A SizeVariable scales the icons from 20 down to 1 pixel based on view scale. A BookmarksWidget in " +
+        "the upper-left corner offers Angeles National Forest, Crystal Lake, and San Fernando bookmarks, and a " +
+        "LegendWidget in the lower-right shows the category-to-icon mapping. The sample is intended to demonstrate " +
+        "category-based pictographic styling at multiple scales.";
 
     private UniqueValueInfo[] RendererInfos => _symbolCats.Select(symCat =>
             new UniqueValueInfo(symCat,

@@ -1,0 +1,190 @@
+@namespace IowaBridges.Components.Bridges
+@implements IAsyncDisposable
+
+<MapView @ref="_mapView"
+         Longitude="-93.6"
+         Latitude="42.0"
+         Zoom="7"
+         Style="@MapStyle"
+         Class="bridge-map"
+         OnViewInitialized="OnViewInitialized">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+        </Basemap>
+
+        <FeatureLayer @ref="_bridgeLayer"
+                      Url="https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Bridge_Inventory/FeatureServer/0"
+                      DefinitionExpression="@_currentDefinitionExpression"
+                      Renderer="@_renderer"
+                      OutFields="@(["OBJECTID", "STRUCTURE_NUMBER_008", "STATE_CODE_001", "COUNTY_CODE_003", "DECK_COND_058", "SUPERSTRUCTURE_COND_059", "SUBSTRUCTURE_COND_060", "YEAR_BUILT_027", "ADT_029", "OPERATING_RATING_064", "DATE_OF_INSPECT_090"])">
+            <PopupTemplate Title="Bridge {STRUCTURE_NUMBER_008}">
+                <FieldsPopupContent Title="NBI attributes">
+                    <FieldInfo FieldName="YEAR_BUILT_027" Label="Year built" />
+                    <FieldInfo FieldName="DECK_COND_058" Label="Deck condition" />
+                    <FieldInfo FieldName="SUPERSTRUCTURE_COND_059" Label="Superstructure condition" />
+                    <FieldInfo FieldName="SUBSTRUCTURE_COND_060" Label="Substructure condition" />
+                    <FieldInfo FieldName="ADT_029" Label="Average daily traffic" />
+                    <FieldInfo FieldName="OPERATING_RATING_064" Label="Operating rating" />
+                    <FieldInfo FieldName="DATE_OF_INSPECT_090" Label="Inspection date (YYYYMM)" />
+                </FieldsPopupContent>
+            </PopupTemplate>
+        </FeatureLayer>
+
+        <GraphicsLayer @ref="_atRiskLayer" Title="Bridges at risk" />
+    </Map>
+
+    <LayerListWidget Position="OverlayPosition.TopRight" />
+    <LegendWidget Position="OverlayPosition.BottomRight" />
+    <SearchWidget Position="OverlayPosition.TopLeft" />
+    <ScaleBarWidget Position="OverlayPosition.BottomLeft" Unit="ScaleUnit.Dual" />
+</MapView>
+
+@code {
+    [Parameter] public BridgeFilterState Filter { get; set; } = new();
+    [Parameter] public EventCallback<int> OnAtRiskCount { get; set; }
+    [Parameter] public string MapStyle { get; set; } = "height: 100%; width: 100%;";
+
+    private MapView? _mapView;
+    private FeatureLayer? _bridgeLayer;
+    private GraphicsLayer? _atRiskLayer;
+    private readonly UniqueValueRenderer _renderer = BridgeRendererFactory.Create();
+
+    private string _currentDefinitionExpression = BridgeFilterState.IowaStateClause;
+    private bool _viewReady;
+
+    public async Task ApplyFilter()
+    {
+        _currentDefinitionExpression = Filter.ToDefinitionExpression();
+        if (_viewReady && _bridgeLayer is not null)
+        {
+            await _bridgeLayer.SetDefinitionExpression(_currentDefinitionExpression);
+        }
+    }
+
+    /// <summary>
+    /// Zooms to the extent of bridges in the given Iowa county FIPS subcode.
+    /// When <paramref name="countyFips"/> is null, resets to the full Iowa view.
+    /// </summary>
+    public async Task ZoomToCountyAsync(string? countyFips)
+    {
+        if (!_viewReady || _bridgeLayer is null || _mapView is null) return;
+
+        if (string.IsNullOrEmpty(countyFips))
+        {
+            // "All Counties" — return to the initial Iowa view.
+            await _mapView.SetCenter(new Point(longitude: -93.6, latitude: 42.0));
+            await _mapView.SetZoom(7);
+            return;
+        }
+
+        var query = new Query
+        {
+            Where = $"({BridgeFilterState.IowaStateClause}) AND COUNTY_CODE_003 = '{countyFips}'",
+            ReturnGeometry = true
+        };
+
+        var extentResult = await _bridgeLayer.QueryExtent(query);
+        if (extentResult?.Extent is null) return;
+
+        var expanded = await extentResult.Extent.Expand(1.2);
+        await _mapView.GoTo(expanded ?? extentResult.Extent);
+    }
+
+    private async Task OnViewInitialized()
+    {
+        _viewReady = true;
+        // Force the renderer onto the layer after init — the service's SimpleRenderer
+        // otherwise overrides the Razor parameter on first load.
+        if (_bridgeLayer is not null)
+        {
+            await _bridgeLayer.SetRenderer(_renderer);
+        }
+    }
+
+    public async Task<int> FindAtRiskAsync()
+    {
+        if (_bridgeLayer is null || _atRiskLayer is null || _mapView is null) return 0;
+
+        var query = new Query
+        {
+            Where = $"({BridgeFilterState.IowaStateClause}) AND " +
+                    "(DECK_COND_058 IN ('0','1','2','3','4') OR " +
+                    "SUPERSTRUCTURE_COND_059 IN ('0','1','2','3','4') OR " +
+                    "SUBSTRUCTURE_COND_060 IN ('0','1','2','3','4')) AND " +
+                    "YEAR_BUILT_027 < 1960 AND ADT_029 > 5000",
+            OutFields = new[] { "*" },
+            ReturnGeometry = true
+        };
+
+        var result = await _bridgeLayer.QueryFeatures(query);
+        await _atRiskLayer.Clear();
+
+        if (result?.Features is null || result.Features.Count == 0)
+        {
+            await OnAtRiskCount.InvokeAsync(0);
+            return 0;
+        }
+
+#pragma warning disable BL0005
+        var ringSymbol = new SimpleMarkerSymbol
+        {
+            Color = new MapColor("rgba(0,0,0,0)"),
+            Size = 16,
+            Style = SimpleMarkerSymbolStyle.Circle,
+            Outline = new Outline
+            {
+                Color = new MapColor("#e07a3c"),
+                Width = 3
+            }
+        };
+#pragma warning restore BL0005
+
+        double xmin = double.MaxValue, ymin = double.MaxValue;
+        double xmax = double.MinValue, ymax = double.MinValue;
+        var graphics = new List<Graphic>(result.Features.Count);
+
+        foreach (var feature in result.Features)
+        {
+            if (feature.Geometry is Point pt)
+            {
+                graphics.Add(new Graphic(pt, ringSymbol));
+
+                var x = pt.Longitude ?? pt.X;
+                var y = pt.Latitude ?? pt.Y;
+                if (x is null || y is null) continue;
+                if (x.Value < xmin) xmin = x.Value;
+                if (x.Value > xmax) xmax = x.Value;
+                if (y.Value < ymin) ymin = y.Value;
+                if (y.Value > ymax) ymax = y.Value;
+            }
+        }
+
+        await _atRiskLayer.AddMany(graphics);
+        await OnAtRiskCount.InvokeAsync(graphics.Count);
+
+        if (graphics.Count > 0 && xmax > xmin && ymax > ymin)
+        {
+            var extent = new Extent(xmax: xmax, xmin: xmin, ymax: ymax, ymin: ymin, spatialReference: SpatialReference.Wgs84);
+            var expanded = await extent.Expand(1.4);
+            if (expanded is not null)
+            {
+                await _mapView.GoTo(expanded);
+            }
+        }
+
+        return graphics.Count;
+    }
+
+    public async Task ClearAtRiskAsync()
+    {
+        if (_atRiskLayer is null) return;
+        await _atRiskLayer.Clear();
+        await OnAtRiskCount.InvokeAsync(0);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.CompletedTask;
+    }
+}

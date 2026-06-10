@@ -1,6 +1,7 @@
 ﻿using dymaptic.GeoBlazor.Core;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
+using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 
 
 namespace dymaptic.GeoBlazor.Core.Sample.Maui;
@@ -37,6 +38,8 @@ public static class MauiProgram
             .Build();
         builder.Configuration.AddConfiguration(config);
         builder.Services.AddGeoBlazor(builder.Configuration);
+        builder.Services.AddScoped<LayoutService>();
+        builder.Services.AddSingleton<ISampleSourceProvider, SampleSourceProvider>();
 
         return builder.Build();
     }

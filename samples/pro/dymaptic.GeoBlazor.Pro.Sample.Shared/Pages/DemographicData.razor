@@ -1,4 +1,5 @@
 ﻿@page "/demographic-data"
+@inherits SamplePage
 
 @inject LocationService LocationService;
 @inject ArcGISRest ArcGISRest;
@@ -7,10 +8,6 @@
 <PageTitle>Demographic Data</PageTitle>
 <h1>Demographic Data</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/get-demographic-data/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b">Navigation BaseMap</a>
-</div>
 <p class="instructions">
     Zoom in and click on a city, or use the Search Widget to find a city, 
     and you will see a popup with population data for a 1-mile radius buffer 
@@ -41,6 +38,24 @@
 </SimpleFillSymbol>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/get-demographic-data/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=c50de463235e4161b206d000587af18b", "Navigation BaseMap")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates GeoEnrichment-style " +
+        "demographic queries from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's ArcGISRest " +
+        "service combined with the LocationService, GeometryEngine, and SearchWidget Razor components. The page " +
+        "shows a 2D navigation basemap initially centered on Milan, Italy. A SearchWidget pinned in the upper-right " +
+        "corner lets the user type a place name, and the user can also click any point on the map. On either action, " +
+        "the sample reverse-geocodes the location to a city name, draws a one-mile geodesic buffer polygon as a " +
+        "translucent overlay using GeometryEngine.GeodesicBuffer, calls ArcGISRest.QueryDemographicData to retrieve " +
+        "global demographic facts for that buffer, and opens a popup showing total population, male and female " +
+        "counts, and average household size. The sample is intended to demonstrate how to combine geocoding, " +
+        "buffering, and demographic enrichment into a single click-driven workflow.";
 
     private MapView? View { get; set; }
     private Symbol? BufferSymbol { get; set; }

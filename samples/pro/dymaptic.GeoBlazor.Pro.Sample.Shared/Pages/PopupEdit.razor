@@ -1,12 +1,9 @@
 ﻿@page "/popup-edit"
+@inherits SamplePage
 
 <PageTitle>Popup with Edit Action</PageTitle>
 <h1>Popup with Edit Action</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/popup-editaction/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3">Topographic Vector BaseMap</a>
-</div>
 <p class="instructions">
     The sample makes use of both Popups and the Editor widget. It does this by demonstrating how to add a 
     custom edit action to a PopupTemplate displayed in a Popup. The popup displays a custom Edit feature action. 
@@ -62,6 +59,26 @@
 </MapView>
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/popup-editaction/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=67372ff42cd145319639a99152b15bc3", "Topographic Vector BaseMap")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates a custom popup edit action " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's PopupWidget, EditorWidget, " +
+        "PopupTemplate, and ActionButton Razor components. The page shows a 2D topographic basemap centered on " +
+        "El Paso, Texas, displaying a recreation-trails FeatureLayer. An ExpandWidget in the upper-left corner " +
+        "carries a help panel explaining the workflow. Clicking a trail opens a popup whose content is generated " +
+        "by a content function that color-codes the difficulty level (green for easy, purple for medium, red for " +
+        "hard) and shows attachments; the popup also exposes a custom Edit feature ActionButton with a pencil " +
+        "icon. Clicking that action closes the popup, opens the EditorWidget docked in the upper-right corner, " +
+        "and starts an attribute-editing workflow scoped to the clicked feature. When the editor is dismissed, " +
+        "the popup re-opens with refreshed values. The sample is intended to demonstrate orchestrating popups and " +
+        "the editor through a single in-popup action.";
+
     private ValueTask<Content[]?> DifficultyLevel(Graphic graphic)
     {
         AttachmentsContent attachmentsElement = 

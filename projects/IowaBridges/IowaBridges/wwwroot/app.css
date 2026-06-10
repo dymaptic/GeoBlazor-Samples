@@ -1,0 +1,71 @@
+:root {
+    --bg-page: #1a1816;
+    --bg-surface: #25211d;
+    --bg-surface-elevated: #2f2a25;
+    --bg-input: #1f1c19;
+    --border: #3a342e;
+    --border-strong: #4a4239;
+    --text-primary: #f4ede2;
+    --text-secondary: #b5ada0;
+    --text-muted: #837a6f;
+    --text-mono: #d4c8b6;
+
+    --color-good: #5a8a3a;
+    --color-fair: #d4a73c;
+    --color-poor: #c0432a;
+    --color-accent: #e07a3c;
+    --color-unknown: #6a6359;
+
+    --shadow-elevated: 0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+
+    --header-height: 56px;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+    height: 100%;
+}
+
+.mono {
+    font-family: 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+}
+
+button {
+    font-family: inherit;
+}
+
+a, .btn-link {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.blazor-error-boundary {
+    background: #3a1310;
+    color: #f4ede2;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--color-poor);
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}

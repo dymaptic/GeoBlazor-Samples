@@ -1,9 +1,7 @@
 ﻿@page "/georss-layer"
+@inherits SamplePage
 <PageTitle>GeoRSSLayers</PageTitle>
 <h1>GeoRSS Layer</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-georss/">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     A simple demo of displaying a GeoRSS feed.
 </p>
@@ -11,9 +9,27 @@
 <MapView Longitude="-107.95166" Latitude="43.18083" Zoom="4" Class="map-view">
     <Map>
         <Basemap>
-            <BasemapStyle Name="BasemapStyleName.ArcgisLightGrayBase" />
+            <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
         </Basemap>
         <GeoRSSLayer
             Url="https://arcgis.github.io/arcgis-samples-javascript/sample-data/layers-georss/sample-georss.xml" />
     </Map>
 </MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-georss/", "ArcGIS Maps SDK for JavaScript"),
+     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the GeoRSSLayer from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GeoRSSLayer Razor component. The page shows " +
+        "a 2D light-gray basemap centered over the western United States at a country-level zoom. A GeoRSSLayer " +
+        "is added on top of the basemap, sourced from a sample GeoRSS XML feed hosted on the ArcGIS samples " +
+        "GitHub repository; the layer auto-renders any point, line, or polygon items it parses out of the feed " +
+        "using default GeoRSS symbology. There are no controls beyond the basic map navigation (pan, zoom). The " +
+        "sample is intended to demonstrate the simplest possible declarative consumption of a GeoRSS feed in " +
+        "a Blazor application without writing JavaScript.";
+}

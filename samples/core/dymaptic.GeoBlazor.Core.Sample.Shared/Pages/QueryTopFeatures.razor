@@ -1,12 +1,9 @@
 ﻿@page "/query-top-features"
+@inherits SamplePage
 @inject IJSRuntime JsRuntime
 <PageTitle>Query Top Features</PageTitle>
 <h1>Query Top Features</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryTopFeatures">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_National_Parks_Annual_Visitation/FeatureServer/0">US National Parks Annual Visitation</a>
-</div>
 <p class="instructions">
     This sample demonstrates how to use the QueryTopFeatures() method on a FeatureLayer to query the most or the least visited national parks in each state for a given year or total of all time.
 </p>
@@ -150,6 +147,29 @@
 
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#queryTopFeatures", "ArcGIS Maps SDK for JavaScript"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_National_Parks_Annual_Visitation/FeatureServer/0", "US National Parks Annual Visitation")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the QueryTopFeatures " +
+        "method from the ArcGIS Maps SDK for JavaScript via GeoBlazor's FeatureLayer.QueryTopFeatures, " +
+        "TopFeaturesQuery, and TopFilter APIs. " +
+        "The page shows a 2D map of the contiguous United States at zoom level 3, with a FeatureLayer of " +
+        "national parks rendered as small tree-emoji PictureMarkerSymbols. " +
+        "A Calcite panel anchored to the right side of the map presents the controls: a horizontal radio group " +
+        "to choose 'Most visited' (descending) or 'Least visited' (ascending), a select for how many parks " +
+        "to return per state (1, 2, or 3), and a select for the time range (Total of all time, 2018, 2019, " +
+        "or 2020). Two buttons — 'Query parks' (solid when active) and 'Clear query' — run the query or reset. " +
+        "Running the query calls QueryTopFeatures using a TopFilter grouped by State, ordered by the chosen " +
+        "field/direction, and applies a FeatureFilter on the FeatureLayerView so only the top matching parks " +
+        "remain visible. Results render as a Calcite list below the form, each item labeled with the park " +
+        "name plus visitor count and state; clicking a result opens that park's popup on the map. " +
+        "The sample is intended to demonstrate group-wise top-N feature queries in a Blazor application " +
+        "without writing JavaScript.";
 
     private void OnLayerViewCreate(LayerViewCreateEvent evt)
     {

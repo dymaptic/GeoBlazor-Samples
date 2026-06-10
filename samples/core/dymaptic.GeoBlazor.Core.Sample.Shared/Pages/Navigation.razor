@@ -1,23 +1,28 @@
 @page "/navigation"
+@inherits SamplePage
 @using Environment = System.Environment
 
 <PageTitle>Navigation</PageTitle>
 <h1>Navigation</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-map/">ArcGIS API for JavaScript Reference</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=826498a48bd0424f9c9315214f2165d4">Colored Pencil BaseMap</a>
-</div>
 
 <p class="instructions">
     Change the values for latitude, longitude, zoom, and rotation to see the map update in real time.
     Note that once a user drags or zooms the map manually, the Razor Markup bindings to our input fields must be ignored, otherwise the map would "snap back".
     You can always call <code>MapView.SetExtent</code> to set the extent again, or <code>MapView.Refresh</code> to re-enable bindings.
 </p>
-<div class="form-group spaced-row">
-    <label>Latitude:&nbsp;<input type="number" step="0.01" @bind="_latitude" /></label>
-    <label>Longitude:&nbsp;<input type="number" step="0.01" @bind="_longitude" /></label>
-    <label>Zoom:&nbsp;<input type="number" @bind="_zoom" /></label>
-    <label>Rotation (deg):&nbsp;<input type="number" @bind="_rotation" /></label>
+<div class="form-group">
+    <div class="spaced-row">
+        <label for="latitude-input">Latitude:</label>
+        <input id="latitude-input" type="number" step="0.01" @bind="_latitude" />
+        <label for="longitude-input">Longitude:</label>
+        <input id="longitude-input" type="number" step="0.01" @bind="_longitude" />
+    </div>
+    <div class="spaced-row">
+        <label for="zoom-input">Zoom:</label>
+        <input id="zoom-input" type="number" @bind="_zoom" />
+        <label for="rotation-input">Rotation (deg):</label>
+        <input id="rotation-input" type="number" @bind="_rotation" />
+    </div>
 </div>
 
 <MapView @ref="_mapView"
@@ -45,6 +50,27 @@
 
 @code
 {
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-map/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=826498a48bd0424f9c9315214f2165d4", "Colored Pencil BaseMap")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates programmatic map " +
+        "navigation using GeoBlazor's MapView Razor component bound to .NET properties from the ArcGIS " +
+        "Maps SDK for JavaScript. " +
+        "The page shows a 2D map rendered with the 'Colored Pencil' basemap loaded from an ArcGIS Online " +
+        "portal item, initially centered near Thousand Oaks, California at zoom level 11. " +
+        "Above the map is a form with four numeric inputs for Latitude, Longitude, Zoom, and Rotation " +
+        "(degrees); changing any value re-binds the MapView's corresponding parameter and the map updates " +
+        "in real time. Note that once the user manually drags or zooms the map, those one-way bindings stop " +
+        "applying so the map does not snap back. " +
+        "Below the map is a 'Get Extent' button which calls MapView.GetExtent and renders the resulting " +
+        "Extent object as formatted JSON beneath the button. " +
+        "The sample is intended to demonstrate two-way reactive map navigation and extent retrieval in a " +
+        "Blazor application without writing JavaScript.";
+
     private void OnViewRendered()
     {
         Console.WriteLine("View Rendered");

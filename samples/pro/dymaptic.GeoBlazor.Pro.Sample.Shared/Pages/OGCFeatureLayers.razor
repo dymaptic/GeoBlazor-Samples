@@ -1,52 +1,40 @@
 @page "/ogc-feature-layers"
+@inherits SamplePage
 
 <h3>OGC Feature Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-ogcfeaturelayer/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://demo.ldproxy.net/vineyards">Vineyards in Rhineland-Palatinate, Germany</a>
-</div>
 <p class="instructions">
-    This sample shows how to access an <a target="_blank" href="https://www.ogc.org/standards/ogcapi-features">OGC API Features service</a> 
-    using an OGCFeatureLayer. Since this layer type brings the data in as features, you can perform your own rendering, 
-    labeling, clustering, etc. It also demonstrates how to use <code>ExpandWidget</code> Groups to toggle multiple widgets at once.
-</p>
-<p class="instructions">
-    During high traffic times, this data set has been known to be slow or unresponsive. Please check back later if you do not see the green vineyards loading.
+    This sample shows how to access an <a target="_blank" href="https://www.ogc.org/standards/ogcapi-features">OGC API Features service</a>
+    using an <code>OGCFeatureLayer</code>. Portuguese maritime navigational aids ("Aids to Navigation") are categorized
+    via an Arcade <code>valueExpression</code> in a <code>UniqueValueRenderer</code> and pictographed with
+    <code>WebStyleSymbol</code>s. Use the filter to fade out features that do not match the selected NAVAID type.
 </p>
 
 <MapView @ref="_mapView"
          class="map-view"
-         Longitude="6.93"
-         Latitude="49.87"
-         Zoom="12"
-         OnViewRendered="OnViewRendered"
+         Longitude="-8.9624771"
+         Latitude="41.7458514"
+         Zoom="10"
          OnLayerViewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
         </Basemap>
-        <OGCFeatureLayer Url="https://demo.ldproxy.net/vineyards" 
-                         CollectionId="vineyards"
-                         MinScale="5_000_000"
-                         Opacity="0.6"
-                         Copyright="Landwirtschaftskammer RLP (2020), dl-de/by-2-0, <a href='http://weinlagen.lwk-rlp.de/'' target='_blank'>weinlagen.lwk-rlp.de</a>, <a href='http://weinlagen.lwk-rlp.de/portal/nutzungsbedingungen/gewaehrleistung-haftung.html' target='_blank'>Regelungen zu Gewährleistung und Haftung</a>">
-            <LabelClass MaxScale="0" MinScale="100_000">
-                <LabelClassLabelExpressionInfo Expression="$feature.NAME" />
-                <TextSymbol Color="@(new MapColor("#4a6741"))"
-                            HaloSize="1"
-                            HaloColor="@(new MapColor("white"))">
-                    <MapFont Family="IM FELL DW Pica PRO"
-                             Style="MapFontStyle.Italic"
-                             Weight="FontWeight.Normal" />
-                </TextSymbol>
-            </LabelClass>
-            <SimpleRenderer>
-                <WebStyleSymbol StyleUrl="https://www.arcgis.com/sharing/rest/content/items/c71b13cf8f28452faf91ad0552574d24/data"
-                                Name="Mangrove_Common_5" />
-            </SimpleRenderer>
-            <PopupTemplate Title="{name}">
-                <TextContent Text="The {name} vineyard is {area_ha} hectares and resides in {village} village. It is within the {region} region and the {subregion} subregion. " />
+        <OGCFeatureLayer Url="https://api-features.hidrografico.pt"
+                         CollectionId="aton"
+                         Copyright="<a href='https://www.hidrografico.pt/' target='_blank'>Instituto Hidrográfico</a>">
+            <UniqueValueRenderer ValueExpression="@_valueExpression"
+                                 ValueExpressionTitle="NAVAID type"
+                                 UniqueValueInfos="@_uniqueValueInfos" />
+            <PopupTemplate Title="{title}">
+                <TextPopupContent Text="This structure is {expression/altitude} meters above sea level and {expression/height} meters tall." />
+                <FieldsPopupContent>
+                    <FieldInfo FieldName="no_nac" Label="National Number" />
+                    <FieldInfo FieldName="desc" Label="Original Description (Portuguese)" />
+                    <FieldInfo FieldName="foto_url" Label="Photo URL" />
+                </FieldsPopupContent>
+                <PopupExpressionInfo Name="altitude" Expression="DefaultValue($feature.alt_m, 'unknown')" />
+                <PopupExpressionInfo Name="height" Expression="DefaultValue($feature.hgt_m, 'unknown')" />
             </PopupTemplate>
         </OGCFeatureLayer>
     </Map>
@@ -55,82 +43,121 @@
                           BreakPoint="@(new Breakpoint(false))"
                           ButtonEnabled="false" />
     </PopupWidget>
-    <ExpandWidget ExpandIcon="question" Expanded="true" Position="OverlayPosition.TopLeft" Group="sample-group">
-        <div id="appTitle" class="esri-widget">
-            <h3>Wineries</h3>
-            <p>
-                Click on a feature to see more information about a specific winery. Use the filter icon on
-                the left to filter the data by the area of the winery.
-            </p>
-        </div>
-    </ExpandWidget>
-    <ExpandWidget @ref="_filterExpand" ExpandIcon="filter" Position="OverlayPosition.TopLeft" Group="sample-group">
-        <div id="winery-filter" class="esri-widget">
-            <div class="filter-title"><b>Filter by area (hectares)</b></div>
-            <div class="filter-item" @onclick="@(() => FilterByType("greater100"))">Greater than 100</div>
-            <div class="filter-item" @onclick="@(() => FilterByType("fiftyTo100"))">50 - 100</div>
-            <div class="filter-item" @onclick="@(() => FilterByType("lessThan50"))">Less than 50</div>
+    <LegendWidget Position="OverlayPosition.TopRight" />
+    <ExpandWidget ExpandIcon="filter" Expanded="true" Position="OverlayPosition.TopLeft" Group="sample-group">
+        <div id="navaid-filter-label" class="esri-widget" style="padding:15px;">
+            <label for="navaid-filter"><b>Filter by the type of navigational aid</b></label>
+            <select id="navaid-filter" @onchange="OnFilterChange" style="display:block; margin-top:8px; width:100%;">
+                <option value="" selected>All</option>
+                <option value="Buoy">Buoy</option>
+                <option value="Ocean Data Acquisition System">Ocean Data Acquisition System</option>
+                <option value="Raised Light Structure">Raised Light Structure</option>
+                <option value="WindFloat">WindFloat</option>
+            </select>
         </div>
     </ExpandWidget>
 </MapView>
 
 @code {
 
-    private async Task OnViewRendered()
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-ogcfeaturelayer/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://api-features.hidrografico.pt", "Instituto Hidrográfico - Aids to Navigation (ATON)")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates the OGC API Features client " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's OGCFeatureLayer Razor component. The page " +
+        "shows a 2D light-gray basemap centered off the northern Portuguese coast, displaying the Instituto " +
+        "Hidrográfico Aids to Navigation (ATON) collection. A UniqueValueRenderer uses an Arcade valueExpression to " +
+        "categorize each feature as Buoy, Ocean Data Acquisition System, Raised Light Structure, WindFloat, or Other " +
+        "based on substrings in the title and description fields, and renders each category with a WebStyleSymbol " +
+        "from the Esri shapes and nautical web styles. A PopupTemplate combines a TextPopupContent with two " +
+        "PopupExpressionInfo entries (altitude and height) plus a FieldsPopupContent that exposes the national " +
+        "number, original Portuguese description, and photo URL. A LegendWidget in the upper-right shows the " +
+        "category-to-symbol mapping, and an ExpandWidget in the upper-left contains a dropdown filter that applies " +
+        "a FeatureEffect with an opacity(20%) excludedEffect so non-matching navigational aids fade out. The sample " +
+        "is intended to demonstrate consuming an OGC API Features service with Arcade-driven unique-value styling " +
+        "and FeatureEffect filtering.";
+
+    private async Task OnFilterChange(ChangeEventArgs args)
     {
-        if (_firstRender)
+        if (await _popupWidget!.GetVisible() == true)
         {
-            _firstRender = false;
-            
-            // clear the filters when user closes the expand widget
-            await _filterExpand!.AddReactiveWatcher<bool>("filterExpand.expanded", 
-                async expanded =>
-            {
-                if (!expanded)
-                {
-                    await _wineryLayerView!.SetFeatureEffect(null);
-                }
-            }, "filterExpand");
+            await _mapView!.ClosePopup();
         }
+
+        string value = args.Value?.ToString() ?? string.Empty;
+
+        if (_atonLayerView is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(value) || !_sqlWhereClauses.TryGetValue(value, out string? where))
+        {
+            await _atonLayerView.SetFeatureEffect(null);
+            return;
+        }
+
+        await _atonLayerView.SetFeatureEffect(
+            new FeatureEffect(excludedEffect: [new Effect("opacity(20%)")],
+                filter: new FeatureFilter(where: where)));
     }
 
     private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.LayerView is OGCFeatureLayerView ogcFeatureLayerView)
         {
-            // register the layer view for the OGCFeatureLayer
-            _wineryLayerView = ogcFeatureLayerView;
+            _atonLayerView = ogcFeatureLayerView;
         }
     }
 
-    private async Task FilterByType(string selectedType)
+    private const string ShapeStyleUrl =
+        "https://cdn.arcgis.com/sharing/rest/content/items/a63b3a4631ae41d4a1bc3ba6d9c85bfe/data";
+
+    private const string NauticalStyleUrl =
+        "https://cdn.arcgis.com/sharing/rest/content/items/36359a4a8f3143b6bf44d5688e007900/data";
+
+    private readonly string _valueExpression =
+        """
+        When(
+          Find('boia', Lower(DefaultValue($feature.title, ''))) > -1, 'Buoy',
+          Find('odas', Lower(DefaultValue($feature.title, ''))) > -1, 'Ocean Data Acquisition System',
+          Find('coluna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('torre', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('lanterna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('poste', Lower(DefaultValue($feature.desc, ''))) > -1, 'Raised Light Structure',
+          Find('windfloat', Lower(DefaultValue($feature.title, ''))) > -1 || Find('wfa', Lower(DefaultValue($feature.title, ''))) > -1, 'WindFloat',
+          'Other' )
+        """;
+
+    private readonly Dictionary<string, string> _sqlWhereClauses = new()
     {
-        // close popup if it is open
-        if (await _popupWidget!.GetVisible() == true)
-        {
-            await _mapView!.ClosePopup();
-        }
-        
-        // determine filter definition based on the selected type
-        string filterDef = selectedType switch
-        {
-            "greater100" => "area_ha > 100",
-            "fiftyTo100" => "area_ha >= 50 AND area_ha <= 100",
-            "lessThan50" => "area_ha < 50",
-            _ => string.Empty
-        };
+        ["Buoy"] = "LOWER(title) LIKE '%boia%'",
+        ["Ocean Data Acquisition System"] = "LOWER(title) LIKE '%odas%'",
+        ["Raised Light Structure"] = "(LOWER(desc) LIKE '%coluna%' OR LOWER(desc) LIKE '%torre%' OR LOWER(desc) LIKE '%lanterna%' OR LOWER(desc) LIKE '%poste%')",
+        ["WindFloat"] = "(LOWER(title) LIKE '%windfloat%' OR LOWER(title) LIKE '%wfa%')"
+    };
 
-        if (_wineryLayerView is not null)
-        {
-            await _wineryLayerView.SetFeatureEffect(
-                new FeatureEffect(excludedEffect: [new Effect("opacity(20%)")], 
-                    filter: new FeatureFilter(where: filterDef)));
-        }
-    }
-    
-    private bool _firstRender = true;
+    private UniqueValueInfo[] _uniqueValueInfos =>
+    [
+        new UniqueValueInfo("Buoy",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "Circle 3_Shapes_3"),
+            "Buoy"),
+        new UniqueValueInfo("Ocean Data Acquisition System",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "Rectangle"),
+            "Ocean Data Acquisition System"),
+        new UniqueValueInfo("Raised Light Structure",
+            new WebStyleSymbol(styleUrl: NauticalStyleUrl, name: "Lighthouse 1"),
+            "Raised Light Structure"),
+        new UniqueValueInfo("WindFloat",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "Triangle 3_Shapes_3"),
+            "WindFloat"),
+        new UniqueValueInfo("Other",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "asterisk "),
+            "Other")
+    ];
+
     private MapView? _mapView;
     private PopupWidget? _popupWidget;
-    private OGCFeatureLayerView? _wineryLayerView;
-    private ExpandWidget? _filterExpand;
+    private OGCFeatureLayerView? _atonLayerView;
 }

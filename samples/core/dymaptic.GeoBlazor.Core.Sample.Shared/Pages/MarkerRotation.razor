@@ -1,9 +1,7 @@
 ﻿@page "/marker-rotation"
+@inherits SamplePage
 <PageTitle>Marker Rotation</PageTitle>
 <h1>Marker Rotation</h1>
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/display-a-web-map/">ArcGIS API for JavaScript Reference</a>
-</div>
 <p class="instructions">
     Loading a <code>PictureMarkerSymbol</code> from an image url, this sample also demonstrates rotation and size of icons
     varying based on data fields, to demonstrate wind direction and speed.
@@ -28,3 +26,25 @@
         </FeatureLayer>
     </Map>
 </MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-web-map/", "ArcGIS Maps SDK for JavaScript"),
+     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates data-driven marker " +
+        "rotation and sizing from the ArcGIS Maps SDK for JavaScript via GeoBlazor's PictureMarkerSymbol, " +
+        "RotationVariable, and SizeVariable Razor components. " +
+        "The page shows a 2D map zoomed to South America rendered with the ArcGIS imagery basemap. " +
+        "A FeatureLayer of weather stations is overlaid on top, where each station is symbolized by a small " +
+        "blue arrow icon loaded from a Wikimedia SVG via PictureMarkerSymbol. " +
+        "There are no on-screen controls — the visualization itself does the work: each arrow's rotation angle " +
+        "is bound to the WIND_DIRECT field using geographic rotation, so arrows point in the direction the " +
+        "wind is blowing, while each arrow's size is scaled between 8 and 40 pixels based on the WIND_SPEED " +
+        "field via a SizeVariable. The user pans and zooms to explore the wind field. " +
+        "The sample is intended to demonstrate data-driven symbol rotation and sizing in a Blazor application " +
+        "without writing JavaScript.";
+}

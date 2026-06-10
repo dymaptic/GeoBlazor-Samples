@@ -1,0 +1,35 @@
+<div class="search-input-wrap">
+    <input type="search" id="search-input"
+           placeholder="Search for sample..."
+           @oninput="UpdateSearchFilter"
+           @onkeyup="SearchFilterKeyUp"/>
+    <label for="search-input" class="search-label">
+        <img src="/_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/search.svg" alt="Search"/>
+    </label>
+</div>
+
+@code {
+    
+    [Parameter]
+    public EventCallback<string> Filter { get; set; }
+    
+    [Parameter]
+    public EventCallback<string> FullSearch { get; set; }
+    
+    private async Task UpdateSearchFilter(ChangeEventArgs arg)
+    {
+        _searchText = arg.Value?.ToString() ?? string.Empty;
+        await Filter.InvokeAsync(_searchText);
+    }
+
+    private async Task SearchFilterKeyUp(KeyboardEventArgs arg)
+    {
+        if (arg.Key.Equals("Enter"))
+        {
+            await FullSearch.InvokeAsync(_searchText);
+        }
+    }
+    
+    private string _searchText = string.Empty;
+    
+}

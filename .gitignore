@@ -8,7 +8,9 @@
 .DS_Store
 
 # appsettings
-appsettings.json
+/projects/ShipmentTracker/appsettings.json
+/projects/SimpleSearch/SimpleSearch/appsettings.json
+/projects/SimpleSearch/SimpleSearch.Client/wwwroot/appsettings.json
 appsettings.Development.json
 appsettings.Production.json
 
@@ -18,6 +20,7 @@ appsettings.Production.json
 *.user
 *.userosscache
 *.sln.docstates
+*.lscache
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

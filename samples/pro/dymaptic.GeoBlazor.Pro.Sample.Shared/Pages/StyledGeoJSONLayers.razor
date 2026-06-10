@@ -1,11 +1,8 @@
 @page "/geojson-styles"
+@inherits SamplePage
 <PageTitle>Custom Styled GeoJSON Layers</PageTitle>
 <h1>Custom Styled GeoJSON Layers</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://wiki.openstreetmap.org/wiki/Geojson_CSS">GeoJSON CSS Spec</a>
-    <a class="btn btn-secondary" target="_blank" href="https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0">Mapbox SimpleStyle Spec</a>
-</div>
 <p class="instructions">
     This map showcases Seattle tourist attractions with custom styling using the <code>ProGeoJSONLayer</code> and GeoJSON style properties.
     Click on any feature to see its popup with title and description. The data includes points (landmarks), 
@@ -14,21 +11,21 @@
 
 <div class="form-group">
     <h4>Toggle Layers:</h4>
-    <div class="form-row">
-        <input class="form-check-input" type="checkbox" id="points-layer" checked @onchange="@(() => ToggleLayerVisibility("points"))" />
+    <div class="spaced-row">
         <label for="points-layer">Tourist Points</label>
+        <input class="form-check-input" type="checkbox" id="points-layer" checked @onchange="@(() => ToggleLayerVisibility("points"))"/>
     </div>
-    <div class="form-row">
-        <input class="form-check-input" type="checkbox" id="polygons-layer" @onchange="@(() => ToggleLayerVisibility("polygons"))" />
+    <div class="spaced-row">
         <label for="polygons-layer">Neighborhoods</label>
+        <input class="form-check-input" type="checkbox" id="polygons-layer" @onchange="@(() => ToggleLayerVisibility("polygons"))"/>
     </div>
-    <div class="form-row">
-        <input class="form-check-input" type="checkbox" id="lines-layer" @onchange="@(() => ToggleLayerVisibility("lines"))" />
+    <div class="spaced-row">
         <label for="lines-layer">Transportation Routes</label>
+        <input class="form-check-input" type="checkbox" id="lines-layer" @onchange="@(() => ToggleLayerVisibility("lines"))"/>
     </div>
-    <div class="form-row">
-        <input class="form-check-input" type="checkbox" id="multipoints-layer" @onchange="@(() => ToggleLayerVisibility("multipoints"))" />
+    <div class="spaced-row">
         <label for="multipoints-layer">Public Services</label>
+        <input class="form-check-input" type="checkbox" id="multipoints-layer" @onchange="@(() => ToggleLayerVisibility("multipoints"))"/>
     </div>
 </div>
 

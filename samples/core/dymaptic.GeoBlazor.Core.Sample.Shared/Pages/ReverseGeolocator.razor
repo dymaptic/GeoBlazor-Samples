@@ -1,13 +1,10 @@
 ﻿@page "/reverse-geolocator"
+@inherits SamplePage
 @inject LocationService LocationService
 
 <PageTitle>Reverse Geolocator</PageTitle>
 <h1>Reverse Geolocator</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/reverse-geocode/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=8dda0e7b5e2d4fafa80132d59122268c">Streets (WGS84) BaseMap</a>
-</div>
 <p class="instructions">
     Click on any location on the map, and the popup will show the latitude and logitude, 
     as well as an address.
@@ -34,6 +31,25 @@
 <PopupTemplate @ref="Popup" Title="@($"{_longitude}, {_latitude}")" StringContent="@_address" />
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/reverse-geocode/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=8dda0e7b5e2d4fafa80132d59122268c", "Streets (WGS84) BaseMap")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates reverse geocoding " +
+        "(LocationToAddress) from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "LocationService and PopupTemplate Razor components. The page shows a 2D streets basemap centered " +
+        "near Quito, Ecuador. Above the map sits an instructional paragraph; once the user clicks anywhere " +
+        "on the map the page also displays the selected latitude and longitude and the resolved street " +
+        "address in a Selected Point heading. The click handler converts the click point into an address " +
+        "by calling LocationService.LocationToAddress against the ArcGIS World GeocodeServer, then opens a " +
+        "PopupTemplate at the clicked location whose title is the longitude and latitude and whose content " +
+        "is the returned address. The sample is intended to demonstrate how to perform reverse geocoding " +
+        "and bind the result to an interactive popup in a Blazor application without writing JavaScript.";
+
     public MapView? View { get; set; }
     public PopupTemplate? Popup { get; set; }
 

@@ -1,15 +1,11 @@
 @page "/highlight-features-by-geometry"
-@using dymaptic.GeoBlazor.Core.Components.Logic
+@inherits SamplePage
 
 @inject GeometryEngine GeometryEngine
 
 <PageTitle>Highlight Features by Geometry</PageTitle>
 <h1>Highlight Features by Geometry</h1>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=d72ab790752142bd9dfb190c79d6582b">National Park Service Establishments</a>
-</div>
 <p class="instructions">
     Use the Sketch Widget's rectangle tool to draw a selection area on the map.
     Features that intersect the rectangle will be highlighted and shown in the
@@ -57,26 +53,48 @@
                   HideSettingsMenu="true"
                   HideRedoMenu="true">
     </SketchWidget>
-    <CustomOverlay Position="OverlayPosition.TopLeft">
-        <button class="esri-button" style="width: auto; margin: 5px;" @onclick="ClearSelection">
+    <CustomOverlay Position="OverlayPosition.BottomLeft">
+        <button class="esri-button btn" style="width: auto; margin: 5px;" @onclick="ClearSelection">
             Clear Selection
         </button>
     </CustomOverlay>
+    @* ReSharper disable once GeoBlazor_Untested *@
     @if (_npsLayer is not null)
     {
         <FeatureTableWidget @ref="_featureTable"
+                            style="height: 400px;"
                             ContainerId="feature-table-container"
                             OnCellClick="OnCellClick"
                             OnCellPointerOver="OnCellPointerOver"
                             OnCellPointerOut="OnCellPointerOut"
                             FilterBySelectionEnabled="false"
-                            Layers="@([ _npsLayer ])" />
+                            Layer="@_npsLayer" />
     }
 </MapView>
 
 <div id="feature-table-container" style="height: 40%; min-height: 200px; width: 100%; margin-bottom: 4rem;"></div>
 
+@* ReSharper disable once GeoBlazor_Untested *@
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/highlight-features-by-geometry/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=d72ab790752142bd9dfb190c79d6582b", "National Park Service Establishments")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates spatial selection by drawn " +
+        "geometry from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's SketchWidget and " +
+        "FeatureTableWidget Razor components combined with FeatureLayerView feature effects. The page shows a 2D " +
+        "Albers Equal Area projection map of the contiguous United States with a custom cream-and-gray basemap and " +
+        "a National Park Service points-of-interest FeatureLayer overlaid. A SketchWidget pinned in the upper-left " +
+        "corner provides a rectangle drawing tool, and a Clear Selection button sits beside it. Below the map is a " +
+        "FeatureTableWidget that lists every NPS feature. When the user drags a rectangle on the map, the sample " +
+        "queries the layer view for intersecting features, blurs and dims the rest using a FeatureEffect, highlights " +
+        "the selected rows in the table, and synchronizes hovering rows with on-map highlights. The sample is " +
+        "intended to demonstrate coordinated spatial-and-tabular selection driven by user-drawn geometry.";
+
     private async Task OnViewRendered()
     {
         if (_firstRender)

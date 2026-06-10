@@ -12,3 +12,9 @@ select {
     border-radius: 0.5rem;
     border: 1px solid black;
 }
+
+@media (max-width: 1074px) {
+    .render-mode-selector-row {
+        display: none;
+    }
+}

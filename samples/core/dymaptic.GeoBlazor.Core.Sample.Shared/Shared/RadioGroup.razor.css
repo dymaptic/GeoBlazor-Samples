@@ -1,0 +1,38 @@
+input[type="radio"] {
+    visibility: hidden;
+}
+
+.radio-container {
+    position: relative;
+    padding-right: 1rem;
+}
+
+.radio-box {
+    display: inline;
+    height: 1.25rem;
+    width: 1.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 0.25rem;
+    position: absolute;
+    right: 0;
+    top: calc(50% - 0.6rem);
+    background: linear-gradient(var(--background-grey-1), var(--background-grey-1)) padding-box,
+    var(--geoblazor-gradient-horizontal) border-box;
+}
+
+.radio-container input:checked ~ .radio-box {
+    background: var(--geoblazor-accent);
+    border-color: var(--geoblazor-accent-emphasis)
+}
+
+.radio-container input:focus ~ .radio-box {
+    border-color: var(--geoblazor-accent-emphasis)
+}
+
+.radio-container input:hover ~ .radio-box {
+    border-color: var(--geoblazor-accent-hover)
+}
+
+input[type=radio] {
+    visibility: hidden;
+}

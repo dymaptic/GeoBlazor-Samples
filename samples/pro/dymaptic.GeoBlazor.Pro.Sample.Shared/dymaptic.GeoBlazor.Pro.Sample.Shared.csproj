@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <NoWarn>$(NoWarn);GeoBlazor_Untested</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
@@ -9,8 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Markdig" Version="0.44.0"/>
-        <PackageReference Include="MarkdigExtensions.SyntaxHighlighting" Version="1.0.3" />
+        <PackageReference Include="ColorCode.Core" Version="2.0.15" />
+        <PackageReference Include="ColorCode.HTML" Version="2.0.15" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.2"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.2"/>
         <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.2"/>
@@ -34,7 +35,8 @@
         </Otherwise>
     </Choose>
 
-    <Target Name="Copy Razor Files" BeforeTargets="Build" Condition="'$(UseProjectReferences)' == 'true'">
-        <Exec Command="dotnet $(ProGBBuildToolsPath)/RazorCopy.dll"/>
-    </Target>
+    <ItemGroup>
+      <EmbeddedResource Include="Pages\**\*.razor" LogicalName="SampleSource/%(Filename)%(Extension)" />
+      <EmbeddedResource Include="Pages\**\*.razor.cs" LogicalName="SampleSource/%(Filename)%(Extension)" />
+    </ItemGroup>
 </Project>

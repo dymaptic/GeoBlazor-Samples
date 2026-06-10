@@ -1,0 +1,48 @@
+<Project Sdk="Uno.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net10.0-ios;net10.0-maccatalyst;net10.0-android</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net10.0-windows10.0.26100</TargetFrameworks>
+        <OutputType>Exe</OutputType>
+        <UnoSingleProject>true</UnoSingleProject>
+
+        <ApplicationTitle>Field Asset Inspector</ApplicationTitle>
+        <ApplicationId>com.dymaptic.fieldassetinspector</ApplicationId>
+        <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
+
+        <UnoFeatures>
+            Material;
+            Hosting;
+            Toolkit;
+            Logging;
+            MVUX;
+            MauiEmbedding;
+        </UnoFeatures>
+
+        <UserSecretsId>60754166-2e08-4c50-bc9b-09061b92213c</UserSecretsId>
+    </PropertyGroup>
+
+    <!-- Workaround: WinUI XAML compiler generates XamlTypeInfo.g.cs that references
+         MAUI TemplatedView.Children, which is error-obsolete (CS0619) in MAUI 10.
+         This target patches the generated file before C# compilation.
+         Tracked upstream: https://github.com/microsoft/microsoft-ui-xaml/issues/5812 -->
+    <Target Name="PatchXamlTypeInfo"
+            BeforeTargets="CoreCompile"
+            Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+        <Exec Command="powershell -NoProfile -Command &quot;$f='$(IntermediateOutputPath)XamlTypeInfo.g.cs'; if(Test-Path $f){(Get-Content $f -Raw) -replace 'return that\.Children;','return null;' | Set-Content $f -NoNewline}&quot;"
+              IgnoreExitCode="true" />
+    </Target>
+
+    <ItemGroup>
+        <ProjectReference Include="..\FieldAssetInspector.MauiControls\FieldAssetInspector.MauiControls.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="appsettings.json" />
+    </ItemGroup>
+</Project>

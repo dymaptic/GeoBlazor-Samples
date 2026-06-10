@@ -1,12 +1,8 @@
 ﻿@page "/imagery-tile-layer"
+@inherits SamplePage
 
 <h3>Imagery Layers</h3>
 
-<div class="links-div">
-    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/sample-code/layers-hosted-imagerytilelayer-landcover/">ArcGIS API for JavaScript</a>
-    <a class="btn btn-primary" target="_blank" href="https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2">States Feature Layer</a>
-    <a class="btn btn-accent" target="_blank" href="https://tiledimageservices.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/NLCD_2016_Land_Cover_L48_20190424/ImageServer">Land Cover Imagery Tile Layer</a>
-</div>
 <p class="instructions">
     This sample shows how to add an instance of a hosted ImageryTileLayer to a Map in a MapView. The ImageryTileLayer in this sample shows the National Land Cover Database (NLCD) 2016 land cover types for the United States.
 </p>
@@ -90,6 +86,29 @@
 
 
 @code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-hosted-imagerytilelayer-landcover/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2", "States Feature Layer"),
+        new("https://tiledimageservices.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/NLCD_2016_Land_Cover_L48_20190424/ImageServer", "Land Cover Imagery Tile Layer")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the ImageryTileLayer and " +
+        "dynamic UniqueValueRenderer construction from the ArcGIS Maps SDK for JavaScript exposed through " +
+        "GeoBlazor's ImageryTileLayer Razor component. The page shows a 2D map of the lower-48 United States " +
+        "rendered initially in the Albers Equal Area projection. The custom basemap is a FeatureLayer of US " +
+        "states drawn as dark-gray polygons with a soft drop-shadow effect, and on top of it the NLCD 2016 " +
+        "Land Cover ImageryTileLayer paints raster land-cover tiles. In the upper-right corner of the map a " +
+        "CustomOverlay panel titled Land cover types - 2016 contains a vertical Calcite radio-button group " +
+        "with five options (Forested Areas, Developed Areas, Cultivated Areas, Hay/Pasture Areas, Wetlands) " +
+        "and a Change view's projection dropdown listing Albers Equal Area, Web Mercator, and WGS 84. " +
+        "Selecting a land-cover type rebuilds a UniqueValueRenderer in C# (one UniqueValueInfo per NLCD_Land " +
+        "category in that group, colored from a per-type palette) and applies it via SetRenderer; selecting a " +
+        "projection calls SetSpatialReference on both the states layer and the MapView. The sample is intended " +
+        "to demonstrate dynamic raster restyling and live reprojection in a Blazor application without writing " +
+        "JavaScript.";
 
     private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {

@@ -1,0 +1,169 @@
+@namespace IowaBridges.Components.Bridges
+
+<aside class="bridge-sidebar @(_collapsed ? "collapsed" : "")">
+    <div class="sidebar-header">
+        <button class="collapse-toggle mono"
+                type="button"
+                @onclick="ToggleCollapsed"
+                title="@(_collapsed ? "Show filters" : "Hide filters")">
+            @(_collapsed ? "filters >" : "< hide")
+        </button>
+    </div>
+
+    @if (!_collapsed)
+    {
+        <div class="sidebar-body">
+            <section class="section at-risk-section">
+                <h3 class="section-title mono">at-risk query</h3>
+                <button class="at-risk-button"
+                        type="button"
+                        title="Bridges built before 1960, condition <= 4, ADT > 5,000"
+                        disabled="@_atRiskRunning"
+                        @onclick="FindAtRiskClickedAsync">
+                    @(_atRiskRunning ? "Searching..." : "Find Bridges at Risk")
+                </button>
+                @if (AtRiskCount.HasValue)
+                {
+                    <div class="at-risk-result mono">
+                        <span class="result-count">@AtRiskCount.Value</span>
+                        <span class="result-label">@(AtRiskCount.Value == 1 ? "bridge at risk" : "bridges at risk")</span>
+                    </div>
+                    <button class="clear-button" type="button" @onclick="ClearAtRiskClickedAsync">
+                        Clear
+                    </button>
+                }
+            </section>
+
+            <section class="section">
+                <h3 class="section-title mono">condition</h3>
+                <label class="check-row">
+                    <input type="checkbox" checked="@Filter.ShowGood"
+                           @onchange="@((ChangeEventArgs e) => OnConditionChanged("good", (bool)(e.Value ?? false)))" />
+                    <span class="swatch swatch-good"></span>
+                    <span>Good <span class="mono muted">7-9</span></span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" checked="@Filter.ShowFair"
+                           @onchange="@((ChangeEventArgs e) => OnConditionChanged("fair", (bool)(e.Value ?? false)))" />
+                    <span class="swatch swatch-fair"></span>
+                    <span>Fair <span class="mono muted">5-6</span></span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" checked="@Filter.ShowPoor"
+                           @onchange="@((ChangeEventArgs e) => OnConditionChanged("poor", (bool)(e.Value ?? false)))" />
+                    <span class="swatch swatch-poor"></span>
+                    <span>Poor <span class="mono muted">0-4</span></span>
+                </label>
+            </section>
+
+            <section class="section">
+                <h3 class="section-title mono">year built</h3>
+                <div class="year-range">
+                    <div class="year-readout mono">
+                        <span>@Filter.YearMin</span>
+                        <span class="muted">to</span>
+                        <span>@Filter.YearMax</span>
+                    </div>
+                    <input type="range" min="1900" max="2025" step="1"
+                           value="@Filter.YearMin"
+                           @oninput="@((ChangeEventArgs e) => OnYearChanged(true, e.Value?.ToString()))" />
+                    <input type="range" min="1900" max="2025" step="1"
+                           value="@Filter.YearMax"
+                           @oninput="@((ChangeEventArgs e) => OnYearChanged(false, e.Value?.ToString()))" />
+                </div>
+            </section>
+
+            <section class="section">
+                <h3 class="section-title mono">county</h3>
+                <select class="county-select"
+                        value="@(Filter.CountyFips ?? "")"
+                        @onchange="OnCountyChanged">
+                    <option value="">All Counties</option>
+                    @foreach (var (name, fips) in IowaCounties.All)
+                    {
+                        <option value="@fips">@name</option>
+                    }
+                </select>
+            </section>
+        </div>
+    }
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public BridgeFilterState Filter { get; set; } = default!;
+    [Parameter] public int? AtRiskCount { get; set; }
+    [Parameter] public EventCallback OnFilterChanged { get; set; }
+    [Parameter] public EventCallback OnFindAtRisk { get; set; }
+    [Parameter] public EventCallback OnClearAtRisk { get; set; }
+    [Parameter] public EventCallback<string?> OnCountySelected { get; set; }
+
+    private bool _collapsed;
+    private bool _atRiskRunning;
+    private CancellationTokenSource? _yearDebounceCts;
+
+    private void ToggleCollapsed() => _collapsed = !_collapsed;
+
+    private async Task OnConditionChanged(string which, bool value)
+    {
+        switch (which)
+        {
+            case "good": Filter.ShowGood = value; break;
+            case "fair": Filter.ShowFair = value; break;
+            case "poor": Filter.ShowPoor = value; break;
+        }
+        await OnFilterChanged.InvokeAsync();
+    }
+
+    private async Task OnYearChanged(bool isMin, string? raw)
+    {
+        if (!int.TryParse(raw, out var year)) return;
+
+        if (isMin)
+        {
+            Filter.YearMin = Math.Min(year, Filter.YearMax);
+        }
+        else
+        {
+            Filter.YearMax = Math.Max(year, Filter.YearMin);
+        }
+
+        _yearDebounceCts?.Cancel();
+        _yearDebounceCts = new CancellationTokenSource();
+        var token = _yearDebounceCts.Token;
+        try
+        {
+            await Task.Delay(250, token);
+            if (!token.IsCancellationRequested)
+            {
+                await OnFilterChanged.InvokeAsync();
+            }
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task OnCountyChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        Filter.CountyFips = string.IsNullOrEmpty(value) ? null : value;
+        await OnFilterChanged.InvokeAsync();
+        await OnCountySelected.InvokeAsync(Filter.CountyFips);
+    }
+
+    private async Task FindAtRiskClickedAsync()
+    {
+        _atRiskRunning = true;
+        try
+        {
+            await OnFindAtRisk.InvokeAsync();
+        }
+        finally
+        {
+            _atRiskRunning = false;
+        }
+    }
+
+    private async Task ClearAtRiskClickedAsync()
+    {
+        await OnClearAtRisk.InvokeAsync();
+    }
+}
