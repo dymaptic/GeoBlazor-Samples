@@ -147,7 +147,8 @@
 
     private async Task OnSketchEvent(SketchEvent sketchEvent)
     {
-        if (sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete })
+        if (sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete }
+            && _polygonGraphicsLayer is not null)
         {
             // Get all drawn rectangle geometries and union them
             Geometry[] geometries = _polygonGraphicsLayer.Graphics
@@ -237,7 +238,10 @@
             await _featureTable.SetFilterGeometry(null);
         }
 
-        await _polygonGraphicsLayer.RemoveAll();
+        if (_polygonGraphicsLayer is not null)
+        {
+            await _polygonGraphicsLayer.RemoveAll();
+        }
 
         if (_layerView is not null)
         {
@@ -270,7 +274,12 @@
 
     private MapView? _mapView;
     private FeatureLayer? _npsLayer;
-    private GraphicsLayer _polygonGraphicsLayer = new();
+    // Must be a nullable @ref target with NO `= new()` initializer. A field initializer would
+    // create a throwaway GraphicsLayer instance that the SketchWidget can capture (by its id)
+    // before Blazor's @ref overwrites the field with the real component-tree instance that is
+    // actually added to the map — leaving the widget bound to an unregistered layer id and every
+    // toolbar tool disabled. See SketchAsEditor.razor / SpatialRelationships.razor for the same pattern.
+    private GraphicsLayer? _polygonGraphicsLayer;
     private FeatureTableWidget? _featureTable;
     private FeatureLayerView? _layerView;
     private readonly List<ObjectId> _selectedObjectIds = [];
