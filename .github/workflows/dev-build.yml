@@ -33,6 +33,7 @@ jobs:
             -k "${{ secrets.ARCGISAPIKEY }}" `
             -l "${{ secrets.SAMPLES_GEOBLAZOR_DEV_LICENSE_KEY }}" `
             -b "${{ secrets.SAMPLES_API_BYPASS_KEY }}" `
+            -dark `
             -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.json" `
             -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.Production.json" `
             -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.json" `
