@@ -57,7 +57,6 @@
             Clear Selection
         </button>
     </CustomOverlay>
-    @* ReSharper disable once GeoBlazor_Untested *@
     @if (_npsLayer is not null)
     {
         <FeatureTableWidget @ref="_featureTable"
@@ -73,7 +72,6 @@
 
 <div id="feature-table-container" style="height: 40%; min-height: 200px; width: 100%; margin-bottom: 4rem;"></div>
 
-@* ReSharper disable once GeoBlazor_Untested *@
 @code {
 
     public override List<NavMenu.PageLink> PageLinks =>
