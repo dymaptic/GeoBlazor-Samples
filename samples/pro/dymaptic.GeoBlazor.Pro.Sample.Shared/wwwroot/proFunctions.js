@@ -44,3 +44,58 @@ function getCaseInsensitive(obj, key) {
     }
     return undefined;
 }
+
+(function () {
+    const STATUS_BANNER_KEY = 'gb-status-banner-dismissed';
+
+    function applyBannerState() {
+        let banner = document.getElementById('gb-status-banner');
+        if (!banner) {
+            return;
+        }
+        try {
+            if (sessionStorage.getItem(STATUS_BANNER_KEY) === banner.dataset.message) {
+                banner.remove();
+            }
+        } catch {
+            // sessionStorage unavailable (private mode)
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        let closeButton = e.target.closest('.gb-status-banner-close');
+        if (!closeButton) {
+            return;
+        }
+        let banner = closeButton.closest('#gb-status-banner');
+        if (!banner) {
+            return;
+        }
+        try {
+            sessionStorage.setItem(STATUS_BANNER_KEY, banner.dataset.message);
+        } catch {
+            // sessionStorage unavailable (private mode)
+        }
+        banner.remove();
+    });
+
+    function registerEnhancedLoad() {
+        if (window.Blazor) {
+            window.Blazor.addEventListener('enhancedload', applyBannerState);
+            return true;
+        }
+        return false;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyBannerState();
+        if (!registerEnhancedLoad()) {
+            let attempts = 0;
+            let timer = setInterval(() => {
+                if (registerEnhancedLoad() || ++attempts > 50) {
+                    clearInterval(timer);
+                }
+            }, 100);
+        }
+    });
+})();

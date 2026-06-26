@@ -1,0 +1,12 @@
+@inject IConfiguration Configuration
+
+@{
+    string? message = Configuration["StatusBannerMessage"];
+}
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div id="gb-status-banner" class="gb-status-banner" role="status" data-message="@message">
+        <span class="gb-status-banner-text">@message</span>
+        <button type="button" class="gb-status-banner-close" aria-label="Close status banner" title="Close">&times;</button>
+    </div>
+}
