@@ -60,13 +60,10 @@ public sealed class BridgeFilterState
             return null;
         }
 
-        // Build allowed code list from condition fields. Composite condition = min of the three,
-        // where 'N' means "not applicable" (commonly culverts) — we treat as 99/unknown and skip.
-        // The Arcade renderer maps:
-        //   0-4 -> Poor, 5-6 -> Fair, 7-9 -> Good
-        // For server-side filtering, mirror that by requiring at least one of the three condition
-        // fields to fall in the matching code set. (Approximate but readable; exact min requires
-        // server Arcade which the NBI service does not support.)
+        // Filter on the SAME field the renderer symbolizes by (DECK_COND_058) so the
+        // visible dot colors always match the checked condition boxes. The renderer maps:
+        //   0-4 -> Poor (red), 5-6 -> Fair (yellow), 7-9 -> Good (green)
+        // Filtering on deck condition alone keeps symbology and filtering consistent.
 
         var allowed = new List<string>();
         if (ShowPoor) allowed.AddRange(new[] { "0", "1", "2", "3", "4" });
@@ -74,9 +71,6 @@ public sealed class BridgeFilterState
         if (ShowGood) allowed.AddRange(new[] { "7", "8", "9" });
 
         var quoted = string.Join(",", allowed.Select(c => $"'{c}'"));
-        return
-            $"DECK_COND_058 IN ({quoted}) OR " +
-            $"SUPERSTRUCTURE_COND_059 IN ({quoted}) OR " +
-            $"SUBSTRUCTURE_COND_060 IN ({quoted})";
+        return $"DECK_COND_058 IN ({quoted})";
     }
 }
