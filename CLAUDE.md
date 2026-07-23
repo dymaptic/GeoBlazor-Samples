@@ -39,9 +39,9 @@ The `Directory.Build.props` at the repo root controls this toggle. The `Choose` 
 
 ## Repository Layout
 
-### `samples/` — Library Samples (net10.0)
+### `samples/` — Library Samples
 
-Official GeoBlazor sample apps, split into Core and Pro. These target **net10.0** and use `Version="*"` for GeoBlazor packages (always latest).
+Official GeoBlazor sample apps, split into Core and Pro. These target the latest released .NET (see each `.csproj`) and use `Version="*"` for GeoBlazor packages (always latest).
 
 - **`samples/core/`** — Core samples use a Shared library pattern:
   - `*.Sample.Shared` — Razor class library with all sample pages/components
@@ -54,21 +54,21 @@ Official GeoBlazor sample apps, split into Core and Pro. These target **net10.0*
 
 ### `projects/` — Real-World Examples (mixed targets)
 
-Independent demo apps with varying .NET versions and hosting models:
+Independent demo apps with varying .NET targets and hosting models. .NET target and GeoBlazor version vary per project and drift over time — **always check the project's `.csproj` for the actual versions.** Hosting models:
 
-| Project | Target  | Hosting Model | GeoBlazor     |
-|---------|---------|---------------|---------------|
-| ShipmentTracker | net9.0  | Blazor Web App (Server + WASM) | Pro 4.1.0     |
-| SimpleSearch | net9.0  | Blazor Web App (Server + WASM) | Core (latest) |
-| NationFinder | net9.0  | Blazor Web App (Server + WASM) | Core (latest) |
-| NationFinder2 | net9.0  | Blazor Server | Core (latest) |
-| CustomPopups | net8.0  | Blazor Server | Core 3.0.1    |
-| CustomPopupsJS | net8.0  | Blazor Server | Core 3.0.1    |
-| DesMoineBusRoutes | net8.0  | Blazor Server | Core 3.0.1    |
-| MuseumsOfChicago | net8.0  | Blazor Web App | Core (latest) |
-| PointsOnAMapBlog | net8.0  | Blazor WASM | Core 3.0.1    |
-| SolarTracker | net8.0  | Blazor WASM | Core 3.0.1    |
-| FieldAssetInspector | net10.0 | Uno Platform + MAUI Embedding (BlazorWebView) | Core (latest) |
+| Project | Hosting Model | GeoBlazor |
+|---------|---------------|-----------|
+| ShipmentTracker | Blazor Web App (Server + WASM) | Pro (pinned) |
+| SimpleSearch | Blazor Web App (Server + WASM) | Core (latest) |
+| NationFinder | Blazor Web App (Server + WASM) | Core (latest) |
+| NationFinder2 | Blazor Server | Core (latest) |
+| CustomPopups | Blazor Server | Core (pinned) |
+| CustomPopupsJS | Blazor Server | Core (pinned) |
+| DesMoineBusRoutes | Blazor Server | Core (pinned) |
+| MuseumsOfChicago | Blazor Web App | Core (latest) |
+| PointsOnAMapBlog | Blazor WASM | Core (pinned) |
+| SolarTracker | Blazor WASM | Core (pinned) |
+| FieldAssetInspector | Uno Platform + MAUI Embedding (BlazorWebView) | Core (latest) |
 
 ## Configuration
 

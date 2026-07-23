@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Blazor Server application showcasing shipment tracking visualization using GeoBlazor Pro - a .NET wrapper for ArcGIS Maps SDK for JavaScript. The application displays shipments on an interactive map with various layers and widgets.
+This is a Blazor Web App (interactive Server + WebAssembly, with a separate `ShipmentTracker.Client` project for the WASM side) showcasing shipment tracking visualization using GeoBlazor Pro - a .NET wrapper for ArcGIS Maps SDK for JavaScript. The application displays shipments on an interactive map with various layers and widgets.
 
 ## Key Technologies
 
-- **ASP.NET Core 9.0** - Web framework
-- **Blazor Server** - Interactive server-side rendering
-- **GeoBlazor Pro 4.1.0** - GIS mapping components for Blazor
-- **Radzen Blazor 4.23.4** - UI component library
+Versions are pinned in the `.csproj` files — check there rather than relying on docs:
+
+- **ASP.NET Core / Blazor Web App** - Web framework (Server host + WASM `ShipmentTracker.Client`)
+- **GeoBlazor Pro** - GIS mapping components for Blazor
+- **Radzen Blazor** - UI component library
 - **ArcGIS Maps SDK** - Underlying mapping technology
 
 ## Development Commands
@@ -39,8 +40,8 @@ The application runs on:
 ### Core Components
 
 - **Program.cs** - Application startup, configures GeoBlazor Pro and dependency injection
-- **Repository.cs** - Data access layer that loads shipment data from `export.json`
-- **Records.cs** - Domain models including `Shipment`, `ShipmentStatus`, `SearchCriteria`, and `CategoryColors`
+- **Repository.cs** (server project) - Data access layer that loads shipment data from `export.json`
+- **ShipmentTracker.Client/Records.cs** - Domain models including `Shipment`, `ShipmentStatus`, `SearchCriteria`, and `CategoryColors`
 
 ### Data Flow
 
@@ -66,11 +67,11 @@ The application heavily uses GeoBlazor Pro components:
 
 ## Important Files
 
-- **Components/Pages/MapPage.razor** - Main map implementation with shipment visualization
-- **Repository.cs** - Data access and synthetic data generation
-- **Records.cs** - Domain models and color mapping
+- **ShipmentTracker.Client/Pages/MapPage.razor** - Main map implementation with shipment visualization
+- **Repository.cs** (server project) - Data access and synthetic data generation
+- **ShipmentTracker.Client/Records.cs** - Domain models and color mapping
 - **export.json** - Sample shipment data (first 100 records are used)
-- **Components/_Imports.razor** - Global using statements for GeoBlazor namespaces
+- **_Imports.razor** (in both server `Components/` and `ShipmentTracker.Client/`) - Global using statements for GeoBlazor namespaces
 
 ## Configuration Notes
 
