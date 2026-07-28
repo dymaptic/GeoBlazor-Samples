@@ -56,17 +56,17 @@ public partial class CustomPopupContents
         }
     }
 
-    private async Task<string> GenerateContent(PopupTemplateCreatorEvent creatorEvent)
+    private async Task<PopupTemplateContent> GenerateContent(PopupTemplateCreatorEvent? creatorEvent)
     {
         try
         {
             StatisticDefinition levelCount = new("LEVEL_", "level_count",
-                StatisticType.Count);
+                StatisticDefinitionStatisticType.Count);
 
             StatisticDefinition enrollmentAvg = new("ENROLLMENT", "enroll_avg",
-                StatisticType.Avg);
+                StatisticDefinitionStatisticType.Avg);
 
-            Query queryObject = new(Geometry: creatorEvent.Graphic?.Geometry,
+            Query queryObject = new(Geometry: creatorEvent?.Graphic?.Geometry,
                 GroupByFieldsForStatistics: ["LEVEL_"],
                 OutFields: ["*"], SpatialRelationship: SpatialRelationship.Intersects,
                 OutStatistics: [levelCount, enrollmentAvg]);

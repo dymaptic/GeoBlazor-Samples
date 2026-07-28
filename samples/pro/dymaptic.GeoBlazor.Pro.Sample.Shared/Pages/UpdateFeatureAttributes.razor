@@ -49,7 +49,7 @@
     {
         <FeatureFormWidget @ref="_form" 
                            LayerId="@_featureLayer!.Id" 
-                           GroupDisplay="GroupDisplay.Sequential" 
+                           GroupDisplay="FeatureFormGroupDisplay.Sequential" 
                            ContainerId="form"
                            OnSubmit="OnFormSubmit"
                            OnValueChange="OnValueChange" />
@@ -97,8 +97,8 @@
             _highlightHandle = null;
         }
 
-        HitTestResult hitTest = await _mapView!.HitTest(clickEvent);
-        ViewHit[] results = hitTest.Results;
+        HitTestResult hitTest = (await _mapView!.HitTest(clickEvent))!;
+        IViewHit[] results = hitTest.Results;
         if (results.Length > 0 &&
             results[0] is GraphicHit graphicHit &&
             graphicHit.LayerId == _featureLayer!.Id)
@@ -113,7 +113,7 @@
 
     private async Task SelectFeature(ObjectId objectId)
     {
-        Query query = await _featureLayer!.CreateQuery();
+        Query query = (await _featureLayer!.CreateQuery())!;
         query.ObjectIds = [objectId];
         query.OutFields = ["*"];
         query.ReturnGeometry = true;
@@ -167,7 +167,7 @@
     {
         try
         {
-            FeatureEditsResult editsResult = await _featureLayer!.ApplyEdits(edits);
+            EditsResult editsResult = (await _featureLayer!.ApplyEdits(edits))!;
             if (editsResult.AddFeatureResults.Any())
             {
                 await SelectFeature(editsResult.AddFeatureResults[0].ObjectId!);

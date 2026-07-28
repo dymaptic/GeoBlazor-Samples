@@ -22,7 +22,7 @@
          Class="map-view"
          BackgroundColor="@(new MapColor("white"))"
          OnViewRendered="OnViewRendered"
-         OnLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerViewCreate="OnLayerViewCreate">
     <SpatialReference Wkid="102003" />
     <Constraints SnapToZoom="false" MinScale="50465153" />
     <Map>
@@ -46,7 +46,7 @@
                   GraphicsLayer="@_polygonGraphicsLayer"
                   AvailableCreateTools="@([AvailableCreateTool.Rectangle])"
                   UpdateOnGraphicClick="false"
-                  CreationMode="CreationMode.Single"
+                  CreationMode="SketchCreationMode.Single"
                   OnSketchEvent="OnSketchEvent"
                   HideSelectionToolsLassoSelection="true"
                   HideSelectionToolsRectangleSelection="true"
@@ -109,7 +109,7 @@
         }
     }
 
-    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private void OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.LayerView is FeatureLayerView flv && createEvent.Layer?.Id == _npsLayer?.Id)
         {
@@ -250,7 +250,7 @@
         }
     }
 
-    private async Task OnCellPointerOver(FeatureTableCellPointeroverEvent pointeroverEvent)
+    private async Task OnCellPointerOver(FeatureTableCellEvent pointeroverEvent)
     {
         if (_onRowOverHighlight is not null)
         {

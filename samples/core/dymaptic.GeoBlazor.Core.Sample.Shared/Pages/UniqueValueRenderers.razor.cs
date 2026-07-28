@@ -85,6 +85,6 @@ public partial class UniqueValueRenderers
             .Select(r => new UniqueValueInfo(string.Concat(r.Key[0].ToString().ToUpperInvariant(), r.Key.AsSpan(1)).Replace("_", " "), r.Value, r.Key))
             .ToArray(),
         field: "highway", defaultLabel: "Service",
-        legendOptions: new UniqueValueRendererLegendOptions("Route Type"));
+        legendOptions: new RendererLegendOptions(title: "Route Type"));
     private bool _showLegend;
 }

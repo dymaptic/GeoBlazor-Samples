@@ -10,7 +10,7 @@
 
 <MapView @ref="_mapView" OnPointerMove="@(e => OnPointerMoveOrDown(e.X, e.Y))"
          OnPointerDown="@(e => OnPointerMoveOrDown(e.X, e.Y))"
-         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerViewCreate="OnLayerViewCreate"
          Class="map-view"
          Longitude="-61.125537"
          Latitude="35.863534"
@@ -65,7 +65,7 @@
         "with EventRateLimitInMilliseconds. The sample is intended to demonstrate hit testing and feature " +
         "highlighting in a Blazor application without writing JavaScript.";
 
-    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private void OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (_hurricaneLayer!.Id == createEvent.Layer!.Id)
         {

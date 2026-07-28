@@ -369,3 +369,6 @@ MigrationBackup/
 /SimpleSearch/SimpleSearch/wwwroot/lib/
 /NationFinder2/NationFinder/Properties/ServiceDependencies
 *.db*
+
+# Per-developer MSBuild overrides (e.g. UseProjectReferences) - see Directory.Build.props
+local.props

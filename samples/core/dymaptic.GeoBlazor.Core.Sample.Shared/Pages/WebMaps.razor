@@ -6,7 +6,7 @@
 <p class="instructions">
     A simple demo of loading a complete WebMap from ArcGIS Online, including layers, icons, popups, and widgets.
 </p>
-<MapView OnLayerViewCreate="StateHasChanged" Class="map-view">
+<MapView OnViewLayerViewCreate="StateHasChanged" Class="map-view">
     <WebMap @ref="_webMap">
         <PortalItem PortalItemId="237b9584339446a0b56317b5962a4971" />
     </WebMap>

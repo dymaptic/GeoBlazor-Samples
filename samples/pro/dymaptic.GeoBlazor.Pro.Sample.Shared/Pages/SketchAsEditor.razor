@@ -108,7 +108,7 @@
         {
             IncludeByGeoBlazorId = [_featureLayer.Id]
         };
-        HitTestResult hit = await _mapView.HitTest(evt, options);
+        HitTestResult hit = (await _mapView.HitTest(evt, options))!;
         Graphic? graphic = hit.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
 
         if (graphic is null)
@@ -119,7 +119,7 @@
 
         // Stage the picked graphic into the Sketch's own GraphicsLayer so the widget can operate on it.
         await _sketchLayer.Add(graphic);
-        await _sketchWidget.Update([graphic], _updateOptions);
+        await _sketchWidget.TriggerUpdate(graphic, _updateOptions);
         _editing = true;
         _statusMessage = null;
     }
@@ -137,7 +137,7 @@
         await _sketchWidget.Cancel();
     }
 
-    private async Task OnKeyDown(KeyDownEvent evt)
+    private async Task OnKeyDown(ViewKeyDownEvent evt)
     {
         if (evt.Key != "Escape" || _sketchWidget is null) return;
 
@@ -178,10 +178,10 @@
 
         try
         {
-            FeatureEditsResult result = await _featureLayer.ApplyEdits(new FeatureEdits
+            EditsResult result = (await _featureLayer.ApplyEdits(new FeatureLayerApplyEditsEdits
             {
                 UpdateFeatures = [moved]
-            });
+            }))!;
 
             FeatureEditResult? firstError = result.UpdateFeatureResults
                 .FirstOrDefault(r => r.Error is not null);
@@ -211,10 +211,7 @@
     }
 
     // Configure the SketchWidget to perform a Move update; all other options use their defaults.
-    private readonly SketchToolUpdateOptions _updateOptions =
-        new(SketchTool.Move, null, null, null,
-            null, null, null,
-            null!, null!);
+    private readonly SketchViewModelUpdateUpdateOptions _updateOptions = new(Tool: SketchTool.Move);
 
     private MapView? _mapView;
     private FeatureLayer? _featureLayer;

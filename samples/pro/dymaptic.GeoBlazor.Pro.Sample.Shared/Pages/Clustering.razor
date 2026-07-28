@@ -26,7 +26,7 @@
             <PopupTemplate Title="Magnitude {mag} {type}"
                            StringContent="Magnitude {mag} {type} hit {place} on {time}">
                 <FieldInfo FieldName="time">
-                    <FieldInfoFormat DateFormat="DateFormat.ShortDateShortTime"/>
+                    <FieldInfoFormat DateFormat="FieldInfoFormatDateFormat.ShortDateShortTime"/>
                 </FieldInfo>
             </PopupTemplate>
             <SimpleRenderer>
@@ -49,7 +49,7 @@
                                     Color="@(new MapColor("#69dcff"))">
                     <Outline Color="@(new MapColor(0, 139, 174, 0.5))" Width="6"/>
                 </SimpleMarkerSymbol>
-                <LabelClass DeconflictionStrategy="DeconflictionStrategy.None"
+                <LabelClass DeconflictionStrategy="LabelClassDeconflictionStrategy.None"
                        LabelPlacement="LabelPlacement.CenterCenter">
                     <LabelClassLabelExpressionInfo Expression="Text($feature.cluster_count, '#,###')"/>
                     <TextSymbol Color="@(new MapColor("#004a5d"))">

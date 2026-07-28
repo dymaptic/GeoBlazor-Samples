@@ -8,7 +8,7 @@
 
 </p>
 
-<MapView @ref="_mapView" Class="map-view" OnLayerViewCreate="OnLayerViewCreate">
+<MapView @ref="_mapView" Class="map-view" OnViewLayerViewCreate="OnLayerViewCreate">
     <WebMap>
         <PortalItem PortalItemId="433b5f7f524a4d1ebf3a9f8e1bd49ee0" />
     </WebMap>
@@ -46,7 +46,7 @@
     [Inject]
     public required PieChartGenerator PieChartGenerator { get; set; }
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (_featureLayer is null && createEvent.Layer is FeatureLayer fl)
         {
@@ -59,7 +59,7 @@
     
     private async Task<FeatureReductionCluster> GenerateClusterConfig()
     {
-        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!, _mapView!.Id)).PrimaryScheme;
+        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!)).PrimaryScheme!;
         
         TextSymbol labelSymbol = (TextSymbol)labelScheme.LabelingInfo.First().Symbol!;
 #pragma warning disable BL0005
@@ -77,7 +77,7 @@
             .ToList();
         List<string> fieldNames = fieldInfos.Select(fi => fi.FieldName!).ToList();
 
-        PopupTemplate popupTemplate = new(content: new List<Content>
+        PopupTemplate popupTemplate = new(content: new List<IContent>
         {
             new TextContent("This cluster represents <b>{cluster_count}</b> features."),
             new MediaContent(mediaInfos:
@@ -88,7 +88,7 @@
         }, fieldInfos: fieldInfos);
         Dimension? minSize = labelScheme.ClusterMinSize is null ? null : new Dimension(labelScheme.ClusterMinSize.Value); 
         return new FeatureReductionCluster(clusterMinSize: minSize,
-            labelingInfo: labelScheme.LabelingInfo, popupTemplate: popupTemplate, renderer: renderer,
+            labelingInfo: labelScheme.LabelingInfo.ToList(), popupTemplate: popupTemplate, renderer: renderer,
             fields: result.Fields);
     }
 

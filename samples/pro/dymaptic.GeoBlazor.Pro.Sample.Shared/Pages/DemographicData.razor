@@ -62,7 +62,7 @@
 
     private async Task OnSearchSelectResult(SearchSelectResultEvent selectResultEvent)
     {
-        SearchResult selectResult = selectResultEvent.Result!;
+        SearchSelectResultEventResult selectResult = selectResultEvent.Result!;
         await GetDemographicData(selectResult.Name!, (Point)selectResult.Feature!.Geometry!);
     }
 
@@ -72,13 +72,13 @@
         var locatorUrl = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
         AddressCandidate address = await LocationService.LocationToAddress(locatorUrl, mapPoint);
         string? city = null;
-        if (address.Attributes.TryGetValue("City", out object? attribute))
+        if (address.Attributes!.TryGetValue("City", out object? attribute))
         {
-            city = attribute.ToString();
+            city = attribute?.ToString();
         }
-        else if (address.Attributes.TryGetValue("Region", out object? addressAttribute))
+        else if (address.Attributes!.TryGetValue("Region", out object? addressAttribute))
         {
-            city = addressAttribute.ToString();
+            city = addressAttribute?.ToString();
         }
         if (city is null) return;
 
@@ -101,7 +101,12 @@
         attributes.TryGetValue("AVGHHSZ", out object? avgHouseholdSize);
         string popupContent = $"Population: {totalPop}<br>Males: {totalMales}<br>Females: {totalFemales}<br>Average Household Size: {avgHouseholdSize}";
 
-        await View!.ShowPopup(new PopupTemplate(popupTitle, popupContent), mapPoint);
+        await View!.OpenPopup(new PopupOpenOptions
+        {
+            Title = popupTitle,
+            Content = popupContent,
+            Location = mapPoint
+        });
 
         Polygon buffer = (await GeometryEngine.GeodesicBuffer(mapPoint, 1, GeometryEngineLinearUnit.Miles))!;
         var bufferGraphic = new Graphic(buffer, BufferSymbol);

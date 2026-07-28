@@ -10,7 +10,7 @@
          ExcludeApiKey="true"
          Center="@(new Point(2, 46))"
          Class="map-view"
-         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerViewCreate="OnLayerViewCreate"
          OnClick="OnClick"
          OnViewRendered="OnViewRendered"
          @ref="_mapView" PopupEnabled="false">
@@ -63,7 +63,7 @@
         "moves the highlight to the clicked country, and re-applies the effects. The sample is intended to demonstrate " +
         "how blend modes, effects, and grouped layers can produce visually rich spatial focus treatments.";
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _worldImagery?.Id && !_worldImageryPopupsDisabled)
         {

@@ -14,7 +14,7 @@
 <MapView Class="map-view" @ref="_mapView"
          Center="@(new Point(80.20127, 22.12355))"
          Zoom="4"
-         OnLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerViewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
@@ -79,7 +79,7 @@
     [Inject]
     public required LabelGenerator LabelGenerator { get; set; }
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _featureLayer?.Id)
         {
@@ -94,19 +94,26 @@
 
     private async Task OverrideClusterSymbol()
     {
-        await _popupWidget!.SetSelectedClusterBoundaryFeatureSymbol(new SimpleFillSymbol(
-            new Outline(new MapColor(50, 50, 50, 0.25), 0.5),
-            new MapColor(50, 50, 50, 0.15), SimpleFillSymbolStyle.Solid));
+        // PopupViewModel inherits SelectedClusterBoundaryFeature from FeaturesViewModel.
+        PopupViewModel? viewModel = await _popupWidget!.GetViewModel();
+        Graphic? boundaryFeature = viewModel is null ? null : await viewModel.GetSelectedClusterBoundaryFeature();
+
+        if (boundaryFeature is not null)
+        {
+            await boundaryFeature.SetSymbol(new SimpleFillSymbol(
+                new Outline(new MapColor(50, 50, 50, 0.25), 0.5),
+                new MapColor(50, 50, 50, 0.15), SimpleFillSymbolStyle.Solid));
+        }
     }
 
     private async Task<FeatureReductionCluster> GenerateClusterConfig()
     {
         PopupTemplateResults templateResults = await PopupTemplateGenerator.GetClusterTemplates(_featureLayer!);
         PopupTemplate popupTemplate = templateResults.PrimaryTemplate.Value;
-        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!, _mapView!.Id)).PrimaryScheme;
+        LabelScheme labelScheme = (await LabelGenerator.GetClusterLabelSchemes(_featureLayer!)).PrimaryScheme!;
         Dimension? minSize = labelScheme.ClusterMinSize is null ? null : new Dimension(labelScheme.ClusterMinSize.Value);
         return new FeatureReductionCluster(clusterMinSize: minSize,
-            labelingInfo: labelScheme.LabelingInfo, popupTemplate: popupTemplate, maxScale: 50000);
+            labelingInfo: labelScheme.LabelingInfo.ToList(), popupTemplate: popupTemplate, maxScale: 50000);
     }
 
     private async Task ToggleClustering()

@@ -9,7 +9,7 @@
 
 <MapView @ref="_mapView"
          OnClick="OnClick"
-         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerViewCreate="OnLayerViewCreate"
          Class="map-view">
     <Map>
         <Basemap>
@@ -72,7 +72,7 @@
     [Inject]
     public required IJSRuntime JsRuntime { get; set; }
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _featureLayer?.Id)
         {
@@ -80,7 +80,7 @@
         }
     }
 
-    private async Task OnClick(ViewClickEvent clickEvent)
+    private async Task OnClick(ClickEvent clickEvent)
     {
         Query query = (await _featureLayer!.CreateQuery())!;
         query.Geometry = clickEvent.MapPoint;

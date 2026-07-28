@@ -9,9 +9,9 @@
     Also included is the TimelineWidget, which requires GeoBlazor Pro.
 </p>
 <MapView @ref="_mapView" Class="map-view" 
-         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerViewCreate="OnLayerViewCreate"
          OnViewRendered="OnViewRendered">
-    <WebMap>
+    <WebMap @ref="_webMap">
         <PortalItem PortalItemId="70b726074af04a7e9839d8a07f64c039" />
     </WebMap>
     <ExpandWidget Expanded="true" Position="OverlayPosition.TopRight">
@@ -88,7 +88,7 @@
     /// <summary>
     /// Setting the TimeSliderWidget properties from the WebMap
     /// </summary>
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         try
         {
@@ -96,9 +96,10 @@
 
             _layerView = createEvent.LayerView as FeatureLayerView;
 
-            WebMapProperties? props = await _timeSliderWidget?.GetPropertiesFromWebMap(_mapView!.Id)!;
-
-            await _timeSliderWidget?.SetPropertiesFromWebMap(props!)!;
+            if (_timeSliderWidget is not null && _webMap is not null)
+            {
+                await _timeSliderWidget.UpdateWebDocument(_webMap);
+            }
         }
         catch (Exception ex)
         {
@@ -133,6 +134,7 @@
     private MapView? _mapView;
     private FeatureLayerView? _layerView;
     private TimeSliderWidget? _timeSliderWidget;
+    private WebMap? _webMap;
     private BookmarksWidget? _bookmarksWidget;
     private bool _handlerRegistered;
 

@@ -34,7 +34,7 @@
             <PopupTemplate Title="Trail name: {trailName}" ContentFunction="DifficultyLevel">
                 <FieldInfo FieldName="trailName" />
                 <FieldInfo FieldName="difficulty" />
-                <ActionButton Title="Edit feature" ActionId="edit-this" ClassName="esri-icon-edit" CallbackFunction="EditThis" />
+                <ActionButton Title="Edit feature" ActionId="edit-this" ClassName="esri-icon-edit" />
             </PopupTemplate>
         </FeatureLayer>
     </Map>
@@ -50,7 +50,7 @@
             </FormTemplate>
         </EditorLayerInfo>
     </EditorWidget>
-    <PopupWidget @ref="_popupWidget" />
+    <PopupWidget @ref="_popupWidget" OnTriggerAction="OnPopupTriggerAction" />
     <ExpandWidget Position="OverlayPosition.TopLeft" 
                   ExpandTooltip="Open for info"
                   CollapseTooltip="Close info"
@@ -98,6 +98,14 @@
         return new ValueTask<IContent[]?>([textElement, attachmentsElement]);
     }
     
+    private async Task OnPopupTriggerAction(PopupTriggerActionEvent triggerEvent)
+    {
+        if (triggerEvent.Action.ActionId == "edit-this")
+        {
+            await EditThis();
+        }
+    }
+
     private async Task EditThis()
     {
         await _view!.ClosePopup();
@@ -129,7 +137,7 @@
     private FeatureLayer? _featureLayer;
     private EditorWidget? _editor;
     private bool _firstRender = true;
-    private readonly PopupViewOpenPopupOptions _popupOpenOptions = new()
+    private readonly PopupOpenOptions _popupOpenOptions = new()
     {
         FetchFeatures = true,
         ShouldFocus = true

@@ -95,7 +95,7 @@
         "The sample is intended to demonstrate spatial click-to-query plus related-record retrieval in a " +
         "Blazor application without writing JavaScript.";
 
-    private async Task OnClick(ViewClickEvent clickEvent)
+    private async Task OnClick(ClickEvent clickEvent)
     {
         await ClearMap();
         await QueryFeatures(clickEvent.MapPoint);

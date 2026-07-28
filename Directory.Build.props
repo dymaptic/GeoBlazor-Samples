@@ -1,6 +1,11 @@
 <Project>
+    <!-- Per-developer opt-in overrides (gitignored). Must come first: the imports and conditions
+         below read UseProjectReferences, and IDE project-model evaluation only sees it if set here. -->
+    <Import Project="$(MSBuildThisFileDirectory)local.props"
+            Condition="Exists('$(MSBuildThisFileDirectory)local.props')"/>
+
     <!-- Import parent Directory.Build.props if it exists (e.g., when running as submodule of Pro) -->
-    <Import Project="../Directory.Build.props" 
+    <Import Project="../Directory.Build.props"
             Condition="Exists('$(MSBuildThisFileDirectory)../Directory.Build.props') AND '$(UseProjectReferences)' == 'true'"/>
 
     <PropertyGroup>
@@ -18,6 +23,8 @@
     -->
     <PropertyGroup Condition="'$(UseProjectReferences)' == 'true'">
         <CoreProjectPath Condition="'$(CoreProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor.Core</CoreProjectPath>
+        <!-- Nested layout first (this repo as a submodule of GeoBlazor.Pro), then sibling checkouts. -->
+        <ProProjectPath Condition="'$(ProProjectPath)' == '' AND Exists('$(MSBuildThisFileDirectory)..\src\dymaptic.GeoBlazor.Pro\dymaptic.GeoBlazor.Pro.csproj')">$(MSBuildThisFileDirectory)..\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
         <ProProjectPath Condition="'$(ProProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor.Pro\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
         <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
         <!-- Source-ref sample hosts: drop the ESBuild-emitted Core/Pro JS from the MapStaticAssets endpoint manifest so

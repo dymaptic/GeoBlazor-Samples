@@ -33,7 +33,7 @@
 </div>
 
 <SceneView @ref="_view" Class="map-view"
-           OnLayerViewCreate="OnLayerViewCreate">
+           OnViewLayerViewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray"/>
@@ -296,7 +296,7 @@
         "the labels demo. The sample is intended to demonstrate MapImageLayer sublayer toggling, custom " +
         "rendering, and dynamic filtering in a Blazor application without writing JavaScript.";
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is MapImageLayer imageLayer)
         {

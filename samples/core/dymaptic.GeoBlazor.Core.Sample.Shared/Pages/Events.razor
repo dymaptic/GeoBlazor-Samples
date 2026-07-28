@@ -183,7 +183,7 @@
         "The sample is intended to demonstrate listening to and inspecting every map event in a Blazor application " +
         "without writing JavaScript.";
 
-    private async Task OnMapClick(ViewClickEvent clickEvent)
+    private async Task OnMapClick(ClickEvent clickEvent)
     {
         _clickJson = BuildViewableJson(clickEvent);
         ScreenPoint? screenPoint = await _view!.ToScreen(clickEvent.MapPoint);
@@ -204,12 +204,12 @@
         _clickJson += $", MapPoint: {mapPoint.X}, {mapPoint.Y}";
     }
 
-    private void OnMapDoubleClick(ViewDoubleClickEvent clickEvent)
+    private void OnMapDoubleClick(ClickEvent clickEvent)
     {
         _doubleClickJson = BuildViewableJson(clickEvent);
     }
 
-    private void OnMapHold(ViewHoldEvent holdEvent)
+    private void OnMapHold(ClickEvent holdEvent)
     {
         _holdJson = BuildViewableJson(holdEvent);
     }
@@ -229,27 +229,27 @@
         _dragJson = BuildViewableJson(dragEvent);
     }
 
-    private void OnMapPointerEnter(ViewPointerEnterEvent pointerEvent)
+    private void OnMapPointerEnter(PointerEvent pointerEvent)
     {
         _pointerEnterJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerLeave(ViewPointerLeaveEvent pointerEvent)
+    private void OnMapPointerLeave(PointerEvent pointerEvent)
     {
         _pointerLeaveJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerDown(ViewPointerDownEvent pointerEvent)
+    private void OnMapPointerDown(PointerEvent pointerEvent)
     {
         _pointerDownJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerUp(ViewPointerUpEvent pointerEvent)
+    private void OnMapPointerUp(PointerEvent pointerEvent)
     {
         _pointerUpJson = BuildViewableJson(pointerEvent);
     }
 
-    private void OnMapPointerMove(ViewPointerMoveEvent pointerEvent)
+    private void OnMapPointerMove(PointerEvent pointerEvent)
     {
         _pointerMoveJson = BuildViewableJson(pointerEvent);
     }

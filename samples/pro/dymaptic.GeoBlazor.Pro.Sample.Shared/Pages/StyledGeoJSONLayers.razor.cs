@@ -7,6 +7,7 @@ using dymaptic.GeoBlazor.Core.Model;
 using dymaptic.GeoBlazor.Core.Options;
 using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Core.Components.Logic;
+using dymaptic.GeoBlazor.Pro.Components;
 using dymaptic.GeoBlazor.Pro.Components.Layers;
 using Microsoft.AspNetCore.Components;
 
@@ -41,7 +42,7 @@ public partial class StyledGeoJSONLayers
         _initialExtent ??= await _mapView!.GetExtent();
     }
     
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is ProGeoJSONLayer layer)
         {

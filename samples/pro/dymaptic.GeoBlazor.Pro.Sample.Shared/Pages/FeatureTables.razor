@@ -20,7 +20,7 @@
 
 <MapView @ref="_mapView"
          Class="map-view"
-         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerViewCreate="OnLayerViewCreate"
          OnExtentChanged="OnExtentChanged">
     <WebMap @ref="_webMap">
         <PortalItem PortalItemId="332e5d145bec4c2c860d65f7ca494b23" />
@@ -36,7 +36,7 @@
                             HideSelectionColumn="true">
             <ActionColumnConfig Label="Go to feature"
                                 Icon="zoom-to-object"
-                                Callback="GoToFeature" />
+                                OnCallback="GoToFeature" />
         </FeatureTableWidget>
     }
 </MapView>
@@ -68,7 +68,7 @@
         "demonstrate driving a docked attribute table from a WebMap with layer switching, extent-based filtering, " +
         "related-records configuration with relabeled relationship columns, and a feature-aware row action.";
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is not FeatureLayer featureLayer)
         {
@@ -96,7 +96,7 @@
             return;
         }
 
-        IReadOnlyList<AttributeTableTemplateElement>? elements = await template.GetElements();
+        IReadOnlyList<AttributeTableElement>? elements = await template.GetElements();
         if (elements is null)
         {
             return;
@@ -148,9 +148,9 @@
         await relatedTable.SetHideColumnMenus(true);
         await relatedTable.SetHideSelectionColumn(true);
         await relatedTable.SetActionColumnConfig(new ActionColumnConfig(
-            label: $"Go to {relatedTable.Layer?.Title ?? "related"} feature",
+            label: $"Go to {(relatedTable.Layer as Layer)?.Title ?? "related"} feature",
             icon: "zoom-to-object",
-            callback: GoToFeature));
+            onCallback: GoToFeature));
     }
 
     private async Task OnExtentChanged(Extent extent)
@@ -161,9 +161,9 @@
         }
     }
 
-    private async Task GoToFeature(object parameters)
+    private async Task GoToFeature(Graphic feature, int index, MouseEvent native)
     {
-        if (parameters is ActionColumnCallbackParams { Feature: { } feature } && _mapView is not null)
+        if (_mapView is not null)
         {
             await _mapView.GoTo([feature]);
         }

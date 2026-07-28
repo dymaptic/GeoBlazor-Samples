@@ -21,14 +21,14 @@
     @if (_featureLayer is not null)
     {
         <FeatureFormWidget @ref="_form" LayerId="@_featureLayer!.Id"
-                           GroupDisplay="GroupDisplay.Sequential" ContainerId="formDiv"
+                           GroupDisplay="FeatureFormGroupDisplay.Sequential" ContainerId="formDiv"
                            OnSubmit="OnFormSubmit">
             <FormTemplate Title="Enter the incident number">
                 <FieldElement FieldName="IncidentType" Label="Choose incident type" />
                 <FieldElement FieldName="IncidentDescription" Label="Describe the problem" />
             </FormTemplate>
         </FeatureFormWidget>
-        <FeatureTemplatesWidget ContainerId="addTemplatesDiv" LayerIds="@([_featureLayer.Id])"
+        <FeatureTemplatesWidget ContainerId="addTemplatesDiv" Layers="@([_featureLayer])"
                                 OnSelect="OnTemplateSelected"/>
     }
     
@@ -98,7 +98,7 @@
         string cursor = await _mapView!.GetCursor();
         if (cursor != "crosshair")
         {
-            HitTestResult hitTestResult = await _mapView.HitTest(clickEvent);
+            HitTestResult hitTestResult = (await _mapView.HitTest(clickEvent))!;
             if (hitTestResult.Results.Length == 0)
             {
                 ToggleEditingDivs("block", "none");
@@ -126,7 +126,7 @@
 
     private async Task SelectFeature(long objectId)
     {
-        Query query = await _featureLayer!.CreateQuery();
+        Query query = (await _featureLayer!.CreateQuery())!;
         query.ObjectIds = [objectId];
         query.OutFields = ["*"];
         query.ReturnGeometry = true;
@@ -194,7 +194,7 @@
     {
         try
         {
-            FeatureEditsResult editsResult = await _featureLayer!.ApplyEdits(edits);
+            EditsResult editsResult = (await _featureLayer!.ApplyEdits(edits))!;
             if (editsResult.AddFeatureResults.Any() ||
                 editsResult.UpdateFeatureResults.Any())
             {

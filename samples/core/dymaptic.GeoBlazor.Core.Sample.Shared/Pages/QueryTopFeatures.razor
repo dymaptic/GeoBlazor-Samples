@@ -12,7 +12,7 @@
          Class="map-view"
          Longitude="-97.75188" Latitude="37.23308"
          Zoom="3"
-         OnLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerViewCreate="OnLayerViewCreate"
          Style="padding-right: 380px">
     <Map>
         <Basemap>
@@ -171,7 +171,7 @@
         "The sample is intended to demonstrate group-wise top-N feature queries in a Blazor application " +
         "without writing JavaScript.";
 
-    private void OnLayerViewCreate(LayerViewCreateEvent evt)
+    private void OnLayerViewCreate(ViewLayerViewCreateEvent evt)
     {
         if (evt.Layer!.Id == _featureLayer?.Id)
         {
@@ -205,7 +205,7 @@
     private async Task OnParkResultClicked(int index)
     {
         Graphic feature = _results!.Features![index];
-        PopupViewOpenPopupOptions options = 
+        PopupOpenOptions options = 
             new(Features: [feature], Location: await feature.GetGeometry() as Point);
         await _mapView!.ClosePopup();
         await _mapView!.OpenPopup(options);

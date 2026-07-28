@@ -49,8 +49,9 @@
                                            Placeholder="Search by state" />
                     </SearchWidget>
                 </CustomContent>
-                <CustomContent CreatorFunction="@GenerateContent"
-                                    OutFields="@( ["*"])" />
+                <CustomContent OutFields="@( ["*"])">
+                    <CustomContentCreator OnCustomContentCreatorPopupTemplateContentCreator="@GenerateContent" />
+                </CustomContent>
             </PopupTemplate>
         </FeatureLayer>
     </Map>

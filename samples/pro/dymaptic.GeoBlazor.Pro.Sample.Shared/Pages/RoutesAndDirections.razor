@@ -65,7 +65,7 @@
         stops.Add(stop);
         _routeParameters.FeatureSetStops = _routeParameters.FeatureSetStops with {Features = stops.ToArray()};
 
-        if (_routeParameters.FeatureSetStops.Features?.Count >= 2)
+        if (_routeParameters.FeatureSetStops.Features?.Length >= 2)
         {
             RouteSolveResult result = await RouteService.Solve(_routeUrl, _routeParameters);
             await ShowRoute(result);

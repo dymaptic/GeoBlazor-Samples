@@ -202,7 +202,7 @@ else
 }
 
 <SceneView @ref="_view" Class="map-view" OnViewRendered="OnViewRendered"
-           OnLayerViewCreate="OnLayerViewCreate">
+           OnViewLayerViewCreate="OnLayerViewCreate">
     <WebScene>
         <PortalItem PortalItemId="0614ea1f9dd043e9ba157b9c20d3c538"/>
     </WebScene>
@@ -307,7 +307,7 @@ else
     }
 
     // hook to `MapView.OnLayerViewCreate`
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         Layer? layer = createEvent.Layer;
 

@@ -15,7 +15,7 @@
          Longitude="-8.9624771"
          Latitude="41.7458514"
          Zoom="10"
-         OnLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerViewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
@@ -106,7 +106,7 @@
                 filter: new FeatureFilter(where: where)));
     }
 
-    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private void OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.LayerView is OGCFeatureLayerView ogcFeatureLayerView)
         {

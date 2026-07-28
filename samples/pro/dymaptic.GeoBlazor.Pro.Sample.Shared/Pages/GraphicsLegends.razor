@@ -73,7 +73,7 @@
             
             SimpleMarkerSymbol symbol3 = new(color: new MapColor("green"));
             SimpleMarkerSymbol symbol4 = new(color: new MapColor(120, 0, 30, 0.6));
-            PopupTemplate popupTemplate = new("{Name}", "Population: {Pop}");
+            PopupTemplate popupTemplate = new("{Name}", [new TextContent("Population: {Pop}")]);
             
             await _graphicsLayer1!.Add(new Graphic(new Point(-117.1957, 34.0572), symbol1,
                 popupTemplate,

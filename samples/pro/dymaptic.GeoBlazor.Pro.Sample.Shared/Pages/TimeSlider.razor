@@ -12,7 +12,7 @@
          Center="new Point(-100, 30)" 
          Class="map-view" 
          OnViewRendered="OnViewRendered"
-         OnLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerViewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
@@ -50,13 +50,13 @@
 
     private async Task OnViewRendered()
     {
-        if (!_mapView!.Map!.Layers.Contains(_featureLayer!))
+        if (!_mapView!.Map!.Layers!.Contains(_featureLayer!))
         {
             await _mapView!.AddLayer(_featureLayer!);
         }
     }
 
-    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is not FeatureLayer layer)
         {

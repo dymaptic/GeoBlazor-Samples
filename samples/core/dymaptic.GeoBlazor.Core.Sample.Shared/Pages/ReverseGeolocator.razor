@@ -58,14 +58,14 @@
     private double _longitude;
     private string _address = string.Empty;
 
-    private async Task OnClick(ViewClickEvent clickEvent)
+    private async Task OnClick(ClickEvent clickEvent)
     {
         Point mapPoint = clickEvent.MapPoint;
         _latitude = mapPoint.Latitude!.Value;
         _longitude = mapPoint.Longitude!.Value;
         _address = (await LocationService.LocationToAddress(_serviceUrl, mapPoint)).Address ?? string.Empty;
         StateHasChanged();
-        await View!.OpenPopup(new PopupViewOpenPopupOptions
+        await View!.OpenPopup(new PopupOpenOptions
         {
             Title = $"{_longitude}, {_latitude}",
             Content = _address,

@@ -65,9 +65,28 @@ dotnet build /p:UseProjectReferences=true \
   /p:ProProjectPath=../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro
 ```
 
-Default project paths (when not explicitly set) assume sibling directories:
+Default project paths (when not explicitly set):
 - `CoreProjectPath` -> `../GeoBlazor/src/dymaptic.GeoBlazor.Core`
-- `ProProjectPath` -> `../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro`
+- `ProProjectPath` -> `../src/dymaptic.GeoBlazor.Pro` when this repo is nested inside GeoBlazor.Pro,
+  otherwise `../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro` for sibling checkouts
+
+#### Making the IDE agree
+
+Passing `/p:UseProjectReferences=true` on the command line only affects that build — your IDE still
+evaluates the projects with the property unset, so references, highlighting, and analyzers resolve
+against the NuGet packages instead of your local source. To fix that, create a `local.props` beside
+`Directory.Build.props` (gitignored, imported automatically):
+
+```xml
+<Project>
+    <PropertyGroup>
+        <UseProjectReferences>true</UseProjectReferences>
+    </PropertyGroup>
+</Project>
+```
+
+Reload the solution afterwards. This applies to plain `dotnet build` too, so the command-line flags
+above become unnecessary.
 
 ## Configuration
 

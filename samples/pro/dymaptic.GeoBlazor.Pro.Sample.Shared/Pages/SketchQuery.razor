@@ -27,7 +27,7 @@
         <GraphicsLayer @ref="_graphicsLayer" />
     </Map>
     <SketchWidget OnSketchEvent="OnSketchEvent" Position="OverlayPosition.TopRight" 
-                  CreationMode="CreationMode.Update"
+                  CreationMode="SketchCreationMode.Update"
                   GraphicsLayerId="_graphicsLayer.Id"
                   EventRateLimitInMilliseconds="1000"/>
 </MapView>
@@ -87,7 +87,14 @@
             if (_sketchGraphic is not null)
             {
                 _query.Geometry = _sketchGraphic.Geometry;
-                await View!.QueryFeatures(_query, ParcelLayer!, FillSymbol!, PopupTemplate!);    
+                FeatureSet? queryResult = await ParcelLayer!.QueryFeatures(_query);
+                await View!.ClearGraphics();
+
+                if (queryResult?.Features is not null)
+                {
+                    await View.AddGraphics(queryResult.Features
+                        .Select(f => new Graphic(f.Geometry, FillSymbol, PopupTemplate, f.Attributes)));
+                }
             }
             _updating = false;
         }

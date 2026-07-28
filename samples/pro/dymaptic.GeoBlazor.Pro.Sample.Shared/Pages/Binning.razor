@@ -25,7 +25,7 @@
                       DefinitionExpression="@($"CRASH_DATE > Date '12-31-{_year - 1}' AND CRASH_DATE < Date '01-01-{_year + 1}'")">
             <PopupTemplate Title="Crash location">
                 <FieldInfo FieldName="CRASH_DATE" Label="Date">
-                    <FieldInfoFormat DateFormat="DateFormat.DayShortMonthYearLongTime" />
+                    <FieldInfoFormat DateFormat="FieldInfoFormatDateFormat.DayShortMonthYearLongTime" />
                 </FieldInfo>
                 <FieldInfo FieldName="NUMBER_OF_PERSONS_KILLED" Label="Fatalities" />
                 <FieldInfo FieldName="NUMBER_OF_PERSONS_INJURED" Label="Injuries" />
@@ -40,7 +40,7 @@
             <FeatureReductionBinning @ref="_featureBinning" FixedBinLevel="6" LabelsVisible="true"
                                      PopupEnabled="true">
                 <AggregateField Name="aggregateCount" StatisticType="AggregateStatisticType.Count" />
-                <LabelClass MinScale="144448" MaxScale="0" DeconflictionStrategy="DeconflictionStrategy.None">
+                <LabelClass MinScale="144448" MaxScale="0" DeconflictionStrategy="LabelClassDeconflictionStrategy.None">
                     <TextSymbol Color="@(new MapColor("white"))"
                                 HaloColor="@(new MapColor(_colors[4]))" HaloSize="0.5">
                         <MapFont Family="Noto Sans" Size="10" Weight="FontWeight.Bold" />

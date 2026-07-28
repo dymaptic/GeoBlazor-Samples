@@ -33,6 +33,8 @@ dotnet build /p:UseProjectReferences=true \
 
 The `Directory.Build.props` at the repo root controls this toggle. The `Choose` blocks in individual `.csproj` files switch between `PackageReference` (NuGet, default) and `ProjectReference` (local source) based on `UseProjectReferences`.
 
+Command-line `/p:` flags don't reach the IDE's project-model evaluation, so Rider/VS keep resolving against the NuGet packages (wrong references, wrong highlighting). For persistent local-source development, set the property in a gitignored `local.props` beside `Directory.Build.props` — it's imported first, before the parent-props import and the `Choose` conditions that read it. `ProProjectPath` defaults correctly for both the nested-submodule and sibling-checkout layouts; only `local.props` (or `/p:`) is needed.
+
 ### Local NuGet Packages
 
 `nuget.config` adds a `./packages` local feed alongside nuget.org. Drop `.nupkg` files in `packages/` for local testing.
