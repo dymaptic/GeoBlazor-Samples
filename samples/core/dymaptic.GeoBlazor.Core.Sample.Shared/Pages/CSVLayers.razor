@@ -22,13 +22,13 @@
         <CSVLayer Url="https://arcgis.github.io/arcgis-samples-javascript/sample-data/hurricanes.csv"
                   Title="Hurricanes" Copyright="NOAA">
             <PopupTemplate Title="{Name}">
-                <TextPopupContent Text="Category {Category} storm with that occurred at {ISO_time}."/>
-                <FieldsPopupContent>
+                <TextContent Text="Category {Category} storm with that occurred at {ISO_time}."/>
+                <FieldsContent>
                     <FieldInfo FieldName="wmo_pres" Label="Pressure"/>
                     <FieldInfo FieldName="wmo_wind" Label="Wind Speed (mph)"/>
-                </FieldsPopupContent>
+                </FieldsContent>
                 <FieldInfo FieldName="ISO_time">
-                    <FieldInfoFormat DateFormat="DateFormat.ShortDateShortTime"/>
+                    <FieldInfoFormat DateFormat="FieldInfoFormatDateFormat.ShortDateShortTime"/>
                 </FieldInfo>
             </PopupTemplate>
             <UniqueValueRenderer Field="Category">
@@ -98,7 +98,7 @@
 
     private string? _csvLayerUrl;
 
-    private SceneView? _view;
+    private MapView? _view;
 
     private bool _viewRendered;
 

@@ -29,17 +29,17 @@
           Opacity="0.5"
           Title="@_wcsSampleTitle"
           Url="@_wcsLayerUrl">
-    <RasterStretchRenderer StretchType="StretchType.StandardDeviation"
+    <RasterStretchRenderer StretchType="RendererStretchType.StandardDeviation"
                            NumberOfStandardDeviations="3"
                            CustomStatistics="@([_wcsLayerStatistics])">
         <MultipartColorRamp>
-            <AlgorithmicColorRamp Algorithm="Algorithm.Hsv" 
+            <AlgorithmicColorRamp Algorithm="ColorRampAlgorithm.Hsv" 
                                   FromColor="@(new MapColor(0, 0, 255))" 
                                   ToColor="@(new MapColor(0, 255, 255))" />
-            <AlgorithmicColorRamp Algorithm="Algorithm.Hsv" 
+            <AlgorithmicColorRamp Algorithm="ColorRampAlgorithm.Hsv" 
                                   FromColor="@(new MapColor(0, 255, 255))" 
                                   ToColor="@(new MapColor(255, 255, 0))" />
-            <AlgorithmicColorRamp Algorithm="Algorithm.Hsv" 
+            <AlgorithmicColorRamp Algorithm="ColorRampAlgorithm.Hsv" 
                                   FromColor="@(new MapColor(255, 255, 0))" 
                                   ToColor="@(new MapColor(255, 0, 0))" />
         </MultipartColorRamp>
@@ -115,7 +115,7 @@
     private bool _mapRendered;
     private readonly string _wcsLayerUrl = "https://sampleserver6.arcgisonline.com/arcgis/services/ScientificData/SeaTemperature/ImageServer/WCSServer";
     private readonly string _wcsSampleTitle = "Sea temperature - sea level";
-    private readonly RasterBandStatistics _wcsLayerStatistics = new(1, Max: 37, Min: -3, Stddev: 1);
+    private readonly RasterBandStatistics _wcsLayerStatistics = new(Max: 37, Min: -3, Stddev: 1);
     private WCSLayer? _blackAndWhiteLayer;
     private WCSLayer? _colorizedLayer;
 

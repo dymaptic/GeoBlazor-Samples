@@ -152,7 +152,7 @@
                     await _editFeature.Attributes.AddOrUpdate(key, updated[key]!);
                 }
 
-                var edits = new FeatureEdits { UpdateFeatures = [_editFeature] };
+                var edits = new FeatureLayerApplyEditsEdits { UpdateFeatures = [_editFeature] };
 
                 await ApplyAttributeUpdates(edits);
             }
@@ -163,7 +163,7 @@
         }
     }
 
-    private async Task ApplyAttributeUpdates(FeatureEdits edits)
+    private async Task ApplyAttributeUpdates(FeatureLayerApplyEditsEdits edits)
     {
         try
         {

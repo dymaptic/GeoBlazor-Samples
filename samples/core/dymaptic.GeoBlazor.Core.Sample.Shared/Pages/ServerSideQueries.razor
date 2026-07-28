@@ -80,9 +80,9 @@
         }
     }
 
-    private async Task OnClick(ClickEvent clickEvent)
+    private async Task OnClick(ViewClickEvent clickEvent)
     {
-        Query query = await _featureLayer!.CreateQuery();
+        Query query = (await _featureLayer!.CreateQuery())!;
         query.Geometry = clickEvent.MapPoint;
         query.Distance = Distance;
         query.Units = Unit;

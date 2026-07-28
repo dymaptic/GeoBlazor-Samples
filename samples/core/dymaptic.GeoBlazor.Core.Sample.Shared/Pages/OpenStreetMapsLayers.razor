@@ -7,12 +7,15 @@
 </p>
 
 <SceneView Class="map-view" Zoom="1" PromptForArcGISKey="false">
-    <Map Ground="world-elevation">
+    <Map Ground="@WorldElevationGround">
         <OpenStreetMapLayer />
     </Map>
 </SceneView>
 
 @code {
+
+    // Uses Ground's implicit string conversion; an object initializer would trip BL0005.
+    private static readonly Ground WorldElevationGround = "world-elevation";
 
     public override List<NavMenu.PageLink> PageLinks =>
     [

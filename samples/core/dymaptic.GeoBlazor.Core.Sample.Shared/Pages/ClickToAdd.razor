@@ -16,6 +16,7 @@
         </Basemap>
         <GraphicsLayer @ref="_graphicsLayer" />
     </Map>
+    <PopupWidget OnTriggerAction="OnTriggerAction" />
 </MapView>
 
 <div>
@@ -46,13 +47,13 @@
         "is intended to demonstrate event-driven graphic creation and popup actions in a Blazor application " +
         "without writing JavaScript.";
 
-    private async Task OnClick(ClickEvent arg)
+    private async Task OnClick(ViewClickEvent arg)
     {
         Point point = arg.MapPoint;
-        
-        HitTestResult result = await _mapView!.HitTest(arg);
-        
-        if (result.Results is { Length: > 0 } && result.Results[0] is GraphicHit)
+
+        HitTestResult? result = await _mapView!.HitTest(new ScreenPoint(arg.X, arg.Y));
+
+        if (result?.Results is { Length: > 0 } && result.Results[0] is GraphicHit)
         {
             // already added this point
             return;
@@ -68,7 +69,7 @@
             new MapColor("yellow"), 10);
         
         ActionButton actionButton = new("Click to Add to List",
-            "./_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/dymaptic_logo.webp", "test-1", AddPoint);
+            "./_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/dymaptic_logo.webp", "test-1");
         PopupTemplate popupTemplate = new(
             $"New Point at Long: {point.Longitude!.Value:N2} Lat: {point.Latitude!.Value:N2}", 
             actions: [actionButton]);
@@ -76,6 +77,14 @@
         await _graphic.SetPopupTemplate(popupTemplate);
         await _graphic.SetSymbol(symbol);
         await _graphic.SetGeometry(point);
+    }
+
+    private async Task OnTriggerAction(PopupTriggerActionEvent triggerEvent)
+    {
+        if (triggerEvent.Action.ActionId == "test-1")
+        {
+            await AddPoint();
+        }
     }
 
     private async Task AddPoint()

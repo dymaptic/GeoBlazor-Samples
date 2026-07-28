@@ -15,7 +15,7 @@
 </MapView>
 
 <h2>Layers</h2>
-@if (_webMap is not null && _webMap.Layers.Any())
+@if (_webMap?.Layers is not null && _webMap.Layers.Any())
 {
     <table class="table">
         <thead>

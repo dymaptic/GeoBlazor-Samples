@@ -8,8 +8,8 @@
     Hover over or click on a line on the map, and the "Hit Test" will return the hurricane name, category, and wind speed (knots).
 </p>
 
-<MapView @ref="_mapView" OnPointerMove="OnPointerMoveOrDown"
-         OnPointerDown="OnPointerMoveOrDown"
+<MapView @ref="_mapView" OnPointerMove="@(e => OnPointerMoveOrDown(e.X, e.Y))"
+         OnPointerDown="@(e => OnPointerMoveOrDown(e.X, e.Y))"
          OnLayerViewCreate="OnLayerViewCreate"
          Class="map-view"
          Longitude="-61.125537"
@@ -73,19 +73,19 @@
         }
     }
 
-    private async Task OnPointerMoveOrDown(ViewPointerMoveEvent pointerEvent)
+    private async Task OnPointerMoveOrDown(double x, double y)
     {
         if (_evaluatingPointer) return;
 
         _evaluatingPointer = true;
         try
         {
-            MapViewHitTestOptions options = new()
+            HitTestOptions options = new()
                 {
                     IncludeByGeoBlazorId = [_hurricaneLayer!.Id]
                 };
-            HitTestResult result = await _mapView!.HitTest(pointerEvent, options);
-            Graphic? graphic = result.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
+            HitTestResult? result = await _mapView!.HitTest(new ScreenPoint(x, y), options);
+            Graphic? graphic = result?.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
             if (graphic?.Attributes != null)
             {
                 graphic.Attributes.TryGetValue("NAME", out object? name);
@@ -113,7 +113,7 @@
                     return;
                 }
 
-                Query layerQuery = await _layerView!.CreateQuery();
+                Query layerQuery = (await _layerView!.CreateQuery())!;
                 layerQuery.Where = $"YEAR = {newYear} AND NAME = '{newName}'";
                 ObjectId[]? ids = await _layerView.QueryObjectIds(layerQuery);
                 if (_highlightHandle is not null)
@@ -121,7 +121,7 @@
                     await _highlightHandle.Remove();
                     _highlightHandle = null;
                 }
-                _highlightHandle = await _layerView!.Highlight(ids!);
+                _highlightHandle = await _layerView!.Highlight(ids!.Select(i => i.StringVal).ToList());
                 _year = newYear;
                 _name = newName;
             }

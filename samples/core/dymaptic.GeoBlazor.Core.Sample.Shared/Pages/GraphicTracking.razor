@@ -101,7 +101,7 @@
 
     private async Task CenterView()
     {
-        await _view!.GoTo(_graphicsLayer!.Graphics);
+        await _view!.GoTo(_graphicsLayer!.Graphics.ToList());
     }
 
     private int _index = 1;

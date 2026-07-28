@@ -59,7 +59,7 @@
     // ReSharper disable once InconsistentNaming
     public async Task AddRemoveKMLLayer()
     {
-        if (!_view!.Map!.Layers.Any())
+        if (_view!.Map!.Layers is null || !_view.Map.Layers.Any())
         {
             _kmlSampleLayer = new(_kmlLayerUrl);
             await _view.AddLayer(_kmlSampleLayer);

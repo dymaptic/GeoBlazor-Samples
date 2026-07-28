@@ -90,7 +90,7 @@
             _cSharpGraphic = new Graphic(new Point(-118.83, 34.027),
                 new SimpleMarkerSymbol(color: new MapColor("green")),
                 new PopupTemplate("{Name}",
-                    "{Description}<br/>Number: {Number}<br/>{Date}: {Date}<br/>Bool: {Boolean}</br>Object: {Object}"),
+                    [new TextContent("{Description}<br/>Number: {Number}<br/>{Date}: {Date}<br/>Bool: {Boolean}</br>Object: {Object}")]),
                 _graphic2Attributes);
             await _graphicsLayer!.Add(_cSharpGraphic);
             _rendered = true;

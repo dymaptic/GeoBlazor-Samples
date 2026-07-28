@@ -17,7 +17,7 @@ using Microsoft.JSInterop;
 
 namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;
 
-public partial class CustomContents: ComponentBase
+public partial class CustomPopupContents
 {
     public override List<NavMenu.PageLink> PageLinks =>
     [

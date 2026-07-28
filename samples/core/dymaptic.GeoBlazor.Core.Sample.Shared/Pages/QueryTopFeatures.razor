@@ -198,7 +198,7 @@
         _results = await _featureLayer!.QueryTopFeatures(query);
 
         query.OrderByFields = [""];
-        ObjectId[] objectIds = await _featureLayer!.QueryTopObjectIds(query);
+        ObjectId[] objectIds = (await _featureLayer!.QueryTopObjectIds(query))!;
         await _layerView!.SetFilter(new FeatureFilter(objectIds: objectIds));
     }
 

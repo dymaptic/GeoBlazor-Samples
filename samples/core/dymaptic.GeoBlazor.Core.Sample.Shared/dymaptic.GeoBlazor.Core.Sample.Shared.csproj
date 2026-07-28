@@ -37,6 +37,15 @@
         </Content>
     </ItemGroup>
     
+    <!-- TEMPORARY: these three pages call MapView.QueryFeatures / FindPlaces / SolveServiceArea,
+         GeoBlazor Core convenience helpers that were removed in v5 with no replacement.
+         Re-include them once those APIs are restored or the samples are rewritten. -->
+    <ItemGroup>
+      <Content Remove="Pages\SqlQuery.razor" />
+      <Content Remove="Pages\PlaceSelector.razor" />
+      <Content Remove="Pages\ServiceAreas.razor" />
+    </ItemGroup>
+
     <ItemGroup>
       <EmbeddedResource Include="Pages\**\*.razor" LogicalName="SampleSource/%(Filename)%(Extension)" />
       <EmbeddedResource Include="Pages\**\*.razor.cs" LogicalName="SampleSource/%(Filename)%(Extension)" />

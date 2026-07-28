@@ -121,7 +121,7 @@
             ReturnGeometry = false
         };
 
-        ObjectId[] objectIds = await _featureLayer!.QueryObjectIds(query);
+        ObjectId[] objectIds = (await _featureLayer!.QueryObjectIds(query))!;
         if (!objectIds.Any())
         {
             return;
@@ -134,7 +134,7 @@
             await _highlight.Remove();
         }
 
-        _highlight = await layerView.Highlight(objectIds);
+        _highlight = await layerView.Highlight(objectIds.Select(i => i.StringVal).ToList());
 
         var relationshipQuery = new RelationshipQuery
         {

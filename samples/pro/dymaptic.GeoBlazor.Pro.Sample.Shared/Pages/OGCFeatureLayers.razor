@@ -27,12 +27,12 @@
                                  ValueExpressionTitle="NAVAID type"
                                  UniqueValueInfos="@_uniqueValueInfos" />
             <PopupTemplate Title="{title}">
-                <TextPopupContent Text="This structure is {expression/altitude} meters above sea level and {expression/height} meters tall." />
-                <FieldsPopupContent>
+                <TextContent Text="This structure is {expression/altitude} meters above sea level and {expression/height} meters tall." />
+                <FieldsContent>
                     <FieldInfo FieldName="no_nac" Label="National Number" />
                     <FieldInfo FieldName="desc" Label="Original Description (Portuguese)" />
                     <FieldInfo FieldName="foto_url" Label="Photo URL" />
-                </FieldsPopupContent>
+                </FieldsContent>
                 <PopupExpressionInfo Name="altitude" Expression="DefaultValue($feature.alt_m, 'unknown')" />
                 <PopupExpressionInfo Name="height" Expression="DefaultValue($feature.hgt_m, 'unknown')" />
             </PopupTemplate>

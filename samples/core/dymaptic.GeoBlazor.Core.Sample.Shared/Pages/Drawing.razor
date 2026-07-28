@@ -245,7 +245,7 @@
     }
 
     private static readonly PopupTemplate PopupTemplate = new("Polygon",
-        "Congratulations, you drew a polygon!");
+        [new TextContent("Congratulations, you drew a polygon!")]);
     private readonly Graphic _polygonGraphic = new(new Polygon([ MapRings ]),
         new SimpleFillSymbol(new Outline(new MapColor(255, 255, 255), 1),
             new MapColor(81, 46, 132, 0.8)), PopupTemplate);

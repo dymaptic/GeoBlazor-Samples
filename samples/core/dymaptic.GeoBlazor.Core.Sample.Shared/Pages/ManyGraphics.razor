@@ -186,7 +186,8 @@
 
     private PopupTemplate GeneratePopupTemplate()
     {
-        return new PopupTemplate("Test", "Test Content<br/>{testString}<br/>{testNumber}", new[] { "*" });
+        return new PopupTemplate("Test",
+            [new TextContent("Test Content<br/>{testString}<br/>{testNumber}")], new[] { "*" });
     }
 
     private AttributesDictionary GenerateAttributes()

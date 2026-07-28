@@ -9,7 +9,6 @@ using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
 using dymaptic.GeoBlazor.Core.Components.Logic;
 using dymaptic.GeoBlazor.Pro.Components.Layers;
 using Microsoft.AspNetCore.Components;
-using dymaptic.GeoBlazor.Core.Options;
 
 
 namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;

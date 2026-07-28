@@ -79,7 +79,7 @@
         "the popup re-opens with refreshed values. The sample is intended to demonstrate orchestrating popups and " +
         "the editor through a single in-popup action.";
 
-    private ValueTask<Content[]?> DifficultyLevel(Graphic graphic)
+    private ValueTask<IContent[]?> DifficultyLevel(Graphic graphic)
     {
         AttachmentsContent attachmentsElement = 
             new AttachmentsContent(displayType: AttachmentsContentDisplayType.List);
@@ -95,7 +95,7 @@
             };
         TextContent textElement = new TextContent(text);
 
-        return new ValueTask<Content[]?>([textElement, attachmentsElement]);
+        return new ValueTask<IContent[]?>([textElement, attachmentsElement]);
     }
     
     private async Task EditThis()
@@ -129,7 +129,7 @@
     private FeatureLayer? _featureLayer;
     private EditorWidget? _editor;
     private bool _firstRender = true;
-    private readonly PopupViewPopupOpenOptions _popupOpenOptions = new()
+    private readonly PopupViewOpenPopupOptions _popupOpenOptions = new()
     {
         FetchFeatures = true,
         ShouldFocus = true

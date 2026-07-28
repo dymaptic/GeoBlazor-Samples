@@ -21,12 +21,11 @@
             <PopupTemplate Title="Trail Run" StringContent="{name}">
                 <ActionButton Image="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/Measure_Distance16.webp"
                               Title="Measure Length"
-                              ActionId="measure-this"
-                              CallbackFunction="MeasureThis" />
+                              ActionId="measure-this" />
             </PopupTemplate>
         </FeatureLayer>
     </Map>
-    <PopupWidget @ref="_popup" />
+    <PopupWidget @ref="_popup" OnTriggerAction="OnTriggerAction" />
 </MapView>
 
 @code {
@@ -53,6 +52,14 @@
         "in a Blazor application without writing JavaScript.";
 
     private MapView? MapView { get; set; }
+
+    private async Task OnTriggerAction(PopupTriggerActionEvent triggerEvent)
+    {
+        if (triggerEvent.Action.ActionId == "measure-this")
+        {
+            await MeasureThis();
+        }
+    }
 
     private async Task MeasureThis()
     {

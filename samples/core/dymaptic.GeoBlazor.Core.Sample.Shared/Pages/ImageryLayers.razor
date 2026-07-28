@@ -60,7 +60,7 @@
 
     public async Task AddRemoveImageryLayer()
     {
-        if (!_view!.Map!.Layers.Any())
+        if (_view!.Map!.Layers is null || !_view.Map.Layers.Any())
         {
             _imagerySampleLayer = new(_imageryLayerUrl);
             await _view.AddLayer(_imagerySampleLayer);

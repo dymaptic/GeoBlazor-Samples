@@ -156,7 +156,7 @@
                 #pragma warning restore BL0005
                 _editFeature = new Graphic(point);
                 await _editFeature.Attributes.AddOrUpdate("IncidentType", attributes["IncidentType"]!);
-                var edits = new FeatureEdits
+                var edits = new FeatureLayerApplyEditsEdits
                 {
                     AddFeatures = [_editFeature]
                 };
@@ -180,7 +180,7 @@
                 await _editFeature.Attributes.AddOrUpdate(key, updated[key]!);
             }
 
-            var edits = new FeatureEdits
+            var edits = new FeatureLayerApplyEditsEdits
             {
                 UpdateFeatures = [_editFeature]
             };
@@ -190,7 +190,7 @@
         }
     }
 
-    private async Task ApplyEditsToIncidents(FeatureEdits edits)
+    private async Task ApplyEditsToIncidents(FeatureLayerApplyEditsEdits edits)
     {
         try
         {
@@ -254,7 +254,7 @@
 
     private async Task DeleteEdits()
     {
-        var edits = new FeatureEdits
+        var edits = new FeatureLayerApplyEditsEdits
         {
             DeleteFeatures = [_editFeature!]
         };
