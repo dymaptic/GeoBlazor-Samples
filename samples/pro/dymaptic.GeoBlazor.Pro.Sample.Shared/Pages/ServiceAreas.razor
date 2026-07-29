@@ -18,6 +18,9 @@
 </MapView>
 
 @code {
+    
+    [Inject]
+    public required ServiceAreaService ServiceAreaService { get; set; }
 
     public override List<NavMenu.PageLink> PageLinks =>
     [
@@ -42,7 +45,22 @@
         await _areaGraphic.SetGeometry(clickEvent.MapPoint);
         await _mapView!.ClearGraphics();
         await _mapView.AddGraphic(_areaGraphic);
-        await _mapView.SolveServiceArea(_serviceAreaUrl, [5, 10, 15], _areaFillSymbol);
+        ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl, ["5", "10", "15"]);
+
+        if (result?.ServiceAreaPolygons?.Features is null || result.ServiceAreaPolygons.Features.Length == 0)
+        {
+            return;
+        }
+        
+        List<Graphic> graphics = [];
+        
+        foreach (Graphic graphic in result.ServiceAreaPolygons.Features)
+        {
+            await graphic.SetSymbol(_areaFillSymbol);
+            graphics.Add(graphic);
+        }
+        
+        await _mapView.AddGraphics(graphics);
     }
 
     private MapView? _mapView;

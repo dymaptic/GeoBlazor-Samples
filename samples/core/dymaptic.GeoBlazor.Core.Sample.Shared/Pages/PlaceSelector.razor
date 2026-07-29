@@ -31,6 +31,8 @@
 <PopupTemplate @ref="Popup" Title="{PlaceName}" StringContent="{Place_addr}" />
 
 @code {
+    [Inject]
+    public required LocationService LocationService { get; set; }
 
     public override List<NavMenu.PageLink> PageLinks =>
     [
@@ -68,18 +70,20 @@
 
     private async Task OnSelectionChanged(ChangeEventArgs arg)
     {
-        var category = arg.Value?.ToString();
+        string? category = arg.Value?.ToString();
         if (category is null || (category == _places[0])) return;
 
-        var query = new AddressQuery
-        {
-            LocatorUrl = "http://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer",
-            Categories = new HashSet<string> { category },
-            MaxLocations = 25,
-            OutFields = new HashSet<string> { "Place_addr", "PlaceName" }
-        };
+        List<AddressCandidate> result = await LocationService.AddressToLocations(
+            new Address("", "", "", ""), [category], 
+            maxLocations: 25, outFields: ["Place_addr", "PlaceName"]);
+        
+        if (result.Count == 0) return;
 
-        await View!.FindPlaces(query, Symbol!, Popup!);
+        AddressCandidate location = result[0];
+
+        Graphic locationGraphic = new(location.Location, Symbol, Popup);
+
+        await View!.AddGraphic(locationGraphic);
     }
 
 }

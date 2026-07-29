@@ -86,7 +86,21 @@
                 SpatialRelationship = SpatialRelationship.Intersects,
                 UseViewExtent = true
             };
-        await View!.QueryFeatures(query, QueryFeatureLayer!, Symbol!, Popup!);
+        
+        FeatureSet? result = await QueryFeatureLayer!.QueryFeatures(query);
+        
+        if (result?.Features is null || result.Features.Length == 0) return;
+        
+        List<Graphic> graphics = [];
+
+        foreach (Graphic graphic in result.Features)
+        {
+            await graphic.SetSymbol(Symbol!);
+            await graphic.SetPopupTemplate(Popup!);
+            graphics.Add(graphic);
+        }
+
+        await View!.AddGraphics(graphics);
     }
 
 }

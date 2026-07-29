@@ -120,15 +120,14 @@
     private const string NauticalStyleUrl =
         "https://cdn.arcgis.com/sharing/rest/content/items/36359a4a8f3143b6bf44d5688e007900/data";
 
+    // Verbatim (not raw) string: Rider's Razor parser mis-tokenizes """ inside @code and flags the rest of the block.
     private readonly string _valueExpression =
-        """
-        When(
-          Find('boia', Lower(DefaultValue($feature.title, ''))) > -1, 'Buoy',
-          Find('odas', Lower(DefaultValue($feature.title, ''))) > -1, 'Ocean Data Acquisition System',
-          Find('coluna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('torre', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('lanterna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('poste', Lower(DefaultValue($feature.desc, ''))) > -1, 'Raised Light Structure',
-          Find('windfloat', Lower(DefaultValue($feature.title, ''))) > -1 || Find('wfa', Lower(DefaultValue($feature.title, ''))) > -1, 'WindFloat',
-          'Other' )
-        """;
+        @"When(
+  Find('boia', Lower(DefaultValue($feature.title, ''))) > -1, 'Buoy',
+  Find('odas', Lower(DefaultValue($feature.title, ''))) > -1, 'Ocean Data Acquisition System',
+  Find('coluna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('torre', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('lanterna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('poste', Lower(DefaultValue($feature.desc, ''))) > -1, 'Raised Light Structure',
+  Find('windfloat', Lower(DefaultValue($feature.title, ''))) > -1 || Find('wfa', Lower(DefaultValue($feature.title, ''))) > -1, 'WindFloat',
+  'Other' )";
 
     private readonly Dictionary<string, string> _sqlWhereClauses = new()
     {
