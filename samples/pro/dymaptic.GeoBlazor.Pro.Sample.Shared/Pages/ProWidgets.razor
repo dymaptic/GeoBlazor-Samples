@@ -180,7 +180,7 @@
     }
     @if (_showSketch)
     {
-        <SketchWidget GraphicsLayerId="@_graphicsLayer!.Id" Position="OverlayPosition.TopRight"/>
+        <SketchWidget Layer="_graphicsLayer" Position="OverlayPosition.TopRight"/>
     }
     @if (_showTrack)
     {
@@ -202,9 +202,8 @@
     }
     @if (_showBookmarks)
     {
-        <BookmarksWidget Position="OverlayPosition.TopRight" @ref="_bookmarkWidget" DragEnabled="true">
-            <BookmarksVisibleElements EditBookmarkButton="true" AddBookmarkButton="true"/>
-        </BookmarksWidget>
+        <BookmarksWidget Position="OverlayPosition.TopRight" @ref="_bookmarkWidget" DragEnabled="true"
+                         ShowEditBookmarkButton="true" ShowAddBookmarkButton="true" />
     }
 </MapView>
 

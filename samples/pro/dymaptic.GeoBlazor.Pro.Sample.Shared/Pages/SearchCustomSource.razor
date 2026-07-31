@@ -23,8 +23,8 @@
     </Map>
     <SearchWidget IncludeDefaultSources="false" Position="OverlayPosition.TopRight">
         <LocatorSearchSource Placeholder="example: 8 Boulevard du Port" 
-                      GetSuggestionsHandler="GetSuggestions"
-                      GetResultsHandler="GetResults" />
+                      OnGetSuggestions="GetSuggestions"
+                      OnGetResults="GetResults" />
     </SearchWidget>
 </MapView>
 
@@ -53,8 +53,8 @@
         _center = _view!.Center ?? _center;
     }
 
-    private async Task<IReadOnlyList<SuggestResult>> GetSuggestions(int? maxSuggestions, int? sourceIndex, 
-        SpatialReference? spatialReference, string? suggestTerm, Guid? viewId)
+    private async Task<SearchSuggestResult[]> GetSuggestions(string suggestTerm, double? maxSuggestions,
+        int? sourceIndex, SpatialReference? spatialReference)
     {
         // You can request data from a
         // third-party source to find some
@@ -73,12 +73,13 @@
         });
       
         return response.Data?.Features
-            .Select(feature => new SuggestResult("name", feature.Properties["label"].ToString()!, sourceIndex!.Value))
+            .Select(feature => new SearchSuggestResult(Key: "name", SourceIndex: sourceIndex,
+                Text: feature.Properties["label"].ToString()!))
             .ToArray() ?? [];
     }
 
-    private async Task<IReadOnlyList<SearchResult>> GetResults(bool? exactMatch, Point? location, int? maxResults, int? sourceIndex, 
-        SpatialReference? spatialReference, SuggestResult suggestResult, Guid? viewId)
+    private async Task<SearchResult[]> GetResults(bool? exactMatch, Point? location, double? maxResults,
+        int? sourceIndex, SpatialReference? spatialReference, SearchSuggestResult suggestResult)
     {
         // If the Search widget passes the current location,
         // you can use this in your own custom source

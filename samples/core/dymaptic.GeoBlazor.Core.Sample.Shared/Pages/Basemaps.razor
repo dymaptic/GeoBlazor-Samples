@@ -88,7 +88,8 @@
         </MapView>
         break;
     case 2:
-        <SceneView @ref="_sceneView2" Class="map-view" Zoom="11" Latitude="_latitude" Longitude="_longitude">
+        <SceneView @ref="_sceneView2" Class="map-view" 
+                   Zoom="1" Latitude="_latitude" Longitude="_longitude">
             <Map>
                 <Basemap>
                     <BasemapStyle Name="_basemapStyleName"/>
@@ -98,7 +99,11 @@
 
         break;
     case 3:
-        <MapView @ref="_mapView3" Class="map-view" Zoom="11" Latitude="_latitude" Longitude="_longitude">
+        <MapView @ref="_mapView3" 
+                 Class="map-view" 
+                 Zoom="11" 
+                 Latitude="_latitude" 
+                 Longitude="_longitude">
             <Map>
                 <Basemap>
                     <PortalItem PortalItemId="@_basemapId" />

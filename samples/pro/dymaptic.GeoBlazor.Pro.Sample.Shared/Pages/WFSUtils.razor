@@ -9,8 +9,8 @@
 
 <MapView @ref="_mapView"
          class="map-view"
-         Longitude="-2"
-         Latitude="53"
+         Longitude="165"
+         Latitude="-77.5"
          Zoom="5"
          PopupEnabled="true">
     <Map>
@@ -55,16 +55,15 @@
     public override List<NavMenu.PageLink> PageLinks =>
     [
         new("https://developers.arcgis.com/javascript/latest/sample-code/layers-wfs/", "ArcGIS Maps SDK for JavaScript"),
-        new("https://geoportal.statistics.gov.uk/datasets/ons::counties-may-2023-boundaries-en-buc-2/about", "Office for National Statistics (UK)")
+        new("https://data.gns.cri.nz", "GNS Science (New Zealand)")
     ];
 
     public override string Description =>
         "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates browsing and consuming " +
         "OGC Web Feature Services from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's WfsUtils " +
         "service together with the WFSLayer, LayerListWidget, and PopupWidget Razor components. The page shows a " +
-        "2D light-gray basemap centered on the United Kingdom. A panel pinned in the upper-right corner contains " +
-        "a labeled OGC WFS endpoint, a text input prefilled with the UK Office for National Statistics counties " +
-        "WFS URL, and a Get Capabilities button. Clicking the button calls WfsUtils.GetCapabilities to issue a " +
+        "2D light-gray basemap centered on McMurdo Sound, Antarctica. A panel pinned in the upper-right corner contains " +
+        "a labeled OGC WFS endpoint, a text input prefilled with the GNS Science (New Zealand) WFS URL, and a Get Capabilities button. Clicking the button calls WfsUtils.GetCapabilities to issue a " +
         "GetCapabilities request and renders the returned feature types as a clickable list, with a calcite-loader " +
         "shown during fetch and a warning notice if the service does not support WFS 2.0.0 with GeoJSON output. " +
         "Selecting a feature type adds it to the map as a WFSLayer and zooms to its extent. The sample is intended " +
@@ -134,7 +133,7 @@
         }
     }
     
-    private string _endpoint = "https://dservices1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/services/Counties_May_2023_Boundaries_EN_BUC/WFSServer?service=wfs";
+    private string _endpoint = "https://data.gns.cri.nz/webmaps/geology/wfs";
     private bool _loading;
     private bool _showWarning;
     private IReadOnlyCollection<WFSFeatureType>? _featureTypes;

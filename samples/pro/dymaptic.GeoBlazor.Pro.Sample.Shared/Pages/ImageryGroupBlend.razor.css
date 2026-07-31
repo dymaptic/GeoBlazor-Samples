@@ -1,5 +1,14 @@
-.slider {
-    height: 40px;
+/* The LayerList item panel gives its content roughly 246px, so keep this widget narrower than
+   that and let it shrink if it is rendered outside the panel. */
+#rendererDiv {
+    box-sizing: border-box;
     width: 100%;
-    background-color: transparent;
+    padding: 10px;
+}
+
+/* calcite-slider centers its handle and tick labels on the ends of the track, so it needs
+   horizontal room of its own to keep the min and max labels from being clipped. */
+.slider {
+    margin-inline: 1rem;
+    margin-block-end: 0.5rem;
 }

@@ -130,12 +130,11 @@
     }
     @if (_showBookmarks)
     {
-        <BookmarksWidget Position="OverlayPosition.TopRight" 
+        <BookmarksWidget Position="OverlayPosition.TopRight"
                          @ref="_bookmarkWidget"
-                         DragEnabled="true">
-            <BookmarksVisibleElements EditBookmarkButton="true"
-                                      AddBookmarkButton="true" />
-        </BookmarksWidget>
+                         DragEnabled="true"
+                         ShowEditBookmarkButton="true"
+                         ShowAddBookmarkButton="true" />
     }
 </MapView>
 

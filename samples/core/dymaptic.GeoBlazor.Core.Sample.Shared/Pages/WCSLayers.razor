@@ -79,7 +79,7 @@
 
         try
         {
-            if (!_view!.Map!.Layers!.Any())
+            if (_view!.Map?.Layers?.Count is null or 0)
             {
                 if (colorized)
                 {

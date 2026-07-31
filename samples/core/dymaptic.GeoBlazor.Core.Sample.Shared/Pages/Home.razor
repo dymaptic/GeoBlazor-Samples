@@ -1,5 +1,18 @@
 ﻿@page "/{PageRoute:nonfile?}"
 
+@* Anything that reaches this catch-all with a route segment matched no page. Say so rather than
+   silently rendering Home, which makes a missing or excluded sample page look like a working link. *@
+@if (!string.IsNullOrWhiteSpace(PageRoute))
+{
+    <div id="route-not-found">
+        <h2>Sample not found</h2>
+        <p>
+            No sample page is registered for <code>/@PageRoute</code> in this host. It may not be
+            included in this build &mdash; check the other Core/Pro sample hosts.
+        </p>
+    </div>
+}
+
 <div id="feature-panel">
     <h1>GeoBlazor</h1>
     <p>

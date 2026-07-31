@@ -25,7 +25,7 @@
             <WebScene>
                 <PortalItem PortalItemId="adfad6ee6c6043238ea64e121bb6429a" />
             </WebScene>
-            <LayerListWidget Position="OverlayPosition.TopRight" OnListItemCreatedHandler="OnListItemCreated" />
+            <LayerListWidget Position="OverlayPosition.TopRight" OnListItemCreatedFunction="OnListItemCreated" />
         </SceneView>
     }
     else // for mobile, move the widget off of the map so you can see the whole map
@@ -35,7 +35,7 @@
             <WebScene>
                 <PortalItem PortalItemId="adfad6ee6c6043238ea64e121bb6429a" />
             </WebScene>
-            <LayerListWidget ContainerId="widget-holder" OnListItemCreatedHandler="OnListItemCreated" />
+            <LayerListWidget ContainerId="widget-holder" OnListItemCreatedFunction="OnListItemCreated" />
         </SceneView>
     }
 }
@@ -72,15 +72,15 @@
         }
     }
 
-    private async Task<ListItem> OnListItemCreated(ListItem item)
+    private async Task OnListItemCreated(ListItemCreatedHandlerEvent evt)
     {
+        ListItem item = evt.Item;
         await item.SetVisibility(true);
         await item.SetPanel(new ListItemPanelWidget(showLegendContent: true));
         if (item.Title?.StartsWith("Transit") ?? false)
         {
             await item.SetTitle($"Mass {item.Title}");
         }
-        return item;
     }
 
     private int? _windowWidth;

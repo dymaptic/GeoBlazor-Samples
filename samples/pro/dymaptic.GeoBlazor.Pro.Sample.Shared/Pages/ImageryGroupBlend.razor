@@ -1,5 +1,6 @@
 ﻿@page "/imagery-group-blend"
 @inherits SamplePage
+@implements IAsyncDisposable
 
 <h3>Imagery Group Blend</h3>
 
@@ -11,12 +12,12 @@
          Center="@(new Point(84, 31))"
          Zoom="4"
          OnViewLayerViewCreate="OnLayerViewCreated">
-    <Constraints SnapToZoom="false" />
+    <View2DConstraints SnapToZoom="false" />
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
         </Basemap>
-        <GroupLayer Title="Group Layer" ListMode="ListMode.Show">
+        <GroupLayer @ref="_groupLayer" Title="Group Layer" ListMode="ListMode.Show">
             <TileLayer Url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer"
                        ListMode="ListMode.HideChildren" />
             <ImageryTileLayer @ref="_layer"
@@ -25,28 +26,20 @@
                               BlendMode="BlendMode.DestinationIn" />
         </GroupLayer>
     </Map>
-    <LayerListWidget OnListItemCreatedHandler="OnListItemCreated"
+    <LayerListWidget OnListItemCreatedFunction="OnListItemCreated"
                      Position="OverlayPosition.TopRight" />
     <BasemapToggleWidget Position="OverlayPosition.BottomLeft"
                          NextBasemapStyle="BasemapStyleName.ArcgisDarkGray" />
 </MapView>
-<SliderWidget ContainerId="value-slider"
-              Min="0"
-              Max="5000"
-              Values="@([120, 3068])"
-              StepInterval="10"
-              SnapOnClickEnabled="false"
-              @ref="_slider"
-              ValueChanged="OnSliderChanged"
-              View="_mapView">
-    <SliderVisibleElements Labels="true" RangeLabels="true" />
-</SliderWidget>
-
-<div id="rendererDiv" class="esri-widget" style="@(_listItemSet ? "display: block;" : "display: none;")">
+@* The LayerList's ListItemPanel takes this element as its content and moves it into the panel,
+   which places it inside the <arcgis-map> DOM. ArcGIS widget components detect that and relocate
+   themselves into the view's floating UI corners, so the stretch slider below is a plain
+   <calcite-slider> rather than GeoBlazor's SliderWidget, matching Esri's own sample. *@
+<div id="rendererDiv" class="esri-widget" style="display: @(_listItemsSet ? "block" : "none")">
     <h3 class="esri-widget__heading">Stretch Rendering Parameters</h3>
 
     <label class="esri-feature-form__label">Select stretch type</label>
-    <select id="stretchType" @onchange="ToggleStretchType" 
+    <select id="stretchType" @onchange="ToggleStretchType"
             class="esri-input esri-select"
             style="width: 10rem;">
         <option value="@RendererStretchType.MinMax" selected>min-max</option>
@@ -56,7 +49,9 @@
     <label id="sliderLabel" class="esri-feature-form__label">
         @_stretchType.ToString() value:
     </label>
-    <div id="value-slider" class="slider"></div>
+    @* Min, max, step, ticks and value(s) are all applied from JavaScript, because calcite-slider's
+       value attribute only parses a single number. See ConfigureSlider below. *@
+    <calcite-slider id="@SliderId" class="slider" label-handles label-ticks></calcite-slider>
     <input type="checkbox" class="form-check-input" checked @onchange="ToggleBlendMode" />
     <label>Toggle blendMode</label>
 </div>
@@ -73,14 +68,54 @@
     public override string Description =>
         "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates ImageryTileLayer rendering " +
         "with raster stretch from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's ImageryTileLayer, " +
-        "GroupLayer, RasterStretchRenderer, and SliderWidget Razor components. The page shows a 2D map centered on " +
+        "GroupLayer, and RasterStretchRenderer Razor components. The page shows a 2D map centered on " +
         "the Tibetan Plateau with a GroupLayer that blends World Imagery underneath a World Elevation 3D ImageryTileLayer " +
         "using a destination-in blend mode. A LayerListWidget in the upper-right corner lets the user expand the " +
         "elevation layer and reveal a stretch-rendering panel containing a stretch-type dropdown (Min-Max or Standard " +
-        "Deviation), a two-handle SliderWidget that adjusts the active stretch values in meters or standard deviations, " +
-        "and a checkbox that toggles the GroupLayer's blend mode between DestinationIn and Normal. A BasemapToggleWidget " +
+        "Deviation), an embedded Calcite slider that adjusts the active stretch values in meters or standard deviations, " +
+        "and a checkbox that toggles the GroupLayer's blend mode between DestinationIn and Normal. Following Esri's own " +
+        "recommended pattern for content embedded in a LayerList panel, the slider is a raw calcite-slider web component " +
+        "wired up with JavaScript interop rather than GeoBlazor's SliderWidget, because ArcGIS widget components placed " +
+        "inside the map's DOM relocate themselves into the view's floating UI corners. A BasemapToggleWidget " +
         "in the lower-left switches between light-gray and dark-gray basemaps. The sample is intended to demonstrate " +
         "interactive raster styling and blending of elevation data over imagery.";
+
+    [Inject]
+    public required IJSRuntime JsRuntime { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await ConfigureSlider();
+            await JsRuntime.InvokeVoidAsync("initCalciteSlider", SliderId, _dotNetRef,
+                nameof(OnSliderChanged));
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnSliderChanged(double[] values)
+    {
+        await UpdateRenderer(values);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef is null) return;
+
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("disposeCalciteSlider", SliderId);
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit is already gone, so there is nothing left to clean up in the browser.
+        }
+
+        _dotNetRef.Dispose();
+        _dotNetRef = null;
+    }
 
     private async Task OnLayerViewCreated(ViewLayerViewCreateEvent createEvent)
     {
@@ -96,14 +131,11 @@
         }
     }
 
-    private async Task OnSliderChanged(double[] values)
-    {
-        await UpdateRenderer(values);
-    }
-
     private async Task UpdateRenderer(double[] values)
     {
-        var bandStat = _rasterInfo!.Statistics!.First();
+        if (_rasterInfo?.Statistics is null) return;
+
+        RasterInfoStatistics bandStat = _rasterInfo.Statistics.First();
         RasterStretchRenderer newRenderer;
         switch (_stretchType)
         {
@@ -119,12 +151,12 @@
                         new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                     stretchType: _stretchType, 
                     customStatistics: [new RasterBandStatistics(Avg: bandStat.Avg, Max: bandStat.Max, Min: bandStat.Min, 
-                        Stddev: bandStat.Stddev)],
+                Stddev: bandStat.Stddev)],
                 numberOfStandardDeviations: (int)values[0]);
 
                 break;
         }
-        
+
         await _layer!.SetRenderer(newRenderer);
     }
 
@@ -139,48 +171,54 @@
             await _layer!.SetProperty(nameof(ImageryTileLayer.BlendMode), BlendMode.Normal);
         }
     }
-    
+
     private async Task ToggleStretchType(ChangeEventArgs e)
     {
         _stretchType = (RendererStretchType)Enum.Parse(typeof(RendererStretchType), e.Value?.ToString()!);
-
-        switch (_stretchType)
-        {
-            case RendererStretchType.MinMax:
-                await _slider!.SetMax(5000);
-                await _slider.SetMin(0);
-                await _slider.SetSteps([10]);
-                await _slider.SetValues([120, 3068]);
-
-                break;
-            case RendererStretchType.StandardDeviation:
-                await _slider!.SetMax(3);
-                await _slider.SetMin(1);
-                await _slider.SetSteps([1]);
-                await _slider.SetValues([1]);
-
-                break;
-        }
-        
-        await UpdateRenderer(_slider!.Values!.ToArray());
+        await ConfigureSlider();
+        await UpdateRenderer(SliderSettings[_stretchType].Values);
     }
-    
-    private async Task<ListItem> OnListItemCreated(ListItem listItem)
+
+    private async Task ConfigureSlider()
     {
+        SliderSetting setting = SliderSettings[_stretchType];
+        await JsRuntime.InvokeVoidAsync("configureCalciteSlider", SliderId, setting.Min, setting.Max,
+            setting.Step, setting.Ticks, setting.Values);
+    }
+
+    private async Task OnListItemCreated(ListItemCreatedHandlerEvent evt)
+    {
+        ListItem listItem = evt.Item;
         if (listItem.LayerId == _layer?.Id)
         {
             await listItem.SetPanel(new ListItemPanelWidget(open: true, icon: "map", containerId: "rendererDiv"));
             await listItem.SetOpen(true);
-            _listItemSet = true;
+            _listItemsSet = true;
         }
-        return listItem;
+        else if (listItem.LayerId == _groupLayer?.Id)
+        {
+            await listItem.SetOpen(true);
+        }
     }
 
+    private const string SliderId = "value-slider";
+
+    // Slider configuration per stretch type, matching Esri's ArcGIS Maps SDK sample. Min-Max uses a
+    // two-thumb range in meters, Standard Deviation a single thumb over 1-3 deviations.
+    private static readonly Dictionary<RendererStretchType, SliderSetting> SliderSettings = new()
+    {
+        [RendererStretchType.MinMax] = new SliderSetting(Min: 0, Max: 5000, Step: 10, Ticks: 5000, Values: [120, 3068]),
+        [RendererStretchType.StandardDeviation] = new SliderSetting(Min: 1, Max: 3, Step: 1, Ticks: 3, Values: [1])
+    };
+
     private ImageryTileLayer? _layer;
+    private GroupLayer? _groupLayer;
     private RendererStretchType _stretchType = RendererStretchType.MinMax;
-    private SliderWidget? _slider;
     private RasterInfo? _rasterInfo;
     private MapView? _mapView;
     private bool _rendererAdded;
-    private bool _listItemSet;
+    private bool _listItemsSet;
+    private DotNetObjectReference<ImageryGroupBlend>? _dotNetRef;
+
+    private record SliderSetting(double Min, double Max, double Step, double Ticks, double[] Values);
 }

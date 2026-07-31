@@ -19,6 +19,7 @@ public class ProNavMenu : NavMenu
 
                 return p with { Href = href };
             }),
+        new("service-areas", "PRO: Service Areas", "oi-comment-square", null, true, Categories.Location),
         new("imagery-group-blend", "PRO: Imagery Blend", null, "blend.svg", true, Categories.Layers),
         new("sketch-query", "PRO: Sketch Query", "oi-location", null, true, Categories.Queries),
         new("edit-feature-data", "PRO: Edit Data", "oi-map-marker", null, true, Categories.Interaction),

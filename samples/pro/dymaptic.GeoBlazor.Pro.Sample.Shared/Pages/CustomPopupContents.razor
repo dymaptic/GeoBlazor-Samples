@@ -28,11 +28,9 @@
                       PopupEnabled="true">
             <PopupTemplate OutFields="@( ["*"])"
                            Title="State: {state_name}">
-                <CustomContent>
-                    <img src="@_logoUrl"
-                         width="150"
-                         alt="GeoBlazor Logo" />
-                </CustomContent>
+                <CustomContent Creator="@(new CustomContentCreator(
+                                             customContentCreatorPopupTemplateContent:
+                                             $"<img src='{_logoUrl}' width='150' alt='GeoBlazor Logo' />"))" />
                 <CustomContent>
                     <SearchWidget IncludeDefaultSources="false"
                                   LocationEnabled="false"

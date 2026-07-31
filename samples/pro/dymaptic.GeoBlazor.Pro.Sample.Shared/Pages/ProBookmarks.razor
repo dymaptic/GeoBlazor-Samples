@@ -15,9 +15,8 @@
         <PortalItem PortalItemId="70b726074af04a7e9839d8a07f64c039" />
     </WebMap>
     <ExpandWidget Expanded="true" Position="OverlayPosition.TopRight">
-        <BookmarksWidget  @ref="_bookmarksWidget" OnBookmarkSelect="OnBookmarkClick" DragEnabled="true">
-            <BookmarksVisibleElements EditBookmarkButton="true" AddBookmarkButton="true" />
-        </BookmarksWidget>
+        <BookmarksWidget  @ref="_bookmarksWidget" OnBookmarkSelect="OnBookmarkClick" DragEnabled="true"
+                          ShowEditBookmarkButton="true" ShowAddBookmarkButton="true" />
     </ExpandWidget>
     <TimeSliderWidget @ref="_timeSliderWidget" 
                       Position="OverlayPosition.BottomLeft" 

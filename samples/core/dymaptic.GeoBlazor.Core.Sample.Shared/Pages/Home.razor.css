@@ -1,4 +1,16 @@
-﻿#feature-panel {
+﻿#route-not-found {
+    margin: 2rem 2rem 0;
+    padding: 1rem 1.5rem;
+    border-left: 4px solid #c7254e;
+    background-color: rgb(199 37 78 / 8%);
+}
+
+#route-not-found h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+#feature-panel {
     padding: 2rem;
 }
 

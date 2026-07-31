@@ -30,11 +30,11 @@
     public override string Description =>
         "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates service-area " +
         "(drive-time) network analysis from the ArcGIS Maps SDK for JavaScript exposed through " +
-        "GeoBlazor's MapView.SolveServiceArea method. The page shows a 2D navigation basemap centered on " +
+        "GeoBlazor's ServiceAreaService.Solve method. The page shows a 2D navigation basemap centered on " +
         "Osaka, Japan at zoom level 11. Above the map is an instructional paragraph telling the user to " +
         "click on any point on the map to see a set of Service Areas representing 5, 10, and 15 minute " +
         "drivable distance bands. When the user clicks, a small white marker is placed at the clicked " +
-        "point and the page calls SolveServiceArea against the ArcGIS World ServiceAreas REST endpoint " +
+        "point and the page calls ServiceAreaService.Solve against the ArcGIS World ServiceAreas REST endpoint " +
         "with break values of 5, 10, and 15 minutes; the resulting drive-time polygons are added to the " +
         "map and styled with a translucent purple fill, with previous graphics cleared on each click. " +
         "The sample is intended to demonstrate solving and visualizing network service areas from a " +
@@ -45,7 +45,7 @@
         await _areaGraphic.SetGeometry(clickEvent.MapPoint);
         await _mapView!.ClearGraphics();
         await _mapView.AddGraphic(_areaGraphic);
-        ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl, ["5", "10", "15"]);
+        ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl, defaultBreaks: [5, 10, 15]);
 
         if (result?.ServiceAreaPolygons?.Features is null || result.ServiceAreaPolygons.Features.Length == 0)
         {

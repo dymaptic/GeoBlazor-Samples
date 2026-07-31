@@ -199,7 +199,6 @@ public partial class NavMenu
         new("graphic-tracking", "Graphic Tracking", "oi-move", Category: Categories.Interaction),
 
         new("place-selector", "Place Selector", "oi-arrow-bottom", Category: Categories.Location),
-        new("service-areas", "Service Areas", "oi-comment-square", Category: Categories.Location),
         new("calculate-geometries", "Calculate Geometries", "oi-clipboard", Category: Categories.Location),
         new("projection", "Display Projection", "oi-sun", Category: Categories.Location),
         new("projection-tool", "Projection Tool", "oi-cog", Category: Categories.Location),
