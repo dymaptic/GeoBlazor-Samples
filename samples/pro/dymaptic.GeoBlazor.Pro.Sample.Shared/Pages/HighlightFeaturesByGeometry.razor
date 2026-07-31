@@ -139,7 +139,7 @@
                 // Apply feature effect to blur non-selected features
                 var featureEffect = new FeatureEffect(
                     filter: new FeatureFilter(objectIds: _selectedObjectIds.ToArray()),
-                    excludedEffect: [new Effect("blur(5px) grayscale(90%) opacity(40%)")]);
+                    excludedEffect: "blur(5px) grayscale(90%) opacity(40%)");
 
                 await _layerView!.SetFeatureEffect(featureEffect);
             }
@@ -219,7 +219,7 @@
             // Apply feature effect to blur non-selected features
             var featureEffect = new FeatureEffect(
                 filter: new FeatureFilter(objectIds: _selectedObjectIds.ToArray()),
-                excludedEffect: [new Effect("blur(5px) grayscale(90%) opacity(40%)")]);
+                excludedEffect: "blur(5px) grayscale(90%) opacity(40%)");
 
             await _layerView!.SetFeatureEffect(featureEffect);
         }

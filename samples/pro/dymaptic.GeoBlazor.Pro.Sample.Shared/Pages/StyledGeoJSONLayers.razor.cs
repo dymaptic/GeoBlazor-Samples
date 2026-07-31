@@ -10,6 +10,7 @@ using dymaptic.GeoBlazor.Core.Components.Logic;
 using dymaptic.GeoBlazor.Pro.Components;
 using dymaptic.GeoBlazor.Pro.Components.Layers;
 using Microsoft.AspNetCore.Components;
+using System.Text.Json;
 
 
 namespace dymaptic.GeoBlazor.Pro.Sample.Shared.Pages;
@@ -64,6 +65,12 @@ public partial class StyledGeoJSONLayers
             if (_highlightHandle is not null)
             {
                 await _highlightHandle.Remove();
+            }
+
+            if (feature.Layer is not ProGeoJSONLayer)
+            {
+                Console.WriteLine($"Feature layer is not a ProGeoJSONLayer. Graphic: {JsonSerializer.Serialize(feature)}");
+                return;
             }
 
             GeoJSONLayerView layerView = _layerViews[(ProGeoJSONLayer)feature.Layer!];

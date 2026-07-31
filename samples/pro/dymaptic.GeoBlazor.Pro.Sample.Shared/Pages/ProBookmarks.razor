@@ -115,7 +115,7 @@
 
         var hurricaneName = eventArgs.Bookmark.Name;
 
-        var featureEffect = new FeatureEffect([new Effect { Value = "grayscale(100%) opacity(30%)" }],
+        var featureEffect = new FeatureEffect("grayscale(100%) opacity(30%)",
             filter: new FeatureFilter(where: $"Name = '{hurricaneName!.ToUpper()}'"));
            
         _ = _layerView.SetFeatureEffect(featureEffect);
