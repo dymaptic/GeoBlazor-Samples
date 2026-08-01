@@ -168,7 +168,7 @@ public partial class StyledGeoJSONLayers
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": [-122.3331, 47.5979]
+                "coordinates": [-122.3382, 47.6074]
               },
               "properties": {
                 "name": "Seattle Art Museum",
@@ -184,7 +184,7 @@ public partial class StyledGeoJSONLayers
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": [-122.3414, 47.6080]
+                "coordinates": [-122.3548, 47.6163]
               },
               "properties": {
                 "name": "Olympic Sculpture Park",
@@ -265,7 +265,7 @@ public partial class StyledGeoJSONLayers
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": [-122.3370, 47.6218]
+                "coordinates": [-122.3599, 47.6294]
               },
               "properties": {
                 "name": "Kerry Park",
@@ -282,7 +282,7 @@ public partial class StyledGeoJSONLayers
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": [-122.3480, 47.6205]
+                "coordinates": [-122.3486, 47.6215]
               },
               "properties": {
                 "name": "Museum of Pop Culture",
@@ -298,7 +298,7 @@ public partial class StyledGeoJSONLayers
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": [-122.3394, 47.6186]
+                "coordinates": [-122.3502, 47.6206]
               },
               "properties": {
                 "name": "Chihuly Garden and Glass",
@@ -314,7 +314,7 @@ public partial class StyledGeoJSONLayers
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": [-122.3537, 47.6219]
+                "coordinates": [-122.3508, 47.6214]
               },
               "properties": {
                 "name": "Seattle Center Armory",
@@ -345,11 +345,11 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "Polygon",
                 "coordinates": [[
-                  [-122.3567, 47.6062],
-                  [-122.3567, 47.6162],
-                  [-122.3367, 47.6162],
-                  [-122.3367, 47.6062],
-                  [-122.3567, 47.6062]
+                  [-122.3554, 47.6191],
+                  [-122.3554, 47.6240],
+                  [-122.3480, 47.6240],
+                  [-122.3480, 47.6191],
+                  [-122.3554, 47.6191]
                 ]]
               },
               "properties": {
@@ -372,12 +372,11 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "Polygon",
                 "coordinates": [[
-                  [-122.350, 47.610],
-                  [-122.345, 47.608],
-                  [-122.340, 47.609],
-                  [-122.336, 47.612],
-                  [-122.341, 47.616],
-                  [-122.350, 47.610]
+                  [-122.3588, 47.6191],
+                  [-122.3480, 47.6191],
+                  [-122.3480, 47.6110],
+                  [-122.3588, 47.6110],
+                  [-122.3588, 47.6191]
                 ]]
               },
               "properties": {
@@ -398,11 +397,11 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "Polygon",
                 "coordinates": [[
-                  [-122.345, 47.600],
-                  [-122.335, 47.600],
-                  [-122.330, 47.605],
-                  [-122.340, 47.608],
-                  [-122.345, 47.600]
+                  [-122.3450, 47.6080],
+                  [-122.3300, 47.6080],
+                  [-122.3300, 47.6020],
+                  [-122.3450, 47.6020],
+                  [-122.3450, 47.6080]
                 ]]
               },
               "properties": {
@@ -423,15 +422,12 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "Polygon",
                 "coordinates": [[
-                  [-122.355, 47.625],
-                  [-122.345, 47.625],
-                  [-122.343, 47.620],
-                  [-122.340, 47.618],
-                  [-122.335, 47.620],
-                  [-122.330, 47.617],
-                  [-122.330, 47.628],
-                  [-122.355, 47.628],
-                  [-122.355, 47.625]
+                  [-122.3657, 47.6244],
+                  [-122.3599, 47.6294],
+                  [-122.3564, 47.6383],
+                  [-122.3480, 47.6240],
+                  [-122.3480, 47.6191],
+                  [-122.3657, 47.6244]
                 ]]
               },
               "properties": {
@@ -453,13 +449,11 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "Polygon",
                 "coordinates": [[
-                  [-122.335, 47.605],
-                  [-122.330, 47.605],
-                  [-122.325, 47.615],
-                  [-122.330, 47.617],
-                  [-122.335, 47.620],
-                  [-122.340, 47.618],
-                  [-122.335, 47.605]
+                  [-122.3372, 47.6270],
+                  [-122.3280, 47.6260],
+                  [-122.3280, 47.6190],
+                  [-122.3411, 47.6191],
+                  [-122.3372, 47.6270]
                 ]]
               },
               "properties": {
@@ -494,18 +488,16 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                  [-122.3493, 47.6205],
-                  [-122.3465, 47.6134],
-                  [-122.3421, 47.6089],
-                  [-122.3375, 47.6034],
-                  [-122.3331, 47.5979]
+                  [-122.3491, 47.6204],
+                  [-122.3417, 47.6094],
+                  [-122.3382, 47.6074]
                 ]
               },
               "properties": {
                 "name": "Tourist Walking Route",
                 "type": "pedestrian",
-                "distance": "2.1 miles",
-                "duration": "45 minutes",
+                "distance": "1.3 miles",
+                "duration": "28 minutes",
                 "stroke": "#e63946",
                 "stroke-width": 4,
                 "stroke-opacity": 0.8,
@@ -520,13 +512,10 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                  [-122.360, 47.610],
-                  [-122.350, 47.610],
-                  [-122.345, 47.608],
-                  [-122.340, 47.609],
-                  [-122.335, 47.605],
-                  [-122.330, 47.605],
-                  [-122.320, 47.600]
+                  [-122.3374, 47.6120],
+                  [-122.3411, 47.6191],
+                  [-122.3390, 47.6238],
+                  [-122.3372, 47.6270]
                 ]
               },
               "properties": {
@@ -547,25 +536,22 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                  [-122.320, 47.620],
-                  [-122.330, 47.617],
-                  [-122.335, 47.605],
-                  [-122.345, 47.600],
-                  [-122.348, 47.590],
-                  [-122.350, 47.580],
-                  [-122.355, 47.570]
+                  [-122.3374, 47.6120],
+                  [-122.3359, 47.6077],
+                  [-122.3309, 47.6020],
+                  [-122.3280, 47.5983]
                 ]
               },
               "properties": {
                 "name": "Link Light Rail",
                 "type": "transit",
-                "length": "22 miles",
-                "stations": "16 stations",
+                "length": "1.6 miles (Downtown Seattle Transit Tunnel segment)",
+                "stations": "4 stations (Westlake, Symphony, Pioneer Square, ID/Chinatown)",
                 "stroke": "#4cc9f0",
                 "stroke-width": 6,
                 "stroke-opacity": 0.8,
                 "title": "Link Light Rail",
-                "description": "Seattle's modern light rail system connecting downtown with neighborhoods and the airport"
+                "description": "Downtown segment of Seattle's Link Light Rail through the historic Downtown Seattle Transit Tunnel, which continues on to neighborhoods and the airport"
               }
             },
             {
@@ -573,12 +559,11 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                  [-122.370, 47.625],
-                  [-122.355, 47.625],
-                  [-122.345, 47.625],
-                  [-122.335, 47.620],
-                  [-122.330, 47.617],
-                  [-122.325, 47.615]
+                  [-122.3564, 47.6383],
+                  [-122.3464, 47.6192],
+                  [-122.3480, 47.6186],
+                  [-122.3430, 47.6150],
+                  [-122.3380, 47.6100]
                 ]
               },
               "properties": {
@@ -598,11 +583,9 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                  [-122.345, 47.625],
-                  [-122.345, 47.615],
-                  [-122.343, 47.608],
-                  [-122.340, 47.600],
-                  [-122.342, 47.592]
+                  [-122.3521, 47.6185],
+                  [-122.3386, 47.6092],
+                  [-122.3312, 47.6017]
                 ]
               },
               "properties": {
@@ -613,8 +596,8 @@ public partial class StyledGeoJSONLayers
                 "stroke-width": 2,
                 "stroke-opacity": 1.0,
                 "stroke-dasharray": "2,1",
-                "title": "Queen Anne Bike Path",
-                "description": "Dedicated cycling infrastructure connecting Queen Anne hill to Downtown"
+                "title": "2nd Avenue Protected Bike Lane",
+                "description": "Dedicated protected cycling lane on 2nd Avenue connecting Denny Way to Pioneer Square through Downtown"
               }
             }
           ]
@@ -636,17 +619,14 @@ public partial class StyledGeoJSONLayers
               "geometry": {
                 "type": "MultiPoint",
                 "coordinates": [
-                  [-122.3358, 47.6210],
-                  [-122.3489, 47.6183],
-                  [-122.3287, 47.6091],
-                  [-122.3490, 47.6070],
-                  [-122.3390, 47.6014]
+                  [-122.3327, 47.6067],
+                  [-122.3628, 47.6338]
                 ]
               },
               "properties": {
                 "name": "Public Libraries",
                 "type": "education",
-                "services": "Books, Internet, Community Programs",
+                "services": "Central Library and Queen Anne Branch, Seattle Public Library",
                 "marker-color": "#3f51b5",
                 "marker-size": "medium",
                 "marker-symbol": "library",

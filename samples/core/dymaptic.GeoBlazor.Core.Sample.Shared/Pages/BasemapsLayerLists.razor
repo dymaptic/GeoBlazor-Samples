@@ -87,14 +87,15 @@
         }
     }
     
-    private async Task ToggleReferenceLayersVisibility()
+    private async Task ToggleReferenceLayersVisibility(ChangeEventArgs args)
     {
-        await _widget!.SetHideReferenceLayers(_widget!.HideReferenceLayers ?? true);
+        // the checkbox is "show", the widget property is "hide"
+        await _widget!.SetHideReferenceLayers(!(bool)args.Value!);
     }
-    
-    private async Task ToggleBaseLayersVisibility()
+
+    private async Task ToggleBaseLayersVisibility(ChangeEventArgs args)
     {
-        await _widget!.SetHideBaseLayers(_widget!.HideBaseLayers ?? true);
+        await _widget!.SetHideBaseLayers(!(bool)args.Value!);
     }
 
     private int? _windowWidth;

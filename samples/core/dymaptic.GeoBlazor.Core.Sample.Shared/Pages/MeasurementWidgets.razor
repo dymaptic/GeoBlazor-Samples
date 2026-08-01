@@ -20,16 +20,6 @@
     <WebMap>
         <PortalItem ExcludeApiKey="true" PortalItemId="990d0191f2574db495c4304a01c3e65b" />
     </WebMap>
-    <DistanceMeasurement2DWidget @ref="_distanceWidget" 
-                                 Visible="false" 
-                                 ContainerId="distance-widget-holder"
-                                 @bind-ViewModel="_distanceWidgetViewModel"
-                                 @bind-ViewModel:after="StateHasChanged" />
-    <AreaMeasurement2DWidget @ref="_areaWidget" 
-                             Visible="false" 
-                             ContainerId="area-widget-holder"
-                             @bind-ViewModel="_areaWidgetViewModel"
-                             @bind-ViewModel:after="StateHasChanged" />
     <CustomOverlay @ref="_toolOverlay" Position="OverlayPosition.TopRight">
         <div id="topbar">
             <label>Measure Tools</label>
@@ -37,29 +27,38 @@
                 <button class="action-button esri-icon-measure-area@(_areaBtnActive ? " active" : "")"
                         type="button"
                         title="Measure area"
-                        disabled="@(_areaWidgetViewModel is null)"
                         @onclick="OnAreaButtonClicked"></button>
                 <button class="action-button esri-icon-measure-line@(_distanceBtnActive ? " active" : "")"
                         type="button"
                         title="Measure distance between two or more points"
-                        disabled="@(_distanceWidgetViewModel is null)"
                         @onclick="OnDistanceButtonClicked"></button>
             </div>
         </div>
     </CustomOverlay>
-    <CustomOverlay Position="OverlayPosition.BottomLeft">
-        <button class="btn btn-primary" @onclick="ToggleWidgets">
+    @* TODO: ArcGIS V5 re-adds the ability to hide/show this *@
+    @* <CustomOverlay Position="OverlayPosition.BottomLeft">
+        <button class="btn btn-primary" @onclick="ToggleDetails">
             @(_showDetails ? "Hide" : "Show") Details
         </button>
-    </CustomOverlay>
+    </CustomOverlay> *@
+    @if (_distanceBtnActive)
+    {
+        <DistanceMeasurement2DWidget @ref="_distanceWidget"
+                                        Position="OverlayPosition.BottomRight"
+                                        Visible="@_showDetails" />
+    }
+    @if (_areaBtnActive)
+    {
+        <div id="area-widget-holder" style="display: none">
+            <AreaMeasurement2DWidget @ref="_areaWidget" 
+                                    Position="OverlayPosition.BottomRight"
+                                    Visible="@_showDetails" />
+        </div>
+    }
 </MapView>
-
-<div id="distance-widget-holder" style="display: none"></div>
-<div id="area-widget-holder" style="display: none"></div>
 
 
 @code {
-
     public override List<NavMenu.PageLink> PageLinks =>
     [
         new("https://developers.arcgis.com/javascript/latest/sample-code/widgets-measurement-2d/", "ArcGIS Maps SDK for JavaScript"),
@@ -84,69 +83,59 @@
 
     private async Task OnDistanceButtonClicked()
     {
-        await SetActiveWidget("distance");
-        await SetActiveButton("distance");
+        if (_areaWidget is not null)
+        {
+            Console.WriteLine("Clearing area widget");
+            await _areaWidget.Clear();
+        }
+
+        _distanceBtnActive = true;
+        _areaBtnActive = false;
+        _toolOverlay!.Refresh();
+        StateHasChanged();
+
+        await InvokeAsync(async () =>
+        {
+            Console.WriteLine("Refreshing distance widget");
+            if (_distanceWidget is not null)
+            {
+                Console.WriteLine("Starting distance widget");
+                await _distanceWidget.Start();
+            }
+        });
     }
 
     private async Task OnAreaButtonClicked()
     {
-        await SetActiveWidget("area");
-        await SetActiveButton("area");
-    }
-
-    private async Task SetActiveWidget(string? widgetType)
-    {
-        switch (widgetType)
+        if (_distanceWidget is not null)
         {
-            case "distance":
-                await _distanceWidget!.SetVisibility(true);
-                await _areaWidget!.SetVisibility(false);
-                await _distanceWidgetViewModel!.Start();
-                break;
-            case "area":
-                await _areaWidget!.SetVisibility(true);
-                await _distanceWidget!.SetVisibility(false);
-                await _areaWidgetViewModel!.Start();
-                break;
-            default:
-                await _distanceWidget!.SetVisibility(false);
-                await _areaWidget!.SetVisibility(false);
-                break;
+            Console.WriteLine("Clearing distance widget");
+            await _distanceWidget.Clear();
         }
-    }
 
-    private async Task SetActiveButton(string? widgetType)
-    {
-        _distanceBtnActive = widgetType == "distance";
-        _areaBtnActive = widgetType == "area";
+        _areaBtnActive = true;
+        _distanceBtnActive = false;
         _toolOverlay!.Refresh();
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
+
+        await InvokeAsync(async () =>
+        {
+            Console.WriteLine("Refreshing area widget");
+            if (_areaWidget is not null)
+            {
+                Console.WriteLine("Starting area widget");
+                await _areaWidget.Start();
+            }
+        });
     }
 
-    private async Task ToggleWidgets()
+    private void ToggleDetails()
     {
         _showDetails = !_showDetails;
-
-        if (_showDetails)
-        {
-            await _distanceWidget!.SetPosition(OverlayPosition.BottomRight);
-            await _areaWidget!.SetPosition(OverlayPosition.BottomRight);
-        }
-        else
-        {
-            await _distanceWidget!.SetContainerId("distance-widget-holder");
-            await _areaWidget!.SetContainerId("area-widget-holder");
-        }
-
-        await SetActiveButton(null);
-        await SetActiveWidget(null);
     }
-
     private DistanceMeasurement2DWidget? _distanceWidget;
     private AreaMeasurement2DWidget? _areaWidget;
     private MapView? _mapView;
-    private DistanceMeasurement2DViewModel? _distanceWidgetViewModel;
-    private AreaMeasurement2DViewModel? _areaWidgetViewModel;
     private CustomOverlay? _toolOverlay;
     private bool _areaBtnActive;
     private bool _distanceBtnActive;
