@@ -31,7 +31,7 @@
         <FeatureLayer @ref="_featureLayer"
                       OutFields="@(new []{"*"})"
                       Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/El_Paso_Recreation_AttributeEditsOnly/FeatureServer/1">
-            <PopupTemplate Title="Trail name: {trailName}" ContentFunction="DifficultyLevel">
+            <PopupTemplate Title="Trail name: {trailName}" OnContentFunction="DifficultyLevel">
                 <FieldInfo FieldName="trailName" />
                 <FieldInfo FieldName="difficulty" />
                 <ActionButton Title="Edit feature" ActionId="edit-this" ClassName="esri-icon-edit" />
@@ -79,8 +79,15 @@
         "the popup re-opens with refreshed values. The sample is intended to demonstrate orchestrating popups and " +
         "the editor through a single in-popup action.";
 
-    private ValueTask<IContent[]?> DifficultyLevel(Graphic graphic)
+    private Task<IReadOnlyList<IContent>> DifficultyLevel(PopupTemplateCreatorEvent? evt)
     {
+        if (evt is null || evt.Graphic is null)
+        {
+            return Task.FromResult<IReadOnlyList<IContent>>(Array.Empty<IContent>());
+        }
+
+        Graphic graphic = evt.Graphic;
+
         AttachmentsContent attachmentsElement = 
             new AttachmentsContent(displayType: AttachmentsContentDisplayType.List);
         string level = graphic.Attributes["difficulty"]!.ToString()!;
@@ -95,7 +102,7 @@
             };
         TextContent textElement = new TextContent(text);
 
-        return new ValueTask<IContent[]?>([textElement, attachmentsElement]);
+        return Task.FromResult<IReadOnlyList<IContent>>(new IContent[] { textElement, attachmentsElement });
     }
     
     private async Task OnPopupTriggerAction(PopupTriggerActionEvent triggerEvent)

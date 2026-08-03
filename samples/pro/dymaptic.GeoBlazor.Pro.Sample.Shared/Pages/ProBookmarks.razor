@@ -85,20 +85,33 @@
     }
     
     /// <summary>
-    /// Setting the TimeSliderWidget properties from the WebMap
+    /// Setting the TimeSliderWidget properties from the time-aware layer
     /// </summary>
     private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
     {
         try
         {
-            if (createEvent.Layer is not FeatureLayer) return;
+            if (createEvent.Layer is not FeatureLayer featureLayer) return;
 
             _layerView = createEvent.LayerView as FeatureLayerView;
 
-            if (_timeSliderWidget is not null && _webMap is not null)
-            {
-                await _timeSliderWidget.UpdateWebDocument(_webMap);
-            }
+            if (_timeSliderWidget is null) return;
+
+            // A time slider gets its range from the time-aware layer it animates
+            TimeInfo? timeInfo = featureLayer.TimeInfo ?? await featureLayer.GetTimeInfo();
+            TimeExtent? fullTimeExtent = timeInfo?.FullTimeExtent;
+
+            if (fullTimeExtent is null) return;
+
+            // The full extent defines the slider's range, so it has to be applied first
+            await _timeSliderWidget.SetFullTimeExtent(fullTimeExtent);
+
+            // Snap the thumbs to one stop per year of hurricane data
+            await _timeSliderWidget.SetStops(new StopsByInterval(new TimeInterval(TemporalTime.Years, 1)));
+
+            // TimeWindow mode animates the span between the two thumbs, so start with a one year window
+            await _timeSliderWidget.SetTimeExtent(new TimeExtent(fullTimeExtent.Start,
+                fullTimeExtent.Start?.AddYears(1)));
         }
         catch (Exception ex)
         {
