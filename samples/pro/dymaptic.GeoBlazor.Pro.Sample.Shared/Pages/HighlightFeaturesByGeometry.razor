@@ -43,15 +43,14 @@
         <GraphicsLayer @ref="_polygonGraphicsLayer" />
     </Map>
     <SketchWidget Position="OverlayPosition.TopLeft"
-                  GraphicsLayer="@_polygonGraphicsLayer"
+                  Layer="@_polygonGraphicsLayer"
                   AvailableCreateTools="@([AvailableCreateTool.Rectangle])"
                   UpdateOnGraphicClick="false"
                   CreationMode="SketchCreationMode.Single"
-                  OnSketchEvent="OnSketchEvent"
+                  OnCreate="OnSketchCreate"
                   HideSelectionToolsLassoSelection="true"
                   HideSelectionToolsRectangleSelection="true"
-                  HideSettingsMenu="true"
-                  HideRedoMenu="true">
+                  HideSettingsMenu="true">
     </SketchWidget>
     <CustomOverlay Position="OverlayPosition.BottomLeft">
         <button class="esri-button btn" style="width: auto; margin: 5px;" @onclick="ClearSelection">
@@ -146,9 +145,9 @@
         }
     }
 
-    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
     {
-        if (sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete }
+        if (sketchEvent.State == SketchEventState.Complete
             && _polygonGraphicsLayer is not null)
         {
             // Get all drawn rectangle geometries and union them

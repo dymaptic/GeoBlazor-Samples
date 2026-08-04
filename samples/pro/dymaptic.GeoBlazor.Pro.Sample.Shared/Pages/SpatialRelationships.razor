@@ -33,8 +33,9 @@
     </Map>
     <SketchWidget Position="OverlayPosition.TopRight" 
                   UpdateOnGraphicClick="true" 
-                  OnSketchEvent="OnSketchEvent"
-                  GraphicsLayer="@(_graphicsLayer)"
+                  OnCreate="OnSketchCreate"
+                  OnUpdate="OnSketchUpdate"
+                  Layer="@(_graphicsLayer)"
                   EventRateLimitInMilliseconds="200"
                   HideSelectionToolsLassoSelection="true"
                   HideSelectionToolsRectangleSelection="true"
@@ -99,27 +100,33 @@
         }
     }
 
-    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
     {
-        if (sketchEvent.EventType == SketchEventType.Create)
+        if (sketchEvent.State == SketchEventState.Start)
         {
-            if (sketchEvent.State == SketchEventState.Start)
-            {
-                Graphic first = _currentGraphics[0];
-                await _graphicsLayer!.Remove(first);
-                _currentGraphics.RemoveAt(0);
-                return;
-            }
-            if (sketchEvent.State == SketchEventState.Complete)
-            {
-                _currentGraphics.Add(sketchEvent.Graphics[0]);
-            }
-            else
-            {
-                return;
-            }
+            Graphic first = _currentGraphics[0];
+            await _graphicsLayer!.Remove(first);
+            _currentGraphics.RemoveAt(0);
+            return;
         }
 
+        if (sketchEvent.State != SketchEventState.Complete)
+        {
+            return;
+        }
+
+        _currentGraphics.Add(sketchEvent.Graphic);
+        await RecalculateRelationships();
+    }
+
+    private Task OnSketchUpdate(SketchUpdateEvent sketchEvent)
+    {
+        // Recalculate on every update state so the results track the drag.
+        return RecalculateRelationships();
+    }
+
+    private async Task RecalculateRelationships()
+    {
         await _cts.CancelAsync();
         _cts = new CancellationTokenSource();
 

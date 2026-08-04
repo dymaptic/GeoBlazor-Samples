@@ -26,7 +26,7 @@
         </Basemap>
         <GraphicsLayer @ref="_graphicsLayer" />
     </Map>
-    <SketchWidget OnSketchEvent="OnSketchEvent" Position="OverlayPosition.TopRight" 
+    <SketchWidget OnCreate="OnSketchCreate" OnUpdate="OnSketchUpdate" Position="OverlayPosition.TopRight"
                   CreationMode="SketchCreationMode.Update"
                   Layer="_graphicsLayer"
                   EventRateLimitInMilliseconds="1000"/>
@@ -73,31 +73,50 @@
         Where="1=1"
     };
 
-    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
     {
-        if ((!_updating && sketchEvent.EventType == SketchEventType.Update) || 
-            sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete })
+        if (sketchEvent.State != SketchEventState.Complete)
         {
-            if (_sketchGraphic is not null && sketchEvent.State == SketchEventState.Complete)
-            {
-                await _graphicsLayer.Remove(_sketchGraphic);
-            }
-            _updating = true;
-            _sketchGraphic = sketchEvent.Graphics.FirstOrDefault();
-            if (_sketchGraphic is not null)
-            {
-                _query.Geometry = _sketchGraphic.Geometry;
-                FeatureSet? queryResult = await ParcelLayer!.QueryFeatures(_query);
-                await View!.ClearGraphics();
-
-                if (queryResult?.Features is not null)
-                {
-                    await View.AddGraphics(queryResult.Features
-                        .Select(f => new Graphic(f.Geometry, FillSymbol, PopupTemplate, f.Attributes)));
-                }
-            }
-            _updating = false;
+            return;
         }
+
+        await QueryBySketch(sketchEvent.Graphic, replacePrevious: true);
+    }
+
+    private async Task OnSketchUpdate(SketchUpdateEvent sketchEvent)
+    {
+        // Query on every update state so results track the drag; _updating throttles re-entrant events.
+        if (_updating)
+        {
+            return;
+        }
+
+        await QueryBySketch(sketchEvent.Graphics.FirstOrDefault(),
+            replacePrevious: sketchEvent.State == SketchEventState.Complete);
+    }
+
+    private async Task QueryBySketch(Graphic? graphic, bool replacePrevious)
+    {
+        if (replacePrevious && _sketchGraphic is not null)
+        {
+            await _graphicsLayer.Remove(_sketchGraphic);
+        }
+
+        _updating = true;
+        _sketchGraphic = graphic;
+        if (_sketchGraphic is not null)
+        {
+            _query.Geometry = _sketchGraphic.Geometry;
+            FeatureSet? queryResult = await ParcelLayer!.QueryFeatures(_query);
+            await View!.ClearGraphics();
+
+            if (queryResult?.Features is not null)
+            {
+                await View.AddGraphics(queryResult.Features
+                    .Select(f => new Graphic(f.Geometry, FillSymbol, PopupTemplate, f.Attributes)));
+            }
+        }
+        _updating = false;
     }
 
     private GraphicsLayer _graphicsLayer = new();

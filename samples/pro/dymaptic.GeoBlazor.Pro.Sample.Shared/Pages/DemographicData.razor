@@ -1,5 +1,6 @@
 ﻿@page "/demographic-data"
 @inherits SamplePage
+@using System.Text.Json;
 
 @inject LocationService LocationService;
 @inject ArcGISRest ArcGISRest;
@@ -88,6 +89,7 @@
     private async Task GetDemographicData(string locationName, Point mapPoint)
     {
         Graphic[] features = await ArcGISRest.QueryDemographicData(mapPoint);
+        Console.WriteLine($"Demographic data for {locationName}: {JsonSerializer.Serialize(features)}");
         await ShowData(locationName, features[0].Attributes, mapPoint);
     }
 
@@ -96,9 +98,13 @@
         await View!.ClosePopup();
         var popupTitle = $"Global facts near {locationName}";
         attributes.TryGetValue("TOTPOP", out object? totalPop);
+        Console.WriteLine($"Total population: {totalPop}");
         attributes.TryGetValue("TOTMALES", out object? totalMales);
+        Console.WriteLine($"Total males: {totalMales}");
         attributes.TryGetValue("TOTFEMALES", out object? totalFemales);
+        Console.WriteLine($"Total females: {totalFemales}");
         attributes.TryGetValue("AVGHHSZ", out object? avgHouseholdSize);
+        Console.WriteLine($"Average household size: {avgHouseholdSize}");
         string popupContent = $"Population: {totalPop}<br>Males: {totalMales}<br>Females: {totalFemales}<br>Average Household Size: {avgHouseholdSize}";
 
         await View!.OpenPopup(new PopupOpenOptions

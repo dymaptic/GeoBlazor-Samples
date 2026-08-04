@@ -24,19 +24,36 @@
         </Basemap>
         <GraphicsLayer @ref="_graphicsLayer" />
     </Map>
-    <SketchWidget OnSketchEvent="OnSketchEvent" Layer="_graphicsLayer" />
+    <SketchWidget OnCreate="OnSketchCreate" OnUpdate="OnSketchUpdate" Layer="_graphicsLayer" />
 </MapView>
 
 
 @code {
-    private async Task OnSketchEvent(SketchEvent arg)
+    private async Task OnSketchCreate(SketchCreateEvent arg)
     {
         if (arg.State == SketchEventState.Complete)
         {
-            Polygon drawnGraphic = (Polygon)arg.Graphics[0].Geometry!;
-            _polygon = (Polygon)(await ProjectionEngine.Project(drawnGraphic, new SpatialReference(4324)))!;
-            await AssertGraphics();
+            await ProjectAndAssert(arg.Graphic.Geometry);
         }
+    }
+
+    private async Task OnSketchUpdate(SketchUpdateEvent arg)
+    {
+        if (arg.State == SketchEventState.Complete)
+        {
+            await ProjectAndAssert(arg.Graphics.FirstOrDefault()?.Geometry);
+        }
+    }
+
+    private async Task ProjectAndAssert(Geometry? geometry)
+    {
+        if (geometry is not Polygon drawnGraphic)
+        {
+            return;
+        }
+
+        _polygon = (Polygon)(await ProjectionEngine.Project(drawnGraphic, new SpatialReference(4324)))!;
+        await AssertGraphics();
     }
 
     private async Task AssertGraphics()

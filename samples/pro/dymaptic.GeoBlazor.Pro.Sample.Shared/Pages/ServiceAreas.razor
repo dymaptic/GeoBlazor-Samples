@@ -45,7 +45,15 @@
         await _areaGraphic.SetGeometry(clickEvent.MapPoint);
         await _mapView!.ClearGraphics();
         await _mapView.AddGraphic(_areaGraphic);
-        ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl, defaultBreaks: [5, 10, 15]);
+
+        // a separate Graphic is used for the facility because ArcGIS mutates the geometry of each
+        // facility feature in place while normalizing it, which would corrupt the displayed marker
+        FeatureSet facilities = new(Features: [new Graphic(clickEvent.MapPoint)]);
+
+        ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl,
+            facilities: facilities,
+            defaultBreaks: [5, 10, 15],
+            outSpatialReference: new SpatialReference(3857));
 
         if (result?.ServiceAreaPolygons?.Features is null || result.ServiceAreaPolygons.Features.Length == 0)
         {
@@ -66,6 +74,7 @@
     private MapView? _mapView;
     private readonly Graphic _areaGraphic = new(symbol: new SimpleMarkerSymbol(color: new MapColor("white"), size: 8));
     private readonly SimpleFillSymbol _areaFillSymbol = new(color: new MapColor(81, 46, 132, 0.25));
+    // ArcGIS appends "/solveServiceArea" itself, so this must stop at the network analysis layer
     private readonly string _serviceAreaUrl =
-        "https://route-api.arcgis.com/arcgis/rest/services/World/ServiceAreas/NAServer/ServiceArea_World/solveServiceArea";
+        "https://route-api.arcgis.com/arcgis/rest/services/World/ServiceAreas/NAServer/ServiceArea_World";
 }

@@ -40,7 +40,9 @@
         <div id="measurements" class="esri-widget">@((MarkupString)_measurement)</div>
     </CustomOverlay>
     <ScaleBarWidget Unit="ScaleUnit.Metric" Position="OverlayPosition.BottomRight" />
-    <SketchWidget Position="OverlayPosition.TopRight" OnSketchEvent="OnSketchEvent"
+    <SketchWidget Position="OverlayPosition.TopRight" 
+                  OnCreate="OnSketchCreate"
+                  OnUpdate="OnSketchUpdate"
                   AvailableCreateTools="@([AvailableCreateTool.Polyline, AvailableCreateTool.Polygon, AvailableCreateTool.Rectangle])"
                   CreationMode="SketchCreationMode.Update" UpdateOnGraphicClick="true"
                   Layer="_graphicsLayer"
@@ -83,29 +85,60 @@
         }
     }
 
-    private async Task OnSketchEvent(SketchEvent sketchEvent)
+    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
     {
         if (_firstSketch)
         {
             await _graphicsLayer.Remove(_sketchGraphic!);
             _firstSketch = false;
         }
-        if ((!_updating && sketchEvent.EventType == SketchEventType.Update) || 
-            sketchEvent is { EventType: SketchEventType.Create, State: SketchEventState.Complete })
+
+        if (sketchEvent.State == SketchEventState.Complete)
         {
             if (_sketchGraphic is not null && sketchEvent.State == SketchEventState.Complete)
             {
+                Console.WriteLine($"Removing Sketch ID: {_sketchGraphic.Id}");
                 await _graphicsLayer.Remove(_sketchGraphic);
                 _overlay!.Refresh();
             }
             _updating = true;
-            _sketchGraphic = sketchEvent.Graphics.FirstOrDefault();
+            _sketchGraphic = sketchEvent.Graphic;
+            Console.WriteLine($"Sketch created. ID: {_sketchGraphic.Id}");
             if (_sketchGraphic is not null)
             {
                 await GetMeasurements(_sketchGraphic.Geometry!);  
             }
             _updating = false;
         }
+    }
+
+    private async Task OnSketchUpdate(SketchUpdateEvent sketchEvent)
+    {
+        // Measure on every update state, not just Complete, so the readout tracks the drag live.
+        // The _updating flag throttles re-entrant events while a measurement is in flight.
+        if (_updating)
+        {
+            return;
+        }
+
+        _updating = true;
+        Graphic? newGraphic = sketchEvent.Graphics.FirstOrDefault();
+        if (newGraphic is not null)
+        {
+            Console.WriteLine($"Sketch updated. ID: {newGraphic.Id}");
+            if (_sketchGraphic?.Id != newGraphic.Id)
+            {
+                if (_sketchGraphic is not null)
+                {
+                    Console.WriteLine($"Removing Sketch ID: {_sketchGraphic.Id}");
+                    await _graphicsLayer.Remove(_sketchGraphic);
+                }
+                _sketchGraphic = newGraphic;
+            }
+
+            await GetMeasurements(_sketchGraphic.Geometry!);
+        }
+        _updating = false;
     }
 
     private async Task GetMeasurements(Geometry geometry)
