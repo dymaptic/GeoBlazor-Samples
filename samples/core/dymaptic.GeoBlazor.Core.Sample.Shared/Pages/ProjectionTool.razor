@@ -115,10 +115,10 @@
                     <option value="54050" selected="@(_wkid2 = 54050)">54050: World Fuller / Dymaxion map (Polyhedral)</option>
                 </optgroup>
             </select>
-            <div class="spaced-row">
-                <label>X: @_endX?.ToString("N2")</label>
-                <label>Y: @_endY?.ToString("N2")</label>
-            </div>
+        </div>
+        <div class="spaced-row">
+            <label>X: @_endX?.ToString("N2")</label>
+            <label>Y: @_endY?.ToString("N2")</label>
         </div>
         
         <MapView @ref="_view2" Longitude="_startingLong" Latitude="_startingLat" Zoom="3"

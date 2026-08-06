@@ -7,7 +7,7 @@
     Use the dropdown in the top-right of the map to select a type of location to display.
     Click on a rendered point on the map to get details.
 </p>
-<MapView @ref="View" Longitude="18.9553" Latitude="69.6492" Zoom="13" Class="map-view">
+<MapView @ref="_view" Longitude="18.9553" Latitude="69.6492" Zoom="13" Class="map-view">
     <Map>
         <Basemap>
             <PortalItem PortalItemId="00f90f3f3c9141e4bea329679b257142" />
@@ -25,10 +25,10 @@
 </MapView>
 
 @* Declare these outside the map view for reference/passing into the Query *@
-<SimpleMarkerSymbol @ref="Symbol" Color="@(new MapColor("#000000"))" Size="12">
+<SimpleMarkerSymbol @ref="_symbol" Color="@(new MapColor("#000000"))" Size="12">
     <Outline Color="@(new MapColor("#ffffff"))" Width="2" />
 </SimpleMarkerSymbol>
-<PopupTemplate @ref="Popup" Title="{PlaceName}" StringContent="{Place_addr}" />
+<PopupTemplate @ref="_popup" Title="{PlaceName}" StringContent="{Place_addr}" />
 
 @code {
     [Inject]
@@ -55,9 +55,9 @@
         "The sample is intended to demonstrate category-based place search and result rendering in a Blazor " +
         "application without writing JavaScript.";
 
-    public MapView? View { get; set; }
-    public SimpleMarkerSymbol? Symbol { get; set; }
-    public PopupTemplate? Popup { get; set; }
+    private MapView? _view;
+    private SimpleMarkerSymbol? _symbol;
+    private PopupTemplate? _popup;
 
     private readonly string[] _places =
     {
@@ -71,20 +71,33 @@
 
     private async Task OnSelectionChanged(ChangeEventArgs arg)
     {
+        await _view!.ClosePopup();
+        await _view.ClearGraphics();
         string? category = arg.Value?.ToString();
         if (category is null || (category == _places[0])) return;
 
+        Extent? extent = await _view!.GetExtent();
+        Point? center = await extent!.GetCenter();
+
         List<AddressCandidate> result = await LocationService.AddressToLocations(
-            new Address("", "", "", ""), [category], 
-            maxLocations: 25, outFields: ["Place_addr", "PlaceName"]);
-        
+            default(Address?), 
+            categories: [category], 
+            location: center,
+            maxLocations: 25, 
+            outFields: ["Place_addr", "PlaceName"]);
+
+        Console.WriteLine($"Found {result.Count} locations for category '{category}'");
+
         if (result.Count == 0) return;
 
-        AddressCandidate location = result[0];
-
-        Graphic locationGraphic = new(location.Location, Symbol, Popup);
-
-        await View!.AddGraphic(locationGraphic);
+        foreach (AddressCandidate candidate in result)
+        {
+            AttributesDictionary? attributes = candidate.Attributes is null
+                ? null
+                : new AttributesDictionary(candidate.Attributes.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value));
+            Graphic locationGraphic = new(candidate.Location, _symbol, _popup, attributes);
+            await _view!.AddGraphic(locationGraphic);
+        }
     }
 
 }

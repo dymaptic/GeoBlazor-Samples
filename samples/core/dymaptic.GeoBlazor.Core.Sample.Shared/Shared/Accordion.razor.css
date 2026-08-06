@@ -3,7 +3,7 @@
 }
 
 .accordion-title:hover {
-    background-color: var(--text-emphasis);
+    background-color: var(--background-grey-2);
 }
 
 .accordion-title .oi {

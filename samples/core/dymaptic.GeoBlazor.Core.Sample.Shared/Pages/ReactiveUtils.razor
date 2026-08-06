@@ -206,7 +206,7 @@ else
     <WebScene>
         <PortalItem PortalItemId="0614ea1f9dd043e9ba157b9c20d3c538"/>
     </WebScene>
-    <LayerListWidget Position="OverlayPosition.TopRight" OnListItemCreatedHandler="OnListItemCreated"/>
+    <LayerListWidget Position="OverlayPosition.TopRight" OnListItemCreatedFunction="OnListItemCreated"/>
     <HomeWidget @ref="_homeWidget" Position="OverlayPosition.TopLeft"/>
 </SceneView>
 
@@ -323,6 +323,7 @@ else
     private void PopupWatchHandler(bool value)
     {
         _popupOpen = value;
+        StateHasChanged();
     }
 
     private async Task ToggleCenterHandler()
@@ -342,6 +343,7 @@ else
     private void CenterWatchHandler(Point value)
     {
         _center = value;
+        StateHasChanged();
     }
 
     private async Task ToggleExtentHandler()
@@ -361,6 +363,7 @@ else
     private void ExtentWatchHandler(Extent value)
     {
         _extent = value;
+        StateHasChanged();
     }
 
     private async Task ToggleLayerHandler()
@@ -413,8 +416,10 @@ else
         StateHasChanged();
     }
 
-    private async Task<ListItem> OnListItemCreated(ListItem item)
+    private async Task<ListItem> OnListItemCreated(ListItemCreatedHandlerEvent evt)
     {
+        ListItem item = evt.Item;
+        Console.WriteLine($"ListItem created for layer {item.Title} with id {item.Id}");
         await item.SetVisibility(false);
         _listItemsCreated++;
         return item;

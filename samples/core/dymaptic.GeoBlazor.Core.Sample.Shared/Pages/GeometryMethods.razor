@@ -50,12 +50,12 @@
         Y:
     </label>
     <input id="offsetY" type="number" @bind="_dy" />
+    <button type="button" class="btn btn-accent" @onclick="OffsetExtent">Offset</button>
     <label for="offsetExtent">
         Offset Extent:
     </label>
     <textarea id="offsetExtent" type="text" value="@_offsetExtent" disabled />
 </div>
-<button type="button" class="btn btn-accent" @onclick="OffsetExtent">Offset</button>
 <div class="form-group">
     <h2>Point Methods</h2>
     <p>
@@ -68,14 +68,14 @@
         Point to JSON: <button type="button" class="btn btn-primary" @onclick="PointToJson">Convert</button>
     </label>
     <label>
-        JSON: <input type="text" value="@_pointJson" disabled />
+        JSON: <textarea value="@_pointJson" disabled />
     </label>
     <label>
         JSON to Point: <button type="button" class="btn btn-secondary" disabled="@(_pointJson is null)"
                                @onclick="JsonToPoint">Convert</button>
     </label>
     <label>
-        C# Point: <input type="text" value="@_jsonToPointSuccess" disabled />
+        C# Point: <textarea value="@_jsonToPointSuccess" disabled />
     </label>
 </div>
 <div class="form-group">
@@ -95,13 +95,13 @@
         Add Path: <button type="button" class="btn btn-primary" @onclick="AddPath">Add Path</button>
     </label>
     <label>
-        New Path: <input type="text" value="@_addedPath" disabled />
+        New Path: <textarea value="@_addedPath" disabled />
     </label>
     <label>
         Get Point: <button type="button" class="btn btn-secondary" @onclick="GetLinePoint">Get Point</button>
     </label>
     <label>
-        Point: <input type="text" value="@_linePoint" disabled />
+        Point: <textarea value="@_linePoint" disabled />
     </label>
     <CodeHighlight Language="csharp" Code="@(@"
                        Polygon _polygon = new(new MapPath[]
@@ -120,7 +120,7 @@
         Insert Point: <button type="button" class="btn btn-accent" @onclick="InsertPoint">Insert Point</button>
     </label>
     <label>
-        New Polygon: <input type="text" value="@_insertPoint" disabled />
+        New Polygon: <textarea value="@_insertPoint" disabled />
     </label>
 </div>
 <div class="form-group">
@@ -136,13 +136,13 @@
         Polygon from Extent: <button type="button" class="btn btn-primary" @onclick="PolygonFromExtent">Convert</button>
     </label>
     <label>
-        Polygon: @_newPolygon
+        Polygon: <textarea value="@_newPolygon" disabled />
     </label>
     <label>
         Check if Clockwise: <button type="button" class="btn btn-secondary" @onclick="IsClockwise">Check</button>
     </label>
     <label>
-        Is Clockwise: <input type="text" value="@_isClockwise" disabled />
+        Is Clockwise: <input type="text" value="@(_isClockwise ?? false ? "true" : "false")" disabled />
     </label>
 </div>
 
@@ -228,7 +228,9 @@
 
     private async Task IsClockwise()
     {
-        _isClockwise = await GeometryEngine.IsClockwise(_polygon, _polygon.Rings.First());
+        bool isClockwise = await GeometryEngine.IsClockwise(_polygon, _polygon.Rings.First());
+        Console.WriteLine($"Is Clockwise: {isClockwise}");
+        _isClockwise = isClockwise;
     }
 
     private string? _pointJson;

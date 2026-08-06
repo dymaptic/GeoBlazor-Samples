@@ -18,9 +18,12 @@
 </MapView>
 
 @code {
-    
+
     [Inject]
     public required ServiceAreaService ServiceAreaService { get; set; }
+
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
 
     public override List<NavMenu.PageLink> PageLinks =>
     [
@@ -42,33 +45,37 @@
 
     private async Task OnClick(ClickEvent clickEvent)
     {
-        await _areaGraphic.SetGeometry(clickEvent.MapPoint);
-        await _mapView!.ClearGraphics();
-        await _mapView.AddGraphic(_areaGraphic);
-
-        // a separate Graphic is used for the facility because ArcGIS mutates the geometry of each
-        // facility feature in place while normalizing it, which would corrupt the displayed marker
-        FeatureSet facilities = new(Features: [new Graphic(clickEvent.MapPoint)]);
-
-        ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl,
-            facilities: facilities,
-            defaultBreaks: [5, 10, 15],
-            outSpatialReference: new SpatialReference(3857));
-
-        if (result?.ServiceAreaPolygons?.Features is null || result.ServiceAreaPolygons.Features.Length == 0)
+        await JSRuntime.InvokeVoidAsync("setWaitCursor", true);
+        await InvokeAsync(async() => 
         {
-            return;
-        }
-        
-        List<Graphic> graphics = [];
-        
-        foreach (Graphic graphic in result.ServiceAreaPolygons.Features)
-        {
-            await graphic.SetSymbol(_areaFillSymbol);
-            graphics.Add(graphic);
-        }
-        
-        await _mapView.AddGraphics(graphics);
+            await _areaGraphic.SetGeometry(clickEvent.MapPoint);
+            await _mapView!.ClearGraphics();
+            await _mapView.AddGraphic(_areaGraphic);
+
+            // a separate Graphic is used for the facility because ArcGIS mutates the geometry of each
+            // facility feature in place while normalizing it, which would corrupt the displayed marker
+            FeatureSet facilities = new(Features: [new Graphic(clickEvent.MapPoint)]);
+
+            ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl,
+                facilities: facilities,
+                defaultBreaks: [5, 10, 15],
+                outSpatialReference: new SpatialReference(3857));
+
+            if (result?.ServiceAreaPolygons?.Features is not null && result.ServiceAreaPolygons.Features.Length > 0)
+            {
+                List<Graphic> graphics = [];
+            
+                foreach (Graphic graphic in result.ServiceAreaPolygons.Features)
+                {
+                    await graphic.SetSymbol(_areaFillSymbol);
+                    graphics.Add(graphic);
+                }
+                
+                await _mapView.AddGraphics(graphics);
+            }
+            
+            await JSRuntime.InvokeVoidAsync("setWaitCursor", false);
+        });
     }
 
     private MapView? _mapView;

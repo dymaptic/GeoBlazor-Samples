@@ -94,36 +94,30 @@
                 var newYear = year?.ToString();
                 if (newYear is null || newName is null) return;
 
+                Console.WriteLine($"HitTest: {newName} ({newYear})");
+
                 graphic.Attributes.TryGetValue("CAT", out object? category);
                 _category = category?.ToString();
                 graphic.Attributes.TryGetValue("WIND_KTS", out object? wind);
                 _wind = wind?.ToString();
 
+                Console.WriteLine($"Attributes: NAME={newName}, YEAR={newYear}, CAT={_category}, WIND_KTS={_wind}");
+
                 if (_highlightHandle is not null && ((_name != newName) || (_year != newYear)))
                 {
                     await _highlightHandle.Remove();
                     _highlightHandle = null;
-                    _evaluatingPointer = false;
-                    return;
                 }
 
-                if (_highlightHandle is not null)
+                if (_highlightHandle is null)
                 {
-                    _evaluatingPointer = false;
-                    return;
+                    Query layerQuery = (await _layerView!.CreateQuery())!;
+                    layerQuery.Where = $"YEAR = {newYear} AND NAME = '{newName}'";
+                    ObjectId[] ids = await _layerView.QueryObjectIds(layerQuery) ?? [];
+                    _highlightHandle = await _layerView!.Highlight(ids);
+                    _year = newYear;
+                    _name = newName;
                 }
-
-                Query layerQuery = (await _layerView!.CreateQuery())!;
-                layerQuery.Where = $"YEAR = {newYear} AND NAME = '{newName}'";
-                ObjectId[]? ids = await _layerView.QueryObjectIds(layerQuery);
-                if (_highlightHandle is not null)
-                {
-                    await _highlightHandle.Remove();
-                    _highlightHandle = null;
-                }
-                _highlightHandle = await _layerView!.Highlight(ids!.Select(i => i.StringVal).ToList());
-                _year = newYear;
-                _name = newName;
             }
             else if (_highlightHandle is not null)
             {
@@ -135,8 +129,10 @@
         {
             Console.WriteLine(ex);
         }
-
-        _evaluatingPointer = false;
+        finally
+        {
+            _evaluatingPointer = false;
+        }
     }
 
     private MapView? _mapView;
