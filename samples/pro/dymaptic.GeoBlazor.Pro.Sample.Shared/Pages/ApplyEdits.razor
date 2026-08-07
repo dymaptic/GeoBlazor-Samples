@@ -45,20 +45,18 @@
                 <div id="addTemplatesDiv"></div>
             </div>
 
-            <div id="featureUpdateDiv" style="display:@_attributeEditingDisplayStyle; margin-top: 1em;">
+            <div id="featureUpdateDiv" style="display:@_attributeEditingDisplayStyle;">
+                <div id="formDiv"></div>                
                 <div id="attributeArea">
-                    <div id="formDiv"></div>
-                    <input type="button" @onclick="Submit"
-                        class="btn"
-                        value="Update incident info"
-                        id="btnUpdate" />
+                    <button @onclick="Submit"
+                        class="btn btn-primary"
+                        id="btnUpdate">Update incident info</button>
                 </div>
                 <br />
                 <div id="deleteArea">
-                    <input type="button" @onclick="DeleteEdits"
-                        class="btn"
-                        value="Delete incident"
-                        id="btnDelete" />
+                    <button @onclick="DeleteEdits"
+                        class="btn btn-primary"
+                        id="btnDelete">Delete incident</button>
                 </div>
             </div>
 
@@ -124,7 +122,9 @@
         }
     }
 
-    private async Task SelectFeature(long objectId)
+    // Takes ObjectId rather than long: converting an ObjectId built from a string value to long
+    // yields 0, and the service returns objectId as a string from ApplyEdits.
+    private async Task SelectFeature(ObjectId objectId)
     {
         Query query = (await _featureLayer!.CreateQuery())!;
         query.ObjectIds = [objectId];
@@ -172,12 +172,17 @@
 
     private async Task OnFormSubmit(FeatureFormSubmitEvent submitEvent)
     {
-        if (_editFeature is not null)
+        if (_editFeature is null)
         {
-            AttributesDictionary updated = (await _form!.GetValues())!;
-            foreach (string key in updated.Keys)
+            return;
+        }
+
+        try
+        {
+            // Use the values carried on the submit event rather than querying the widget afterwards.
+            foreach ((string key, object? value) in submitEvent.Values)
             {
-                await _editFeature.Attributes.AddOrUpdate(key, updated[key]!);
+                await _editFeature.Attributes.AddOrUpdate(key, value);
             }
 
             var edits = new FeatureLayerApplyEditsEdits
@@ -188,6 +193,10 @@
             await ApplyEditsToIncidents(edits);
             await _mapView!.SetCursor("auto");
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private async Task ApplyEditsToIncidents(FeatureLayerApplyEditsEdits edits)
@@ -195,32 +204,18 @@
         try
         {
             EditsResult editsResult = (await _featureLayer!.ApplyEdits(edits))!;
-            if (editsResult.AddFeatureResults.Any() ||
-                editsResult.UpdateFeatureResults.Any())
-            {
-                await UnselectFeature();
-                ObjectId objectId;
+            await UnselectFeature();
 
-                if (editsResult.AddFeatureResults.Any())
-                {
-                    objectId = editsResult.AddFeatureResults[0].ObjectId!;
-                }
-                else
-                {
-                    objectId = editsResult.UpdateFeatureResults[0].ObjectId!;
-                }
-                
-                await SelectFeature(objectId);
-                if (_addFeatureDivDisplayStyle == "block")
-                {
-                    ToggleEditingDivs("none", "block");
-                }
-                else if (_addFeatureDivDisplayStyle == "none")
-                {
-                    ToggleEditingDivs("block", "none");
-                }
+            // Set the panel state per edit type rather than flipping the current state: flipping
+            // cancels itself out if this runs twice for one submit.
+            if (editsResult.AddFeatureResults.Any())
+            {
+                // Load the new feature into the form so its attributes can be filled in.
+                await SelectFeature(editsResult.AddFeatureResults[0].ObjectId!);
+                ToggleEditingDivs("none", "block");
             }
-            else if (editsResult.DeleteFeatureResults.Any())
+            else if (editsResult.UpdateFeatureResults.Any() ||
+                editsResult.DeleteFeatureResults.Any())
             {
                 ToggleEditingDivs("block", "none");
             }

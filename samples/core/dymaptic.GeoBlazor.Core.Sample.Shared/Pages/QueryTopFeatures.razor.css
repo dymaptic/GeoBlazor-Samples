@@ -11,7 +11,9 @@
     height: 100%;
     position: absolute;
     top: 0;
-    right: -370px;
+    /* CustomOverlay sits beside arcgis-map, so this resolves against .map-wrapper's padding box
+       (which includes the MapView's 380px padding-right gutter this panel occupies). */
+    right: 10px;
     --calcite-ui-brand: #71C96E;
     --calcite-ui-brand-hover: #67B564;
     background-color: #2e3033;

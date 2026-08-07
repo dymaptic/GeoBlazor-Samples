@@ -1,13 +1,20 @@
 ﻿#editArea {
     padding: 6px;
-    width: 370px;
+    width: calc(380px - 2rem);
     height: 100%;
     position: absolute;
     top: 0;
-    right: -370px;
+    /* CustomOverlay sits beside arcgis-map, so this resolves against .map-wrapper's padding box
+       (which includes the MapView's 380px padding-right gutter this panel occupies). */
+    right: 1rem;
     overflow-y: scroll;
 }
 
 #addTemplatesDiv ::deep .esri-item-list__scroller {
     overflow-y: unset;
+}
+
+.btn {
+    width: calc(100% - 2rem);
+    margin: 1rem;
 }

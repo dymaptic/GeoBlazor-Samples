@@ -145,11 +145,9 @@
         {
             if (_editFeature is not null)
             {
-                AttributesDictionary updated = (await _form!.GetValues())!;
-
-                foreach (string key in updated.Keys)
+                foreach ((string key, object? value) in submitEvent.Values)
                 {
-                    await _editFeature.Attributes.AddOrUpdate(key, updated[key]!);
+                    await _editFeature.Attributes.AddOrUpdate(key, value);
                 }
 
                 var edits = new FeatureLayerApplyEditsEdits { UpdateFeatures = [_editFeature] };
