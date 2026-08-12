@@ -31,6 +31,7 @@
                             style="height: 400px;"
                             ContainerId="feature-table-container"
                             Layer="@_regionLayer"
+                            Layers="@_tableLayers"
                             ShowLayerDropdown="true"
                             RelatedRecordsEnabled="true"
                             HideSelectionColumn="true">
@@ -79,6 +80,11 @@
 
         if (_regionLayer is null && featureLayer.Title == "Region" && _webMap is not null)
         {
+            // Read the WebMap's whole layer list up front rather than accumulating one layer view at
+            // a time, so the dropdown group is complete on the render that first builds the widget.
+            IReadOnlyList<Layer>? webMapLayers = await _webMap.GetLayers();
+            _tableLayers = webMapLayers?.OfType<FeatureLayer>().ToList() ?? [featureLayer];
+
             _regionLayer = featureLayer;
             StateHasChanged();
         }
@@ -173,5 +179,6 @@
     private WebMap? _webMap;
     private FeatureTableWidget? _featureTable;
     private FeatureLayer? _regionLayer;
+    private IReadOnlyList<FeatureLayer> _tableLayers = [];
     private bool _waiterRegistered;
 }
