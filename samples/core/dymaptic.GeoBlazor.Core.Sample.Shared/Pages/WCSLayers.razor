@@ -50,6 +50,9 @@
 
 @code {
 
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
+
     public override List<NavMenu.PageLink> PageLinks =>
     [
         new("https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-WCSLayer.html", "ArcGIS Maps SDK for JavaScript"),
@@ -74,7 +77,7 @@
 
     private async Task AddRemoveWCSLayer(bool colorized)
     {
-        await SetCursor("wait");
+        await SetCursor(true);
         await Task.Delay(100);
 
         try
@@ -101,13 +104,13 @@
         }
         finally
         {
-            await SetCursor("default");
+            await SetCursor(false);
         }
     }
 
-    private async Task SetCursor(string cursor)
+    private async Task SetCursor(bool wait)
     {
-        await _view!.CoreJsModule!.InvokeVoidAsync("setCursor", cursor, _view.Id);
+        await JSRuntime.InvokeVoidAsync("setWaitCursor", wait);
     }
 
 

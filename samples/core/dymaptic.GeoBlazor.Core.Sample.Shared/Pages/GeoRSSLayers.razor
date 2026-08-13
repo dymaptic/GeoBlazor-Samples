@@ -3,16 +3,16 @@
 <PageTitle>GeoRSSLayers</PageTitle>
 <h1>GeoRSS Layer</h1>
 <p class="instructions">
-    A simple demo of displaying a GeoRSS feed.
+    A simple demo of displaying a GeoRSS feed, sourced from the GDACS live global disaster feed.
 </p>
 
-<MapView Longitude="-107.95166" Latitude="43.18083" Zoom="4" Class="map-view">
+<MapView Longitude="0" Latitude="20" Zoom="2" Class="map-view">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
         </Basemap>
         <GeoRSSLayer
-            Url="https://arcgis.github.io/arcgis-samples-javascript/sample-data/layers-georss/sample-georss.xml" />
+            Url="https://www.gdacs.org/xml/rss.xml" />
     </Map>
 </MapView>
 
@@ -26,10 +26,11 @@
     public override string Description =>
         "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the GeoRSSLayer from the " +
         "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GeoRSSLayer Razor component. The page shows " +
-        "a 2D light-gray basemap centered over the western United States at a country-level zoom. A GeoRSSLayer " +
-        "is added on top of the basemap, sourced from a sample GeoRSS XML feed hosted on the ArcGIS samples " +
-        "GitHub repository; the layer auto-renders any point, line, or polygon items it parses out of the feed " +
-        "using default GeoRSS symbology. There are no controls beyond the basic map navigation (pan, zoom). The " +
-        "sample is intended to demonstrate the simplest possible declarative consumption of a GeoRSS feed in " +
-        "a Blazor application without writing JavaScript.";
+        "a 2D streets basemap zoomed out to a whole-world view. A GeoRSSLayer is added on top of the basemap, " +
+        "sourced from the GDACS (Global Disaster Alert and Coordination System) live GeoRSS feed; the layer " +
+        "auto-renders each active event worldwide as a point using default GeoRSS symbology, covering hazard " +
+        "types such as earthquakes, tropical cyclones, floods, and wildfires, and refreshes as new events are " +
+        "reported. There are no controls beyond the basic map navigation (pan, zoom). The sample is intended to " +
+        "demonstrate the simplest possible declarative consumption of a live GeoRSS feed in a Blazor application " +
+        "without writing JavaScript.";
 }

@@ -18,6 +18,7 @@
             <input id="earthquakes-checkbox" 
                    type="checkbox" 
                    class="form-check-input"
+                   checked="@_showEarthquakes"
                    @onchange="@(() => _showEarthquakes = !_showEarthquakes)">
             <label for="earthquakes-source">
                 Data Source:
@@ -45,8 +46,16 @@
                           Title="USGS Earthquakes"
                           Copyright="USGS Earthquakes"
                           OrderBy="@([new OrderByInfo("mag", SortOrder.Descending)])">
-                <PopupTemplate Title="Earthquake Info"
-                               StringContent="<b>Magnitude:</b> {mag}<br><b>Type:</b> {type}<br><b>Location:</b> {place}<br><b>Time:</b> {time}" />
+                <PopupTemplate Title="Earthquake Info">
+                    <FieldsContent>
+                        <FieldInfo FieldName="mag" Label="Magnitude" />
+                        <FieldInfo FieldName="type" Label="Type" />
+                        <FieldInfo FieldName="place" Label="Location" />
+                        <FieldInfo FieldName="time" Label="Time">
+                            <FieldInfoFormat DateFormat="@FieldInfoFormatDateFormat.ShortDateShortTime" />
+                        </FieldInfo>
+                    </FieldsContent>               
+                </PopupTemplate>
                 <SimpleRenderer>
                     <SimpleMarkerSymbol Color="@(new MapColor(226, 119, 40))"
                                         Size="6"
@@ -87,7 +96,7 @@
         "of the map documents the size ramp. The sample is intended to demonstrate consuming a remote GeoJSON " +
         "feed with data-driven rendering in a Blazor application without writing JavaScript.";
 
-    private bool _showEarthquakes;
+    private bool _showEarthquakes = true; 
     private string _dataUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
 
     private void OnSourceChanged(ChangeEventArgs e)

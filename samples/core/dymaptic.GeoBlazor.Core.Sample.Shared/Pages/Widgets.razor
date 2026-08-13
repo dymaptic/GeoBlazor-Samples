@@ -75,7 +75,7 @@
         </label>
         <input id="area Measurement 2D-input" type="checkbox" class="form-check-input"  @onchange="@(() => ToggleWidget(nameof(AreaMeasurement2DWidget)))"/>
     </div>
-        
+
 </div>
 
 <div id="gallery-box"></div>
@@ -88,7 +88,7 @@
     </Map>
     @if (_showLocate)
     {
-        <LocateWidget Scale="1500" 
+        <LocateWidget Scale="1500"
                       Position="OverlayPosition.TopLeft" />
     }
     @if (_showSearch)
@@ -97,7 +97,7 @@
     }
     @if (_showBasemapToggle)
     {
-        <BasemapToggleWidget NextBasemapStyle="BasemapStyleName.ArcgisImagery" 
+        <BasemapToggleWidget NextBasemapStyle="BasemapStyleName.ArcgisImagery"
                              Position="OverlayPosition.BottomRight" />
     }
     @if (_showBasemapGallery)
@@ -210,7 +210,7 @@
                     }
 
                     await Task.Delay(500);
-                    
+
                     await InvokeAsync(async () =>
                     {
                         await _bookmarkWidget!.SetBookmarks(_bookmarks);
@@ -224,7 +224,7 @@
     private readonly List<Bookmark> _bookmarks =
     [
         new("Angeles National Forest",
-            thumbnail: new BookmarkThumbnail("/_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/Blazor-API-60px.webp"),
+            thumbnail: new Thumbnail("/_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/Blazor-API-60px.webp"),
             viewpoint: new Viewpoint(new Extent(-13092887.54677721, -13139131.948889678,
                 4090610.189673263, 4047767.23531948, spatialReference: new SpatialReference(102100)))),
 
@@ -249,5 +249,5 @@
     private bool _showAreaMeasurement;
     private bool _showBookmarks;
 
-    private BookmarksWidget? _bookmarkWidget;    
+    private BookmarksWidget? _bookmarkWidget;
 }
