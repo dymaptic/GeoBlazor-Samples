@@ -21,6 +21,10 @@ dotnet run
 
 There is no top-level solution file. Build/run at the individual project level.
 
+**Never suppress the launch profile.** Do not pass `--no-launch-profile`, and do not override `--urls` in a way that bypasses `Properties/launchSettings.json`. Every profile in these samples sets `ASPNETCORE_ENVIRONMENT=Development`; without it the app starts in Production, where `MapStaticAssets`' development runtime handler cannot resolve `_framework` assets (these hosts have no `wwwroot` on disk). The failure is silent and easy to misread: `_framework/blazor.web.js` returns **HTTP 200 with 0 bytes**, `window.Blazor` stays `undefined`, and the page renders fully but is never interactive — no console error, no server error. The map still appears, because the `<arcgis-*>` web components self-initialize from prerendered HTML, so the page looks healthy while every event handler is dead.
+
+To run on a specific port, add or pick a profile (`--launch-profile <name>`) rather than dropping profiles entirely. This affects local `dotnet run` against build output only; `dotnet publish` uses a different static-asset pipeline and is unaffected (samples.geoblazor.com runs in Production without issue).
+
 ### Using Local GeoBlazor Source
 
 To develop against local GeoBlazor repos instead of NuGet packages:
