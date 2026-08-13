@@ -9,7 +9,7 @@
     <a href="https://docs.geoblazor.com/pages/authentication.html#arcgis-authentication">ArcGIS API key or App Id</a>, 
     you can access the ArcGIS Basemap Style Service as well as hundreds of ArcGIS Online Basemaps and TileLayers.
 </p>
-<div class="form-group">
+<Accordion Title="Select a Basemap">
     <RadioGroup @bind-Value="_basemapType">
         <RadioRow Value="0"
                   Label="Default Basemap"
@@ -21,7 +21,9 @@
                   Label="2D Map Styles"
                   Id="2d-basemap">
             <select @onchange="SelectStyleMapChanged" style="@(_basemapType == 1 ? "": "visibility: hidden")">
-                @foreach (BasemapStyleName style in Enum.GetValues(typeof(BasemapStyleName)))
+                @foreach (BasemapStyleName style in Enum.GetValues(typeof(BasemapStyleName))
+                    .Cast<BasemapStyleName>()
+                    .Where(s => !s.ToString().EndsWith("Labels")))
                 {
                     <option value="@style">@style</option>
                 }
@@ -34,7 +36,9 @@
                   Label="3D Scene Styles"
                   Id="3d-basemap">
             <select @onchange="SelectSceneStyleMapChanged" style="@(_basemapType == 2 ? "": "visibility: hidden")">
-                @foreach (BasemapStyleName style in Enum.GetValues(typeof(BasemapStyleName)))
+                @foreach (BasemapStyleName style in Enum.GetValues(typeof(BasemapStyleName))
+                    .Cast<BasemapStyleName>()
+                    .Where(s => !s.ToString().EndsWith("Labels")))
                 {
                     <option value="@style">@style</option>
                 }
@@ -68,7 +72,7 @@
             </div>
         </RadioRow>
     </RadioGroup>
-</div>
+</Accordion>
 
 @switch (_basemapType)
 {

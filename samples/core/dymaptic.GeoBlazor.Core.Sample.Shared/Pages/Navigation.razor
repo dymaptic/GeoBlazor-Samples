@@ -9,6 +9,7 @@
     Change the values for latitude, longitude, zoom, and rotation to see the map update in real time.
     Note that once a user drags or zooms the map manually, the Razor Markup bindings to our input fields must be ignored, otherwise the map would "snap back".
     You can always call <code>MapView.SetExtent</code> to set the extent again, or <code>MapView.Refresh</code> to re-enable bindings.
+    Drag or zoom the map, then use the "Reset Bindings" button below to call <code>MapView.Refresh</code> and snap back to the values above.
 </p>
 <div class="form-group">
     <div class="spaced-row">
@@ -41,6 +42,7 @@
 
 <div class="form-group">
     <button type="button" class="btn btn-accent" @onclick="GetExtent">Get Extent</button>
+    <button type="button" class="btn btn-accent" @onclick="ResetBindings">Reset Bindings</button>
     @if (!string.IsNullOrEmpty(_extentJson))
     {
         <div>@((MarkupString)_extentJson)</div>
@@ -67,7 +69,8 @@
         "in real time. Note that once the user manually drags or zooms the map, those one-way bindings stop " +
         "applying so the map does not snap back. " +
         "Below the map is a 'Get Extent' button which calls MapView.GetExtent and renders the resulting " +
-        "Extent object as formatted JSON beneath the button. " +
+        "Extent object as formatted JSON beneath the button, and a 'Reset Bindings' button which calls " +
+        "MapView.Refresh to re-enable the markup bindings after a manual drag or zoom. " +
         "The sample is intended to demonstrate two-way reactive map navigation and extent retrieval in a " +
         "Blazor application without writing JavaScript.";
 
@@ -76,6 +79,12 @@
         Console.WriteLine("View Rendered");
     }
     
+    // Re-enables the Razor markup bindings after a manual drag or zoom.
+    private async Task ResetBindings()
+    {
+        await _mapView!.Refresh();
+    }
+
     private async Task GetExtent()
     {
         Extent? extent = await _mapView!.GetExtent();
