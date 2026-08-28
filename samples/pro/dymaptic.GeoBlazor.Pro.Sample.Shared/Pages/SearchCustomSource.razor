@@ -69,7 +69,7 @@
                 { "lat", _center.Latitude },
                 { "lon", _center.Longitude }
             },
-            ResponseType = RequestOptionsResponseType.Json
+            ResponseType = ResponseType.Json
         });
       
         return response.Data?.Features
@@ -101,7 +101,7 @@
         RequestResponse<QueryData> response = await Rest.Request<QueryData>(url, new RequestOptions
         {
             Query = query,
-            ResponseType = RequestOptionsResponseType.Json
+            ResponseType = ResponseType.Json
         });
 
         List<SearchResult> results = [];

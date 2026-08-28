@@ -123,7 +123,7 @@
             && _layer!.Renderer == null && !_rendererAdded)
         {
             _rendererAdded = true;
-            await _layer.SetRenderer(new RasterStretchRenderer(new AlgorithmicColorRamp(ColorRampAlgorithm.CieLab,
+            await _layer.SetRenderer(new RasterStretchRenderer(new AlgorithmicColorRamp(Algorithm.CieLab,
                 new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                 stretchType: _stretchType, 
                 customStatistics: [new RasterBandStatistics(Min: 120, Max: 3068, Avg: 400, Stddev: 700)]));
@@ -140,14 +140,14 @@
         switch (_stretchType)
         {
             case RendererStretchType.MinMax:
-                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(ColorRampAlgorithm.CieLab,
+                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(Algorithm.CieLab,
                         new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                     stretchType: _stretchType, 
                     customStatistics: [new RasterBandStatistics(Avg: bandStat.Avg, Max: values[1], Min: values[0], Stddev: bandStat.Stddev)]);
 
                 break;
             default:
-                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(ColorRampAlgorithm.CieLab,
+                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(Algorithm.CieLab,
                         new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                     stretchType: _stretchType, 
                     customStatistics: [new RasterBandStatistics(Avg: bandStat.Avg, Max: bandStat.Max, Min: bandStat.Min, 
