@@ -25,7 +25,7 @@
                       DefinitionExpression="@($"CRASH_DATE > Date '12-31-{_year - 1}' AND CRASH_DATE < Date '01-01-{_year + 1}'")">
             <PopupTemplate Title="Crash location">
                 <FieldInfo FieldName="CRASH_DATE" Label="Date">
-                    <FieldInfoFormat DateFormat="FieldInfoFormatDateFormat.DayShortMonthYearLongTime" />
+                    <FieldInfoFormat DateFormat="DateFormat.DayShortMonthYearLongTime" />
                 </FieldInfo>
                 <FieldInfo FieldName="NUMBER_OF_PERSONS_KILLED" Label="Fatalities" />
                 <FieldInfo FieldName="NUMBER_OF_PERSONS_INJURED" Label="Injuries" />
