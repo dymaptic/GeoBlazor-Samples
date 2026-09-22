@@ -50,7 +50,7 @@
                 </SimpleMarkerSymbol>
                 <LabelClass DeconflictionStrategy="LabelClassDeconflictionStrategy.None"
                        LabelPlacement="LabelPlacement.CenterCenter">
-                    <LabelClassLabelExpressionInfo Expression="Text($feature.cluster_count, '#,###')"/>
+                    <LabelExpressionInfo Expression="Text($feature.cluster_count, '#,###')"/>
                     <TextSymbol Color="@(new MapColor("#004a5d"))">
                         <MapFont Weight="FontWeight.Bold" Family="Noto Sans" Size="12"/>
                     </TextSymbol>
