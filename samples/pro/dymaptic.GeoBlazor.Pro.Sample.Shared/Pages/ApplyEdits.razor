@@ -21,7 +21,7 @@
     @if (_featureLayer is not null)
     {
         <FeatureFormWidget @ref="_form" LayerId="@_featureLayer!.Id"
-                           GroupDisplay="FeatureFormGroupDisplay.Sequential" ContainerId="formDiv"
+                           GroupDisplay="GroupDisplay.Sequential" ContainerId="formDiv"
                            OnSubmit="OnFormSubmit">
             <FormTemplate Title="Enter the incident number">
                 <FieldElement FieldName="IncidentType" Label="Choose incident type" />

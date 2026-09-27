@@ -14,7 +14,7 @@
 
 <MapView Center="@(new Point(-73.9304, 40.6971))"
          Scale="144447" Class="map-view">
-    <View2DConstraints SnapToZoom="false" />
+    <MapViewConstraints SnapToZoom="false" />
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
@@ -25,7 +25,7 @@
                       DefinitionExpression="@($"CRASH_DATE > Date '12-31-{_year - 1}' AND CRASH_DATE < Date '01-01-{_year + 1}'")">
             <PopupTemplate Title="Crash location">
                 <FieldInfo FieldName="CRASH_DATE" Label="Date">
-                    <FieldInfoFormat DateFormat="FieldInfoFormatDateFormat.DayShortMonthYearLongTime" />
+                    <FieldInfoFormat DateFormat="DateFormat.DayShortMonthYearLongTime" />
                 </FieldInfo>
                 <FieldInfo FieldName="NUMBER_OF_PERSONS_KILLED" Label="Fatalities" />
                 <FieldInfo FieldName="NUMBER_OF_PERSONS_INJURED" Label="Injuries" />
@@ -45,7 +45,7 @@
                                 HaloColor="@(new MapColor(_colors[4]))" HaloSize="0.5">
                         <MapFont Family="Noto Sans" Size="10" Weight="FontWeight.Bold" />
                     </TextSymbol>
-                    <LabelClassLabelExpressionInfo Expression="Text($feature.aggregateCount, '#,###')" /> 
+                    <LabelExpressionInfo Expression="Text($feature.aggregateCount, '#,###')" /> 
                 </LabelClass>
                 <PopupTemplate Title="Car crashes" StringContent="{aggregateCount} car crashes occurred in this area." />
                 <SimpleRenderer>

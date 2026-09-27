@@ -24,7 +24,7 @@
          OnViewRendered="OnViewRendered"
          OnViewLayerViewCreate="OnLayerViewCreate">
     <SpatialReference Wkid="102003" />
-    <View2DConstraints SnapToZoom="false" MinScale="50465153" />
+    <MapViewConstraints SnapToZoom="false" MinScale="50465153" />
     <Map>
         <Basemap>
             <FeatureLayer Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2"
@@ -46,7 +46,7 @@
                   Layer="@_polygonGraphicsLayer"
                   AvailableCreateTools="@([AvailableCreateTool.Rectangle])"
                   UpdateOnGraphicClick="false"
-                  CreationMode="SketchCreationMode.Single"
+                  CreationMode="CreationMode.Single"
                   OnCreate="OnSketchCreate"
                   HideSelectionToolsLassoSelection="true"
                   HideSelectionToolsRectangleSelection="true"
