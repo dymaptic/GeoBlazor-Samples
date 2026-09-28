@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Telemetry contracts and scenario settings shared by the simulator and the dashboard.
+       Deliberately framework-independent: no ASP.NET Core, no GeoBlazor. -->
+
+  <ItemGroup>
+    <!-- The single prepared route file, embedded so the WebAssembly client and the server
+         simulator read identical road geometry. Provenance: README.md. -->
+    <EmbeddedResource Include="..\data\routes.geojson" Link="Routing\routes.geojson" />
+  </ItemGroup>
+
+</Project>

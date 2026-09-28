@@ -1,0 +1,74 @@
+@using System.Globalization
+@using System.Text
+@using FleetDashboard.Client.State
+
+<figure class="speed-chart">
+    <figcaption>Sampled speed <span>km/h · last 60 seconds</span></figcaption>
+    <p class="latest-speed">@(LatestSpeedKph is double speed ? $"{speed:0.#} km/h" : "No current speed")</p>
+    @if (_visibleSamples.Count == 0)
+    {
+        <p class="empty-chart">No speed samples yet</p>
+    }
+    else
+    {
+        <div class="plot">
+            <span class="axis-max">@ScaleMaximum.ToString("0", CultureInfo.InvariantCulture)</span>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img"
+                 aria-label="Sampled speed (km/h), last 60 seconds">
+                <line class="grid-line" x1="0" y1="10" x2="100" y2="10" />
+                <line class="grid-line" x1="0" y1="50" x2="100" y2="50" />
+                <line class="grid-line" x1="0" y1="90" x2="100" y2="90" />
+                @foreach (string segment in Segments())
+                {
+                    <path class="speed-segment" d="@segment" vector-effect="non-scaling-stroke" />
+                }
+            </svg>
+            <span class="axis-zero">0</span>
+        </div>
+        <div class="time-axis"><span>−60s</span><span>Now</span></div>
+    }
+</figure>
+
+@code {
+    [Parameter] public IReadOnlyList<SpeedSample> Samples { get; set; } = [];
+    [Parameter] public double? LatestSpeedKph { get; set; }
+    [Parameter] public DateTimeOffset? WindowEndUtc { get; set; }
+
+    private double ScaleMaximum => Math.Max(60, _visibleSamples.Count > 0 ? _visibleSamples.Max(s => s.SpeedKph) : 60);
+
+    protected override void OnParametersSet()
+    {
+        _windowEnd = WindowEndUtc ?? (Samples.Count > 0 ? Samples[^1].ObservedAtUtc : DateTimeOffset.UnixEpoch);
+        _visibleSamples = Samples.Where(s => s.ObservedAtUtc >= _windowEnd.AddSeconds(-60)
+            && s.ObservedAtUtc <= _windowEnd).TakeLast(60).ToArray();
+    }
+
+    private IReadOnlyList<string> Segments()
+    {
+        var paths = new List<string>();
+        var path = new StringBuilder();
+        SpeedSample? previous = null;
+
+        foreach (SpeedSample sample in _visibleSamples)
+        {
+            if (previous is not null && sample.ObservedAtUtc - previous.ObservedAtUtc > TimeSpan.FromSeconds(1.5))
+            {
+                paths.Add(path.ToString());
+                path.Clear();
+            }
+
+            double x = Math.Clamp(100 - ((_windowEnd - sample.ObservedAtUtc).TotalSeconds * 100 / 60), 0, 100);
+            double y = 90 - (Math.Clamp(sample.SpeedKph / ScaleMaximum, 0, 1) * 80);
+            string point = FormattableString.Invariant($"{x:0.###},{y:0.###}");
+            path.Append(path.Length == 0 ? $"M{point} L{point} " : $"L{point} ");
+            previous = sample;
+        }
+
+        if (path.Length > 0) paths.Add(path.ToString());
+
+        return paths;
+    }
+
+    private IReadOnlyList<SpeedSample> _visibleSamples = [];
+    private DateTimeOffset _windowEnd;
+}

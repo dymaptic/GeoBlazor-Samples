@@ -59,6 +59,7 @@ Independent demo apps with varying .NET versions and hosting models:
 | Project | Target  | Hosting Model | GeoBlazor     |
 |---------|---------|---------------|---------------|
 | ShipmentTracker | net9.0  | Blazor Web App (Server + WASM) | Pro 4.1.0     |
+| FleetDashboard | net10.0 | Blazor Web App (Server + WASM) | Core 4.6.2    |
 | SimpleSearch | net9.0  | Blazor Web App (Server + WASM) | Core (latest) |
 | NationFinder | net9.0  | Blazor Web App (Server + WASM) | Core (latest) |
 | NationFinder2 | net9.0  | Blazor Server | Core (latest) |
