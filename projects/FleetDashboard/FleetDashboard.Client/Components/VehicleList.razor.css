@@ -1,0 +1,18 @@
+.list-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: 1rem 1.2rem; }
+h2 { margin: 0; font-size: 1rem; }
+h2 span { color: #52665f; margin-left: .4rem; font-family: var(--font-data); font-size: .8rem; }
+.shortcut { color: var(--teal); font-size: .8rem; border: 1px solid #adc9c2; background: transparent; padding: .4rem .65rem; }
+.roster { max-height: 265px; overflow-y: auto; list-style: none; margin: 0; padding: 0; scrollbar-color: #adc9c2 transparent; }
+.roster button { width: 100%; display: grid; grid-template-columns: 2.7rem 1fr auto; align-items: center; gap: .5rem; text-align: left; padding: .65rem 1.2rem; border: 0; border-top: 1px solid #e3ebe6; background: var(--paper); }
+.roster button:hover { background: #f0f7f3; }
+.roster button[aria-pressed="true"] { background: #e0efea; box-shadow: inset 4px 0 var(--teal); }
+.truck-number { font-family: var(--font-data); font-weight: 600; }
+.route-name { font-size: .83rem; }
+.vehicle-status { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: #226057; }
+.vehicle-status::before { content: "●"; padding-right: .35rem; }
+.vehicle-status.idle { color: #52665f; }
+.vehicle-status.idle::before { content: "Ⅱ"; }
+.vehicle-status.stale { color: #8a4d08; }
+.vehicle-status.stale::before { content: "!"; font-weight: 800; }
+.empty-copy { margin: 0; padding: 1rem 1.2rem 1.5rem; color: #52665f; }
+@media (max-width: 900px) { .roster { max-height: 220px; } }

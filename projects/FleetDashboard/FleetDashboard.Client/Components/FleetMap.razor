@@ -1,0 +1,442 @@
+@using System.Diagnostics
+@using System.Globalization
+@using FleetDashboard.Client.Rendering
+@using FleetDashboard.Client.State
+@using FleetDashboard.Client.Streaming
+@using FleetDashboard.Shared.Routing
+@implements IAsyncDisposable
+
+<div class="fleet-map" aria-label="Fleet map. Select a marker or use the vehicle list.">
+    <MapView @ref="_view" Style="height: 100%; width: 100%;" Longitude="-75.345" Latitude="41.082" Zoom="12"
+             OnViewRendered="MapInitialized" OnClick="SelectAtPoint"
+             OnJavascriptErrorHandler="MapJavascriptFailed" OnExceptionHandler="MapExceptionFailed">
+        <Map>
+            <GraphicsLayer @ref="_routeLayer" Title="Stored demonstration routes" />
+            <FeatureLayer @ref="_vehicleLayer" Title="Fleet vehicles" ObjectIdField="oid"
+                          GeometryType="FeatureGeometryType.Point" Source="_initialSource" Fields="_fields"
+                          Renderer="_statusRenderer">
+                <SpatialReference Wkid="4326" />
+            </FeatureLayer>
+            <GraphicsLayer @ref="_selectionLayer" Title="Selected vehicle" />
+        </Map>
+        <HomeWidget Position="OverlayPosition.TopLeft" />
+    </MapView>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<VehicleListItem> Vehicles { get; set; } = [];
+    [Parameter] public IReadOnlyList<VehicleListItem> UpdatedVehicles { get; set; } = [];
+    [Parameter] public IReadOnlyList<int> RemovedVehicleIds { get; set; } = [];
+    [Parameter] public long UpdateBatchVersion { get; set; }
+    [Parameter] public int? SelectedVehicleId { get; set; }
+    [Parameter] public EventCallback<int> SelectedVehicleIdChanged { get; set; }
+    [Parameter] public EventCallback Initialized { get; set; }
+    [Parameter] public EventCallback<string> EditFailed { get; set; }
+
+    /// <summary>Reports a failed batch that will be retried automatically, with the 1-based
+    /// consecutive attempt number. Fired only below <see cref="MaxConsecutiveEditFailures"/>.</summary>
+    [Parameter] public EventCallback<int> EditRetrying { get; set; }
+    [Parameter] public int RetryVersion { get; set; }
+    [Parameter] public bool SimulateFailure { get; set; }
+    [Parameter] public MapEditGranularity EditGranularity { get; set; } = MapEditGranularity.Collection;
+
+    /// <summary>Maximum awaited edit calls per drain pass; 0 drains until pending state is empty.</summary>
+    [Parameter] public int MaxEditsPerDrain { get; set; }
+    [Parameter] public EventCallback<MapEditTelemetry> EditsApplied { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _initialSource = Vehicles.Select(CreateGraphic).ToArray();
+        _featureIdentities = new VehicleFeatureIdentityMap(Vehicles.Select(v => v.VehicleId));
+        _routeGraphics = FleetRoutes.All.Select(route => new Graphic(
+            new Polyline(paths: [new MapPath(route.Points.Select(p => new MapPoint(p.Longitude, p.Latitude)).ToArray())],
+                spatialReference: new SpatialReference(wkid: 4326)),
+            new SimpleLineSymbol(color: new MapColor("#91B3A7"), width: 3))).ToArray();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        QueueVehicleDelta();
+        QueueSelection();
+        if (RetryVersion != _retryVersion)
+        {
+            _retryVersion = RetryVersion;
+            _failed = false;
+            _consecutiveFailures = 0;
+        }
+
+        await DrainUpdates();
+    }
+
+    /// <summary>Automatic retry bound: a failed batch leaves its vehicles pending and retries on
+    /// the next cadence tick; map updates pause only after this many consecutive failures.</summary>
+    public const int MaxConsecutiveEditFailures = 3;
+
+    protected override bool ShouldRender()
+    {
+        // Initialize the map tree once; telemetry and selection use the imperative layer APIs.
+        return false;
+    }
+
+    private bool CapReached(int appliedCalls) => MaxEditsPerDrain > 0 && appliedCalls >= MaxEditsPerDrain;
+
+    private async Task DrainUpdates()
+    {
+        if (_disposed || _busy || _failed) return;
+        if (SimulateFailure)
+        {
+            await HandleEditFailure(new InvalidOperationException(
+                "Simulated map edit failure. Last-known positions are retained."));
+            return;
+        }
+
+        if (!_ready || !HasVehicleLayer) return;
+
+        _busy = true;
+        try
+        {
+            int appliedCalls = 0;
+            while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection)
+                   && !_disposed && !_failed)
+            {
+                VehicleListItem[] updates = _pendingUpdates.Values.ToArray();
+                int[] removals = _pendingRemovals.ToArray();
+                VehicleListItem? selectedVehicle = _pendingSelectedVehicle;
+                bool updateSelection = _hasPendingSelection;
+                _hasPendingSelection = false;
+
+                if (updates.Length > 0 || removals.Length > 0)
+                {
+                    if (EditGranularity == MapEditGranularity.Individual)
+                    {
+                        foreach (VehicleListItem update in updates)
+                        {
+                            if (_disposed || _failed || CapReached(appliedCalls)) break;
+                            await ApplyVehicleDelta([update], []);
+                            RemoveAppliedDelta([update], []);
+                            appliedCalls++;
+                        }
+                        int[] remaining = [.._pendingRemovals];
+                        foreach (int removal in remaining)
+                        {
+                            if (_disposed || _failed || CapReached(appliedCalls)) break;
+                            await ApplyVehicleDelta([], [removal]);
+                            RemoveAppliedDelta([], [removal]);
+                            appliedCalls++;
+                        }
+                    }
+                    else
+                    {
+                        await ApplyVehicleDelta(updates, removals);
+                        RemoveAppliedDelta(updates, removals);
+                        appliedCalls++;
+                    }
+                }
+                if (updateSelection && !_disposed) await UpdateSelection(selectedVehicle);
+                if (CapReached(appliedCalls)) break;
+            }
+            if (!_disposed) _consecutiveFailures = 0;
+        }
+        catch (OperationCanceledException) when (_disposed) { }
+        catch (Exception exception)
+        {
+            await HandleEditFailure(exception);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    /// <summary>Counts a failed batch without discarding its pending vehicles for reconciliation.
+    /// The next cadence tick retries with the newest state; the map pauses at the bound.</summary>
+    private async Task HandleEditFailure(Exception exception)
+    {
+        if (_disposed) return;
+
+        _consecutiveFailures++;
+        if (_consecutiveFailures >= MaxConsecutiveEditFailures)
+        {
+            _failed = true;
+            await EditFailed.InvokeAsync(exception.Message);
+        }
+        else
+        {
+            await EditRetrying.InvokeAsync(_consecutiveFailures);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        await _lifetime.CancelAsync();
+        _lifetime.Dispose();
+    }
+
+    private async Task MapInitialized(Guid viewId)
+    {
+        if (_ready || _initializing || _disposed) return;
+
+        _initializing = true;
+        try
+        {
+            await AddRoutes();
+
+            if (_disposed) return;
+            _ready = true;
+            await Initialized.InvokeAsync();
+            await DrainUpdates();
+        }
+        catch (Exception exception)
+        {
+            await ReportFailure($"Map initialization failed: {exception.Message}");
+        }
+        finally
+        {
+            _initializing = false;
+        }
+    }
+
+    protected virtual async Task AddRoutes()
+    {
+        if (_routeLayer is null) return;
+
+        foreach (Graphic route in _routeGraphics)
+        {
+            if (_disposed) return;
+            await _routeLayer.Add(route);
+        }
+    }
+
+    protected virtual async Task ApplyVehicleDelta(IReadOnlyList<VehicleListItem> updatedVehicles,
+        IReadOnlyList<int> removedVehicleIds)
+    {
+        VehicleListItem[] addedVehicles = updatedVehicles.Where(v => !_featureIdentities.Contains(v.VehicleId)).ToArray();
+        Graphic[] additions = addedVehicles.Select(CreateGraphic).ToArray();
+        Graphic[] updates = updatedVehicles.Where(v => _featureIdentities.Contains(v.VehicleId))
+            .Select(CreateGraphic).ToArray();
+        int[] existingRemovedVehicleIds = removedVehicleIds.Where(_featureIdentities.Contains).Distinct().ToArray();
+        Graphic[] removals = existingRemovedVehicleIds.Select(vehicleId => new Graphic(
+            attributes: new AttributesDictionary(new Dictionary<string, object?>
+                { ["oid"] = _featureIdentities.GetObjectId(vehicleId) }))
+            { Id = _graphicIds[vehicleId] }).ToArray();
+        if (additions.Length + updates.Length + removals.Length == 0) return;
+
+        long start = Stopwatch.GetTimestamp();
+        FeatureEditsResult result = await _vehicleLayer!.ApplyEdits(new FeatureEdits
+        {
+            AddFeatures = additions,
+            UpdateFeatures = updates,
+            DeleteFeatures = removals
+        }, cancellationToken: _lifetime.Token);
+        double applyMilliseconds = Stopwatch.GetElapsedTime(start, Stopwatch.GetTimestamp()).TotalMilliseconds;
+
+        FeatureEditResult[] results = [..result.AddFeatureResults, ..result.UpdateFeatureResults,
+            ..result.DeleteFeatureResults];
+        for (int index = 0; index < result.AddFeatureResults.Length && index < addedVehicles.Length; index++)
+        {
+            FeatureEditResult added = result.AddFeatureResults[index];
+            if (added.Error is null && int.TryParse(added.ObjectId?.ToString(), NumberStyles.Integer,
+                    CultureInfo.InvariantCulture, out int objectId))
+            {
+                _featureIdentities.Add(addedVehicles[index].VehicleId, objectId);
+            }
+        }
+        for (int index = 0; index < result.DeleteFeatureResults.Length && index < existingRemovedVehicleIds.Length; index++)
+        {
+            if (result.DeleteFeatureResults[index].Error is null)
+            {
+                int vehicleId = existingRemovedVehicleIds[index];
+                _featureIdentities.Remove(vehicleId);
+                _graphicIds.Remove(vehicleId);
+            }
+        }
+
+        int failures = results.Count(r => r.Error is not null);
+        if (failures > 0 || results.Length != additions.Length + updates.Length + removals.Length)
+            throw new InvalidOperationException($"The map did not confirm every vehicle edit ({failures} reported errors).");
+
+        await EditsApplied.InvokeAsync(new MapEditTelemetry(additions.Length + updates.Length + removals.Length,
+            applyMilliseconds));
+    }
+
+    private Graphic CreateGraphic(VehicleListItem vehicle)
+    {
+        if (!_graphicIds.TryGetValue(vehicle.VehicleId, out Guid id))
+        {
+            id = Guid.NewGuid();
+            _graphicIds.Add(vehicle.VehicleId, id);
+        }
+
+        // Core 4.6.2 replaces in-memory Source entries by Graphic.Id, not the feature's OID.
+        int? objectId = _featureIdentities.Contains(vehicle.VehicleId)
+            ? _featureIdentities.GetObjectId(vehicle.VehicleId)
+            : null;
+        return VehicleGraphicFactory.Create(vehicle, id, objectId);
+    }
+
+    private void QueueVehicleDelta()
+    {
+        if (UpdateBatchVersion == _lastUpdateBatchVersion) return;
+        _lastUpdateBatchVersion = UpdateBatchVersion;
+
+        foreach (VehicleListItem vehicle in UpdatedVehicles)
+        {
+            _pendingUpdates[vehicle.VehicleId] = vehicle;
+            _pendingRemovals.Remove(vehicle.VehicleId);
+        }
+
+        foreach (int vehicleId in RemovedVehicleIds)
+        {
+            _pendingUpdates.Remove(vehicleId);
+            _pendingRemovals.Add(vehicleId);
+        }
+    }
+
+    private void RemoveAppliedDelta(IEnumerable<VehicleListItem> updates, IEnumerable<int> removals)
+    {
+        foreach (VehicleListItem update in updates)
+        {
+            if (_pendingUpdates.TryGetValue(update.VehicleId, out VehicleListItem? pending) && pending == update)
+                _pendingUpdates.Remove(update.VehicleId);
+        }
+
+        foreach (int vehicleId in removals)
+        {
+            _pendingRemovals.Remove(vehicleId);
+        }
+    }
+
+    protected virtual bool HasVehicleLayer => _vehicleLayer is not null;
+
+    private void QueueSelection()
+    {
+        VehicleListItem? selectedVehicle = SelectedVehicleId is int selectedVehicleId
+            ? Vehicles.FirstOrDefault(vehicle => vehicle.VehicleId == selectedVehicleId)
+            : null;
+        if (EqualityComparer<VehicleListItem?>.Default.Equals(selectedVehicle, _displayedSelectedVehicle)) return;
+
+        _pendingSelectedVehicle = selectedVehicle;
+        _hasPendingSelection = true;
+    }
+
+    private async Task UpdateSelection(VehicleListItem? selected)
+    {
+        if (_disposed) return;
+
+        // Zoom once per selection identity change, never per telemetry report, so the viewport
+        // stays under the user's control while a selected vehicle keeps reporting.
+        bool selectionChanged = _displayedSelectedVehicle?.VehicleId != selected?.VehicleId;
+        _displayedSelectedVehicle = selected;
+        if (selectionChanged && selected is not null) await ZoomToVehicle(selected);
+
+        if (_selectionLayer is null || _disposed) return;
+
+        await _selectionLayer.Clear();
+        if (_disposed) return;
+        if (selected is null) return;
+
+        await _selectionLayer.Add(new Graphic(new Point(longitude: selected.Longitude, latitude: selected.Latitude),
+            new SimpleMarkerSymbol(color: new MapColor("transparent"), size: 20,
+                outline: new Outline(color: new MapColor("#182724"), width: 2.5))));
+    }
+
+    /// <summary>
+    /// Frames the selected vehicle in a small extent (roughly an 800 m box at this latitude)
+    /// so selecting a truck pulls the map in without a continuous follow mode.
+    /// </summary>
+    private Task ZoomToVehicle(VehicleListItem vehicle)
+    {
+        const double halfSpanDegrees = 0.006;
+        var extent = new Extent(
+            xmax: vehicle.Longitude + halfSpanDegrees,
+            xmin: vehicle.Longitude - halfSpanDegrees,
+            ymax: vehicle.Latitude + halfSpanDegrees,
+            ymin: vehicle.Latitude - halfSpanDegrees,
+            spatialReference: new SpatialReference(wkid: 4326));
+        return GoToExtent(extent);
+    }
+
+    /// <summary>Zooms the view to the given extent; virtual so tests can observe calls.</summary>
+    protected virtual Task GoToExtent(Extent extent) => _view?.GoTo(extent) ?? Task.CompletedTask;
+
+    private async Task SelectAtPoint(ClickEvent click)
+    {
+        if (_view is null || _vehicleLayer is null || !_ready || _disposed) return;
+
+        try
+        {
+            var hits = await _view.HitTest(click, new HitTestOptions { IncludeByGeoBlazorId = [_vehicleLayer.Id] });
+            if (_disposed) return;
+            // The include filter establishes layer ownership; Core 4.6.2 can omit GraphicHit.LayerId.
+            GraphicHit? hit = hits?.Results.OfType<GraphicHit>().FirstOrDefault();
+            if (hit is not null && int.TryParse(hit.Graphic.Attributes["oid"]?.ToString(),
+                NumberStyles.Integer, CultureInfo.InvariantCulture, out int objectId) &&
+                _featureIdentities.TryGetVehicleId(objectId, out int vehicleId))
+            {
+                await SelectedVehicleIdChanged.InvokeAsync(vehicleId);
+            }
+        }
+        catch (Exception exception)
+        {
+            await ReportFailure($"Map selection failed: {exception.Message}");
+        }
+    }
+
+    private Task MapJavascriptFailed(JavascriptException exception)
+    {
+        return ReportFailure($"Map unavailable: {exception.Message}");
+    }
+
+    private async Task<bool> MapExceptionFailed(Exception exception)
+    {
+        await ReportFailure($"Map unavailable: {exception.Message}");
+        return true;
+    }
+
+    private async Task ReportFailure(string message)
+    {
+        if (_disposed) return;
+
+        _failed = true;
+        await EditFailed.InvokeAsync(message);
+    }
+
+    private readonly Field[] _fields = [new(FieldType.Oid, "oid", "Vehicle ID"),
+        new(FieldType.String, "vehicle", "Vehicle"), new(FieldType.Double, "speedKph", "Speed (km/h)"),
+        new(FieldType.String, "route", "Route"), new(FieldType.String, "status", "Status")];
+    private readonly UniqueValueRenderer _statusRenderer = new(field: "status", uniqueValueInfos:
+    [
+        new(value: "Moving", label: "Live / moving", symbol: new SimpleMarkerSymbol(color: new MapColor("#087F78"),
+            size: 9, outline: new Outline(color: new MapColor("white"), width: 1))),
+        new(value: "Idle", label: "Idle", symbol: new SimpleMarkerSymbol(color: new MapColor("#52665F"),
+            size: 9, style: SimpleMarkerSymbolStyle.Square,
+            outline: new Outline(color: new MapColor("white"), width: 1))),
+        new(value: "Stale", label: "Stale", symbol: new SimpleMarkerSymbol(color: new MapColor("#D98218"),
+            size: 11, style: SimpleMarkerSymbolStyle.Diamond,
+            outline: new Outline(color: new MapColor("#182724"), width: 1)))
+    ]);
+    private readonly CancellationTokenSource _lifetime = new();
+    private MapView? _view;
+    private FeatureLayer? _vehicleLayer;
+    private GraphicsLayer? _selectionLayer;
+    private GraphicsLayer? _routeLayer;
+    private IReadOnlyList<Graphic> _initialSource = [];
+    private IReadOnlyList<Graphic> _routeGraphics = [];
+    private VehicleFeatureIdentityMap _featureIdentities = new([]);
+    private readonly Dictionary<int, Guid> _graphicIds = [];
+    private readonly Dictionary<int, VehicleListItem> _pendingUpdates = [];
+    private readonly HashSet<int> _pendingRemovals = [];
+    private VehicleListItem? _pendingSelectedVehicle;
+    private VehicleListItem? _displayedSelectedVehicle;
+    private bool _hasPendingSelection;
+    private int _retryVersion;
+    private long _lastUpdateBatchVersion = -1;
+    private bool _ready;
+    private bool _initializing;
+    private bool _busy;
+    private bool _failed;
+    private int _consecutiveFailures;
+    private bool _disposed;
+}

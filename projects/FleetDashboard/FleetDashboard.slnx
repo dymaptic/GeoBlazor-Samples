@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FleetDashboard.Client/FleetDashboard.Client.csproj" />
+  <Project Path="FleetDashboard.Server/FleetDashboard.Server.csproj" />
+  <Project Path="FleetDashboard.Shared/FleetDashboard.Shared.csproj" />
+  <Project Path="FleetDashboard.Tests/FleetDashboard.Tests.csproj" />
+</Solution>

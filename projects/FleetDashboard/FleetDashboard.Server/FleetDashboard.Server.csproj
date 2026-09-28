@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FleetDashboard.Shared\FleetDashboard.Shared.csproj" />
+    <ProjectReference Include="..\FleetDashboard.Client\FleetDashboard.Client.csproj" />
+  </ItemGroup>
+
+</Project>

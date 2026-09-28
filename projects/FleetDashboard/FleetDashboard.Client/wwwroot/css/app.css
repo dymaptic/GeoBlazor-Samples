@@ -1,0 +1,27 @@
+:root {
+    --fog: #F3F6F4;
+    --paper: #FFFFFF;
+    --ink: #182724;
+    --teal: #087F78;
+    --amber: #D98218;
+    --failure: #B23A32;
+    --font-heading: Bahnschrift, "Segoe UI", sans-serif;
+    --font-body: "Segoe UI", Arial, sans-serif;
+    --font-data: "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fog); color: var(--ink); font-family: var(--font-body); }
+button, input, select { font: inherit; color: inherit; }
+button { min-height: 44px; border-radius: 3px; padding: .55rem .85rem; cursor: pointer; }
+button:disabled { cursor: default; opacity: .5; }
+a { color: var(--teal); }
+button:focus-visible, a:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+h1:focus { outline: none; }
+.loading-progress { width: 80px; height: 80px; display: block; margin: 20vh auto 1rem; }
+.loading-progress circle { fill: none; stroke: #c7d7ce; stroke-width: 5; transform-origin: 50% 50%; transform: rotate(-90deg); }
+.loading-progress circle:last-child { stroke: var(--teal); stroke-dasharray: calc(251.327 * var(--blazor-load-percentage, 0%) / 100) 251.327; }
+.loading-progress-text { text-align: center; }
+.loading-progress-text::after { content: "Loading fleet dispatch · " var(--blazor-load-percentage-text, ""); }
+#blazor-error-ui { display: none; background: #fbece8; border-top: 2px solid var(--failure); padding: 1rem; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; }
+#blazor-error-ui .dismiss { margin-left: 1rem; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }

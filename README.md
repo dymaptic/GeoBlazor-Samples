@@ -29,6 +29,7 @@ Real-world example applications built with GeoBlazor:
 - **CustomPopups** - Custom popup functionality
 - **CustomPopupsJS** - Custom popups with JavaScript integration
 - **DesMoineBusRoutes** - Bus route mapping
+- **FleetDashboard** - Real-time fleet telemetry dashboard (Blazor WASM + SignalR)
 - **MuseumsOfChicago** - Museum location finder
 - **NationFinder** / **NationFinder2** - Country search applications
 - **PointsOnAMapBlog** - Points of interest mapping

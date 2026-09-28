@@ -1,0 +1,38 @@
+@using FleetDashboard.Client.State
+
+<section class="vehicle-list" aria-labelledby="vehicle-list-title">
+    <div class="list-heading">
+        <h2 id="vehicle-list-title">Vehicles <span>@Vehicles.Count.ToString("D2")</span></h2>
+        <button class="shortcut" disabled="@(!Vehicles.Any(v => v.VehicleId == 7))"
+                @onclick="() => SelectedVehicleIdChanged.InvokeAsync(7)">Find truck 007</button>
+    </div>
+    @if (Vehicles.Count == 0)
+    {
+        <p class="empty-copy">No vehicles in this snapshot. Reset the scenario to restore the fleet.</p>
+    }
+    else
+    {
+        <ul class="roster" aria-label="Fleet vehicles">
+            @foreach (VehicleListItem vehicle in Vehicles)
+            {
+                <li @key="vehicle.VehicleId">
+                    <button data-vehicle-id="@vehicle.VehicleId"
+                            aria-pressed="@((SelectedVehicleId == vehicle.VehicleId).ToString().ToLowerInvariant())"
+                            @onclick="() => SelectedVehicleIdChanged.InvokeAsync(vehicle.VehicleId)">
+                        <span class="truck-number">@vehicle.VehicleId.ToString("D3")</span>
+                        <span class="route-name">@vehicle.RouteName</span>
+                        <span class="vehicle-status @vehicle.Status.ToString().ToLowerInvariant()">
+                            @(vehicle.Status == VehicleStatus.Moving ? "Live" : vehicle.Status.ToString())
+                        </span>
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<VehicleListItem> Vehicles { get; set; } = [];
+    [Parameter] public int? SelectedVehicleId { get; set; }
+    [Parameter] public EventCallback<int> SelectedVehicleIdChanged { get; set; }
+}

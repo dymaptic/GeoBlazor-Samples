@@ -1,0 +1,465 @@
+@page "/"
+@using FleetDashboard.Client.Components
+@using FleetDashboard.Client.Diagnostics
+@using FleetDashboard.Client.Rendering
+@using FleetDashboard.Client.State
+@using FleetDashboard.Client.Streaming
+@using FleetDashboard.Shared
+@inject IFleetFrameSource FrameSource
+@inject TimeProvider Clock
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<PageTitle>Fleet dispatch · Pocono region</PageTitle>
+<div class="dispatch-board">
+    <header class="dispatch-header">
+        <div><p class="eyebrow">Monroe County, Pennsylvania</p><h1>Fleet dispatch<span>.</span></h1></div>
+        <div class="simulation-label">Simulated telemetry</div>
+    </header>
+    <div class="status-tape" role="status" aria-live="polite">
+        <strong class="connection @(_mapError is null ? "" : "failure")">@ConnectionLabel</strong>
+        <span>@_snapshot.Vehicles.Count vehicles</span>
+        <span>@_snapshot.Vehicles.Count(v => v.Status == VehicleStatus.Moving) moving</span>
+        <span>@_snapshot.Vehicles.Count(v => v.Status == VehicleStatus.Stale) stale</span>
+        <span class="freshness">@FreshnessLabel</span>
+    </div>
+    @if (_mapError is not null)
+    {
+        <div class="error-banner" role="alert">
+            <div><strong>Map updates paused</strong><p>@_mapError Telemetry remains available below.</p></div>
+            <button @onclick="RetryMap">Retry map updates</button>
+        </div>
+    }
+    @if (_sourceError is not null)
+    {
+        <div class="error-banner" role="alert">
+            <div><strong>Telemetry unavailable</strong><p>@_sourceError</p></div>
+            <button @onclick="RetryConnection">Retry connection</button>
+        </div>
+    }
+    @if (_mapRetryingAttempt > 0 && _mapError is null)
+    {
+        <p class="stale-message" role="status">
+            Reapplying map updates after a failed batch (attempt @_mapRetryingAttempt of @FleetMap.MaxConsecutiveEditFailures).
+        </p>
+    }
+    @if (_queue is { SafetyStop: true } queue)
+    {
+        <div class="error-banner" role="alert">
+            <div><strong>Baseline safety stop</strong>
+            <p>The pending queue reached @RawTelemetryQueue.Capacity.ToString("N0") records, so map
+               updates halted instead of growing without bound. Telemetry keeps flowing;
+               @queue.RejectedRecordCount.ToString("N0") records were rejected.</p></div>
+            <button @onclick="ResumeMapUpdates">Resume map updates</button>
+        </div>
+    }
+    <div class="workspace-grid">
+        <section class="map-panel" aria-labelledby="map-title">
+            <div class="map-heading"><h2 id="map-title">Pocono region</h2><span>4 local routes</span></div>
+            <div class="map-surface">
+                <FleetMap @key="_mapGeneration" Vehicles="_snapshot.Vehicles"
+                          UpdatedVehicles="_mapUpdatedVehicles" RemovedVehicleIds="_mapRemovedVehicleIds"
+                          UpdateBatchVersion="_mapBatchVersion"
+                          EditGranularity="_mode.EditGranularity()"
+                          MaxEditsPerDrain="@(_mode.UsesRawQueue() ? RawEditsPerDrain : 0)"
+                          EditsApplied="RecordMapTelemetry" EditRetrying="MapRetrying"
+                          SelectedVehicleId="_snapshot.SelectedVehicle?.VehicleId"
+                          SelectedVehicleIdChanged="SelectVehicle" Initialized="MapInitialized"
+                          EditFailed="MapFailed" RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure" />
+                @if (!_mapInitialized && _mapError is null)
+                {
+                    <div class="map-notice"><strong>Initializing map</strong><span>The vehicle list is ready to use.</span></div>
+                }
+                @if (_snapshot.HasCurrentSnapshot && _snapshot.Vehicles.Count == 0)
+                {
+                    <div class="map-notice"><strong>No vehicles to display</strong><span>Reset the scenario to restore the fleet.</span></div>
+                }
+            </div>
+            <div class="map-legend" aria-label="Map symbol legend">
+                <span><i class="marker moving" aria-hidden="true"></i> Live / moving</span>
+                <span><i class="marker idle" aria-hidden="true"></i> Idle</span>
+                <span><i class="marker stale" aria-hidden="true"></i> Stale</span>
+                <span class="route-note">Stored road routes · not for navigation</span>
+            </div>
+        </section>
+        <aside class="detail-rail" aria-label="Fleet roster and selected vehicle">
+            <VehicleList Vehicles="_snapshot.Vehicles" SelectedVehicleId="_snapshot.SelectedVehicle?.VehicleId"
+                         SelectedVehicleIdChanged="SelectVehicle" />
+            <section class="selected-details" aria-labelledby="details-title">
+                @if (_snapshot.SelectedVehicle is VehicleListItem selected)
+                {
+                    <div class="detail-heading">
+                        <div><p class="eyebrow">Selected vehicle</p><h2 id="details-title">Truck @selected.VehicleId.ToString("D3")</h2></div>
+                        <button class="clear-selection" @onclick="ClearSelection" aria-label="Clear vehicle selection">×</button>
+                    </div>
+                    <ol class="route-progress">
+                        <li><span class="detail-label">Assigned route</span><strong>@selected.RouteName</strong></li>
+                        <li class="@(selected.Status == VehicleStatus.Stale ? "is-stale" : "")">
+                            <span class="detail-label">Current observation</span><strong>@selected.Status · @selected.SpeedKph.ToString("0.#") km/h</strong>
+                            <span>Reported @selected.ObservedAtUtc.ToString("HH:mm:ss") UTC · @selected.AgeSeconds.ToString("0")s ago</span>
+                            @if (selected.Status == VehicleStatus.Stale)
+                            {
+                                <p class="stale-message">Stale report. Showing the last-known position and speed.</p>
+                            }
+                        </li>
+                        <li><SpeedChart Samples="_snapshot.SelectedHistory" LatestSpeedKph="selected.SpeedKph"
+                                        WindowEndUtc="Clock.GetUtcNow()" /></li>
+                    </ol>
+                }
+                else
+                {
+                    <p class="eyebrow">Selected vehicle</p><h2 id="details-title">Choose a truck</h2>
+                    <p class="no-selection">Select a marker on the map or a vehicle in the list to see its route, latest report, and speed history. The map zooms to the truck you choose.</p>
+                    <span class="selection-hint">Try truck 007 to follow the demo.</span>
+                }
+            </section>
+        </aside>
+    </div>
+    <details class="scenario-controls">
+        <summary>Display preview controls <span>Local server simulation</span></summary>
+        <p class="eyebrow">
+            Mode: @_mode.Label() · Load: @_preset.Name ·
+            Records/s: @Math.Round(_metrics.IncomingRecordsPerSecond) ·
+            Pending: @PendingDisplay ·
+            Map calls/s: @Math.Round(_metrics.MapCallsPerSecond, 1) ·
+            Edit p50/p95: @FormatApplyDelay ·
+            Failures: @_metrics.Failures ·
+            Latest map batch: @_lastMapBatchCount ·
+            Superseded state: @_state.SupersededPendingReportCount ·
+            Reconnects: @ReconnectCountDisplay
+        </p>
+        @if (_modeNotice is not null)
+        {
+            <p class="stale-message">@_modeNotice</p>
+        }
+        <div class="scenario-actions">
+            <button @onclick="ToggleTruckPause" aria-pressed="@_pauseTruck.ToString().ToLowerInvariant()">@(_pauseTruck ? "Resume truck 007" : "Pause truck 007")</button>
+            <button @onclick="ToggleFleetPause" aria-pressed="@_pauseFleet.ToString().ToLowerInvariant()">@(_pauseFleet ? "Resume all reports" : "Pause all reports")</button>
+            <button @onclick="ShowEmptyFleet">Hide fleet locally</button>
+            <button @onclick="SimulateMapError" disabled="@(_mapError is not null)">Simulate map failure</button>
+            <button @onclick="BreakConnection" disabled="@(FrameSource is not IFleetScenarioControls)">Break connection</button>
+            <button @onclick="ResetScenario">Reset scenario</button>
+        </div>
+    </details>
+    <footer class="board-footer"><span>Local demonstration · seed 1190232</span><span>Positions and speeds are simulated.</span></footer>
+</div>
+
+@code {
+    private const int RawCaptureLimit = 250;
+    private const int RawEditsPerDrain = 250;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _mode = ParseMode();
+        _preset = ParsePreset(_mode);
+        _metrics = new DemoMetrics(Clock);
+        if (_mode.UsesRawQueue()) _queue = new RawTelemetryQueue();
+        await Advance();
+        if (FrameSource is IFleetScenarioControls controls)
+            await SendScenarioCommand(controls.SetPresetAsync(_preset.Name));
+        _updateLoop = RunUpdates();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        await _lifetime.CancelAsync();
+        if (_updateLoop is not null) await _updateLoop;
+        _lifetime.Dispose();
+    }
+
+    private string ConnectionLabel => _mapError is not null ? "Map paused"
+        : _sourceError is not null ? "Telemetry unavailable"
+        : FrameSource is IFleetConnectionStatus { IsReconnecting: true } ? "Reconnecting"
+        : !_mapInitialized ? "Initializing map"
+        : _snapshot.Vehicles.Count == 0 ? "Empty fleet"
+        : _snapshot.Vehicles.All(v => v.Status == VehicleStatus.Stale) ? "Stale telemetry"
+        : _pauseFleet ? "Display held" : "Live";
+
+    private string FreshnessLabel => _snapshot.LastFrameAtUtc is DateTimeOffset last
+        ? $"Updated {Math.Max(0, (Clock.GetUtcNow() - last).TotalSeconds):0}s ago" : "Awaiting telemetry";
+
+    private string PendingDisplay => (_queue?.PendingCount ?? _state.DirtyVehicleCount).ToString("N0");
+
+    private string ReconnectCountDisplay => FrameSource is IFleetConnectionStatus status
+        ? status.ReconnectCount.ToString() : "n/a";
+
+    private string FormatApplyDelay
+    {
+        get
+        {
+            (double median, double p95) = _metrics.ApplyDurationMilliseconds;
+            return $"{median:0.#} / {p95:0.#} ms";
+        }
+    }
+
+    private async Task RunUpdates()
+    {
+        using var timer = new PeriodicTimer(_mode.MapCadence(), Clock);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(_lifetime.Token))
+            {
+                if (_disposed) break;
+                await InvokeAsync(async () => { await Advance(); StateHasChanged(); });
+            }
+        }
+        catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
+    }
+
+    private DemoMode ParseMode()
+    {
+        string? value = QueryValue("mode");
+        if (value is null) return DemoMode.Ready;
+        if (DemoModeParser.TryParse(value, out DemoMode mode)) return mode;
+        AddModeNotice($"Unknown mode '{value}' — running the ready dashboard.");
+        return DemoMode.Ready;
+    }
+
+    /// <summary>Optional <c>preset</c> query override so every pipeline mode can be compared or
+    /// rehearsed at the same workload. Without it, the mode's default preset applies and only
+    /// <c>baseline</c> runs the stress load.</summary>
+    private ScenarioSettings ParsePreset(DemoMode mode)
+    {
+        ScenarioSettings fallback = ScenarioSettings.ForMode(mode);
+        string? value = QueryValue("preset");
+        if (value is null) return fallback;
+        if (ScenarioSettings.TryByName(value, out ScenarioSettings preset)) return preset;
+        AddModeNotice($"Unknown preset '{value}' — using {fallback.Name}.");
+        return fallback;
+    }
+
+    private string? QueryValue(string key) => new Uri(Navigation.Uri).Query.TrimStart('?')
+        .Split('&', StringSplitOptions.RemoveEmptyEntries)
+        .Select(pair => pair.Split('=', 2))
+        .Where(parts => parts.Length == 2 && parts[0] == key)
+        .Select(parts => Uri.UnescapeDataString(parts[1]))
+        .FirstOrDefault();
+
+    private void AddModeNotice(string notice) =>
+        _modeNotice = _modeNotice is null ? notice : $"{_modeNotice} {notice}";
+
+    private async Task Advance()
+    {
+        if (_disposed) return;
+
+        DateTimeOffset now = Clock.GetUtcNow();
+        try
+        {
+            bool serverScenario = FrameSource is IFleetScenarioControls;
+            if (!_pauseFleet || serverScenario)
+            {
+                FleetFrame frame = await FrameSource.GetFrameAsync(now, _lifetime.Token);
+                _lastFrame = frame;
+                IReadOnlyList<VehicleReport> reports = _emptyFleet ? [] : frame.Vehicles;
+                if (_pauseTruck && _heldTruck is not null)
+                    reports = reports.Select(v => v.VehicleId == 7 ? _heldTruck : v).ToArray();
+                frame = frame with { Vehicles = reports };
+                _state.Accept(frame);
+                _queue?.Accept(frame);
+                _metrics.RecordIncoming(reports.Count);
+                _sourceError = null;
+            }
+        }
+        catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
+        catch (Exception exception)
+        {
+            _sourceError = $"Telemetry unavailable: {exception.Message}";
+        }
+
+        _snapshot = _state.CreateView(now);
+        UpdateMapDelta(now);
+    }
+
+    private void UpdateMapDelta(DateTimeOffset now)
+    {
+        if (_queue is not null)
+        {
+            PendingFleetBatch rawBatch = _queue.Capture(RawCaptureLimit);
+            _lastMapBatchCount = rawBatch.Reports.Count;
+            _mapUpdatedVehicles = rawBatch.Reports
+                .Select(report => VehicleListItems.Create(report, now)).ToArray();
+            _mapRemovedVehicleIds = [];
+        }
+        else
+        {
+            PendingFleetBatch mapBatch = _state.CaptureDirty();
+            _lastMapBatchCount = mapBatch.Reports.Count + mapBatch.RemovedVehicleIds.Count;
+            Dictionary<int, VehicleListItem> vehicles = _snapshot.Vehicles.ToDictionary(vehicle => vehicle.VehicleId);
+            _mapUpdatedVehicles = mapBatch.Reports
+                .Where(report => vehicles.ContainsKey(report.VehicleId))
+                .Select(report => vehicles[report.VehicleId])
+                .ToArray();
+            _mapRemovedVehicleIds = mapBatch.RemovedVehicleIds;
+        }
+
+        if (_lastMapBatchCount > 0) _mapBatchVersion++;
+    }
+
+    private void RecordMapTelemetry(MapEditTelemetry telemetry)
+    {
+        _mapRetryingAttempt = 0;
+        _metrics.RecordMapCall(telemetry.FeatureCount, telemetry.ApplyMilliseconds);
+    }
+
+    private void MapRetrying(int attempt)
+    {
+        _metrics.RecordFailure();
+        _mapRetryingAttempt = attempt;
+    }
+
+    private async Task RetryConnection()
+    {
+        if (FrameSource is IFleetConnectionStatus status)
+        {
+            await status.RetryConnectionAsync();
+        }
+
+        _sourceError = null;
+        await Advance();
+        StateHasChanged();
+    }
+
+    private async Task BreakConnection()
+    {
+        if (FrameSource is IFleetScenarioControls controls)
+        {
+            await controls.BreakConnectionAsync();
+        }
+    }
+
+    private void SelectVehicle(int id)
+    {
+        _state.Select(id);
+        _snapshot = _state.CreateView(Clock.GetUtcNow());
+    }
+
+    private void ClearSelection()
+    {
+        _state.Select(null);
+        _snapshot = _state.CreateView(Clock.GetUtcNow());
+    }
+
+    private void MapInitialized()
+    {
+        _mapInitialized = true;
+    }
+
+    private void MapFailed(string message)
+    {
+        _metrics.RecordFailure();
+        _mapRetryingAttempt = 0;
+        _mapError = message;
+    }
+
+    private void ResumeMapUpdates()
+    {
+        _queue?.Reset();
+    }
+
+    private void RetryMap()
+    {
+        _simulateMapFailure = false;
+        _mapError = null;
+        _mapRetryingAttempt = 0;
+        _retryVersion++;
+        if (!_mapInitialized) _mapGeneration++;
+    }
+
+    private async Task ToggleTruckPause()
+    {
+        if (FrameSource is IFleetScenarioControls controls)
+        {
+            bool pausing = !_pauseTruck;
+            if (await SendScenarioCommand(pausing ? controls.PauseVehicleAsync(7) : controls.ResumeVehicleAsync(7)))
+                _pauseTruck = pausing;
+            return;
+        }
+
+        _pauseTruck = !_pauseTruck;
+        _heldTruck = _pauseTruck ? _lastFrame?.Vehicles.FirstOrDefault(v => v.VehicleId == 7) : null;
+    }
+
+    private async Task ToggleFleetPause()
+    {
+        if (FrameSource is IFleetScenarioControls controls)
+        {
+            bool pausing = !_pauseFleet;
+            if (await SendScenarioCommand(pausing ? controls.PauseFleetAsync() : controls.ResumeFleetAsync()))
+                _pauseFleet = pausing;
+            return;
+        }
+
+        _pauseFleet = !_pauseFleet;
+    }
+
+    private async Task<bool> SendScenarioCommand(Task command)
+    {
+        try
+        {
+            await command;
+            _sourceError = null;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            _sourceError = $"Scenario command failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    private async Task ShowEmptyFleet()
+    {
+        _emptyFleet = true;
+        _pauseFleet = false;
+        await Advance();
+    }
+
+    private void SimulateMapError()
+    {
+        _simulateMapFailure = true;
+    }
+
+    private async Task ResetScenario()
+    {
+        if (FrameSource is IFleetScenarioControls controls)
+            await SendScenarioCommand(controls.ResetAsync());
+
+        _pauseTruck = false;
+        _pauseFleet = false;
+        _emptyFleet = false;
+        _heldTruck = null;
+        _state = new FleetDashboardState();
+        _queue?.Reset();
+        if (FrameSource is DeterministicFleetFrameSource deterministic) deterministic.Reset();
+        RetryMap();
+        await Advance();
+    }
+
+    private readonly CancellationTokenSource _lifetime = new();
+    private FleetDashboardState _state = new();
+    private FleetDashboardView _snapshot = new([], null, [], null, false);
+    private FleetFrame? _lastFrame;
+    private VehicleReport? _heldTruck;
+    private Task? _updateLoop;
+    private string? _mapError;
+    private string? _sourceError;
+    private int _mapRetryingAttempt;
+    private bool _mapInitialized;
+    private bool _disposed;
+    private bool _pauseTruck;
+    private bool _pauseFleet;
+    private bool _emptyFleet;
+    private bool _simulateMapFailure;
+    private int _retryVersion;
+    private int _mapGeneration;
+    private IReadOnlyList<VehicleListItem> _mapUpdatedVehicles = [];
+    private IReadOnlyList<int> _mapRemovedVehicleIds = [];
+    private int _lastMapBatchCount;
+    private long _mapBatchVersion;
+    private DemoMode _mode = DemoMode.Ready;
+    private ScenarioSettings _preset = ScenarioSettings.Normal;
+    private DemoMetrics _metrics = new();
+    private RawTelemetryQueue? _queue;
+    private string? _modeNotice;
+}
