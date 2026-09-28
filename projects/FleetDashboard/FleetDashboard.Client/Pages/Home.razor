@@ -129,7 +129,7 @@
     <details class="scenario-controls">
         <summary>Display preview controls <span>Local server simulation</span></summary>
         <p class="eyebrow">
-            Mode: @_mode.Label() · Load: @_preset.Name@PresetStatusSuffix ·
+            Mode: @_mode.Label() · Load: @_preset.Name@(PresetStatusSuffix) ·
             Records/s: @Math.Round(_metrics.IncomingRecordsPerSecond) ·
             Pending: @PendingDisplay ·
             Map calls/s: @Math.Round(_metrics.MapCallsPerSecond, 1) ·
@@ -270,19 +270,12 @@
                     reports = reports.Select(v => v.VehicleId == 7 ? _heldTruck : v).ToArray();
                 frame = frame with { Vehicles = reports };
 
-                // The frame source keeps serving its last known frame until a new one arrives, so
-                // only an unseen frame is a new record. Accepting repeats would flood the raw queue
-                // with duplicates and inflate the incoming-record metric.
-                bool isUnseenFrame = _lastReceivedRunId != frame.RunId
-                    || frame.FrameSequence > _lastReceivedFrameSequence;
-                if (isUnseenFrame)
-                {
-                    _lastReceivedRunId = frame.RunId;
-                    _lastReceivedFrameSequence = frame.FrameSequence;
-                }
-
                 _state.Accept(frame);
-                if (isUnseenFrame)
+
+                // The frame source keeps serving its last known frame until a new one arrives, so
+                // only an unseen frame is a new record; counting repeats would flood the raw queue
+                // with duplicates and inflate the incoming-record metric.
+                if (_frameCursor.TryAdvance(frame))
                 {
                     _queue?.Accept(frame);
                     _metrics.RecordIncoming(reports.Count);
@@ -499,11 +492,10 @@
     }
 
     private readonly CancellationTokenSource _lifetime = new();
+    private readonly FleetFrameCursor _frameCursor = new();
     private FleetDashboardState _state = new();
     private FleetDashboardView _snapshot = new([], null, [], null, false);
     private FleetFrame? _lastFrame;
-    private Guid? _lastReceivedRunId;
-    private long _lastReceivedFrameSequence = -1;
     private VehicleReport? _heldTruck;
     private Task? _updateLoop;
     private string? _mapError;
