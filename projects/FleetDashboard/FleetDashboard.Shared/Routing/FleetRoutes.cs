@@ -7,9 +7,9 @@ namespace FleetDashboard.Shared.Routing;
 public sealed record RoutePoint(double Longitude, double Latitude);
 
 /// <summary>
-/// One prepared fleet path loaded from <c>demo/data/routes.geojson</c>. A route is a connected
-/// road line; <see cref="AtDistance"/> walks it forward and then back, so the vehicle turns
-/// around at the far end instead of following an invented closing segment.
+/// One prepared fleet path loaded from <c>projects/FleetDashboard/data/routes.geojson</c>. A route
+/// is a connected road line; <see cref="AtDistance"/> walks it forward and then back, so the
+/// vehicle turns around at the far end instead of following an invented closing segment.
 /// </summary>
 public sealed class FleetRoute
 {

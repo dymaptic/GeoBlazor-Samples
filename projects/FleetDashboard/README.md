@@ -70,23 +70,23 @@ The dashboard chooses one of seven pipeline modes from a `mode` query-string val
 collection map edits at a 250 ms cadence. `latest` and `batched` use the same bounded state at
 100 ms, with `latest` issuing one edit per vehicle and `batched` issuing one collection edit.
 `pipeline` and `baseline` instead keep every observation in a raw FIFO queue at 100 ms, with one
-awaited edit per record, and `baseline` adds the safety stop described below. Only `baseline`
+awaited edit per vehicle, and both modes share the safety stop described below. Only `baseline`
 defaults to the stress workload; every other mode defaults to normal. Add a `preset` query parameter
 (`normal`, `stress`, `quiet`, or `ceiling`) to override the mode default. An unrecognized `mode` or
 `preset` falls back with a visible notice.
 
-The `baseline` safety stop halts map updates when the raw queue reaches 20,000 pending records, shows
+The raw-queue safety stop halts map updates when the queue reaches 20,000 pending records, shows
 a red banner with the rejected-record count, and keeps telemetry flowing. Click **Resume map
 updates** to clear it. The scenario strip reports records per second, pending count, map calls, edit
 latency percentiles, failure count, latest map batch size, superseded state, and reconnect count.
 
-Open **Scenario controls** below the map to pause truck 007, pause all reports, hide the fleet
+Open **Display preview controls** below the map to pause truck 007, pause all reports, hide the fleet
 locally, simulate a map failure, break the connection with a real server abort, or reset the
 scenario. A report becomes stale after five seconds. Map failures keep telemetry visible and expose
 a retry button that pauses after three consecutive failed batches. The connection break shows a
 visible `Live -> Reconnecting -> Live` recovery in about one second and increments the reconnect
-counter. Navigating away during an in-flight map edit disposes the edit timer, the telemetry
-subscription, and the highlight, so no work continues against a component that no longer exists.
+counter. Navigating away during an in-flight map edit cancels the page's update loop and the edit
+itself, so no work continues against a component that no longer exists.
 
 ## The patterns it demonstrates
 
@@ -108,8 +108,9 @@ subscription, and the highlight, so no work continues against a component that n
    stale on its own.
 7. **Make failures visible.** A failed edit stays on screen as an error and retries a bounded
    number of times. It never counts as displayed.
-8. **Clean up on navigation.** Dispose timers, subscriptions, highlights and the hub connection
-   when the component goes away, including during an in-flight edit.
+8. **Clean up on navigation.** Cancel the page's update loop and any in-flight edit when the
+   component goes away. The frame source and its hub connection are scoped to the app and survive
+   navigation.
 
 Coalesce state that has a current value. Never coalesce events: a transaction or an alarm
 transition has to be processed before anything is replaced.
