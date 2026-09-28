@@ -33,6 +33,10 @@
     [Parameter] public EventCallback Initialized { get; set; }
     [Parameter] public EventCallback<string> EditFailed { get; set; }
 
+    /// <summary>Reports a failed hit test or marker selection. Selection failures never pause map
+    /// updates, so they are surfaced separately from <see cref="EditFailed"/>.</summary>
+    [Parameter] public EventCallback<string> SelectionFailed { get; set; }
+
     /// <summary>Reports a failed batch that will be retried automatically, with the 1-based
     /// consecutive attempt number. Fired only below <see cref="MaxConsecutiveEditFailures"/>.</summary>
     [Parameter] public EventCallback<int> EditRetrying { get; set; }
@@ -83,18 +87,21 @@
     private async Task DrainUpdates()
     {
         if (_disposed || _busy || _failed) return;
-        if (SimulateFailure)
-        {
-            await HandleEditFailure(new InvalidOperationException(
-                "Simulated map edit failure. Last-known positions are retained."));
-            return;
-        }
 
-        if (!_ready || !HasVehicleLayer) return;
-
+        // The simulated failure path takes the same busy guard as a real edit, so a render raised
+        // by a retry callback cannot advance the failure count twice for one cadence tick.
         _busy = true;
         try
         {
+            if (SimulateFailure)
+            {
+                await HandleEditFailure(new InvalidOperationException(
+                    "Simulated map edit failure. Last-known positions are retained."));
+                return;
+            }
+
+            if (!_ready || !HasVehicleLayer) return;
+
             int appliedCalls = 0;
             while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection)
                    && !_disposed && !_failed)
@@ -371,16 +378,19 @@
             if (_disposed) return;
             // The include filter establishes layer ownership; Core 4.6.2 can omit GraphicHit.LayerId.
             GraphicHit? hit = hits?.Results.OfType<GraphicHit>().FirstOrDefault();
-            if (hit is not null && int.TryParse(hit.Graphic.Attributes["oid"]?.ToString(),
-                NumberStyles.Integer, CultureInfo.InvariantCulture, out int objectId) &&
-                _featureIdentities.TryGetVehicleId(objectId, out int vehicleId))
+            // A graphic without an oid attribute is an ordinary miss, not a failure.
+            if (hit is not null
+                && hit.Graphic.Attributes.TryGetValue("oid", out object? objectIdValue)
+                && int.TryParse(objectIdValue?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture,
+                    out int objectId)
+                && _featureIdentities.TryGetVehicleId(objectId, out int vehicleId))
             {
                 await SelectedVehicleIdChanged.InvokeAsync(vehicleId);
             }
         }
         catch (Exception exception)
         {
-            await ReportFailure($"Map selection failed: {exception.Message}");
+            await SelectionFailed.InvokeAsync($"Map selection failed: {exception.Message}");
         }
     }
 
