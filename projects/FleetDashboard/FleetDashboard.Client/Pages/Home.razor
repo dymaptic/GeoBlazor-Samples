@@ -37,11 +37,21 @@
             <button @onclick="RetryConnection">Retry connection</button>
         </div>
     }
+    @if (_commandError is not null)
+    {
+        <div class="error-banner" role="alert">
+            <div><strong>Scenario command failed</strong><p>@_commandError</p></div>
+        </div>
+    }
     @if (_mapRetryingAttempt > 0 && _mapError is null)
     {
         <p class="stale-message" role="status">
             Reapplying map updates after a failed batch (attempt @_mapRetryingAttempt of @FleetMap.MaxConsecutiveEditFailures).
         </p>
+    }
+    @if (_selectionNotice is not null)
+    {
+        <p class="stale-message" role="status">@_selectionNotice</p>
     }
     @if (_queue is { SafetyStop: true } queue)
     {
@@ -65,7 +75,8 @@
                           EditsApplied="RecordMapTelemetry" EditRetrying="MapRetrying"
                           SelectedVehicleId="_snapshot.SelectedVehicle?.VehicleId"
                           SelectedVehicleIdChanged="SelectVehicle" Initialized="MapInitialized"
-                          EditFailed="MapFailed" RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure" />
+                          EditFailed="MapFailed" SelectionFailed="SelectionFailed"
+                          RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure" />
                 @if (!_mapInitialized && _mapError is null)
                 {
                     <div class="map-notice"><strong>Initializing map</strong><span>The vehicle list is ready to use.</span></div>
@@ -118,7 +129,7 @@
     <details class="scenario-controls">
         <summary>Display preview controls <span>Local server simulation</span></summary>
         <p class="eyebrow">
-            Mode: @_mode.Label() · Load: @_preset.Name ·
+            Mode: @_mode.Label() · Load: @_preset.Name@PresetStatusSuffix ·
             Records/s: @Math.Round(_metrics.IncomingRecordsPerSecond) ·
             Pending: @PendingDisplay ·
             Map calls/s: @Math.Round(_metrics.MapCallsPerSecond, 1) ·
@@ -154,9 +165,8 @@
         _preset = ParsePreset(_mode);
         _metrics = new DemoMetrics(Clock);
         if (_mode.UsesRawQueue()) _queue = new RawTelemetryQueue();
+        _presetNeedsApply = FrameSource is IFleetScenarioControls;
         await Advance();
-        if (FrameSource is IFleetScenarioControls controls)
-            await SendScenarioCommand(controls.SetPresetAsync(_preset.Name));
         _updateLoop = RunUpdates();
     }
 
@@ -183,6 +193,10 @@
 
     private string ReconnectCountDisplay => FrameSource is IFleetConnectionStatus status
         ? status.ReconnectCount.ToString() : "n/a";
+
+    /// <summary>Shown beside the requested preset until the hub confirms the change, so the
+    /// controls never present a workload the server has not applied.</summary>
+    private string PresetStatusSuffix => _presetNeedsApply ? " (applying)" : "";
 
     private string FormatApplyDelay
     {
@@ -255,9 +269,25 @@
                 if (_pauseTruck && _heldTruck is not null)
                     reports = reports.Select(v => v.VehicleId == 7 ? _heldTruck : v).ToArray();
                 frame = frame with { Vehicles = reports };
+
+                // The frame source keeps serving its last known frame until a new one arrives, so
+                // only an unseen frame is a new record. Accepting repeats would flood the raw queue
+                // with duplicates and inflate the incoming-record metric.
+                bool isUnseenFrame = _lastReceivedRunId != frame.RunId
+                    || frame.FrameSequence > _lastReceivedFrameSequence;
+                if (isUnseenFrame)
+                {
+                    _lastReceivedRunId = frame.RunId;
+                    _lastReceivedFrameSequence = frame.FrameSequence;
+                }
+
                 _state.Accept(frame);
-                _queue?.Accept(frame);
-                _metrics.RecordIncoming(reports.Count);
+                if (isUnseenFrame)
+                {
+                    _queue?.Accept(frame);
+                    _metrics.RecordIncoming(reports.Count);
+                }
+
                 _sourceError = null;
             }
         }
@@ -267,6 +297,7 @@
             _sourceError = $"Telemetry unavailable: {exception.Message}";
         }
 
+        await ApplyPresetIfPending();
         _snapshot = _state.CreateView(now);
         UpdateMapDelta(now);
     }
@@ -276,10 +307,12 @@
         if (_queue is not null)
         {
             PendingFleetBatch rawBatch = _queue.Capture(RawCaptureLimit);
-            _lastMapBatchCount = rawBatch.Reports.Count;
+            // Roster removals are only tracked by the state model; the raw queue holds reports.
+            PendingFleetBatch removedBatch = _state.CaptureDirty();
             _mapUpdatedVehicles = rawBatch.Reports
                 .Select(report => VehicleListItems.Create(report, now)).ToArray();
-            _mapRemovedVehicleIds = [];
+            _mapRemovedVehicleIds = removedBatch.RemovedVehicleIds;
+            _lastMapBatchCount = rawBatch.Reports.Count + _mapRemovedVehicleIds.Count;
         }
         else
         {
@@ -330,6 +363,7 @@
 
     private void SelectVehicle(int id)
     {
+        _selectionNotice = null;
         _state.Select(id);
         _snapshot = _state.CreateView(Clock.GetUtcNow());
     }
@@ -338,6 +372,11 @@
     {
         _state.Select(null);
         _snapshot = _state.CreateView(Clock.GetUtcNow());
+    }
+
+    private void SelectionFailed(string message)
+    {
+        _selectionNotice = message;
     }
 
     private void MapInitialized()
@@ -398,14 +437,37 @@
         try
         {
             await command;
-            _sourceError = null;
+            _commandError = null;
             return true;
         }
         catch (Exception exception)
         {
-            _sourceError = $"Scenario command failed: {exception.Message}";
+            _commandError = $"Scenario command failed: {exception.Message}";
             return false;
         }
+    }
+
+    /// <summary>Re-sends the requested preset after the first successful frame and after every
+    /// reconnect, so a preset survives a connection that was not ready at load time. A failed send
+    /// stays pending and is reported as a command error, never as a frame-source error.</summary>
+    private async Task ApplyPresetIfPending()
+    {
+        if (FrameSource is not IFleetScenarioControls controls) return;
+
+        if (FrameSource is IFleetConnectionStatus status)
+        {
+            if (status.ReconnectCount != _seenReconnectCount)
+            {
+                _seenReconnectCount = status.ReconnectCount;
+                _presetNeedsApply = true;
+            }
+
+            if (status.IsReconnecting) return;
+        }
+
+        if (!_presetNeedsApply || _sourceError is not null) return;
+
+        if (await SendScenarioCommand(controls.SetPresetAsync(_preset.Name))) _presetNeedsApply = false;
     }
 
     private async Task ShowEmptyFleet()
@@ -440,10 +502,14 @@
     private FleetDashboardState _state = new();
     private FleetDashboardView _snapshot = new([], null, [], null, false);
     private FleetFrame? _lastFrame;
+    private Guid? _lastReceivedRunId;
+    private long _lastReceivedFrameSequence = -1;
     private VehicleReport? _heldTruck;
     private Task? _updateLoop;
     private string? _mapError;
     private string? _sourceError;
+    private string? _commandError;
+    private string? _selectionNotice;
     private int _mapRetryingAttempt;
     private bool _mapInitialized;
     private bool _disposed;
@@ -462,4 +528,6 @@
     private DemoMetrics _metrics = new();
     private RawTelemetryQueue? _queue;
     private string? _modeNotice;
+    private bool _presetNeedsApply;
+    private int _seenReconnectCount;
 }
