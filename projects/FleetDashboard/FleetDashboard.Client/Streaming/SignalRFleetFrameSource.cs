@@ -14,7 +14,7 @@ public sealed class SignalRFleetFrameSource
     /// can see it before recovery; matches the first automatic-reconnect delay.</summary>
     private static readonly TimeSpan ReconnectVisibleDelay = TimeSpan.FromSeconds(1);
 
-    public SignalRFleetFrameSource(HubConnection connection, TimeProvider clock)
+    public SignalRFleetFrameSource(IFleetHubConnection connection, TimeProvider clock)
     {
         _connection = connection;
         _clock = clock;
@@ -87,7 +87,10 @@ public sealed class SignalRFleetFrameSource
                 }
             }
 
-            if (IsSnapshotRequired())
+            // A snapshot request is only meaningful on a live transport: during the reconnect
+            // window the state can be Connecting, and invoking there would throw instead of
+            // serving the last known frame while the reconnect path re-establishes the connection.
+            if (IsSnapshotRequired() && _connection.State == HubConnectionState.Connected)
             {
                 FleetFrame snapshot = await _connection.InvokeAsync<FleetFrame>("GetSnapshot", cancellationToken);
                 AcceptSnapshot(snapshot);
@@ -267,7 +270,7 @@ public sealed class SignalRFleetFrameSource
         }
     }
 
-    private readonly HubConnection _connection;
+    private readonly IFleetHubConnection _connection;
     private readonly TimeProvider _clock;
     private readonly SemaphoreSlim _connectionGate = new(1, 1);
     private readonly object _sync = new();

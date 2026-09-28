@@ -18,6 +18,8 @@ builder.Services.AddScoped(sp => new HubConnectionBuilder()
     .WithAutomaticReconnect([TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2),
         TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10)])
     .Build());
+builder.Services.AddScoped<IFleetHubConnection>(sp =>
+    new HubConnectionAdapter(sp.GetRequiredService<HubConnection>()));
 builder.Services.AddScoped<IFleetFrameSource, SignalRFleetFrameSource>();
 builder.Services.AddSingleton(TimeProvider.System);
 
