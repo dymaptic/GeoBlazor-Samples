@@ -135,6 +135,46 @@ public sealed class FleetDashboardPageTests
         page.WaitForAssertion(() => Assert.IsFalse(page.Markup.Contains("Telemetry unavailable")));
     }
 
+    [TestMethod]
+    public async Task ARequestedPresetStaysPendingAndReportsItsOwnErrorUntilTheHubAcceptsIt()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        context.Services.AddSingleton<IFleetFrameSource>(new ScenarioControlSource());
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        context.Services.GetRequiredService<NavigationManager>().NavigateTo("http://localhost/?mode=baseline");
+        var page = context.Render<Home>();
+
+        // The preset stays visibly pending and its failure never masquerades as a telemetry outage.
+        StringAssert.Contains(page.Markup, "Load: stress (applying)");
+        StringAssert.Contains(page.Markup, "Scenario command failed");
+        Assert.IsFalse(page.Markup.Contains("Telemetry unavailable"));
+    }
+
+    [TestMethod]
+    public async Task ThePresetRequestReachesTheHubOnceTheFrameSourceAcceptsCommands()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        var source = new ScenarioControlSource { AcceptsPreset = true };
+        context.Services.AddSingleton<IFleetFrameSource>(source);
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        var page = context.Render<Home>();
+
+        StringAssert.Contains(page.Markup, "Load: normal");
+        Assert.IsFalse(page.Markup.Contains("(applying)"));
+        Assert.IsFalse(page.Markup.Contains("Scenario command failed"));
+        CollectionAssert.AreEqual(new[] { "normal" }, source.Presets.ToArray());
+    }
+
     private sealed class RecoverableSource : IFleetFrameSource, IFleetConnectionStatus
     {
         public bool IsReconnecting => false;
@@ -166,6 +206,44 @@ public sealed class FleetDashboardPageTests
             return ValueTask.FromResult(new FleetFrame(Guid.Empty, ++_sequence, instant,
                 [new VehicleReport(7, _sequence, instant, -75.34, 41.09, 42, "swiftwater")]));
         }
+
+        private long _sequence;
+    }
+
+    private sealed class ScenarioControlSource : IFleetFrameSource, IFleetScenarioControls
+    {
+        public bool AcceptsPreset { get; init; }
+
+        public List<string> Presets { get; } = [];
+
+        public ValueTask<FleetFrame> GetFrameAsync(DateTimeOffset instant,
+            CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(new FleetFrame(Guid.Empty, ++_sequence, instant,
+                [new VehicleReport(7, _sequence, instant, -75.34, 41.09, 42, "swiftwater")]));
+        }
+
+        public Task SetPresetAsync(string presetName, CancellationToken cancellationToken = default)
+        {
+            Presets.Add(presetName);
+            return AcceptsPreset
+                ? Task.CompletedTask
+                : Task.FromException(new InvalidOperationException("The preset was refused."));
+        }
+
+        public Task PauseVehicleAsync(int vehicleId, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task ResumeVehicleAsync(int vehicleId, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task PauseFleetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task ResumeFleetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task ResetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task BreakConnectionAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         private long _sequence;
     }
