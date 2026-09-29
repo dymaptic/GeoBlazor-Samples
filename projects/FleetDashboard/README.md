@@ -124,7 +124,8 @@ drawn route and a vehicle's path can never disagree.
 The geometry is from OpenStreetMap contributors, retrieved once through the public OSRM demo routing
 server with `overview=full&geometries=geojson` and committed as the runtime artifact. It is offered
 under the Open Data Commons Open Database License (ODbL). The paths are demonstration geometry, not
-navigation directions.
+navigation directions. `data/prepare-routes.mjs` regenerates the file against OSRM, and
+[data/README.md](data/README.md) records the endpoints, the license, and the validation rules.
 
 `FleetDashboard.Shared.Routing.FleetRoutes` validates every feature before use: each route has an
 `id`, a `name`, and at least two coordinate pairs; coordinates are longitude/latitude within valid

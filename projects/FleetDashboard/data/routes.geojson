@@ -1,6 +1,6 @@
 {
   "type": "FeatureCollection",
-  "name": "fleet-demo-routes",
+  "name": "fleet-dashboard-routes",
   "features": [
     {
       "type": "Feature",
