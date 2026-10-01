@@ -1,0 +1,31 @@
+# Local SQL Server for the Spatial Dispatch sample. One command, no manual database preparation:
+#
+#   docker compose up -d
+#
+# There is deliberately no named volume. Every `up` starts from an empty database, the application seeds it
+# at startup from its compiled DemoContract records, and the sample therefore cannot drift from the records
+# across runs. `docker compose down` throws the data away, which is the intended behavior.
+#
+# The sa password below is committed on purpose: it reaches nothing but a throwaway local container, and a
+# cold clone has to work without the reader inventing a credential. Never reuse it anywhere real.
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: spatialdispatch-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      # MSSQL_SA_PASSWORD, not the deprecated SA_PASSWORD.
+      MSSQL_SA_PASSWORD: "Dispatch!2026demo"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      # sqlcmd lives under mssql-tools18 in current images, and that build is encryption-first, so -C is
+      # required to accept the container's self-signed certificate.
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -C -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s

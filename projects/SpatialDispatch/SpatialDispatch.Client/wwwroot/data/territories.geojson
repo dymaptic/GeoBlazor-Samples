@@ -1,0 +1,73 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -75.83,
+              41.352
+            ],
+            [
+              -75.61,
+              41.352
+            ],
+            [
+              -75.585,
+              41.5
+            ],
+            [
+              -75.835,
+              41.5
+            ],
+            [
+              -75.83,
+              41.352
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "TerritoryId": 1,
+        "Name": "North Valley"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -75.92,
+              41.18
+            ],
+            [
+              -75.65,
+              41.18
+            ],
+            [
+              -75.61,
+              41.352
+            ],
+            [
+              -75.83,
+              41.352
+            ],
+            [
+              -75.92,
+              41.18
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "TerritoryId": 2,
+        "Name": "South Valley"
+      }
+    }
+  ]
+}

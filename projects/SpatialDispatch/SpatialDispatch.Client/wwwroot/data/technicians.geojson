@@ -1,0 +1,167 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.6805,
+          41.3612
+        ]
+      },
+      "properties": {
+        "TechnicianId": 201,
+        "Name": "Morgan Lee",
+        "TerritoryId": 1,
+        "TerritoryName": "North Valley",
+        "IsAvailable": 0,
+        "LocationLabel": "Montage service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.687,
+          41.3505
+        ]
+      },
+      "properties": {
+        "TechnicianId": 202,
+        "Name": "Riley Chen",
+        "TerritoryId": 2,
+        "TerritoryName": "South Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Moosic service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.671329,
+          41.41073
+        ]
+      },
+      "properties": {
+        "TechnicianId": 203,
+        "Name": "Jordan Alvarez",
+        "TerritoryId": 1,
+        "TerritoryName": "North Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Steamtown service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.625401,
+          41.465984
+        ]
+      },
+      "properties": {
+        "TechnicianId": 204,
+        "Name": "Casey Patel",
+        "TerritoryId": 1,
+        "TerritoryName": "North Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Dickson City service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.61,
+          41.487
+        ]
+      },
+      "properties": {
+        "TechnicianId": 205,
+        "Name": "Avery Brooks",
+        "TerritoryId": 1,
+        "TerritoryName": "North Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Archbald service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.79,
+          41.462
+        ]
+      },
+      "properties": {
+        "TechnicianId": 206,
+        "Name": "Devon Ortiz",
+        "TerritoryId": 1,
+        "TerritoryName": "North Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Clarks Summit service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.88,
+          41.23
+        ]
+      },
+      "properties": {
+        "TechnicianId": 207,
+        "Name": "Harper Nguyen",
+        "TerritoryId": 2,
+        "TerritoryName": "South Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Wilkes-Barre service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.7,
+          41.22
+        ]
+      },
+      "properties": {
+        "TechnicianId": 208,
+        "Name": "Sam Okafor",
+        "TerritoryId": 2,
+        "TerritoryName": "South Valley",
+        "IsAvailable": 1,
+        "LocationLabel": "Route 115 service stop"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.76,
+          41.205
+        ]
+      },
+      "properties": {
+        "TechnicianId": 209,
+        "Name": "Quinn Delgado",
+        "TerritoryId": 2,
+        "TerritoryName": "South Valley",
+        "IsAvailable": 0,
+        "LocationLabel": "Bear Creek service stop"
+      }
+    }
+  ]
+}

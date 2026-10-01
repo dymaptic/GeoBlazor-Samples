@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="SpatialDispatch/SpatialDispatch.csproj" />
+  <Project Path="SpatialDispatch.Client/SpatialDispatch.Client.csproj" />
+  <Project Path="SpatialDispatch.Data/SpatialDispatch.Data.csproj" />
+  <Project Path="SpatialDispatch.Shared/SpatialDispatch.Shared.csproj" />
+  <Project Path="SpatialDispatch.Tests/SpatialDispatch.Tests.csproj" />
+</Solution>

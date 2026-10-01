@@ -35,6 +35,7 @@ Real-world example applications built with GeoBlazor:
 - **PointsOnAMapBlog** - Points of interest mapping
 - **ShipmentTracker** - Shipment tracking
 - **SolarTracker** - Solar panel location tracking
+- **SpatialDispatch** - Field-service dispatch board over SQL Server spatial data (Blazor Web App + Pro)
 
 ## Getting Started
 

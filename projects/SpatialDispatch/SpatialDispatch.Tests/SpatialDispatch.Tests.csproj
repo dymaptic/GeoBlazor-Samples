@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="2.9.0" />
+    <PackageReference Include="NSubstitute" Version="6.2.0" />
+    <PackageReference Include="xunit.v3" Version="4.0.0" />
+    <!-- Serializes a FeatureCollection the same way the API does, so the layer-shape test checks the real
+         GeoJSON rather than a hand-written approximation of it. -->
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SpatialDispatch.Client\SpatialDispatch.Client.csproj" />
+    <ProjectReference Include="..\SpatialDispatch.Data\SpatialDispatch.Data.csproj" />
+    <ProjectReference Include="..\SpatialDispatch.Shared\SpatialDispatch.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The static layer files the earlier checkpoint branches serve. Copied in so the layer-shape test can
+         compare the API's GeoJSON against them instead of restating their property names. -->
+    <Content Include="..\SpatialDispatch.Client\wwwroot\data\territories.geojson"
+             Link="data\territories.geojson"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\SpatialDispatch.Client\wwwroot\data\technicians.geojson"
+             Link="data\technicians.geojson"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

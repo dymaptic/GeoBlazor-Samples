@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
+    <!-- Pro brings dymaptic.GeoBlazor.Core in transitively, so Core is never referenced directly: an
+         explicit Core version would drag it above what this Pro build was compiled against. Pinned to the
+         version published on nuget.org so a cold clone restores without a private feed. -->
+    <PackageReference Include="dymaptic.GeoBlazor.Pro" Version="4.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SpatialDispatch.Shared\SpatialDispatch.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
