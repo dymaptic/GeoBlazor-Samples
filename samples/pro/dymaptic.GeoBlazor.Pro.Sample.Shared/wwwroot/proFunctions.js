@@ -99,3 +99,27 @@ function getCaseInsensitive(obj, key) {
         }
     });
 })();
+// Sets the starting camera of the page's SceneView. Used by the WebStyleSymbols3D sample because the
+// SceneView Tilt/ZIndex parameters do not reach the camera correctly in GeoBlazor 4.6.2.
+window.goToSceneCamera = function (longitude, latitude, z, tilt, heading) {
+    const target = { position: { longitude, latitude, z }, tilt, heading };
+
+    // The scene is built more than once during startup (prerender then interactive render), and a rebuild
+    // resets the camera, so apply the target a few times over the first few seconds. Runs detached so the
+    // caller's JS interop call returns immediately.
+    const delays = [0, 1200, 1800];
+    (async () => {
+        for (const delay of delays) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            const element = document.querySelector('arcgis-scene');
+            const view = element && element.view;
+            if (!view) {
+                continue;
+            }
+            await view.when();
+            await view.goTo(target);
+        }
+    })();
+
+    return true;
+};
