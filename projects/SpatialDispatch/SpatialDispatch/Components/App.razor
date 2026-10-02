@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["SpatialDispatch.styles.css"]" />
+    <link rel="stylesheet" href="_content/dymaptic.GeoBlazor.Core/css/geoblazor.css" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="RenderMode" />
+</head>
+
+<body>
+    <Routes @rendermode="RenderMode" />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>
+
+@code {
+    // Prerendering is off so the ArcGIS view initializes exactly once, in the browser. Prerendering a map
+    // component renders it twice and the second pass has to tear the first one down.
+    private static readonly InteractiveWebAssemblyRenderMode RenderMode = new(prerender: false);
+}

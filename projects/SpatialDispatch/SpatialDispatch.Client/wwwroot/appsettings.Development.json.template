@@ -1,0 +1,6 @@
+{
+  "GeoBlazor": {
+    "LicenseKey": "PASTE_YOUR_GEOBLAZOR_PRO_LICENSE_KEY"
+  },
+  "ArcGISApiKey": "OPTIONAL_ARCGIS_API_KEY_FOR_ROAD_ROUTING"
+}

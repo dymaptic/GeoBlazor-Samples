@@ -1,0 +1,364 @@
+@page "/"
+@using System.Globalization
+@inject IDispatchService DispatchService
+@inject IRouteService RouteService
+
+<PageTitle>SpatialDispatch &middot; Dispatch board</PageTitle>
+
+<div class="page-heading">
+    <h1>Dispatch board</h1>
+    <span class="page-subtitle">Match open jobs to the closest available technician in the covering territory.</span>
+</div>
+
+<div class="dispatch-layout">
+
+    <section class="panel jobs-panel" aria-labelledby="jobs-heading">
+        <div class="panel-header">
+            <span class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                    <path d="M9 12h6M9 16h4" />
+                </svg>
+                <h2 id="jobs-heading">Open jobs</h2>
+            </span>
+            @if (_jobsState == LoadState.Ready && _jobs.Count > 0)
+            {
+                <span class="count-badge">@_jobs.Count</span>
+            }
+        </div>
+
+        @if (_jobsState == LoadState.Loading)
+        {
+            <p class="state-message loading" data-testid="jobs-loading">Loading open jobs&hellip;</p>
+        }
+        else if (_jobsState == LoadState.Failed)
+        {
+            <p class="state-message error" role="alert" data-testid="jobs-error">
+                Could not load open jobs. @_jobsError
+            </p>
+        }
+        else if (_jobs.Count == 0)
+        {
+            <p class="state-message" data-testid="jobs-empty">No open jobs.</p>
+        }
+        else
+        {
+            <ul class="job-list" data-testid="job-list">
+                @foreach (Job job in _jobs)
+                {
+                    <li>
+                        <button type="button"
+                                class="job-button @(job.Id == _selectedJob?.Id ? "selected" : null)"
+                                data-testid="@($"job-{job.Id}")"
+                                @onclick="() => SelectJobAsync(job)">
+                            <span class="job-row">
+                                <span class="job-customer">@job.Customer</span>
+                                <span class="job-priority @job.Priority.ToString().ToLowerInvariant()">
+                                    @job.Priority
+                                </span>
+                            </span>
+                            <span class="job-summary">@job.Summary</span>
+                            <span class="job-row job-meta">
+                                <span class="job-status" data-testid="@($"job-status-{job.Id}")">
+                                    @(StatusOf(job) == JobStatus.Assigned ? "Assigned" : "Open")
+                                </span>
+                                @if (_assignments.TryGetValue(job.Id, out string? assignee))
+                                {
+                                    <span class="job-assignee" data-testid="@($"job-assignee-{job.Id}")">@assignee</span>
+                                }
+                            </span>
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="panel map-panel" aria-label="Dispatch map">
+        @* The map is the one part of this screen that can fail for reasons outside the application: a
+           missing GeoBlazor registration key, a blocked tile server, a WebGL problem on the room's
+           projector. None of those should take down the dispatch answer next to it. *@
+        <ErrorBoundary>
+            <ChildContent>
+                <DispatchMap SelectedJob="_selectedJob" Dispatch="_dispatch" Route="_route"
+                             SelectedCandidate="_selectedCandidate" />
+            </ChildContent>
+            <ErrorContent Context="mapError">
+                <div class="map-unavailable" data-testid="map-unavailable">
+                    <p><strong>The map is unavailable.</strong></p>
+                    <p>The dispatch result on the right is unaffected.</p>
+                    <p class="map-error-detail">@PlainText(mapError.Message)</p>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
+    </section>
+
+    <section class="panel result-panel" aria-labelledby="result-heading">
+        <div class="panel-header">
+            <span class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 3v2M12 19v2M3 12h2M19 12h2" />
+                </svg>
+                <h2 id="result-heading">Recommendation</h2>
+            </span>
+        </div>
+
+        @if (_selectedJob is null)
+        {
+            <p class="state-message" data-testid="no-selection">
+                Select an open job to see its territory and the closest available technician.
+            </p>
+        }
+        else if (_dispatchState == LoadState.Loading)
+        {
+            <p class="state-message loading" data-testid="dispatch-loading">Finding the closest available technician&hellip;</p>
+        }
+        else if (_dispatchState == LoadState.Failed)
+        {
+            <p class="state-message error" role="alert" data-testid="dispatch-error">
+                Dispatch failed. @_dispatchError
+            </p>
+        }
+        else if (_dispatch is not null)
+        {
+            <dl class="recommendation" data-testid="recommendation">
+                <dt>Containing territory</dt>
+                <dd data-testid="containing-territory">@_dispatch.ContainingTerritory.Name</dd>
+
+                <dt>Recommended technician</dt>
+                <dd data-testid="recommended-technician">@_dispatch.RecommendedTechnician.Name</dd>
+
+                <dt>Straight-line distance</dt>
+                <dd data-testid="recommended-distance">@FormatKilometers(_dispatch.StraightLineDistanceMeters)</dd>
+            </dl>
+
+            <p class="route-note" data-testid="route-note">
+                @if (_route is null)
+                {
+                    <text>Drawing the path&hellip;</text>
+                }
+                else if (_route.IsFallback)
+                {
+                    <text>
+                        Routing is not configured, so the map shows a straight connector. The recommendation
+                        is unchanged.
+                    </text>
+                }
+                else
+                {
+                    <text>Road route drawn from the technician to the job.</text>
+                }
+            </p>
+
+            <h3>Candidates</h3>
+            <ul class="candidate-list" data-testid="candidate-list">
+                @foreach (TechnicianCandidate candidate in _dispatch.Candidates)
+                {
+                    <li>
+                        <button type="button"
+                                class="candidate @candidate.Outcome.ToString().ToLowerInvariant() @(candidate.Id == _selectedCandidate?.Id ? "selected" : null)"
+                                data-testid="@($"candidate-{candidate.Id}")"
+                                aria-pressed="@(candidate.Id == _selectedCandidate?.Id ? "true" : "false")"
+                                @onclick="() => SelectCandidateAsync(candidate)">
+                            <span class="candidate-name">@candidate.Name</span>
+                            <span class="candidate-distance">@FormatKilometers(candidate.DistanceMeters)</span>
+                            <span class="candidate-outcome" data-testid="@($"candidate-outcome-{candidate.Id}")">
+                                @DescribeOutcome(candidate)
+                            </span>
+                        </button>
+                    </li>
+                }
+            </ul>
+
+            @if (StatusOf(_selectedJob) == JobStatus.Assigned)
+            {
+                <p class="assigned-note" data-testid="assigned-note">
+                    Assigned to @_assignments[_selectedJob.Id].
+                </p>
+            }
+            else
+            {
+                <button type="button"
+                        class="assign-button"
+                        data-testid="assign-button"
+                        @onclick="AssignRecommended">
+                    Assign @FirstName(_dispatch.RecommendedTechnician.Name)
+                </button>
+            }
+        }
+    </section>
+
+</div>
+
+@code {
+    private enum LoadState
+    {
+        Loading,
+        Ready,
+        Failed
+    }
+
+    private IReadOnlyList<Job> _jobs = [];
+    private LoadState _jobsState = LoadState.Loading;
+    private string? _jobsError;
+
+    private Job? _selectedJob;
+    private DispatchResult? _dispatch;
+    private RoutePath? _route;
+    private TechnicianCandidate? _selectedCandidate;
+    private LoadState _dispatchState = LoadState.Ready;
+    private string? _dispatchError;
+
+    // Bumped on every selection change. An answer that arrives after the dispatcher has moved on carries
+    // a stale version and is discarded rather than overwriting the answer for the current selection.
+    private int _selectionVersion;
+
+    // Assignment is presentation state only. It lives in this component, so a page refresh restores every
+    // job to Open, which is what the demo contract promises and what the rehearsal reset depends on.
+    private readonly Dictionary<int, string> _assignments = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _jobs = await DispatchService.GetOpenJobsAsync();
+            _jobsState = LoadState.Ready;
+        }
+        catch (Exception ex)
+        {
+            _jobsError = ex.Message;
+            _jobsState = LoadState.Failed;
+        }
+    }
+
+    private async Task SelectJobAsync(Job job)
+    {
+        _selectedJob = job;
+        _dispatch = null;
+        _route = null;
+        _selectedCandidate = null;
+        _dispatchError = null;
+        _dispatchState = LoadState.Loading;
+
+        int version = ++_selectionVersion;
+        DispatchResult dispatch;
+
+        try
+        {
+            dispatch = await DispatchService.GetDispatchAsync(job.Id);
+        }
+        catch (Exception ex)
+        {
+            if (version != _selectionVersion)
+            {
+                return;
+            }
+
+            _dispatchError = ex.Message;
+            _dispatchState = LoadState.Failed;
+            return;
+        }
+
+        // A slower answer for a job the dispatcher has already left must not replace the answer for the job
+        // now on screen.
+        if (version != _selectionVersion)
+        {
+            return;
+        }
+
+        _dispatch = dispatch;
+        _dispatchState = LoadState.Ready;
+
+        // The path is drawn after the recommendation is already on screen. Routing is a visual enrichment,
+        // so a failure here must not discard an answer the database already gave.
+        StateHasChanged();
+
+        await LoadRouteAsync(dispatch.RecommendedTechnician.Location, job.Location, version);
+    }
+
+    /// <summary>
+    ///     Previews a candidate's own route to the selected job, so the dispatcher can compare someone the
+    ///     database did not pick. The recommendation card is unchanged.
+    /// </summary>
+    private async Task SelectCandidateAsync(TechnicianCandidate candidate)
+    {
+        if (_selectedJob is null || _dispatch is null)
+        {
+            return;
+        }
+
+        _selectedCandidate = candidate;
+        _route = null;
+        StateHasChanged();
+
+        await LoadRouteAsync(candidate.Location, _selectedJob.Location, ++_selectionVersion);
+    }
+
+    /// <summary>
+    ///     Resolves the drawn path, degrading to the straight connector on any routing failure. A failure here
+    ///     must never discard the dispatch answer already on screen.
+    /// </summary>
+    private async Task LoadRouteAsync(GeoPoint from, GeoPoint to, int version)
+    {
+        RoutePath route;
+
+        try
+        {
+            route = await RouteService.GetRouteAsync(from, to);
+        }
+        catch
+        {
+            route = new RoutePath([from, to], IsFallback: true);
+        }
+
+        // A route that resolves after the dispatcher has selected something else must not replace the path
+        // for the current selection.
+        if (version != _selectionVersion)
+        {
+            return;
+        }
+
+        _route = route;
+    }
+
+    private void AssignRecommended()
+    {
+        if (_selectedJob is null || _dispatch is null)
+        {
+            return;
+        }
+
+        _assignments[_selectedJob.Id] = _dispatch.RecommendedTechnician.Name;
+    }
+
+    private JobStatus StatusOf(Job job) =>
+        _assignments.ContainsKey(job.Id) ? JobStatus.Assigned : JobStatus.Open;
+
+    private static string FormatKilometers(double meters) =>
+        $"{(meters / 1000).ToString("0.0", CultureInfo.InvariantCulture)} km";
+
+    private static string FirstName(string fullName) =>
+        fullName.Split(' ')[0];
+
+    /// <summary>
+    ///     Strips markup out of a library exception message so the fallback panel does not display raw
+    ///     anchor tags to the room. GeoBlazor's missing-key message is written for an HTML surface.
+    /// </summary>
+    private static string PlainText(string message) =>
+        System.Text.RegularExpressions.Regex.Replace(message, "<.*?>", string.Empty);
+
+    private static string DescribeOutcome(TechnicianCandidate candidate) =>
+        candidate.Outcome switch
+        {
+            CandidateOutcome.Recommended => "Recommended",
+            CandidateOutcome.Eligible => $"Eligible - {candidate.TerritoryName}",
+            CandidateOutcome.ExcludedByAvailability => "Unavailable",
+            CandidateOutcome.ExcludedByTerritory => $"Assigned to {candidate.TerritoryName}",
+            _ => string.Empty
+        };
+}

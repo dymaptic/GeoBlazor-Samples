@@ -1,0 +1,30 @@
+@inherits LayoutComponentBase
+
+@* One screen, no navigation. The talk never leaves the dispatch board, so a sidebar would only take
+   projector space away from the map. The header carries the product identity and shift status instead. *@
+
+<div class="app">
+    <header class="app-header">
+        <div class="brand">
+            <span class="brand-mark" aria-hidden="true">SD</span>
+            <span class="brand-text">
+                <span class="brand-name">Spatial Dispatch</span>
+                <span class="brand-tagline">Field Service Operations</span>
+            </span>
+        </div>
+        <div class="app-header-meta">
+            <span class="status-chip"><span class="dot" aria-hidden="true"></span> Live</span>
+            <span class="header-shift">Scranton&ndash;Wilkes-Barre &middot; Day shift</span>
+        </div>
+    </header>
+
+    <main class="app-shell">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">X</span>
+</div>

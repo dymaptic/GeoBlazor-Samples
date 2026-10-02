@@ -1,0 +1,254 @@
+@inject IMapLayerSource LayerSource
+
+@* The only component in the application that knows GeoBlazor exists. Everything it needs arrives as a
+   parameter, which keeps the dashboard testable: bUnit cannot render the ArcGIS JS interop, so the
+   dashboard tests stub this one component out. *@
+
+<MapView Longitude="@ViewLongitude"
+         Latitude="@ViewLatitude"
+         Zoom="@ViewZoom"
+         Class="dispatch-map"
+         PromptForArcGISKey="false"
+         @ref="_mapView"
+         OnViewInitialized="OnViewInitializedAsync">
+    <Map>
+        <Basemap>
+            @* OpenStreetMap needs no credentials, so a cold clone gets a real basemap. *@
+            <OpenStreetMapLayer />
+        </Basemap>
+
+        <GeoJSONLayer Url="@LayerSource.TerritoriesUrl" Title="Service territories" Opacity="0.35">
+            <SimpleRenderer>
+                <SimpleFillSymbol Color="@TerritoryFill">
+                    <Outline Color="@TerritoryOutline" Width="1.5" />
+                </SimpleFillSymbol>
+            </SimpleRenderer>
+        </GeoJSONLayer>
+
+        @if (Dispatch is not null)
+        {
+            @* A second layer over the same GeoJSON, filtered to the one territory that contains the job.
+               Re-keyed on the territory ID so a different answer redraws the highlight. *@
+            <GeoJSONLayer @key="@($"territory-{Dispatch.ContainingTerritory.Id}")"
+                          Url="@LayerSource.TerritoriesUrl"
+                          Title="Containing territory"
+                          DefinitionExpression="@($"TerritoryId = {Dispatch.ContainingTerritory.Id}")"
+                          Opacity="0.55">
+                <SimpleRenderer>
+                    <SimpleFillSymbol Color="@ContainingFill">
+                        <Outline Color="@ContainingOutline" Width="3" />
+                    </SimpleFillSymbol>
+                </SimpleRenderer>
+            </GeoJSONLayer>
+        }
+
+        <GeoJSONLayer Url="@LayerSource.TechniciansUrl" Title="Technicians">
+            <SimpleRenderer>
+                <SimpleMarkerSymbol Color="@TechnicianFill" Size="9">
+                    <Outline Color="@TechnicianOutline" Width="1" />
+                </SimpleMarkerSymbol>
+            </SimpleRenderer>
+        </GeoJSONLayer>
+
+        <GraphicsLayer @ref="_graphicsLayer" Title="Dispatch" />
+    </Map>
+
+    @* The ArcGIS Legend widget describes the GeoJSON layers from their renderers. The job marker,
+       recommended technician, and route are client-side graphics on the Dispatch layer, which a
+       layer-renderer legend cannot describe, so they get the Pro GraphicsLegendWidget instead. Both
+       are positioned by the view, so neither can drift into GeoBlazor's top-right branding. *@
+    <LegendWidget Position="OverlayPosition.BottomRight" />
+    <GraphicsLegendWidget Position="OverlayPosition.BottomLeft"
+                          Label="Dispatch legend"
+                          GraphicLabelTemplate="{Name}"
+                          GroupBySymbol="true" />
+</MapView>
+
+@code {
+    /// <summary>The job whose customer location is drawn. Null before the dispatcher picks one.</summary>
+    [Parameter]
+    public Job? SelectedJob { get; set; }
+
+    /// <summary>The dispatch answer, used to highlight the territory and mark the recommended technician.</summary>
+    [Parameter]
+    public DispatchResult? Dispatch { get; set; }
+
+    /// <summary>
+    ///     The technician the dispatcher clicked in the candidate list, when previewing someone other than the
+    ///     recommendation. The <see cref="Route" /> already starts at this technician's location; this only adds
+    ///     the marker that labels the route's origin.
+    /// </summary>
+    [Parameter]
+    public TechnicianCandidate? SelectedCandidate { get; set; }
+
+    /// <summary>The drawn path, either a real route or the straight-line fallback.</summary>
+    [Parameter]
+    public RoutePath? Route { get; set; }
+
+    private const double ViewLongitude = -75.72;
+    private const double ViewLatitude = 41.36;
+    private const double ViewZoom = 10;
+
+    private static readonly MapColor TerritoryFill = new("#94a3b8");
+    private static readonly MapColor TerritoryOutline = new("#475569");
+    private static readonly MapColor ContainingFill = new("#3b82f6");
+    private static readonly MapColor ContainingOutline = new("#1d4ed8");
+    private static readonly MapColor TechnicianFill = new("#64748b");
+    private static readonly MapColor TechnicianOutline = new("#ffffff");
+    private static readonly MapColor JobFill = new("#dc2626");
+    private static readonly MapColor RecommendedFill = new("#16a34a");
+    private static readonly MapColor SelectedFill = new("#f59e0b");
+    private static readonly MapColor RouteColor = new("#1d4ed8");
+
+    private MapView? _mapView;
+    private GraphicsLayer? _graphicsLayer;
+    private bool _viewInitialized;
+    private bool _drawInProgress;
+    private bool _redrawPending;
+
+    /// <summary>
+    ///     The route the view last zoomed to. Parameters are re-applied on every parent render, so keying the
+    ///     zoom on the route instance keeps an assignment click or any other unrelated redraw from yanking the
+    ///     map back after the dispatcher has panned it.
+    /// </summary>
+    private RoutePath? _zoomedRoute;
+
+    /// <summary>
+    ///     The GraphicsLegendWidget reads a graphic's LegendLabel directly, but falls back to formatting
+    ///     its attributes through GraphicLabelTemplate. Both carry the same text so the entry reads the same
+    ///     whichever path the widget takes.
+    /// </summary>
+    private static AttributesDictionary AttributeLabel(string label) =>
+        new(new Dictionary<string, object?> { ["Name"] = label });
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await DrawDispatchGraphicsAsync();
+    }
+
+    private async Task OnViewInitializedAsync()
+    {
+        _viewInitialized = true;
+        await DrawDispatchGraphicsAsync();
+    }
+
+    /// <summary>
+    ///     Redraws the job marker, the recommended technician marker, and the connecting path, coalescing a
+    ///     burst of parameter updates into a single redraw so two callers cannot interleave the clear and the
+    ///     adds.
+    /// </summary>
+    /// <remarks>
+    ///     Parameters are re-applied on every parent render, and the view's own initialization can race the
+    ///     first of those renders. A second request while one draw is in flight is remembered and run once
+    ///     the current draw finishes, which keeps <c>Clear</c>/<c>Add</c>/<c>GoTo</c> from interleaving.
+    /// </remarks>
+    private async Task DrawDispatchGraphicsAsync()
+    {
+        if (!_viewInitialized || _graphicsLayer is null)
+        {
+            return;
+        }
+
+        if (_drawInProgress)
+        {
+            _redrawPending = true;
+            return;
+        }
+
+        _drawInProgress = true;
+
+        GraphicsLayer graphicsLayer = _graphicsLayer;
+
+        try
+        {
+            do
+            {
+                _redrawPending = false;
+                await DrawGraphicsOnceAsync(graphicsLayer);
+            }
+            while (_redrawPending);
+        }
+        finally
+        {
+            _drawInProgress = false;
+        }
+    }
+
+    /// <summary>
+    ///     A single redraw of the job marker, the recommended technician marker, and the connecting path.
+    /// </summary>
+    /// <remarks>
+    ///     These three are graphics rather than layer features because they are answers about one job, not
+    ///     reference data. Everything on a layer comes from GeoJSON; everything drawn here comes from the
+    ///     dispatch result.
+    /// </remarks>
+    private async Task DrawGraphicsOnceAsync(GraphicsLayer graphicsLayer)
+    {
+        await graphicsLayer.Clear();
+
+        Graphic? routeGraphic = null;
+
+        if (Route is { Points.Count: > 1 })
+        {
+            MapPoint[] path = Route.Points
+                .Select(p => new MapPoint(p.Longitude, p.Latitude))
+                .ToArray();
+
+            SimpleLineSymbol lineSymbol = new(
+                RouteColor,
+                4,
+                Route.IsFallback ? SimpleLineSymbolStyle.ShortDash : SimpleLineSymbolStyle.Solid);
+
+            string routeLabel = Route.IsFallback ? "Straight-line route" : "Road route";
+
+            routeGraphic = new Graphic(
+                new Polyline([new MapPath(path)]),
+                lineSymbol,
+                legendLabel: routeLabel,
+                attributes: AttributeLabel(routeLabel));
+
+            await graphicsLayer.Add(routeGraphic);
+        }
+
+        if (Dispatch is not null)
+        {
+            GeoPoint location = Dispatch.RecommendedTechnician.Location;
+
+            await graphicsLayer.Add(new Graphic(
+                new Point(location.Longitude, location.Latitude),
+                new SimpleMarkerSymbol(new Outline(TechnicianOutline, 2), RecommendedFill, 16),
+                legendLabel: "Recommended technician",
+                attributes: AttributeLabel("Recommended technician")));
+        }
+
+        // A previewed candidate gets a marker of its own so the route's origin is labeled, unless the
+        // dispatcher re-clicked the recommended technician and the green marker already sits there.
+        if (SelectedCandidate is not null && SelectedCandidate.Id != Dispatch?.RecommendedTechnician.Id)
+        {
+            GeoPoint location = SelectedCandidate.Location;
+
+            await graphicsLayer.Add(new Graphic(
+                new Point(location.Longitude, location.Latitude),
+                new SimpleMarkerSymbol(new Outline(TechnicianOutline, 2), SelectedFill, 16),
+                legendLabel: $"Selected candidate - {SelectedCandidate.Name}",
+                attributes: AttributeLabel($"Selected candidate - {SelectedCandidate.Name}")));
+        }
+
+        if (SelectedJob is not null)
+        {
+            await graphicsLayer.Add(new Graphic(
+                new Point(SelectedJob.Location.Longitude, SelectedJob.Location.Latitude),
+                new SimpleMarkerSymbol(new Outline(TechnicianOutline, 2), JobFill, 18),
+                legendLabel: "Job site",
+                attributes: AttributeLabel("Job site")));
+        }
+
+        // Fit the view to the route once per route, not once per render. Passing the route graphic rather than
+        // an explicit extent lets the view pad the line, and the route's endpoints are the two markers above.
+        if (routeGraphic is not null && _mapView is not null && !ReferenceEquals(Route, _zoomedRoute))
+        {
+            await _mapView.GoTo([routeGraphic]);
+            _zoomedRoute = Route;
+        }
+    }
+}

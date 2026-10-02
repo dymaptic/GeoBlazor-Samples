@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Brings EF Core's SQL Server provider plus NetTopologySuite. These are the only places the spatial
+         libraries are referenced: SpatialDispatch.Shared is downloaded to the browser, so nothing spatial
+         belongs there. Versions track the other Microsoft packages in the solution. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="10.0.11" />
+    <!-- Feature, FeatureCollection, and AttributesTable, which NetTopologySuite 2.x ships separately from
+         its geometry types. Needed to build the map's GeoJSON layers. -->
+    <PackageReference Include="NetTopologySuite.Features" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SpatialDispatch.Shared\SpatialDispatch.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
