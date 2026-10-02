@@ -18,8 +18,10 @@ builder.Services.AddRazorComponents()
 
 string connectionString = builder.Configuration.GetConnectionString("DispatchDatabase")
     ?? throw new InvalidOperationException(
-        "No DispatchDatabase connection string. Start the database with `docker compose up -d`; the "
-        + "connection string for it is committed in appsettings.json.");
+        "No DispatchDatabase connection string. In Development, copy appsettings.Development.json.template "
+        + "to appsettings.Development.json and set the server there; outside Development, set the "
+        + "ConnectionStrings__DispatchDatabase environment variable. Then start the database with "
+        + "`docker compose up -d`. The README has both steps.");
 
 builder.Services.AddDbContext<DispatchDbContext>(options =>
     options.UseSqlServer(connectionString, sqlServer =>

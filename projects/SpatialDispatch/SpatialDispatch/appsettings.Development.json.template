@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DispatchDatabase": "Server=localhost,1433;Database=SpatialDispatch;User Id=sa;Password=Dispatch!2026demo;Encrypt=True;TrustServerCertificate=True"
+  }
+}
