@@ -1,7 +1,10 @@
 @page "/"
 @using System.Globalization
+@implements IDisposable
 @inject IDispatchService DispatchService
 @inject IRouteService RouteService
+@inject PersistentComponentState ApplicationState
+@inject ILogger<DispatchBoard> Logger
 
 <PageTitle>SpatialDispatch &middot; Dispatch board</PageTitle>
 
@@ -36,7 +39,7 @@
         else if (_jobsState == LoadState.Failed)
         {
             <p class="state-message error" role="alert" data-testid="jobs-error">
-                Could not load open jobs. @_jobsError
+                Could not load open jobs. Refresh the page to try again.
             </p>
         }
         else if (_jobs.Count == 0)
@@ -216,9 +219,11 @@
         Failed
     }
 
+    private const string JobsStateKey = "spatial-dispatch.open-jobs";
+
     private IReadOnlyList<Job> _jobs = [];
     private LoadState _jobsState = LoadState.Loading;
-    private string? _jobsError;
+    private PersistingComponentStateSubscription _persistingSubscription;
 
     private Job? _selectedJob;
     private DispatchResult? _dispatch;
@@ -250,6 +255,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistJobs);
+
+        if (ApplicationState.TryTakeFromJson<IReadOnlyList<Job>>(JobsStateKey, out IReadOnlyList<Job>? jobs))
+        {
+            // The prerender pass already fetched these, so hydration shows the same list instead of
+            // flashing the loading message back and querying the database a second time.
+            _jobs = jobs ?? [];
+            _jobsState = LoadState.Ready;
+            return;
+        }
+
         try
         {
             _jobs = await DispatchService.GetOpenJobsAsync();
@@ -257,9 +273,26 @@
         }
         catch (Exception ex)
         {
-            _jobsError = ex.Message;
+            // The prerender pass runs this against SQL Server, whose exception text can name the server
+            // or database, so it is logged here and the page shows a generic message instead.
+            Logger.LogError(ex, "Could not load the open jobs.");
             _jobsState = LoadState.Failed;
         }
+    }
+
+    private Task PersistJobs()
+    {
+        if (_jobsState == LoadState.Ready)
+        {
+            ApplicationState.PersistAsJson(JobsStateKey, _jobs);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    void IDisposable.Dispose()
+    {
+        _persistingSubscription.Dispose();
     }
 
     private async Task SelectJobAsync(Job job)

@@ -1,4 +1,5 @@
 using Bunit;
+using Bunit.TestDoubles;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -25,12 +26,14 @@ public class DispatchBoardTests : BunitContext
 
     private readonly IDispatchService _dispatchService = Substitute.For<IDispatchService>();
     private readonly IRouteService _routeService = Substitute.For<IRouteService>();
+    private readonly BunitPersistentComponentState _persistentState;
 
     public DispatchBoardTests()
     {
         ComponentFactories.AddStub<DispatchMap>();
         Services.AddSingleton(_dispatchService);
         Services.AddSingleton(_routeService);
+        _persistentState = AddBunitPersistentComponentState();
     }
 
     [Fact]
@@ -56,14 +59,34 @@ public class DispatchBoardTests : BunitContext
     }
 
     [Fact]
-    public void Failure_to_load_jobs_shows_an_error_rather_than_an_empty_board()
+    public void Failure_to_load_jobs_shows_an_error_without_leaking_the_exception_text()
     {
         _dispatchService.GetOpenJobsAsync(Arg.Any<CancellationToken>())
             .ThrowsAsync(new InvalidOperationException("database unreachable"));
 
         IRenderedComponent<DispatchBoard> board = Render<DispatchBoard>();
 
-        Assert.Contains("database unreachable", board.Find("[data-testid=jobs-error]").TextContent);
+        string message = board.Find("[data-testid=jobs-error]").TextContent;
+        Assert.Contains("Could not load open jobs", message);
+        Assert.DoesNotContain("database unreachable", message);
+    }
+
+    [Fact]
+    public void Prerendered_jobs_are_restored_instead_of_fetched_again()
+    {
+        UseRealDemoData();
+
+        IRenderedComponent<DispatchBoard> prerendered = Render<DispatchBoard>();
+        Assert.NotNull(prerendered.Find($"[data-testid=job-{JobId}]"));
+
+        _persistentState.TriggerOnPersisting();
+        _dispatchService.ClearReceivedCalls();
+
+        IRenderedComponent<DispatchBoard> hydrated = Render<DispatchBoard>();
+
+        Assert.NotNull(hydrated.Find($"[data-testid=job-{JobId}]"));
+        Assert.Empty(hydrated.FindAll("[data-testid=jobs-loading]"));
+        _dispatchService.DidNotReceive().GetOpenJobsAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
