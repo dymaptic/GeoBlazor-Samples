@@ -99,3 +99,56 @@ function getCaseInsensitive(obj, key) {
         }
     });
 })();
+// Sets the starting camera of the page's SceneView. Used by the WebStyleSymbols3D sample because the
+// SceneView Tilt/ZIndex parameters do not reach the camera in GeoBlazor 4.6.2 (dymaptic/GeoBlazor#540).
+window.goToSceneCamera = function (longitude, latitude, heightAboveGround, tilt, heading) {
+    const element = document.querySelector('arcgis-scene');
+    if (!element) {
+        return false;
+    }
+
+    const applyCamera = async () => {
+        const view = element.view;
+        if (!element.isConnected || !view) {
+            return false;
+        }
+
+        await view.when();
+
+        // The camera z is an absolute elevation, so lift it above the sampled ground by the requested height.
+        // If the ground sampler is not ready, fall back to an absolute elevation that clears the local
+        // terrain (about 460 m at this location).
+        let z = 1000;
+        try {
+            const ground = view.groundView?.elevationSampler?.queryElevation({ longitude, latitude });
+            if (ground && Number.isFinite(ground.z)) {
+                z = ground.z + heightAboveGround;
+            }
+        } catch (error) {
+            // Sampling the ground is best-effort; the absolute fallback above is used instead.
+        }
+
+        await view.goTo({ position: { longitude, latitude, z }, tilt, heading });
+        return true;
+    };
+
+    // The scene is built more than once during startup (prerender then interactive render), and a rebuild
+    // resets the camera, so apply the target a few times over the first few seconds. Runs detached so the
+    // caller's JS interop call returns immediately. The captured element keeps every retry on this page's
+    // scene, and a rejected goTo (an abort from user interaction, for example) cannot stop the rest.
+    const delays = [0, 1200, 1800];
+    (async () => {
+        for (const delay of delays) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            try {
+                await applyCamera();
+            } catch (error) {
+                if (!error || error.name !== 'AbortError') {
+                    console.warn('Scene camera update failed.', error);
+                }
+            }
+        }
+    })();
+
+    return true;
+};

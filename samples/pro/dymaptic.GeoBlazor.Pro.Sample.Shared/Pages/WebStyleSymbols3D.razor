@@ -1,0 +1,84 @@
+@page "/web-style-symbols-3d"
+@inherits SamplePage
+@inject IJSRuntime JsRuntime
+<PageTitle>Web Style Symbols (3D)</PageTitle>
+<h1>Web Style Symbols (3D)</h1>
+
+<p class="instructions">
+    A 3D <code>SceneView</code> where every tree in a point FeatureLayer is drawn as a realistic 3D model pulled
+    from the Esri Realistic Trees web style through a <code>WebStyleSymbol</code>. Three size visual variables
+    stretch each model along the height, width, and depth axes to the tree's real-world measurements, so the
+    trees appear at their true size and shape on the ground, and a color variable shades them from light to
+    deep green by their stored carbon. Click any tree to open its popup.
+</p>
+
+<SceneView Class="map-view" Longitude="@CenterLongitude" Latitude="@CenterLatitude">
+    <Map Ground="world-elevation">
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisImageryStandard" />
+        </Basemap>
+        <FeatureLayer Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0"
+                      OutFields="@(["*"])">
+            <SimpleRenderer>
+                <WebStyleSymbol StyleName="EsriRealisticTreesStyle" Name="Other" />
+                <SizeVariable Field="Height"
+                              Axis="VisualAxis.Height"
+                              ValueUnit="VisualValueUnit.Feet" />
+                <SizeVariable Field="Width_EW"
+                              Axis="VisualAxis.Width"
+                              ValueUnit="VisualValueUnit.Feet" />
+                <SizeVariable Field="Width_NS"
+                              Axis="VisualAxis.Depth"
+                              ValueUnit="VisualValueUnit.Feet" />
+                <ColorVariable Field="C_Storage">
+                    <ColorStop Value="0" Color="@(new MapColor("#b7e4c7"))" />
+                    <ColorStop Value="6600" Color="@(new MapColor("#52b788"))" />
+                    <ColorStop Value="13228" Color="@(new MapColor("#2d6a4f"))" />
+                </ColorVariable>
+            </SimpleRenderer>
+            <PopupTemplate Title="{Cmn_Name}"
+                           StringContent="{Sci_Name}<br/>Condition: {Condition}<br/>Height: {Height} ft" />
+        </FeatureLayer>
+    </Map>
+</SceneView>
+
+@code {
+
+    private const double CenterLongitude = -82.4411;
+    private const double CenterLatitude = 35.6122;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            // GeoBlazor 4.6.2 does not apply a SceneView's Tilt/ZIndex parameters to the camera correctly
+            // (the tilt value lands in the camera's elevation and the tilt stays 0, which also affects the
+            // Core Scene sample), so the starting camera is set through JavaScript instead: 500 m above the
+            // ground, tilted 60 degrees, looking north. See dymaptic/GeoBlazor#540.
+            await JsRuntime.InvokeVoidAsync("goToSceneCamera", CenterLongitude, CenterLatitude, 500, 60, 0);
+        }
+    }
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/visualization/3d-visualization/visualizing-points-3d/", "ArcGIS Maps SDK for JavaScript - Visualizing points with 3D symbols"),
+        new("https://developers.arcgis.com/javascript/latest/sample-code/visualization-trees-realistic/", "ArcGIS Maps SDK for JavaScript - Thematic visualization with realistic 3D symbols"),
+        new("https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0", "Landscape Trees Feature Service")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates 3D Web Style Symbols from " +
+        "the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor Pro's WebStyleSymbol and SimpleRenderer Razor " +
+        "components. The page shows a 3D SceneView with an imagery basemap and world elevation, centered on a tree " +
+        "inventory in Asheville, North Carolina. A point FeatureLayer of trees is drawn with a SimpleRenderer whose " +
+        "symbol is a WebStyleSymbol pointing at the Esri Realistic Trees style and its realistic glTF model named " +
+        "Other. Three SizeVariables scale each model along the height, width, and depth axes from the tree's " +
+        "measured Height, Width_EW, and Width_NS fields in feet, so every tree is rendered at its real-world size " +
+        "and canopy shape, and a color variable shades them from light to deep green by their stored carbon. " +
+        "A PopupTemplate shows the common and scientific name, condition, and height when a tree " +
+        "is clicked. The sample is intended to demonstrate placing realistic 3D model objects in a scene without " +
+        "hosting a model file or writing JavaScript to create the symbols. A small JavaScript call sets the initial " +
+        "camera, because the SceneView Tilt and ZIndex parameters do not reach the camera in the current release.";
+}
