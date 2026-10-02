@@ -1,7 +1,10 @@
 @page "/"
 @using System.Globalization
+@implements IDisposable
 @inject IDispatchService DispatchService
 @inject IRouteService RouteService
+@inject PersistentComponentState ApplicationState
+@inject ILogger<DispatchBoard> Logger
 
 <PageTitle>SpatialDispatch &middot; Dispatch board</PageTitle>
 
@@ -36,7 +39,7 @@
         else if (_jobsState == LoadState.Failed)
         {
             <p class="state-message error" role="alert" data-testid="jobs-error">
-                Could not load open jobs. @_jobsError
+                Could not load open jobs. Refresh the page to try again.
             </p>
         }
         else if (_jobs.Count == 0)
@@ -82,8 +85,21 @@
            projector. None of those should take down the dispatch answer next to it. *@
         <ErrorBoundary>
             <ChildContent>
-                <DispatchMap SelectedJob="_selectedJob" Dispatch="_dispatch" Route="_route"
-                             SelectedCandidate="_selectedCandidate" />
+                @if (_mapReady)
+                {
+                    <DispatchMap SelectedJob="_selectedJob" Dispatch="_dispatch" Route="_route"
+                                 SelectedCandidate="_selectedCandidate" />
+                }
+                else
+                {
+                    @* Prerendering happens on the server, where the map's own services and its JavaScript
+                       interop do not exist. Rendering it there throws and would flash the error panel
+                       below, so it waits for the browser. The placeholder keeps the panel's height so the
+                       page does not jump when the map arrives. *@
+                    <div class="map-placeholder" data-testid="map-placeholder">
+                        <p>Loading the map&hellip;</p>
+                    </div>
+                }
             </ChildContent>
             <ErrorContent Context="mapError">
                 <div class="map-unavailable" data-testid="map-unavailable">
@@ -203,9 +219,11 @@
         Failed
     }
 
+    private const string JobsStateKey = "spatial-dispatch.open-jobs";
+
     private IReadOnlyList<Job> _jobs = [];
     private LoadState _jobsState = LoadState.Loading;
-    private string? _jobsError;
+    private PersistingComponentStateSubscription _persistingSubscription;
 
     private Job? _selectedJob;
     private DispatchResult? _dispatch;
@@ -222,8 +240,32 @@
     // job to Open, which is what the demo contract promises and what the rehearsal reset depends on.
     private readonly Dictionary<int, string> _assignments = [];
 
+    // False during the server prerender, which cannot host the map. This is what lets everything else on
+    // the board appear in the server-rendered HTML while the WebAssembly bundle is still downloading.
+    private bool _mapReady;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _mapReady = true;
+            StateHasChanged();
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistJobs);
+
+        if (ApplicationState.TryTakeFromJson<IReadOnlyList<Job>>(JobsStateKey, out IReadOnlyList<Job>? jobs))
+        {
+            // The prerender pass already fetched these, so hydration shows the same list instead of
+            // flashing the loading message back and querying the database a second time.
+            _jobs = jobs ?? [];
+            _jobsState = LoadState.Ready;
+            return;
+        }
+
         try
         {
             _jobs = await DispatchService.GetOpenJobsAsync();
@@ -231,9 +273,26 @@
         }
         catch (Exception ex)
         {
-            _jobsError = ex.Message;
+            // The prerender pass runs this against SQL Server, whose exception text can name the server
+            // or database, so it is logged here and the page shows a generic message instead.
+            Logger.LogError(ex, "Could not load the open jobs.");
             _jobsState = LoadState.Failed;
         }
+    }
+
+    private Task PersistJobs()
+    {
+        if (_jobsState == LoadState.Ready)
+        {
+            ApplicationState.PersistAsJson(JobsStateKey, _jobs);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    void IDisposable.Dispose()
+    {
+        _persistingSubscription.Dispose();
     }
 
     private async Task SelectJobAsync(Job job)

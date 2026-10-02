@@ -22,7 +22,8 @@
 </html>
 
 @code {
-    // Prerendering is off so the ArcGIS view initializes exactly once, in the browser. Prerendering a map
-    // component renders it twice and the second pass has to tear the first one down.
-    private static readonly InteractiveWebAssemblyRenderMode RenderMode = new(prerender: false);
+    // Prerendering renders the page's content on the server so it is visible while the WebAssembly
+    // bundle downloads and boots, which is several seconds on a cold load. The map is the one component
+    // that cannot run twice, so see DispatchBoard for how it opts out of the prerender pass.
+    private static readonly InteractiveWebAssemblyRenderMode RenderMode = new(prerender: true);
 }

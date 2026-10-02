@@ -3,6 +3,7 @@ using NetTopologySuite.IO.Converters;
 using SpatialDispatch.Api;
 using SpatialDispatch.Components;
 using SpatialDispatch.Data;
+using SpatialDispatch.Shared.Demo;
 using SpatialDispatch.Shared.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -10,11 +11,11 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// GeoBlazor is registered in the client alone. Prerendering and server interactivity are both off, so no
-// GeoBlazor component ever renders in this process, and the license key lives in the client's
-// wwwroot/appsettings.Development.json where only the WebAssembly configuration can read it. Turning either
-// back on means registering GeoBlazor here too, reading the key from that same file: a host that guessed at
-// the key would register Core while the client registered Pro, and RouteService would not resolve.
+// GeoBlazor is registered in the client alone, but prerendering is on, so the dependencies the prerender
+// pass reaches have to exist here as well: the board reads its data through SqlServerDispatchService and
+// its route through the straight-line fallback registered below. The map is the one component that cannot
+// render on the server, so DispatchBoard holds it back until the browser has taken over. That is what keeps
+// GeoBlazor, and the license key in the client's wwwroot/appsettings.Development.json, out of this process.
 
 string connectionString = builder.Configuration.GetConnectionString("DispatchDatabase")
     ?? throw new InvalidOperationException(
@@ -39,6 +40,13 @@ builder.Services.AddDbContext<DispatchDbContext>(options =>
     }));
 
 builder.Services.AddScoped<IDispatchService, SqlServerDispatchService>();
+
+// Prerendering instantiates the board on the server, so every service the component tree injects has to
+// resolve here as well as in the client. Routing is the one that differs: the server has no ArcGIS route
+// service to call, so it registers the same straight-line fallback the client uses when a key is missing.
+// That registration exists only to satisfy DI for the prerender pass; IRouteService is invoked when a job
+// is selected, which cannot happen until the WebAssembly app takes over.
+builder.Services.AddScoped<IRouteService, StraightLineRouteService>();
 
 // Teaches System.Text.Json to write NetTopologySuite geometries as GeoJSON. ConfigureHttpJsonOptions is the
 // Minimal API entry point; AddControllers().AddJsonOptions(), which the package README shows, configures
