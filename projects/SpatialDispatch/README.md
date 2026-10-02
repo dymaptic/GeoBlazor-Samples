@@ -26,9 +26,10 @@ are ordinary Entity Framework Core LINQ.
 
 ## Configuring the connection string
 
-The database connection string is not committed. It lives in the host project's
-`appsettings.Development.json`, which is gitignored, so each machine points at its own SQL Server. Copy the
-template first:
+The connection string is not committed in a file the host loads as configuration. The committed
+`appsettings.Development.json.template` carries the same throwaway container credential that `compose.yaml`
+documents, while the host project's `appsettings.Development.json`, which is gitignored, is where each
+machine points at its own SQL Server. Copy the template first:
 
 ```bash
 cp projects/SpatialDispatch/SpatialDispatch/appsettings.Development.json.template \
@@ -51,9 +52,11 @@ Write the port into the server name. A bare `localhost` with no port reaches a n
 machine over shared memory instead of the container, and the container's password then fails as a login
 error rather than a connection error.
 
-Without a connection string at all, the host stops at startup with a message naming the template to copy.
-This file is on the host, never under the client's `wwwroot`, so the credential is not downloaded to the
-browser the way the Pro key is.
+`appsettings.Development.json` is read only in the Development environment, which the `http` and `https`
+launch profiles set. A host outside Development supplies the connection string through the
+`ConnectionStrings__DispatchDatabase` environment variable instead. With neither in place, the host stops at
+startup with a message naming both routes. This file is on the host, never under the client's `wwwroot`, so
+the credential is not downloaded to the browser the way the Pro key is.
 
 ## Configuring the Pro key
 
