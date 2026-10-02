@@ -7,7 +7,7 @@ namespace SpatialDispatch.Tests;
 /// </summary>
 /// <remarks>
 ///     The clustered primary key is the part worth a test rather than a comment. A spatial index cannot be
-///     created on a table whose primary key is nonclustered, and the failure arrives as error 1908 naming
+///     created on a table whose primary key is nonclustered, and the failure arrives as error 12008 naming
 ///     the constraint, which reads like a key problem rather than an index problem. EF Core's default gives
 ///     us a clustered key today; a later <c>IsClustered(false)</c> on either indexed table, Territories or
 ///     Technicians, would break the migration, and this is where that shows up. Jobs carries no spatial

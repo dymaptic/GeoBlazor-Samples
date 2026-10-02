@@ -31,7 +31,7 @@ Real-world example applications built with GeoBlazor:
 - **DesMoineBusRoutes** - Bus route mapping
 - **FleetDashboard** - Real-time fleet telemetry dashboard (Blazor WASM + SignalR)
 - **MuseumsOfChicago** - Museum location finder
-- **NationFinder** / **NationFinder2** - Country search applications
+- **NationFinder / NationFinder2** - Country search applications
 - **PointsOnAMapBlog** - Points of interest mapping
 - **ShipmentTracker** - Shipment tracking
 - **SolarTracker** - Solar panel location tracking

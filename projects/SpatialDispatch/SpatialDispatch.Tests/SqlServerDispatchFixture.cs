@@ -13,8 +13,8 @@ namespace SpatialDispatch.Tests;
 ///     <c>STDistance</c> run in SQL Server, so an in-memory or SQLite substitute would test nothing. That
 ///     makes them the one part of the suite with an external prerequisite, so when the container is not
 ///     running they skip with an explanation rather than failing. A cold clone can still run
-///     <c>dotnet run --project tests/SpatialDispatch.Tests</c> and get a green result covering everything
-///     else.
+///     <c>dotnet run --project projects/SpatialDispatch/SpatialDispatch.Tests</c> and get a green result
+///     covering everything else.
 /// </remarks>
 public sealed class SqlServerDispatchFixture : IAsyncLifetime
 {

@@ -102,7 +102,7 @@ sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "DROP DATABASE SpatialDispatch"
 ## What you should see
 
 1. **Open jobs** lists three jobs, with the urgent one, Summit Sports Catering, at the top.
-2. Selecting it highlights **North Valley** on the map and recommends **Jordan Alvarez** at **5.7 km**.
+2. Selecting it highlights North Valley on the map and recommends **Jordan Alvarez** at 5.7 km.
 3. The candidate list shows why the two nearer technicians lost: Morgan Lee is unavailable and Riley Chen
    is assigned to South Valley.
 4. A dashed connector is drawn from Jordan to the customer. That is the no-credentials routing fallback; a
