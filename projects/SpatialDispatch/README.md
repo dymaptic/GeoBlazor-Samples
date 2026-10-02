@@ -170,10 +170,11 @@ of the suite still runs on a machine without Docker.
   `Services/ArcGisRouteService.cs`. Everything the map needs arrives as a parameter, which is what lets the
   dashboard tests stub it out, because bUnit cannot run the ArcGIS JavaScript interop.
 - **The map's basemap is OpenStreetMap**, which needs no credentials, and `PromptForArcGISKey` is off.
-- **Prerendering is on for the page and off for the map.** The board's answer is rendered on the server, so
-  it appears while the WebAssembly bundle is still downloading, which is what removes the blank wait on a
-  cold load. The map is held back until the browser has taken over, which is what keeps the ArcGIS view from
-  initializing twice.
+- **Prerendering is on for the page and off for the map.** The page shell and open-jobs list are rendered on
+  the server, so they appear while the WebAssembly bundle is still downloading, which is what removes the
+  blank wait on a cold load. The recommendation needs an interactive job selection, so it arrives only after
+  the browser has taken over, and the map is held back until then too, which is what keeps the ArcGIS view
+  from initializing twice.
 - **GeoBlazor Pro is pinned to the nuget.org release** (4.6.1), not a local build feed, so a cold clone
   restores on any machine.
 - **Spatial values are `geography`, not `geometry`.** That is what makes `STDistance` return meters instead

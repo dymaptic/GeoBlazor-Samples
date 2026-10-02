@@ -44,8 +44,8 @@ builder.Services.AddScoped<IDispatchService, SqlServerDispatchService>();
 // Prerendering instantiates the board on the server, so every service the component tree injects has to
 // resolve here as well as in the client. Routing is the one that differs: the server has no ArcGIS route
 // service to call, so it registers the same straight-line fallback the client uses when a key is missing.
-// The prerendered HTML therefore shows the dashed connector, and the browser redraws a real road route
-// once the WebAssembly app takes over, exactly as it does today when a key is absent.
+// That registration exists only to satisfy DI for the prerender pass; IRouteService is invoked when a job
+// is selected, which cannot happen until the WebAssembly app takes over.
 builder.Services.AddScoped<IRouteService, StraightLineRouteService>();
 
 // Teaches System.Text.Json to write NetTopologySuite geometries as GeoJSON. ConfigureHttpJsonOptions is the
