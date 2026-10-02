@@ -82,8 +82,21 @@
            projector. None of those should take down the dispatch answer next to it. *@
         <ErrorBoundary>
             <ChildContent>
-                <DispatchMap SelectedJob="_selectedJob" Dispatch="_dispatch" Route="_route"
-                             SelectedCandidate="_selectedCandidate" />
+                @if (_mapReady)
+                {
+                    <DispatchMap SelectedJob="_selectedJob" Dispatch="_dispatch" Route="_route"
+                                 SelectedCandidate="_selectedCandidate" />
+                }
+                else
+                {
+                    @* Prerendering happens on the server, where the map's own services and its JavaScript
+                       interop do not exist. Rendering it there throws and would flash the error panel
+                       below, so it waits for the browser. The placeholder keeps the panel's height so the
+                       page does not jump when the map arrives. *@
+                    <div class="map-placeholder" data-testid="map-placeholder">
+                        <p>Loading the map&hellip;</p>
+                    </div>
+                }
             </ChildContent>
             <ErrorContent Context="mapError">
                 <div class="map-unavailable" data-testid="map-unavailable">
@@ -221,6 +234,19 @@
     // Assignment is presentation state only. It lives in this component, so a page refresh restores every
     // job to Open, which is what the demo contract promises and what the rehearsal reset depends on.
     private readonly Dictionary<int, string> _assignments = [];
+
+    // False during the server prerender, which cannot host the map. This is what lets everything else on
+    // the board appear in the server-rendered HTML while the WebAssembly bundle is still downloading.
+    private bool _mapReady;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _mapReady = true;
+            StateHasChanged();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
