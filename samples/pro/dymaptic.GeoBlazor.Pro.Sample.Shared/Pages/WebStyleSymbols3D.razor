@@ -8,10 +8,11 @@
     A 3D <code>SceneView</code> where every tree in a point FeatureLayer is drawn as a realistic 3D model pulled
     from the Esri Realistic Trees web style through a <code>WebStyleSymbol</code>. Three size visual variables
     stretch each model along the height, width, and depth axes to the tree's real-world measurements, so the
-    trees appear at their true size and shape on the ground. Click any tree to open its popup.
+    trees appear at their true size and shape on the ground, and a color variable shades them from light to
+    deep green by their stored carbon. Click any tree to open its popup.
 </p>
 
-<SceneView Class="map-view" Longitude="-82.4411" Latitude="35.6122">
+<SceneView Class="map-view" Longitude="@CenterLongitude" Latitude="@CenterLatitude">
     <Map Ground="world-elevation">
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisImageryStandard" />
@@ -22,25 +23,13 @@
                 <WebStyleSymbol StyleName="EsriRealisticTreesStyle" Name="Other" />
                 <SizeVariable Field="Height"
                               Axis="VisualAxis.Height"
-                              ValueUnit="VisualValueUnit.Feet"
-                              MinDataValue="1"
-                              MaxDataValue="130"
-                              MinSize="3"
-                              MaxSize="40" />
+                              ValueUnit="VisualValueUnit.Feet" />
                 <SizeVariable Field="Width_EW"
                               Axis="VisualAxis.Width"
-                              ValueUnit="VisualValueUnit.Feet"
-                              MinDataValue="1"
-                              MaxDataValue="110"
-                              MinSize="1"
-                              MaxSize="25" />
+                              ValueUnit="VisualValueUnit.Feet" />
                 <SizeVariable Field="Width_NS"
                               Axis="VisualAxis.Depth"
-                              ValueUnit="VisualValueUnit.Feet"
-                              MinDataValue="1"
-                              MaxDataValue="110"
-                              MinSize="1"
-                              MaxSize="25" />
+                              ValueUnit="VisualValueUnit.Feet" />
                 <ColorVariable Field="C_Storage">
                     <ColorStop Value="0" Color="@(new MapColor("#b7e4c7"))" />
                     <ColorStop Value="6600" Color="@(new MapColor("#52b788"))" />
@@ -55,6 +44,9 @@
 
 @code {
 
+    private const double CenterLongitude = -82.4411;
+    private const double CenterLatitude = 35.6122;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -64,8 +56,8 @@
             // GeoBlazor 4.6.2 does not apply a SceneView's Tilt/ZIndex parameters to the camera correctly
             // (the tilt value lands in the camera's elevation and the tilt stays 0, which also affects the
             // Core Scene sample), so the starting camera is set through JavaScript instead: 500 m above the
-            // ground, tilted 60 degrees, looking north.
-            await JsRuntime.InvokeVoidAsync("goToSceneCamera", -82.4411, 35.6122, 500, 60, 0);
+            // ground, tilted 60 degrees, looking north. See dymaptic/GeoBlazor#540.
+            await JsRuntime.InvokeVoidAsync("goToSceneCamera", CenterLongitude, CenterLatitude, 500, 60, 0);
         }
     }
 
@@ -84,7 +76,8 @@
         "symbol is a WebStyleSymbol pointing at the Esri Realistic Trees style and its realistic glTF model named " +
         "Other. Three SizeVariables scale each model along the height, width, and depth axes from the tree's " +
         "measured Height, Width_EW, and Width_NS fields in feet, so every tree is rendered at its real-world size " +
-        "and canopy shape. A PopupTemplate shows the common and scientific name, condition, and height when a tree " +
+        "and canopy shape, and a color variable shades them from light to deep green by their stored carbon. " +
+        "A PopupTemplate shows the common and scientific name, condition, and height when a tree " +
         "is clicked. The sample is intended to demonstrate placing realistic 3D model objects in a scene without " +
         "hosting a model file or writing JavaScript to create the symbols. A small JavaScript call sets the initial " +
         "camera, because the SceneView Tilt and ZIndex parameters do not reach the camera in the current release.";
