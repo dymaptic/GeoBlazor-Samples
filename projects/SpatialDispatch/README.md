@@ -24,6 +24,37 @@ are ordinary Entity Framework Core LINQ.
 - Docker, for the SQL Server container in `compose.yaml`
 - A GeoBlazor Pro license key
 
+## Configuring the connection string
+
+The database connection string is not committed. It lives in the host project's
+`appsettings.Development.json`, which is gitignored, so each machine points at its own SQL Server. Copy the
+template first:
+
+```bash
+cp projects/SpatialDispatch/SpatialDispatch/appsettings.Development.json.template \
+   projects/SpatialDispatch/SpatialDispatch/appsettings.Development.json
+```
+
+The copied value matches `compose.yaml`: `Server=localhost,1433` with the container's `sa` credential.
+Change the port when something else already holds 1433, such as a different SQL Server container on the same
+machine, and point it at the port that container publishes:
+
+```json
+{
+  "ConnectionStrings": {
+    "DispatchDatabase": "Server=127.0.0.1,14330;Database=SpatialDispatch;User Id=sa;Password=Dispatch!2026demo;Encrypt=True;TrustServerCertificate=True"
+  }
+}
+```
+
+Write the port into the server name. A bare `localhost` with no port reaches a native SQL Server on the same
+machine over shared memory instead of the container, and the container's password then fails as a login
+error rather than a connection error.
+
+Without a connection string at all, the host stops at startup with a message naming the template to copy.
+This file is on the host, never under the client's `wwwroot`, so the credential is not downloaded to the
+browser the way the Pro key is.
+
 ## Configuring the Pro key
 
 The map is drawn by GeoBlazor Pro, which needs a license key. No key is committed here. Copy the template
@@ -65,7 +96,8 @@ recommendation is identical. Every routing failure degrades to that same line.
 
 ## Running
 
-Start the database first, then the app:
+Copy the connection-string template above first, since the host stops at startup without it, then start the
+database and the app:
 
 ```bash
 cd projects/SpatialDispatch
@@ -92,8 +124,8 @@ $env:ConnectionStrings__DispatchDatabase = "Server=(localdb)\MSSQLLocalDB;Databa
 dotnet run --project projects/SpatialDispatch/SpatialDispatch
 ```
 
-The environment variable overrides the committed connection string for that shell only. To reseed, drop the
-database and run again:
+The environment variable overrides the connection string in `appsettings.Development.json` for that shell
+only. To reseed, drop the database and run again:
 
 ```powershell
 sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "DROP DATABASE SpatialDispatch"
