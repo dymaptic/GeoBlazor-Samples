@@ -1,4 +1,5 @@
 @page "/"
+@using System.Globalization
 @inject IDispatchService DispatchService
 @inject IRouteService RouteService
 
@@ -213,6 +214,10 @@
     private LoadState _dispatchState = LoadState.Ready;
     private string? _dispatchError;
 
+    // Bumped on every selection change. An answer that arrives after the dispatcher has moved on carries
+    // a stale version and is discarded rather than overwriting the answer for the current selection.
+    private int _selectionVersion;
+
     // Assignment is presentation state only. It lives in this component, so a page refresh restores every
     // job to Open, which is what the demo contract promises and what the rehearsal reset depends on.
     private readonly Dictionary<int, string> _assignments = [];
@@ -240,23 +245,40 @@
         _dispatchError = null;
         _dispatchState = LoadState.Loading;
 
+        int version = ++_selectionVersion;
+        DispatchResult dispatch;
+
         try
         {
-            _dispatch = await DispatchService.GetDispatchAsync(job.Id);
-            _dispatchState = LoadState.Ready;
+            dispatch = await DispatchService.GetDispatchAsync(job.Id);
         }
         catch (Exception ex)
         {
+            if (version != _selectionVersion)
+            {
+                return;
+            }
+
             _dispatchError = ex.Message;
             _dispatchState = LoadState.Failed;
             return;
         }
 
+        // A slower answer for a job the dispatcher has already left must not replace the answer for the job
+        // now on screen.
+        if (version != _selectionVersion)
+        {
+            return;
+        }
+
+        _dispatch = dispatch;
+        _dispatchState = LoadState.Ready;
+
         // The path is drawn after the recommendation is already on screen. Routing is a visual enrichment,
         // so a failure here must not discard an answer the database already gave.
         StateHasChanged();
 
-        await LoadRouteAsync(_dispatch.RecommendedTechnician.Location, job.Location);
+        await LoadRouteAsync(dispatch.RecommendedTechnician.Location, job.Location, version);
     }
 
     /// <summary>
@@ -274,23 +296,34 @@
         _route = null;
         StateHasChanged();
 
-        await LoadRouteAsync(candidate.Location, _selectedJob.Location);
+        await LoadRouteAsync(candidate.Location, _selectedJob.Location, ++_selectionVersion);
     }
 
     /// <summary>
     ///     Resolves the drawn path, degrading to the straight connector on any routing failure. A failure here
     ///     must never discard the dispatch answer already on screen.
     /// </summary>
-    private async Task LoadRouteAsync(GeoPoint from, GeoPoint to)
+    private async Task LoadRouteAsync(GeoPoint from, GeoPoint to, int version)
     {
+        RoutePath route;
+
         try
         {
-            _route = await RouteService.GetRouteAsync(from, to);
+            route = await RouteService.GetRouteAsync(from, to);
         }
         catch
         {
-            _route = new RoutePath([from, to], IsFallback: true);
+            route = new RoutePath([from, to], IsFallback: true);
         }
+
+        // A route that resolves after the dispatcher has selected something else must not replace the path
+        // for the current selection.
+        if (version != _selectionVersion)
+        {
+            return;
+        }
+
+        _route = route;
     }
 
     private void AssignRecommended()
@@ -307,7 +340,7 @@
         _assignments.ContainsKey(job.Id) ? JobStatus.Assigned : JobStatus.Open;
 
     private static string FormatKilometers(double meters) =>
-        $"{meters / 1000:0.0} km";
+        $"{(meters / 1000).ToString("0.0", CultureInfo.InvariantCulture)} km";
 
     private static string FirstName(string fullName) =>
         fullName.Split(' ')[0];

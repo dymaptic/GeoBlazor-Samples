@@ -103,6 +103,8 @@
     private MapView? _mapView;
     private GraphicsLayer? _graphicsLayer;
     private bool _viewInitialized;
+    private bool _drawInProgress;
+    private bool _redrawPending;
 
     /// <summary>
     ///     The route the view last zoomed to. Parameters are re-applied on every parent render, so keying the
@@ -131,12 +133,14 @@
     }
 
     /// <summary>
-    ///     Redraws the job marker, the recommended technician marker, and the connecting path.
+    ///     Redraws the job marker, the recommended technician marker, and the connecting path, coalescing a
+    ///     burst of parameter updates into a single redraw so two callers cannot interleave the clear and the
+    ///     adds.
     /// </summary>
     /// <remarks>
-    ///     These three are graphics rather than layer features because they are answers about one job, not
-    ///     reference data. Everything on a layer comes from GeoJSON; everything drawn here comes from the
-    ///     dispatch result.
+    ///     Parameters are re-applied on every parent render, and the view's own initialization can race the
+    ///     first of those renders. A second request while one draw is in flight is remembered and run once
+    ///     the current draw finishes, which keeps <c>Clear</c>/<c>Add</c>/<c>GoTo</c> from interleaving.
     /// </remarks>
     private async Task DrawDispatchGraphicsAsync()
     {
@@ -145,7 +149,42 @@
             return;
         }
 
-        await _graphicsLayer.Clear();
+        if (_drawInProgress)
+        {
+            _redrawPending = true;
+            return;
+        }
+
+        _drawInProgress = true;
+
+        GraphicsLayer graphicsLayer = _graphicsLayer;
+
+        try
+        {
+            do
+            {
+                _redrawPending = false;
+                await DrawGraphicsOnceAsync(graphicsLayer);
+            }
+            while (_redrawPending);
+        }
+        finally
+        {
+            _drawInProgress = false;
+        }
+    }
+
+    /// <summary>
+    ///     A single redraw of the job marker, the recommended technician marker, and the connecting path.
+    /// </summary>
+    /// <remarks>
+    ///     These three are graphics rather than layer features because they are answers about one job, not
+    ///     reference data. Everything on a layer comes from GeoJSON; everything drawn here comes from the
+    ///     dispatch result.
+    /// </remarks>
+    private async Task DrawGraphicsOnceAsync(GraphicsLayer graphicsLayer)
+    {
+        await graphicsLayer.Clear();
 
         Graphic? routeGraphic = null;
 
@@ -168,14 +207,14 @@
                 legendLabel: routeLabel,
                 attributes: AttributeLabel(routeLabel));
 
-            await _graphicsLayer.Add(routeGraphic);
+            await graphicsLayer.Add(routeGraphic);
         }
 
         if (Dispatch is not null)
         {
             GeoPoint location = Dispatch.RecommendedTechnician.Location;
 
-            await _graphicsLayer.Add(new Graphic(
+            await graphicsLayer.Add(new Graphic(
                 new Point(location.Longitude, location.Latitude),
                 new SimpleMarkerSymbol(new Outline(TechnicianOutline, 2), RecommendedFill, 16),
                 legendLabel: "Recommended technician",
@@ -188,7 +227,7 @@
         {
             GeoPoint location = SelectedCandidate.Location;
 
-            await _graphicsLayer.Add(new Graphic(
+            await graphicsLayer.Add(new Graphic(
                 new Point(location.Longitude, location.Latitude),
                 new SimpleMarkerSymbol(new Outline(TechnicianOutline, 2), SelectedFill, 16),
                 legendLabel: $"Selected candidate - {SelectedCandidate.Name}",
@@ -197,7 +236,7 @@
 
         if (SelectedJob is not null)
         {
-            await _graphicsLayer.Add(new Graphic(
+            await graphicsLayer.Add(new Graphic(
                 new Point(SelectedJob.Location.Longitude, SelectedJob.Location.Latitude),
                 new SimpleMarkerSymbol(new Outline(TechnicianOutline, 2), JobFill, 18),
                 legendLabel: "Job site",

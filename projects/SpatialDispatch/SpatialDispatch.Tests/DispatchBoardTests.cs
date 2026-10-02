@@ -1,4 +1,5 @@
 using Bunit;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -218,11 +219,85 @@ public class DispatchBoardTests : BunitContext
         Assert.DoesNotContain("selected", board.Find("[data-testid=candidate-204]").ClassList);
     }
 
+    [Fact]
+    public void A_dispatch_answer_for_an_abandoned_job_does_not_replace_the_current_answer()
+    {
+        Job first = new(
+            101, "First customer", "First job", JobPriority.Routine, "First anchor",
+            new GeoPoint(-75.700000, 41.360000));
+        Job second = new(
+            102, "Second customer", "Second job", JobPriority.Routine, "Second anchor",
+            new GeoPoint(-75.680000, 41.350000));
+
+        _dispatchService.GetOpenJobsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyList<Job>>([first, second]));
+
+        TaskCompletionSource<DispatchResult> firstAnswer = new();
+        TaskCompletionSource<DispatchResult> secondAnswer = new();
+
+        _dispatchService.GetDispatchAsync(101, Arg.Any<CancellationToken>()).Returns(firstAnswer.Task);
+        _dispatchService.GetDispatchAsync(102, Arg.Any<CancellationToken>()).Returns(secondAnswer.Task);
+        UseStraightLineRoutes();
+
+        IRenderedComponent<DispatchBoard> board = Render<DispatchBoard>();
+
+        // Both clicks are dispatched without waiting, so the first job's answer is still in flight when
+        // the dispatcher picks the second job.
+        _ = board.Find("[data-testid=job-101]").TriggerEventAsync("onclick", new MouseEventArgs());
+        _ = board.Find("[data-testid=job-102]").TriggerEventAsync("onclick", new MouseEventArgs());
+
+        secondAnswer.SetResult(AnswerFor(second.Id, "Second technician"));
+        firstAnswer.SetResult(AnswerFor(first.Id, "First technician"));
+
+        // The abandoned job's slower answer must be discarded, not shown over the current selection.
+        board.WaitForAssertion(() =>
+            Assert.Equal(
+                "Second technician",
+                board.Find("[data-testid=recommended-technician]").TextContent.Trim()));
+    }
+
+    [Fact]
+    public void A_route_that_resolves_after_a_candidate_preview_does_not_replace_the_preview()
+    {
+        UseRealDispatchData();
+
+        GeoPoint jordanLocation = new(-75.671329, 41.410730);
+        GeoPoint caseyLocation = new(-75.625401, 41.465984);
+        GeoPoint jobLocation = new(-75.683967, 41.360406);
+
+        TaskCompletionSource<RoutePath> recommendedRoute = new();
+
+        _routeService.GetRouteAsync(jordanLocation, jobLocation, Arg.Any<CancellationToken>())
+            .Returns(recommendedRoute.Task);
+        _routeService.GetRouteAsync(caseyLocation, jobLocation, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new RoutePath([caseyLocation, jobLocation], IsFallback: false)));
+
+        IRenderedComponent<DispatchBoard> board = Render<DispatchBoard>();
+
+        _ = board.Find($"[data-testid=job-{JobId}]").TriggerEventAsync("onclick", new MouseEventArgs());
+        board.WaitForElement("[data-testid=candidate-204]");
+
+        // The recommendation's route is still pending; previewing a candidate draws that route at once.
+        _ = board.Find("[data-testid=candidate-204]").TriggerEventAsync("onclick", new MouseEventArgs());
+
+        // The slow route for the recommendation arrives last and must not replace the preview's road route.
+        recommendedRoute.SetResult(new RoutePath([jordanLocation, jobLocation], IsFallback: true));
+
+        board.WaitForAssertion(() =>
+            Assert.Contains("Road route drawn", board.Find("[data-testid=route-note]").TextContent));
+    }
+
     /// <summary>
     ///     Points the substitutes at the real demo-contract provider, so the tests exercise the same records
     ///     the presentation uses rather than a parallel set of fixtures that could drift from the document.
     /// </summary>
     private void UseRealDemoData()
+    {
+        UseRealDispatchData();
+        UseStraightLineRoutes();
+    }
+
+    private void UseRealDispatchData()
     {
         InMemoryDispatchService real = new();
 
@@ -230,11 +305,35 @@ public class DispatchBoardTests : BunitContext
             .Returns(_ => real.GetOpenJobsAsync());
         _dispatchService.GetDispatchAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(call => real.GetDispatchAsync(call.Arg<int>()));
+    }
+
+    private void UseStraightLineRoutes()
+    {
         _routeService
             .GetRouteAsync(Arg.Any<GeoPoint>(), Arg.Any<GeoPoint>(), Arg.Any<CancellationToken>())
             .Returns(call => new StraightLineRouteService()
                 .GetRouteAsync(call.ArgAt<GeoPoint>(0), call.ArgAt<GeoPoint>(1)));
     }
+
+    private static DispatchResult AnswerFor(int jobId, string technicianName) =>
+        new(
+            jobId,
+            new Territory(1, "North Valley"),
+            CandidateFor(jobId, technicianName),
+            100d,
+            [CandidateFor(jobId, technicianName)]);
+
+    private static TechnicianCandidate CandidateFor(int jobId, string technicianName) =>
+        new(
+            900 + jobId,
+            technicianName,
+            1,
+            "North Valley",
+            IsAvailable: true,
+            "Somewhere service stop",
+            new GeoPoint(-75.700000, 41.360000),
+            100d,
+            CandidateOutcome.Recommended);
 
     private static void SelectCanonicalJob(IRenderedComponent<DispatchBoard> board) =>
         board.Find($"[data-testid=job-{JobId}]").Click();

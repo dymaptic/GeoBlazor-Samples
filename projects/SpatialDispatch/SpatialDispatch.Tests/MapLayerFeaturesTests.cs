@@ -90,13 +90,20 @@ public class MapLayerFeaturesTests
     public void Layer_properties_match_the_static_files_the_dashboard_shipped_with()
     {
         AssertSamePropertyShape(
-            Path.Combine("data", "territories.geojson"),
+            StaticLayerFile("territories.geojson"),
             MapLayerFeatures.ForTerritories(Territories()));
 
         AssertSamePropertyShape(
-            Path.Combine("data", "technicians.geojson"),
+            StaticLayerFile("technicians.geojson"),
             MapLayerFeatures.ForTechnicians(Technicians()));
     }
+
+    /// <summary>
+    ///     Resolves a static layer file against the test binary's own directory, so the test does not depend
+    ///     on the process working directory the runner happened to use.
+    /// </summary>
+    private static string StaticLayerFile(string fileName) =>
+        Path.Combine(AppContext.BaseDirectory, "data", fileName);
 
     private static void AssertSamePropertyShape(string staticFilePath, FeatureCollection generated)
     {

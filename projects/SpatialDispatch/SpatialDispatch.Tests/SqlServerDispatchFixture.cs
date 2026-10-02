@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SpatialDispatch.Data;
 
@@ -37,6 +38,18 @@ public sealed class SqlServerDispatchFixture : IAsyncLifetime
     {
         string connectionString =
             Environment.GetEnvironmentVariable("SPATIALDISPATCH_TEST_CONNECTION") ?? DefaultConnectionString;
+
+        // EnsureDeletedAsync below drops whatever database this connection string names, so an override
+        // aimed at a real database is refused before anything runs. The convention the fixture and
+        // compose.yaml share is that the test database's name ends in "_Tests".
+        string databaseName = new SqlConnectionStringBuilder(connectionString).InitialCatalog;
+
+        if (!databaseName.EndsWith("_Tests", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"The test fixture drops and recreates the database named '{databaseName}'. Point "
+                + "SPATIALDISPATCH_TEST_CONNECTION at a database whose name ends in '_Tests'.");
+        }
 
         // A short probe deliberately without the retry-and-wait the application uses: a developer with no
         // container running should learn that in a couple of seconds, not after a two-minute wait.

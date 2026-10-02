@@ -17,7 +17,7 @@ namespace SpatialDispatch.Data;
 /// <remarks>
 ///     The seed reads <see cref="DemoContract" /> rather than restating the coordinates, so the document has
 ///     exactly one representation in code and the database cannot drift from the slides. Seeding is skipped
-///     only when the tables already hold the same number of records as the contract, so a second
+///     only when the tables already hold the same records, field for field, as the contract, so a second
 ///     <c>dotnet run</c> before a talk is harmless while a database left over from an older contract is
 ///     rebuilt rather than kept.
 /// </remarks>
@@ -85,20 +85,42 @@ public static class DemoDataSeeder
     }
 
     /// <summary>
-    ///     Whether the database already holds the same number of records as the demo contract describes.
+    ///     Whether the database already holds the same records, field for field, as the demo contract
+    ///     describes.
     /// </summary>
     /// <remarks>
-    ///     Counting all three tables rather than asking whether any row exists is what keeps a database
-    ///     from an earlier task out of the demo: adding a technician to the contract changes a count here,
-    ///     and the seed notices.
+    ///     Comparing the content rather than only the row counts is what keeps a database from an earlier
+    ///     task out of the demo: editing a coordinate or a name in the contract without changing how many
+    ///     rows there are still changes the values compared here, and the seed notices. A count-only check
+    ///     would skip right over that edit and leave the old value on stage.
     /// </remarks>
     private static async Task<bool> MatchesContractAsync(
         DispatchDbContext db,
         CancellationToken cancellationToken)
     {
-        return await db.Territories.CountAsync(cancellationToken) == DemoContract.Territories.Count
-            && await db.Technicians.CountAsync(cancellationToken) == DemoContract.Technicians.Count
-            && await db.Jobs.CountAsync(cancellationToken) == DemoContract.Jobs.Count;
+        List<TerritoryEntity> territories =
+            await db.Territories.AsNoTracking().OrderBy(t => t.Id).ToListAsync(cancellationToken);
+        List<TechnicianEntity> technicians =
+            await db.Technicians.AsNoTracking().OrderBy(t => t.Id).ToListAsync(cancellationToken);
+        List<JobEntity> jobs =
+            await db.Jobs.AsNoTracking().OrderBy(j => j.Id).ToListAsync(cancellationToken);
+
+        return territories
+                .Select(t => (t.Id, t.Name, Boundary: t.Boundary.AsText()))
+                .SequenceEqual(DemoContract.Territories
+                    .Select(t => (t.Id, t.Name, Boundary: BoundaryFor(t.Id).AsText())))
+            && technicians
+                .Select(t => (t.Id, t.Name, t.TerritoryId, t.IsAvailable, t.LocationLabel,
+                    Longitude: t.Location.X, Latitude: t.Location.Y))
+                .SequenceEqual(DemoContract.Technicians
+                    .Select(t => (t.Id, t.Name, t.TerritoryId, t.IsAvailable, t.LocationLabel,
+                        Longitude: t.Location.Longitude, Latitude: t.Location.Latitude)))
+            && jobs
+                .Select(j => (j.Id, j.Customer, j.Summary, j.Priority, j.MapAnchor,
+                    Longitude: j.Location.X, Latitude: j.Location.Y))
+                .SequenceEqual(DemoContract.Jobs
+                    .Select(j => (j.Id, j.Customer, j.Summary, j.Priority, j.MapAnchor,
+                        Longitude: j.Location.Longitude, Latitude: j.Location.Latitude)));
     }
 
     /// <summary>
