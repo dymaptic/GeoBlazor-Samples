@@ -38,7 +38,9 @@ cp projects/SpatialDispatch/SpatialDispatch/appsettings.Development.json.templat
 
 The copied value matches `compose.yaml`: `Server=localhost,1433` with the container's `sa` credential.
 Change the port when something else already holds 1433, such as a different SQL Server container on the same
-machine, and point it at the port that container publishes:
+machine, and point it at the port that container publishes. The example below targets an already-running
+container that publishes 14330; to use this sample's `compose.yaml` instead, change its `ports` entry to
+`"14330:1433"` as well:
 
 ```json
 {
@@ -48,9 +50,9 @@ machine, and point it at the port that container publishes:
 }
 ```
 
-Write the port into the server name. A bare `localhost` with no port reaches a native SQL Server on the same
-machine over shared memory instead of the container, and the container's password then fails as a login
-error rather than a connection error.
+Write the port into the server name. On Windows, a bare `localhost` with no port reaches a native SQL Server
+on the same machine over shared memory instead of the container, and the container's password then fails as
+a login error rather than a connection error.
 
 `appsettings.Development.json` is read only in the Development environment, which the `http` and `https`
 launch profiles set. A host outside Development supplies the connection string through the
