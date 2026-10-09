@@ -2,13 +2,7 @@ namespace FleetDashboard.Shared;
 
 
 public sealed record VehicleReport(
-    int VehicleId,
-    long Sequence,
-    DateTimeOffset ObservedAtUtc,
-    double Longitude,
-    double Latitude,
-    double SpeedKph,
-    string RouteId);
+    int VehicleId, long Sequence, DateTimeOffset ObservedAtUtc, double Longitude, double Latitude, double SpeedKph, string RouteId);
 
 /// <summary>One published simulator tick. A frame is the complete roster unless
 /// <paramref name="IsPartial"/> is set: viewport-filtered frames carry only the vehicles a client
