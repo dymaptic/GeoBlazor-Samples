@@ -84,8 +84,10 @@ with its real observation time, so the vehicle list stays complete and nothing t
 frames are marked partial and the client merges them onto the roster it holds. A connection's first
 frame, and any frame after the roster changes, goes out whole so removals still arrive. Other tabs
 keep receiving full frames, and `GetSnapshot` stays complete. Zoom in or select a truck and watch
-**Vehicles/frame** drop: at the stress preset, the whole-fleet view receives all 500 vehicles per
-frame and a selected-truck view receives a few dozen.
+**Vehicles/frame** drop. At the stress preset the opening view holds the whole fleet, so it still
+receives all 500 vehicles per frame; selecting truck 007 drops that to about 105, the trucks in view
+plus the out-of-view share for that frame. In this mode **Records/s** counts what actually arrived,
+not the merged roster.
 
 The raw-queue safety stop halts map updates when the queue reaches 20,000 pending records, shows
 a red banner with the rejected-record count, and keeps telemetry flowing. Click **Resume map
