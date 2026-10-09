@@ -1,0 +1,35 @@
+@page "/ground-elevation"
+@inherits SamplePage
+
+<h3>Ground Elevation</h3>
+
+<p class="instructions">
+    A <code>Ground</code> component on a 3D map, with a custom <code>ElevationLayer</code> as its child.
+    Tilt and drag the scene to see the terrain rise above the flat grid.
+</p>
+
+<SceneView Class="map-view" Longitude="-117.6475" Latitude="34.0" ZIndex="12000" Tilt="75">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+        </Basemap>
+        <Ground>
+            <ElevationLayer Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/Elevation/MtBaldy_Elevation/ImageServer" />
+        </Ground>
+    </Map>
+</SceneView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/scene-elevationlayer/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://developers.arcgis.com/javascript/latest/references/core/Ground/", "Ground API reference")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, shows Ground as a regular Razor component. " +
+        "A SceneView hosts a Map with an imagery Basemap and a Ground element. The Ground holds an ElevationLayer " +
+        "child that points at the Mt. Baldy elevation service, so the terrain near Mt. Baldy in California renders " +
+        "in 3D instead of as a flat surface. Leaving Ground out gives a Scene the default world elevation.";
+}
