@@ -76,7 +76,8 @@
                           SelectedVehicleId="_snapshot.SelectedVehicle?.VehicleId"
                           SelectedVehicleIdChanged="SelectVehicle" Initialized="MapInitialized"
                           EditFailed="MapFailed" SelectionFailed="SelectionFailed"
-                          RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure" />
+                          RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure"
+                          ViewExtentChanged="ViewExtentChanged" />
                 @if (!_mapInitialized && _mapError is null)
                 {
                     <div class="map-notice"><strong>Initializing map</strong><span>The vehicle list is ready to use.</span></div>
@@ -131,6 +132,7 @@
         <p class="eyebrow">
             Mode: @_mode.Label() · Load: @_preset.Name@(PresetStatusSuffix) ·
             Records/s: @Math.Round(_metrics.IncomingRecordsPerSecond) ·
+            Vehicles/frame: @VehiclesPerFrameDisplay ·
             Pending: @PendingDisplay ·
             Map calls/s: @Math.Round(_metrics.MapCallsPerSecond, 1) ·
             Edit p50/p95: @FormatApplyDelay ·
@@ -175,6 +177,7 @@
 @code {
     private const int RawCaptureLimit = 250;
     private const int RawEditsPerDrain = 250;
+    private static readonly TimeSpan ViewportSettleDelay = TimeSpan.FromMilliseconds(300);
 
     protected override async Task OnInitializedAsync()
     {
@@ -209,6 +212,11 @@
         ? $"Updated {Math.Max(0, (Clock.GetUtcNow() - last).TotalSeconds):0}s ago" : "Awaiting telemetry";
 
     private string PendingDisplay => (_queue?.PendingCount ?? _state.DirtyVehicleCount).ToString("N0");
+
+    /// <summary>What the server sent in its latest frame, before the client merges it onto the
+    /// roster. Full-roster modes show the whole fleet; viewport mode shows the drop.</summary>
+    private string VehiclesPerFrameDisplay => FrameSource is IFleetViewportControls viewport
+        ? viewport.LastReceivedVehicleCount.ToString("N0") : "n/a";
 
     private string ReconnectCountDisplay => FrameSource is IFleetConnectionStatus status
         ? status.ReconnectCount.ToString() : "n/a";
@@ -303,7 +311,7 @@
                 if (_frameCursor.TryAdvance(frame))
                 {
                     _queue?.Accept(frame);
-                    _metrics.RecordIncoming(reports.Count);
+                    _metrics.RecordIncoming(ReceivedRecordCount(reports.Count));
                 }
 
                 _sourceError = null;
@@ -317,7 +325,67 @@
 
         await ApplyPresetIfPending();
         _snapshot = _state.CreateView(now);
+        await SyncViewportIfPending(now);
         UpdateMapDelta(now);
+    }
+
+    /// <summary>A viewport frame is merged onto the roster before the page sees it, so count what
+    /// actually arrived. Full frames arrive whole, so every other mode counts exactly as before.</summary>
+    private int ReceivedRecordCount(int displayedCount) =>
+        !_emptyFleet && _mode == DemoMode.Viewport && FrameSource is IFleetViewportControls viewport
+            ? viewport.LastReceivedVehicleCount
+            : displayedCount;
+
+    private void ViewExtentChanged(ViewportExtent extent)
+    {
+        _viewExtent = extent;
+        _viewExtentChangedAtUtc = Clock.GetUtcNow();
+    }
+
+    /// <summary>In viewport mode, tells the server what the map shows and which truck is selected.
+    /// An extent is sent only once it has held still for <see cref="ViewportSettleDelay"/>, which
+    /// debounces a pan or zoom animation on the update clock without a timer. Sends wait for a live
+    /// connection, repeat after every reconnect (the server forgets a dropped connection), and a
+    /// failed send simply stays pending for the next tick.</summary>
+    private async Task SyncViewportIfPending(DateTimeOffset now)
+    {
+        if (_mode != DemoMode.Viewport || FrameSource is not IFleetViewportControls viewport) return;
+        if (_lastFrame is null || _sourceError is not null) return;
+
+        if (FrameSource is IFleetConnectionStatus status)
+        {
+            if (status.IsReconnecting) return;
+            if (status.ReconnectCount != _viewportReconnectCount)
+            {
+                _viewportReconnectCount = status.ReconnectCount;
+                _sentViewExtent = null;
+                _selectionSent = false;
+            }
+        }
+
+        try
+        {
+            if (_viewExtent is not null && _viewExtent != _sentViewExtent
+                && now - _viewExtentChangedAtUtc >= ViewportSettleDelay)
+            {
+                ViewportExtent extent = _viewExtent;
+                await viewport.SetViewportAsync(extent, _lifetime.Token);
+                _sentViewExtent = extent;
+            }
+
+            int? selectedId = _snapshot.SelectedVehicle?.VehicleId;
+            if (!_selectionSent || selectedId != _sentSelectedId)
+            {
+                await viewport.SetSelectedVehicleAsync(selectedId, _lifetime.Token);
+                _sentSelectedId = selectedId;
+                _selectionSent = true;
+            }
+        }
+        catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
+        catch (Exception)
+        {
+            // Left pending: the next update tick retries with the newest extent and selection.
+        }
     }
 
     private void UpdateMapDelta(DateTimeOffset now)
@@ -549,4 +617,10 @@
     private string? _modeNotice;
     private bool _presetNeedsApply;
     private int _seenReconnectCount;
+    private ViewportExtent? _viewExtent;
+    private DateTimeOffset _viewExtentChangedAtUtc;
+    private ViewportExtent? _sentViewExtent;
+    private int? _sentSelectedId;
+    private bool _selectionSent;
+    private int _viewportReconnectCount;
 }

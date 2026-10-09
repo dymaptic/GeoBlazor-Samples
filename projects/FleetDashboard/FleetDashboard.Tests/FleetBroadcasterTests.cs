@@ -17,7 +17,7 @@ public sealed class FleetBroadcasterTests
     {
         var simulator = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal);
         var hubContext = new RecordingHubContext();
-        var broadcaster = new FleetBroadcaster(simulator, hubContext);
+        var broadcaster = new FleetBroadcaster(simulator, hubContext, new ViewportSubscriptions());
 
         await broadcaster.StartAsync(CancellationToken.None);
         FleetFrame frame = await hubContext.NextFrame.WaitAsync(TimeSpan.FromSeconds(15));

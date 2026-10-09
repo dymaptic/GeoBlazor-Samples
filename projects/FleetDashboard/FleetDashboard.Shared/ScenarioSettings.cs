@@ -13,7 +13,11 @@ public enum DemoMode
     Latest,
     Batched,
     Scheduled,
-    Resilient
+    Resilient,
+
+    /// <summary>Implementation #5: the scheduled pipeline, but the server only sends what the
+    /// map can see every frame and everything else at most once per second.</summary>
+    Viewport
 }
 
 
@@ -30,6 +34,7 @@ public static class DemoModeParser
             case "batched": mode = DemoMode.Batched; return true;
             case "scheduled": mode = DemoMode.Scheduled; return true;
             case "resilient": mode = DemoMode.Resilient; return true;
+            case "viewport": mode = DemoMode.Viewport; return true;
             default: mode = DemoMode.Ready; return false;
         }
     }

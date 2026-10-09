@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 namespace FleetDashboard.Client.Streaming;
 
 public sealed class SignalRFleetFrameSource
-    : IFleetFrameSource, IFleetScenarioControls, IFleetConnectionStatus, IAsyncDisposable
+    : IFleetFrameSource, IFleetScenarioControls, IFleetConnectionStatus, IFleetViewportControls, IAsyncDisposable
 {
     /// <summary>Minimum gap between automatic connection attempts after an initial failure, so a
     /// 250 ms update loop cannot hammer an unavailable server. A manual retry clears it.</summary>
@@ -46,6 +46,11 @@ public sealed class SignalRFleetFrameSource
     public int ReconnectCount
     {
         get { lock (_sync) return _reconnectCount; }
+    }
+
+    public int LastReceivedVehicleCount
+    {
+        get { lock (_sync) return _lastReceivedVehicleCount; }
     }
 
     public async ValueTask<FleetFrame> GetFrameAsync(DateTimeOffset observedAtUtc,
@@ -180,6 +185,12 @@ public sealed class SignalRFleetFrameSource
     public Task SetPresetAsync(string presetName, CancellationToken cancellationToken = default) =>
         _connection.SendAsync("SetPreset", presetName, cancellationToken);
 
+    public Task SetViewportAsync(ViewportExtent extent, CancellationToken cancellationToken = default) =>
+        _connection.SendAsync("SetViewport", extent, cancellationToken);
+
+    public Task SetSelectedVehicleAsync(int? vehicleId, CancellationToken cancellationToken = default) =>
+        _connection.SendAsync("SetSelectedVehicle", vehicleId, cancellationToken);
+
     public async Task BreakConnectionAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -214,6 +225,7 @@ public sealed class SignalRFleetFrameSource
     {
         lock (_sync)
         {
+            _lastReceivedVehicleCount = frame.Vehicles.Count;
             if (_activeRunId == frame.RunId)
             {
                 _currentFrame = _currentFrame is null ? frame : FleetFrameOrdering.Newest(_currentFrame, frame);
@@ -282,5 +294,6 @@ public sealed class SignalRFleetFrameSource
     private bool _everConnected;
     private bool _reconnecting;
     private int _reconnectCount;
+    private int _lastReceivedVehicleCount;
     private bool _snapshotRequired = true;
 }

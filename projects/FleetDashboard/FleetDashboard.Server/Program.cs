@@ -11,6 +11,7 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(ScenarioSettings.Normal);
 builder.Services.AddSingleton<FleetSimulator>();
+builder.Services.AddSingleton<ViewportSubscriptions>();
 builder.Services.AddHostedService<FleetBroadcaster>();
 
 WebApplication app = builder.Build();

@@ -3,12 +3,13 @@
 @using FleetDashboard.Client.Rendering
 @using FleetDashboard.Client.State
 @using FleetDashboard.Client.Streaming
+@using FleetDashboard.Shared
 @using FleetDashboard.Shared.Routing
 @implements IAsyncDisposable
 
 <div class="fleet-map" aria-label="Fleet map. Select a marker or use the vehicle list.">
     <MapView @ref="_view" Style="height: 100%; width: 100%;" Longitude="-75.345" Latitude="41.082" Zoom="12"
-             OnViewRendered="MapInitialized" OnClick="SelectAtPoint"
+             OnViewRendered="MapInitialized" OnClick="SelectAtPoint" OnExtentChanged="ExtentChanged"
              OnJavascriptErrorHandler="MapJavascriptFailed" OnExceptionHandler="MapExceptionFailed">
         <Map>
             <GraphicsLayer @ref="_routeLayer" Title="Stored demonstration routes" />
@@ -47,6 +48,11 @@
     /// <summary>Maximum awaited edit calls per drain pass; 0 drains until pending state is empty.</summary>
     [Parameter] public int MaxEditsPerDrain { get; set; }
     [Parameter] public EventCallback<MapEditTelemetry> EditsApplied { get; set; }
+
+    /// <summary>Reports every view extent change in WGS84 degrees, starting with the initial view.
+    /// The view fires this continuously while animating and the consumer debounces, so it is a plain
+    /// delegate: an EventCallback would re-render the whole page on every animation step.</summary>
+    [Parameter] public Action<ViewportExtent>? ViewExtentChanged { get; set; }
 
     protected override void OnInitialized()
     {
@@ -199,6 +205,7 @@
             if (_disposed) return;
             _ready = true;
             await Initialized.InvokeAsync();
+            await ReportInitialExtent();
             await DrainUpdates();
         }
         catch (Exception exception)
@@ -398,6 +405,29 @@
         {
             await SelectionFailed.InvokeAsync($"Map selection failed: {exception.Message}");
         }
+    }
+
+    /// <summary>The first view may settle before any extent-changed event fires. A failed read is
+    /// not a map failure: the next pan or zoom reports the extent anyway.</summary>
+    private async Task ReportInitialExtent()
+    {
+        if (ViewExtentChanged is null || _view is null) return;
+
+        try
+        {
+            ExtentChanged(await _view.GetExtent());
+        }
+        catch (Exception) when (!_disposed)
+        {
+        }
+    }
+
+    private void ExtentChanged(Extent? extent)
+    {
+        if (extent is null || _disposed) return;
+
+        ViewExtentChanged?.Invoke(ViewportExtents.ToGeographic(extent.Xmin, extent.Ymin,
+            extent.Xmax, extent.Ymax, extent.SpatialReference?.Wkid));
     }
 
     private Task MapJavascriptFailed(JavascriptException exception)
