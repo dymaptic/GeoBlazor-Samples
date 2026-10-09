@@ -1,0 +1,18 @@
+@using FleetDashboard.Client.Rendering
+
+<div class="live-layers" role="group" aria-label="Live layers">
+    <span class="live-layers-label">Live layers</span>
+    @foreach (HostedLayerDefinition layer in Layers)
+    {
+        bool on = Enabled.Contains(layer.Id);
+        <button type="button" data-layer-id="@layer.Id" aria-pressed="@on.ToString().ToLowerInvariant()"
+                @onclick="() => LayerToggled.InvokeAsync(layer.Id)">@layer.Label</button>
+    }
+</div>
+
+@code {
+    /// <summary>The layers on offer; key-gated layers are already filtered out by the caller.</summary>
+    [Parameter] public IReadOnlyList<HostedLayerDefinition> Layers { get; set; } = [];
+    [Parameter] public IReadOnlySet<string> Enabled { get; set; } = new HashSet<string>();
+    [Parameter] public EventCallback<string> LayerToggled { get; set; }
+}

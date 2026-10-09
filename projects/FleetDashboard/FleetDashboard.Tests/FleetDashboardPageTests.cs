@@ -252,7 +252,7 @@ public sealed class FleetDashboardPageTests
         private long _sequence;
     }
 
-    private sealed class FakeSource : IFleetFrameSource
+    internal sealed class FakeSource : IFleetFrameSource
     {
         public ValueTask<FleetFrame> GetFrameAsync(DateTimeOffset instant, CancellationToken cancellationToken = default)
         {
@@ -330,7 +330,7 @@ public sealed class FleetDashboardPageTests
         private long _sequence;
     }
 
-    private sealed class QuietMapView : MapView
+    internal sealed class QuietMapView : MapView
     {
         public override Task SetParametersAsync(ParameterView parameters)
         {

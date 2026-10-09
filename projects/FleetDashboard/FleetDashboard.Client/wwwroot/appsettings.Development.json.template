@@ -1,4 +1,5 @@
 {
+  "ArcGISApiKey": "",
   "GeoBlazor": {
     "RegistrationKey": "PASTE_YOUR_FREE_GEOBLAZOR_REGISTRATION_KEY",
     "Theme": "Light"

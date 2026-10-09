@@ -47,6 +47,36 @@ The client only reads `appsettings.Development.json` when it is running in the D
 environment, which it learns from the `Blazor-Environment` response header that
 `FleetDashboard.Server/Program.cs` sets on `/_framework` requests.
 
+## Live layers
+
+Under "Display preview controls", a "Live layers" group toggles three services that someone else
+hosts and keeps current. They are the contrast to the fleet pipeline: each service publishes its own
+stream, and the map only re-requests it on an interval, with no channel, coalescing, or batching.
+All are off by default and draw below the routes and vehicles. Toggling one changes the layer's
+visibility in place and does not touch the vehicle layer, selection, or the update loop.
+
+| Layer | Service | Refresh |
+|-------|---------|---------|
+| NOAA radar | `radar_base_reflectivity` MapServer (`MapImageLayer`) | 5 minutes |
+| NWS watches and warnings | `NWS_Watches_Warnings_v1` FeatureServer layer 6 (`FeatureLayer`) | 3 minutes |
+| Esri traffic | `World/Traffic` MapServer (`MapImageLayer`), needs an ArcGIS API key | 5 minutes |
+
+`RefreshInterval` is in minutes (the ArcGIS JS unit). Radar and warnings are public, so they are sent
+with `ExcludeApiKey` and work without any key. Radar is empty where the US has no weather; zoom out to
+see it.
+
+The traffic toggle appears only when an ArcGIS API key is configured. GeoBlazor reads a top-level
+`ArcGISApiKey` setting, so add it next to `GeoBlazor` in the gitignored
+`appsettings.Development.json` (the template carries an empty placeholder) and rebuild:
+
+```json
+{ "ArcGISApiKey": "YOUR_ARCGIS_API_KEY", "GeoBlazor": { "RegistrationKey": "..." } }
+```
+
+Like the registration key, the API key is downloaded by the browser at runtime, so use a key
+restricted to the traffic service and your demo origin. The layer definitions live in
+`FleetDashboard.Client/Rendering/HostedLayers.cs`.
+
 ## Running
 
 ```bash

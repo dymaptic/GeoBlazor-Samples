@@ -5,9 +5,11 @@
 @using FleetDashboard.Client.State
 @using FleetDashboard.Client.Streaming
 @using FleetDashboard.Shared
+@using Microsoft.Extensions.Configuration
 @inject IFleetFrameSource FrameSource
 @inject TimeProvider Clock
 @inject NavigationManager Navigation
+@inject IConfiguration Configuration
 @implements IAsyncDisposable
 
 <PageTitle>Fleet dispatch · Pocono region</PageTitle>
@@ -77,7 +79,8 @@
                           SelectedVehicleIdChanged="SelectVehicle" Initialized="MapInitialized"
                           EditFailed="MapFailed" SelectionFailed="SelectionFailed"
                           RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure"
-                          ViewExtentChanged="ViewExtentChanged" />
+                          ViewExtentChanged="ViewExtentChanged"
+                          HostedLayerOptions="_hostedLayers" VisibleHostedLayers="_liveLayers" />
                 @if (!_mapInitialized && _mapError is null)
                 {
                     <div class="map-notice"><strong>Initializing map</strong><span>The vehicle list is ready to use.</span></div>
@@ -170,6 +173,7 @@
             <button @onclick="BreakConnection" disabled="@(FrameSource is not IFleetScenarioControls)">Break connection</button>
             <button @onclick="ResetScenario">Reset scenario</button>
         </div>
+        <LiveLayerControls Layers="_hostedLayers" Enabled="_liveLayers" LayerToggled="ToggleLiveLayer" />
     </details>
     <footer class="board-footer"><span>Local demonstration · seed 1190232</span><span>Positions and speeds are simulated.</span></footer>
 </div>
@@ -186,6 +190,7 @@
         _requestedMode = _mode.Label();
         _requestedLoad = _preset.Name;
         _metrics = new DemoMetrics(Clock);
+        _hostedLayers = HostedLayers.Available(HostedLayers.HasApiKey(Configuration));
         if (_mode.UsesRawQueue()) _queue = new RawTelemetryQueue();
         _presetNeedsApply = FrameSource is IFleetScenarioControls;
         await Advance();
@@ -491,6 +496,15 @@
         if (!_mapInitialized) _mapGeneration++;
     }
 
+    /// <summary>Hosted layers are shown or hidden on the map itself; nothing in the vehicle pipeline
+    /// reads this set, so toggling never disturbs telemetry, selection, or the update loop.</summary>
+    private void ToggleLiveLayer(string id)
+    {
+        HashSet<string> next = [.._liveLayers];
+        if (!next.Remove(id)) next.Add(id);
+        _liveLayers = next;
+    }
+
     private async Task ToggleTruckPause()
     {
         if (FrameSource is IFleetScenarioControls controls)
@@ -584,6 +598,8 @@
         await Advance();
     }
 
+    private IReadOnlyList<HostedLayerDefinition> _hostedLayers = [];
+    private IReadOnlySet<string> _liveLayers = new HashSet<string>();
     private readonly CancellationTokenSource _lifetime = new();
     private readonly FleetFrameCursor _frameCursor = new();
     private FleetDashboardState _state = new();
