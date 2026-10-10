@@ -83,6 +83,9 @@ public sealed record ScenarioSettings
     public static ScenarioSettings Quiet { get; } = new("quiet", 500, 1);
     public static ScenarioSettings Ceiling { get; } = new("ceiling", 2000, 10);
 
+    /// <summary>Every named preset, lightest first, for the preview controls.</summary>
+    public static IReadOnlyList<ScenarioSettings> All { get; } = [Normal, Quiet, Stress, Ceiling];
+
     public static ScenarioSettings ForMode(DemoMode mode) =>
         mode == DemoMode.Baseline ? Stress : Normal;
 

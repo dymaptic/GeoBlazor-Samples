@@ -143,6 +143,23 @@
         {
             <p class="stale-message">@_modeNotice</p>
         }
+        <div class="preview-settings">
+            <label for="preview-mode">Mode</label>
+            <select id="preview-mode" @bind="_requestedMode">
+                @foreach (DemoMode mode in Enum.GetValues<DemoMode>())
+                {
+                    <option value="@mode.Label()">@mode.Label()</option>
+                }
+            </select>
+            <label for="preview-load">Load</label>
+            <select id="preview-load" @bind="_requestedLoad">
+                @foreach (ScenarioSettings preset in ScenarioSettings.All)
+                {
+                    <option value="@preset.Name">@preset.Name · @preset.VehicleCount.ToString("N0") vehicles × @preset.FramesPerSecond/s = @preset.RecordsPerSecond.ToString("N0") records/s</option>
+                }
+            </select>
+            <button class="apply-preview" @onclick="ApplyPreview">Apply and reload</button>
+        </div>
         <div class="scenario-actions">
             <button @onclick="ToggleTruckPause" aria-pressed="@_pauseTruck.ToString().ToLowerInvariant()">@(_pauseTruck ? "Resume truck 007" : "Pause truck 007")</button>
             <button @onclick="ToggleFleetPause" aria-pressed="@_pauseFleet.ToString().ToLowerInvariant()">@(_pauseFleet ? "Resume all reports" : "Pause all reports")</button>
@@ -163,6 +180,8 @@
     {
         _mode = ParseMode();
         _preset = ParsePreset(_mode);
+        _requestedMode = _mode.Label();
+        _requestedLoad = _preset.Name;
         _metrics = new DemoMetrics(Clock);
         if (_mode.UsesRawQueue()) _queue = new RawTelemetryQueue();
         _presetNeedsApply = FrameSource is IFleetScenarioControls;
@@ -242,6 +261,12 @@
         AddModeNotice($"Unknown preset '{value}' — using {fallback.Name}.");
         return fallback;
     }
+
+    /// <summary>The mode fixes the client's queue and cadence at startup, so a new mode or load
+    /// reloads the page through the same query string a rehearsed URL would use. The reload also
+    /// restarts the run, so every comparison starts from the same seed.</summary>
+    private void ApplyPreview() =>
+        Navigation.NavigateTo($"?mode={_requestedMode}&preset={_requestedLoad}", forceLoad: true);
 
     private string? QueryValue(string key) => new Uri(Navigation.Uri).Query.TrimStart('?')
         .Split('&', StringSplitOptions.RemoveEmptyEntries)
@@ -517,6 +542,8 @@
     private long _mapBatchVersion;
     private DemoMode _mode = DemoMode.Ready;
     private ScenarioSettings _preset = ScenarioSettings.Normal;
+    private string _requestedMode = DemoMode.Ready.Label();
+    private string _requestedLoad = ScenarioSettings.Normal.Name;
     private DemoMetrics _metrics = new();
     private RawTelemetryQueue? _queue;
     private string? _modeNotice;
