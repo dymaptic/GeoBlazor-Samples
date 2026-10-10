@@ -9,41 +9,59 @@ namespace FleetDashboard.Tests;
 public sealed class ScenarioSettingsTests
 {
     [TestMethod]
-    public void TheNormalPresetCarriesFiftyVehiclesAtTwoFramesPerSecond()
+    public void TheNormalPresetCarriesFiftyVehiclesAtTwoReportsAndTwoFramesPerSecond()
     {
         Assert.AreEqual(50, ScenarioSettings.Normal.VehicleCount);
+        Assert.AreEqual(2, ScenarioSettings.Normal.ReportsPerSecond);
         Assert.AreEqual(2, ScenarioSettings.Normal.FramesPerSecond);
         Assert.AreEqual(100, ScenarioSettings.Normal.RecordsPerSecond);
     }
 
     [TestMethod]
-    public void TheStressPresetCarriesFiveHundredVehiclesAtTenFramesPerSecond()
+    public void TheStressPresetCarriesFiveHundredVehiclesAtTenReportsAndTenFramesPerSecond()
     {
         Assert.AreEqual(500, ScenarioSettings.Stress.VehicleCount);
+        Assert.AreEqual(10, ScenarioSettings.Stress.ReportsPerSecond);
         Assert.AreEqual(10, ScenarioSettings.Stress.FramesPerSecond);
         Assert.AreEqual(5000, ScenarioSettings.Stress.RecordsPerSecond);
     }
 
     [TestMethod]
-    public void TheCeilingPresetCarriesTwoThousandVehiclesAtTenFramesPerSecond()
+    public void TheCeilingPresetCarriesTwoThousandVehiclesAtTenReportsAndTenFramesPerSecond()
     {
         Assert.AreEqual(2000, ScenarioSettings.Ceiling.VehicleCount);
+        Assert.AreEqual(10, ScenarioSettings.Ceiling.ReportsPerSecond);
         Assert.AreEqual(10, ScenarioSettings.Ceiling.FramesPerSecond);
         Assert.AreEqual(20000, ScenarioSettings.Ceiling.RecordsPerSecond);
+    }
+
+    [TestMethod]
+    public void RecordsPerSecondCountsReportsIngestedNotFramesPublished()
+    {
+        var settings = new ScenarioSettings("test", 100, 5, 1);
+
+        Assert.AreEqual(500, settings.RecordsPerSecond);
     }
 
     [TestMethod]
     public void RostersBeyondTwoThousandVehiclesAreRejected()
     {
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(
-            () => new ScenarioSettings("test", ScenarioSettings.MaxVehicleCount + 1, 2));
+            () => new ScenarioSettings("test", ScenarioSettings.MaxVehicleCount + 1, 2, 2));
+    }
+
+    [TestMethod]
+    public void ReportRatesBeyondTwentyPerSecondAreRejected()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new ScenarioSettings("test", 50, ScenarioSettings.MaxReportsPerSecond + 1, 2));
     }
 
     [TestMethod]
     public void FrameRatesBeyondTwentyPerSecondAreRejected()
     {
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(
-            () => new ScenarioSettings("test", 50, ScenarioSettings.MaxFramesPerSecond + 1));
+            () => new ScenarioSettings("test", 50, 2, ScenarioSettings.MaxFramesPerSecond + 1));
     }
 
     [TestMethod]
@@ -57,11 +75,12 @@ public sealed class ScenarioSettingsTests
     }
 
     [TestMethod]
-    public void TheQuietPresetCarriesFiveHundredVehiclesAtOneFramePerSecond()
+    public void TheQuietPresetCarriesFiveHundredVehiclesAtOneReportAndOneFramePerSecond()
     {
-        // E3 control: the stress roster at a tenth of the frame rate, so receive work drops
+        // E3 control: the stress roster at a tenth of the stress rates, so receive work drops
         // while a map drain still carries up to 500 dirty features.
         Assert.AreEqual(500, ScenarioSettings.Quiet.VehicleCount);
+        Assert.AreEqual(1, ScenarioSettings.Quiet.ReportsPerSecond);
         Assert.AreEqual(1, ScenarioSettings.Quiet.FramesPerSecond);
         Assert.AreEqual(500, ScenarioSettings.Quiet.RecordsPerSecond);
     }

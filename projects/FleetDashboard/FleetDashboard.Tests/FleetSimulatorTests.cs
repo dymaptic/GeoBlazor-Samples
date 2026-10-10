@@ -1,4 +1,5 @@
 using FleetDashboard.Server.Simulation;
+using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -8,130 +9,186 @@ namespace FleetDashboard.Tests;
 public sealed class FleetSimulatorTests
 {
     [TestMethod]
-    public void PausingOneVehicleDoesNotPauseTheOthers()
+    public void TheStoreHoldsEveryVehicleAtSequenceOneBeforeTheFirstAdvance()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal);
-        FleetFrame first = simulator.Advance();
+        using var store = new VehicleReportStore();
+        _ = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+
+        IReadOnlyList<VehicleReport> reports = store.Latest();
+        Assert.HasCount(ScenarioSettings.Normal.VehicleCount, reports);
+        Assert.IsTrue(reports.All(r => r.Sequence == 1 && r.ObservedAtUtc == clock.GetUtcNow()));
+    }
+
+    [TestMethod]
+    public void PausingOneVehicleLeavesItsStoredReportUnchangedWhileOthersAdvance()
+    {
+        var clock = new FakeTimeProvider();
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        simulator.Advance();
+        VehicleReport heldBefore = Stored(store, 7);
+        VehicleReport movingBefore = Stored(store, 8);
 
         simulator.PauseVehicle(7);
         clock.AdvanceSeconds(10);
-        FleetFrame second = simulator.Advance();
+        simulator.Advance();
 
-        VehicleReport heldBefore = first.Vehicles.Single(v => v.VehicleId == 7);
-        VehicleReport heldAfter = second.Vehicles.Single(v => v.VehicleId == 7);
-        Assert.AreEqual(heldBefore.Sequence, heldAfter.Sequence);
-        Assert.AreEqual(heldBefore.ObservedAtUtc, heldAfter.ObservedAtUtc);
-        Assert.AreEqual(heldBefore.Longitude, heldAfter.Longitude);
-        Assert.AreEqual(heldBefore.Latitude, heldAfter.Latitude);
+        Assert.AreEqual(heldBefore, Stored(store, 7));
 
-        VehicleReport movingBefore = first.Vehicles.Single(v => v.VehicleId == 8);
-        VehicleReport movingAfter = second.Vehicles.Single(v => v.VehicleId == 8);
+        VehicleReport movingAfter = Stored(store, 8);
         Assert.AreEqual(movingBefore.Sequence + 1, movingAfter.Sequence);
         Assert.IsTrue(movingAfter.ObservedAtUtc > movingBefore.ObservedAtUtc);
     }
 
     [TestMethod]
-    public void ResumedVehicleProducesANewObservationWithoutAPositionJump()
+    public void ResumedVehicleReportsTheNextSequenceWithoutAPositionJump()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal);
-        _ = simulator.Advance();
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        simulator.Advance();
 
         simulator.PauseVehicle(7);
         clock.AdvanceSeconds(10);
-        FleetFrame paused = simulator.Advance();
+        simulator.Advance();
+        VehicleReport held = Stored(store, 7);
 
         simulator.ResumeVehicle(7);
-        FleetFrame resumed = simulator.Advance();
+        simulator.Advance();
 
-        VehicleReport held = paused.Vehicles.Single(v => v.VehicleId == 7);
-        VehicleReport report = resumed.Vehicles.Single(v => v.VehicleId == 7);
+        VehicleReport report = Stored(store, 7);
         Assert.AreEqual(held.Sequence + 1, report.Sequence);
         Assert.AreEqual(held.Longitude, report.Longitude);
         Assert.AreEqual(held.Latitude, report.Latitude);
     }
 
     [TestMethod]
-    public void PausingTheFleetFreezesObservationsWhileFramesContinue()
+    public void PausingTheFleetWritesNothingAndFreezesSimulatedTime()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal);
-        FleetFrame first = simulator.Advance();
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        simulator.Advance();
+        IReadOnlyList<VehicleReport> before = store.Latest();
 
         simulator.PauseFleet();
         clock.AdvanceSeconds(10);
-        FleetFrame frozen = simulator.Advance();
+        simulator.Advance();
 
-        Assert.AreEqual(first.FrameSequence + 1, frozen.FrameSequence);
-        foreach (VehicleReport before in first.Vehicles)
+        CollectionAssert.AreEqual(before.ToArray(), store.Latest().ToArray());
+
+        // Resuming continues from where the fleet stopped; the paused ten seconds are not replayed.
+        simulator.ResumeFleet();
+        simulator.Advance();
+
+        foreach (VehicleReport paused in before)
         {
-            VehicleReport after = frozen.Vehicles.Single(v => v.VehicleId == before.VehicleId);
-            Assert.AreEqual(before.Sequence, after.Sequence);
-            Assert.AreEqual(before.ObservedAtUtc, after.ObservedAtUtc);
-            Assert.AreEqual(before.Longitude, after.Longitude);
+            VehicleReport resumed = Stored(store, paused.VehicleId);
+            Assert.AreEqual(paused.Sequence + 1, resumed.Sequence);
+            Assert.AreEqual(paused.Longitude, resumed.Longitude);
+            Assert.AreEqual(paused.Latitude, resumed.Latitude);
         }
     }
 
     [TestMethod]
-    public void ResetCreatesANewRunAndRestartsSequenceCounters()
+    public void ResetRestartsEveryVehicleAtSequenceOneAndItsStartingPosition()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal);
-        _ = simulator.Advance();
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        IReadOnlyList<VehicleReport> initial = store.Latest();
+        simulator.Advance();
         clock.AdvanceSeconds(10);
-        _ = simulator.Advance();
+        simulator.Advance();
         simulator.PauseVehicle(7);
-        Guid previousRunId = simulator.CurrentFrame.RunId;
+        simulator.PauseFleet();
 
         simulator.Reset();
-        FleetFrame after = simulator.CurrentFrame;
 
-        Assert.AreNotEqual(previousRunId, after.RunId);
-        Assert.AreEqual(1, after.FrameSequence);
-        Assert.AreEqual(1, after.Vehicles.Single(v => v.VehicleId == 7).Sequence);
+        IReadOnlyList<VehicleReport> after = store.Latest();
+        Assert.HasCount(ScenarioSettings.Normal.VehicleCount, after);
+        for (int index = 0; index < after.Count; index++)
+        {
+            Assert.AreEqual(1, after[index].Sequence);
+            Assert.AreEqual(clock.GetUtcNow(), after[index].ObservedAtUtc);
+            Assert.AreEqual(initial[index].Longitude, after[index].Longitude);
+            Assert.AreEqual(initial[index].Latitude, after[index].Latitude);
+        }
     }
 
     [TestMethod]
-    public void ConfiguringTheStressPresetGrowsTheRosterOnTheNextFrame()
+    public void ConfiguringTheStressPresetGrowsTheRosterOnTheNextReport()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal);
-        _ = simulator.Advance();
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        simulator.Advance();
 
         simulator.Configure(ScenarioSettings.Stress);
-        FleetFrame frame = simulator.Advance();
+        simulator.Advance();
 
-        Assert.HasCount(500, frame.Vehicles);
-        Assert.AreEqual(1, frame.Vehicles.Single(v => v.VehicleId == 500).Sequence);
-        Assert.IsTrue(frame.Vehicles.Single(v => v.VehicleId == 7).Sequence > 1);
+        Assert.HasCount(500, store.Latest());
+        Assert.AreEqual(1, Stored(store, 500).Sequence);
+        Assert.IsTrue(Stored(store, 7).Sequence > 1);
     }
 
     [TestMethod]
-    public void ConfiguringTheNormalPresetShrinksTheRoster()
+    public void ConfiguringTheNormalPresetShrinksTheStore()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Stress);
-        _ = simulator.Advance();
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Stress, store);
+        simulator.Advance();
 
         simulator.Configure(ScenarioSettings.Normal);
-        FleetFrame frame = simulator.Advance();
 
-        Assert.HasCount(50, frame.Vehicles);
-        Assert.IsFalse(frame.Vehicles.Any(v => v.VehicleId > 50));
+        Assert.HasCount(50, store.Latest());
+        Assert.IsFalse(store.Latest().Any(r => r.VehicleId > 50));
+
+        simulator.Advance();
+        Assert.HasCount(50, store.Latest());
     }
 
     [TestMethod]
-    public void TheConfiguredPresetIsExposedForTheBroadcasterRate()
+    public void TheConfiguredPresetExposesTheReportAndFrameRates()
     {
         var clock = new FakeTimeProvider();
-        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal);
+        using var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        Assert.AreEqual(2, simulator.Settings.ReportsPerSecond);
         Assert.AreEqual(2, simulator.Settings.FramesPerSecond);
 
         simulator.Configure(ScenarioSettings.Stress);
+        Assert.AreEqual(10, simulator.Settings.ReportsPerSecond);
         Assert.AreEqual(10, simulator.Settings.FramesPerSecond);
         Assert.AreEqual(500, simulator.Settings.VehicleCount);
     }
+
+    [TestMethod]
+    public async Task TheReportingLoopWritesReportsOnItsOwnClock()
+    {
+        using var store = new VehicleReportStore();
+        using var simulator = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal, store);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+
+        await simulator.StartAsync(CancellationToken.None);
+        try
+        {
+            // Sequence 3 takes two loop iterations, so the loop is ticking rather than running once.
+            while (Stored(store, 1).Sequence < 3)
+            {
+                await Task.Delay(50, timeout.Token);
+            }
+        }
+        finally
+        {
+            await simulator.StopAsync(CancellationToken.None);
+        }
+    }
+
+    private static VehicleReport Stored(VehicleReportStore store, int vehicleId) =>
+        store.Latest().Single(r => r.VehicleId == vehicleId);
 
     private sealed class FakeTimeProvider : TimeProvider
     {
