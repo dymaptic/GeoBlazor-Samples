@@ -1,0 +1,91 @@
+@page "/cim-symbols"
+@inherits SamplePage
+<PageTitle>CIM Symbols</PageTitle>
+<h3>CIM Symbols</h3>
+
+<p class="instructions">
+    This page draws a point, a line, and a polygon with <code>CIMSymbol</code>s. Each symbol is assembled from CIM
+    symbol layers: <code>CIMPictureMarker</code>, <code>CIMSolidStroke</code>, and <code>CIMSolidFill</code>.
+</p>
+
+<MapView @ref="_view"
+         Class="map-view"
+         OnViewRendered="OnViewRendered"
+         Longitude="-118.82"
+         Latitude="34.01"
+         Zoom="13">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+        <GraphicsLayer @ref="_graphicsLayer" />
+    </Map>
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-CIMSymbol.html",
+            "ArcGIS Maps SDK for JavaScript")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, demonstrates CIMSymbol, the " +
+        "multi-layer cartographic symbol type from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's " +
+        "CIMSymbol, CIMSymbolReference, CIMPointSymbol, CIMLineSymbol, CIMPolygonSymbol, CIMPictureMarker, " +
+        "CIMSolidStroke, and CIMSolidFill classes. The page shows a 2D light-gray basemap over the Santa Monica " +
+        "Mountains with three graphics in a GraphicsLayer: a point drawn with a CIMPictureMarker, a line drawn " +
+        "with a rounded blue CIMSolidStroke, and a polygon drawn with a green CIMSolidFill outlined by a dark " +
+        "CIMSolidStroke. Each CIMSymbol wraps a CIMSymbolReference whose symbol layers use CIM's 0 to 255 RGBA " +
+        "color arrays. The sample is intended to show how a CIM symbol is composed from symbol layers in C#.";
+
+    private async Task OnViewRendered()
+    {
+        if (!_firstRender)
+        {
+            return;
+        }
+
+        _firstRender = false;
+
+        await _graphicsLayer!.Add(new Graphic(new Point(-118.8215, 34.0140), PointSymbol));
+        await _graphicsLayer.Add(new Graphic(LinePath, LineSymbol));
+        await _graphicsLayer.Add(new Graphic(PolygonRing, PolygonSymbol));
+    }
+
+    private static CIMSymbol PointSymbol => new(data: new CIMSymbolReference(
+        symbol: new CIMPointSymbol(symbolLayers:
+        [
+            new CIMPictureMarker(url: "https://static.arcgis.com/images/Symbols/Basic/RedStickpin.png", size: 32)
+        ])));
+
+    private static CIMSymbol LineSymbol => new(data: new CIMSymbolReference(
+        symbol: new CIMLineSymbol(symbolLayers:
+        [
+            new CIMSolidStroke(color: [0, 112, 255, 255], width: 4, capStyle: CIMLineCapStyle.Round,
+                joinStyle: CIMLineJoinStyle.Round)
+        ])));
+
+    private static CIMSymbol PolygonSymbol => new(data: new CIMSymbolReference(
+        symbol: new CIMPolygonSymbol(symbolLayers:
+        [
+            new CIMSolidStroke(color: [20, 60, 20, 255], width: 2),
+            new CIMSolidFill(color: [76, 230, 0, 160])
+        ])));
+
+    private static Polyline LinePath => new([
+        new MapPath(new MapPoint(-118.8300, 34.0050), new MapPoint(-118.8215, 34.0090),
+            new MapPoint(-118.8100, 34.0040))
+    ]);
+
+    private static Polygon PolygonRing => new([
+        new MapPath(new MapPoint(-118.8250, 34.0200), new MapPoint(-118.8050, 34.0220),
+            new MapPoint(-118.8000, 34.0170), new MapPoint(-118.8150, 34.0150),
+            new MapPoint(-118.8250, 34.0200))
+    ]);
+
+    private MapView? _view;
+    private GraphicsLayer? _graphicsLayer;
+    private bool _firstRender = true;
+}
