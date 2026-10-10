@@ -155,7 +155,7 @@
             <select id="preview-load" @bind="_requestedLoad">
                 @foreach (ScenarioSettings preset in ScenarioSettings.All)
                 {
-                    <option value="@preset.Name">@preset.Name · @preset.VehicleCount.ToString("N0") vehicles × @preset.ReportsPerSecond/s =@preset.RecordsPerSecond.ToString("N0") records/s</option>
+                    <option value="@preset.Name">@preset.Name · @preset.VehicleCount.ToString("N0") vehicles × @preset.ReportsPerSecond/s = @preset.RecordsPerSecond.ToString("N0") records/s</option>
                 }
             </select>
             <button class="apply-preview" @onclick="ApplyPreview">Apply and reload</button>
