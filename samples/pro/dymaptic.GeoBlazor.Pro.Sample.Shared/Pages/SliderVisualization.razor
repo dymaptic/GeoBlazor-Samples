@@ -1,0 +1,82 @@
+@page "/slider-visualization"
+@inherits SamplePage
+
+<PageTitle>Slider Visualization</PageTitle>
+<h1>Slider Visualization</h1>
+<p class="instructions">
+    Drag the opacity slider handles to change how the percentage of Hispanic or Latino residents
+    controls each county's transparency. The same sample runs in Blazor Server, WebAssembly, and MAUI.
+</p>
+
+<MapView class="map-view" Longitude="-98" Latitude="39" Zoom="4">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+        <FeatureLayer @ref="_layer" Url="@LayerURL" Title="Hispanic or Latino population"
+                      Renderer="@_renderer" />
+    </Map>
+    <OpacitySliderWidget @ref="_slider" Position="OverlayPosition.TopRight"
+                         Min="0" Max="100" Precision="1" Stops="@_stops"
+                         OnThumbChange="OnThumbChange" OnThumbDrag="OnThumbDrag" />
+</MapView>
+
+@code {
+    public override string Description =>
+        "An opacity slider updates a feature layer's opacity visual variable as its handles move.";
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new(LayerURL, "US Census 2020 population"),
+        new("https://developers.arcgis.com/javascript/latest/references/map-components/components/arcgis-slider-opacity-legacy/",
+            "ArcGIS opacity slider")
+    ];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _renderer = CreateRenderer(_stops);
+    }
+
+    private async Task OnThumbChange(SliderThumbChangeEvent changeEvent)
+    {
+        await UpdateRenderer();
+    }
+
+    private async Task OnThumbDrag(SliderThumbDragEvent dragEvent)
+    {
+        await UpdateRenderer();
+    }
+
+    private async Task UpdateRenderer()
+    {
+        if (_layer is null || _slider is null)
+        {
+            return;
+        }
+
+        IReadOnlyList<OpacityStop>? stops = await _slider.GetStops();
+        if (stops is null || stops.Count < 2)
+        {
+            return;
+        }
+
+        _stops = stops;
+        _renderer = CreateRenderer(stops);
+        await _layer.SetRenderer(_renderer);
+    }
+
+    private static SimpleRenderer CreateRenderer(IReadOnlyList<OpacityStop> stops)
+    {
+        return new SimpleRenderer(
+            symbol: new SimpleFillSymbol(color: new MapColor("#00619b")),
+            visualVariables: [new OpacityVariable(field: "P002_calc_pct0002", stops: stops)]);
+    }
+
+    private const string LayerURL =
+        "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Census_2020_DHC_Total_Population/FeatureServer/2";
+    private IReadOnlyList<OpacityStop> _stops = [new(value: 0, opacity: 0.1), new(value: 100, opacity: 1)];
+    private SimpleRenderer? _renderer;
+    private FeatureLayer? _layer;
+    private OpacitySliderWidget? _slider;
+}
