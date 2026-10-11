@@ -104,6 +104,24 @@ public sealed class SignalRFleetFrameSourceTests
         Assert.AreEqual(1, frame.FrameSequence);
     }
 
+    [TestMethod]
+    public async Task AResetCompletesOnlyAfterTheServerHasRunIt()
+    {
+        var connection = new FakeHubConnection { Snapshot = Frame(Guid.NewGuid(), 1) };
+        await using var source = new SignalRFleetFrameSource(connection, new FakeTimeProvider());
+
+        Task reset = source.ResetAsync();
+
+        // A send completes once the message is queued, so a caller that reloads the page right
+        // after it would sever the connection before the server ran the reset.
+        CollectionAssert.AreEqual(new[] { "Reset" }, connection.InvokedMethods);
+        CollectionAssert.DoesNotContain(connection.SentMethods, "Reset");
+        Assert.IsFalse(reset.IsCompleted);
+
+        connection.InvokeResult.SetResult();
+        await reset;
+    }
+
     private static FleetFrame Frame(Guid runId, long frameSequence)
     {
         DateTimeOffset publishedAtUtc = DateTimeOffset.Parse("2026-09-08T12:00:00Z");
@@ -131,6 +149,13 @@ public sealed class SignalRFleetFrameSourceTests
         public Exception? StartFailure { get; set; }
 
         public FleetFrame? Snapshot { get; set; }
+
+        public List<string> InvokedMethods { get; } = [];
+
+        public List<string> SentMethods { get; } = [];
+
+        /// <summary>Completes a pending invoke, standing in for the server finishing the hub method.</summary>
+        public TaskCompletionSource InvokeResult { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public event Func<Exception?, Task>? Reconnecting;
         public event Func<string?, Task>? Reconnected;
@@ -160,8 +185,17 @@ public sealed class SignalRFleetFrameSourceTests
             return Task.FromResult((T)(object)Snapshot!);
         }
 
-        public Task SendAsync(string methodName, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public Task InvokeAsync(string methodName, CancellationToken cancellationToken = default)
+        {
+            InvokedMethods.Add(methodName);
+            return InvokeResult.Task;
+        }
+
+        public Task SendAsync(string methodName, CancellationToken cancellationToken = default)
+        {
+            SentMethods.Add(methodName);
+            return Task.CompletedTask;
+        }
 
         public Task SendAsync(string methodName, object? arg1, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;

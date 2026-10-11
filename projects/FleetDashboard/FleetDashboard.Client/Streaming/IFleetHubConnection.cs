@@ -20,10 +20,17 @@ public interface IFleetHubConnection : IAsyncDisposable
     /// <summary>Invokes a hub method that returns a value.</summary>
     Task<T> InvokeAsync<T>(string methodName, CancellationToken cancellationToken = default);
 
-    /// <summary>Invokes a hub method that returns no value.</summary>
+    /// <summary>Invokes a hub method that returns no value and completes only after the server has
+    /// run it. Use this when the caller depends on the method's effect, such as a reset that must
+    /// land before the page reloads.</summary>
+    Task InvokeAsync(string methodName, CancellationToken cancellationToken = default);
+
+    /// <summary>Sends a hub method with no value and completes once the message is queued on the
+    /// connection, not after the server has run it.</summary>
     Task SendAsync(string methodName, CancellationToken cancellationToken = default);
 
-    /// <summary>Invokes a hub method with one argument.</summary>
+    /// <summary>Sends a hub method with one argument and completes once the message is queued on
+    /// the connection, not after the server has run it.</summary>
     Task SendAsync(string methodName, object? arg1, CancellationToken cancellationToken = default);
 
     /// <summary>Raised when the transport begins an automatic reconnect.</summary>

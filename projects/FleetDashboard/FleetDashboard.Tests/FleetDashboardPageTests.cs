@@ -97,6 +97,74 @@ public sealed class FleetDashboardPageTests
     }
 
     [TestMethod]
+    public async Task ThePreviewControlsReloadTheDashboardInTheChosenModeAndLoad()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        context.Services.AddSingleton<IFleetFrameSource>(new FakeSource());
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        var navigation = context.Services.GetRequiredService<NavigationManager>();
+        var page = context.Render<Home>();
+
+        Assert.AreEqual("ready", page.Find("select#preview-mode").GetAttribute("value"));
+        Assert.AreEqual("normal", page.Find("select#preview-load").GetAttribute("value"));
+        page.Find("select#preview-mode").Change("baseline");
+        page.Find("select#preview-load").Change("ceiling");
+        page.Find("button.apply-preview").Click();
+
+        Assert.AreEqual("http://localhost/?mode=baseline&preset=ceiling", navigation.Uri);
+    }
+
+    [TestMethod]
+    public async Task ApplyingThePreviewResetsTheServerRunBeforeReloading()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        var source = new ScenarioControlSource { AcceptsPreset = true };
+        context.Services.AddSingleton<IFleetFrameSource>(source);
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        var navigation = context.Services.GetRequiredService<NavigationManager>();
+        var page = context.Render<Home>();
+
+        page.Find("select#preview-mode").Change("latest");
+        page.Find("select#preview-load").Change("stress");
+        page.Find("button.apply-preview").Click();
+
+        Assert.AreEqual(1, source.ResetCount);
+        Assert.AreEqual("http://localhost/?mode=latest&preset=stress", navigation.Uri);
+    }
+
+    [TestMethod]
+    public async Task ApplyingThePreviewStillReloadsWhenTheServerResetFails()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        var source = new ScenarioControlSource { AcceptsPreset = true, FailsReset = true };
+        context.Services.AddSingleton<IFleetFrameSource>(source);
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        var navigation = context.Services.GetRequiredService<NavigationManager>();
+        var page = context.Render<Home>();
+
+        page.Find("select#preview-mode").Change("baseline");
+        page.Find("button.apply-preview").Click();
+
+        Assert.AreEqual(1, source.ResetCount);
+        Assert.AreEqual("http://localhost/?mode=baseline&preset=normal", navigation.Uri);
+    }
+
+    [TestMethod]
     public async Task AnUnknownModeFallsBackToReadyWithAVisibleNotice()
     {
         await using var context = new BunitContext();
@@ -214,6 +282,10 @@ public sealed class FleetDashboardPageTests
     {
         public bool AcceptsPreset { get; init; }
 
+        public bool FailsReset { get; init; }
+
+        public int ResetCount { get; private set; }
+
         public List<string> Presets { get; } = [];
 
         public ValueTask<FleetFrame> GetFrameAsync(DateTimeOffset instant,
@@ -241,7 +313,13 @@ public sealed class FleetDashboardPageTests
 
         public Task ResumeFleetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-        public Task ResetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task ResetAsync(CancellationToken cancellationToken = default)
+        {
+            ResetCount++;
+            return FailsReset
+                ? Task.FromException(new InvalidOperationException("The reset was refused."))
+                : Task.CompletedTask;
+        }
 
         public Task BreakConnectionAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

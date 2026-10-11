@@ -174,8 +174,11 @@ public sealed class SignalRFleetFrameSource
     public Task ResumeFleetAsync(CancellationToken cancellationToken = default) =>
         _connection.SendAsync("ResumeFleet", cancellationToken);
 
+    // Invoked rather than sent: the caller reloads the page right after this completes, and a send
+    // completes once the message is queued, so the reload would close the connection before the
+    // server ran the reset.
     public Task ResetAsync(CancellationToken cancellationToken = default) =>
-        _connection.SendAsync("Reset", cancellationToken);
+        _connection.InvokeAsync("Reset", cancellationToken);
 
     public Task SetPresetAsync(string presetName, CancellationToken cancellationToken = default) =>
         _connection.SendAsync("SetPreset", presetName, cancellationToken);
