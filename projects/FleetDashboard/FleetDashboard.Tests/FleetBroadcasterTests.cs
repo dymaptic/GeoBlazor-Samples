@@ -31,6 +31,25 @@ public sealed class FleetBroadcasterTests
     }
 
     [TestMethod]
+    public async Task SendsAPopulatedFrameAtStartRatherThanWaitingForTheFirstTick()
+    {
+        using var store = new VehicleReportStore();
+        _ = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal, store);
+        var frameBuilder = new FleetFrameBuilder(store, TimeProvider.System);
+        var hubContext = new RecordingHubContext();
+        var broadcaster = new FleetBroadcaster(frameBuilder, ScenarioSettings.Normal, hubContext,
+            new ViewportSubscriptions());
+
+        await broadcaster.StartAsync(CancellationToken.None);
+        // Normal ticks every 500 ms, so a frame within 200 ms was sent before any tick.
+        FleetFrame frame = await hubContext.NextFrame.WaitAsync(TimeSpan.FromMilliseconds(200));
+        await broadcaster.StopAsync(CancellationToken.None);
+
+        Assert.AreEqual(1, frame.FrameSequence);
+        Assert.AreEqual(ScenarioSettings.Normal.VehicleCount, frame.Vehicles.Count);
+    }
+
+    [TestMethod]
     public async Task BuildsEachFrameWhenItIsSentSoASlowSendNeverQueuesAStaleOne()
     {
         using var store = new VehicleReportStore();
@@ -46,9 +65,9 @@ public sealed class FleetBroadcasterTests
         await broadcaster.StartAsync(CancellationToken.None);
         await hubContext.NextFrame.WaitAsync(TimeSpan.FromSeconds(15));
 
-        // Normal publishes 2 frames a second. Holding the first send across three intervals is
+        // Normal publishes 2 frames a second. Holding the first send across four intervals is
         // where a frame queue would build frames, drop some, and later send a superseded one.
-        await Task.Delay(TimeSpan.FromSeconds(1.6));
+        await Task.Delay(TimeSpan.FromSeconds(2.1));
         hubContext.HoldFirstSend!.SetResult();
         await WaitUntil(() => hubContext.SentFrameSequences.Count >= 3, TimeSpan.FromSeconds(15));
         await broadcaster.StopAsync(CancellationToken.None);
