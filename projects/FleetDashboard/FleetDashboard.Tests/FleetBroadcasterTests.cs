@@ -66,4 +66,5 @@ public sealed class FleetBroadcasterTests
             if (DateTime.UtcNow > deadline) Assert.Fail("Timed out waiting for the broadcaster.");
             await Task.Delay(50);
         }
-    }}
+    }
+}

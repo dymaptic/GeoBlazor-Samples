@@ -12,7 +12,7 @@ public enum HostedLayerKind
 }
 
 /// <summary>One service somebody else hosts and keeps current. The map only refreshes it on an
-/// interval; none of the fleet pipeline (channel, coalescing, batching) is involved.</summary>
+/// interval; none of the fleet pipeline (the server's frame clock, coalescing, batching) is involved.</summary>
 /// <param name="RefreshMinutes">GeoBlazor and ArcGIS JS <c>RefreshInterval</c> are in minutes.</param>
 /// <param name="RequiresApiKey">The service rejects anonymous requests, so the layer is offered
 /// only when an ArcGIS API key is configured.</param>

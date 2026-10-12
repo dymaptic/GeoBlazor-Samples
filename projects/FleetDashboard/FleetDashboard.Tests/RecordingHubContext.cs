@@ -90,7 +90,7 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
             }
 
             NextFrame.TrySetResult(frame);
-            if (sent == 1 && HoldFirstSend is { } hold) await hold.Task;
+            if (sent == 1 && HoldFirstSend is { } hold) await hold.Task.WaitAsync(cancellationToken);
         }
     }
 }
