@@ -16,8 +16,8 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
 
     public string? MethodName => _proxy.MethodName;
 
-    /// <summary>Frame sequences in the order they were sent.</summary>
-    public IReadOnlyList<long> SentFrameSequences => _proxy.SentFrameSequences;
+    /// <summary>Frames in the order they were sent.</summary>
+    public IReadOnlyList<FleetFrame> SentFrames => _proxy.SentFrames;
 
     /// <summary>When set, the first send waits for this before completing, to stand in for a slow client.</summary>
     public TaskCompletionSource? HoldFirstSend
@@ -63,7 +63,7 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
     private sealed class RecordingClientProxy : IClientProxy
     {
         private readonly object _gate = new();
-        private readonly List<long> _sequences = [];
+        private readonly List<FleetFrame> _frames = [];
 
         public TaskCompletionSource<FleetFrame> NextFrame { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -72,9 +72,9 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
 
         public TaskCompletionSource? HoldFirstSend { get; set; }
 
-        public IReadOnlyList<long> SentFrameSequences
+        public IReadOnlyList<FleetFrame> SentFrames
         {
-            get { lock (_gate) return _sequences.ToArray(); }
+            get { lock (_gate) return _frames.ToArray(); }
         }
 
         public async Task SendCoreAsync(string methodName, object?[] args, CancellationToken cancellationToken = default)
@@ -85,8 +85,8 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
             int sent;
             lock (_gate)
             {
-                _sequences.Add(frame.FrameSequence);
-                sent = _sequences.Count;
+                _frames.Add(frame);
+                sent = _frames.Count;
             }
 
             NextFrame.TrySetResult(frame);

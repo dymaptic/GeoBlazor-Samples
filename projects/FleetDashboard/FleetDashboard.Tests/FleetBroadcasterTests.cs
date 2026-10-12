@@ -68,13 +68,24 @@ public sealed class FleetBroadcasterTests
         // Normal publishes 2 frames a second. Holding the first send across four intervals is
         // where a frame queue would build frames, drop some, and later send a superseded one.
         await Task.Delay(TimeSpan.FromSeconds(2.1));
+        DateTimeOffset releasedAt = TimeProvider.System.GetUtcNow();
         hubContext.HoldFirstSend!.SetResult();
-        await WaitUntil(() => hubContext.SentFrameSequences.Count >= 3, TimeSpan.FromSeconds(15));
+        await WaitUntil(() => hubContext.SentFrames.Count >= 3, TimeSpan.FromSeconds(15));
         await broadcaster.StopAsync(CancellationToken.None);
 
-        // Frames are built only when they are sent, so no frame number was skipped.
-        long[] sent = hubContext.SentFrameSequences.Take(3).ToArray();
-        CollectionAssert.AreEqual(new[] { sent[0], sent[0] + 1, sent[0] + 2 }, sent);
+        FleetFrame[] sent = hubContext.SentFrames.Take(3).ToArray();
+
+        // No frame number was skipped, so nothing was built and dropped.
+        long[] sequences = sent.Select(frame => frame.FrameSequence).ToArray();
+        CollectionAssert.AreEqual(new[] { sequences[0], sequences[0] + 1, sequences[0] + 2 }, sequences);
+
+        // A queue that built frames during the hold would also number them consecutively, so
+        // check the clock too: each frame sent after the release was built after the release.
+        foreach (FleetFrame frame in sent.Skip(1))
+        {
+            Assert.IsTrue(frame.PublishedAtUtc >= releasedAt,
+                $"Frame {frame.FrameSequence} was built at {frame.PublishedAtUtc:O}, before the hold ended at {releasedAt:O}.");
+        }
     }
 
     private static async Task WaitUntil(Func<bool> condition, TimeSpan timeout)
