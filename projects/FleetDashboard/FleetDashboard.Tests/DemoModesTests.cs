@@ -40,7 +40,7 @@ public sealed class DemoModesTests
     public void TheRawPipelineModesSubmitOneEditPerVehicle()
     {
         Assert.AreEqual(MapEditGranularity.Individual, DemoMode.Pipeline.EditGranularity());
-        Assert.AreEqual(MapEditGranularity.Individual, DemoMode.Baseline.EditGranularity());
+        Assert.AreEqual(MapEditGranularity.Ordered, DemoMode.Baseline.EditGranularity());
         Assert.AreEqual(MapEditGranularity.Individual, DemoMode.Latest.EditGranularity());
         Assert.AreEqual(MapEditGranularity.Collection, DemoMode.Ready.EditGranularity());
         Assert.AreEqual(MapEditGranularity.Collection, DemoMode.Batched.EditGranularity());

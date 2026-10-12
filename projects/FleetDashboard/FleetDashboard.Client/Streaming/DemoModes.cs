@@ -24,7 +24,8 @@ public static class DemoModes
 
     public static MapEditGranularity EditGranularity(this DemoMode mode) => mode switch
     {
-        DemoMode.Pipeline or DemoMode.Baseline or DemoMode.Latest
+        DemoMode.Baseline => MapEditGranularity.Ordered,
+        DemoMode.Pipeline or DemoMode.Latest
             => MapEditGranularity.Individual,
         _ => MapEditGranularity.Collection
     };
