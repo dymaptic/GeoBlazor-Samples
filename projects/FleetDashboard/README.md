@@ -126,7 +126,8 @@ latency percentiles, failure count, latest map batch size, superseded state, and
 
 Open **Display preview controls** below the map to pause truck 007, pause all reports, hide the fleet
 locally, simulate a map failure, break the connection with a real server abort, or reset the
-scenario. A report becomes stale after five seconds. Map failures keep telemetry visible and expose
+scenario. The **Mode** and **Load** pickers at the top let you reconfigure the dashboard: **Apply and
+reload** restarts the server run and reloads through the same `?mode=&preset=` query string. A report becomes stale after five seconds. Map failures keep telemetry visible and expose
 a retry button that pauses after three consecutive failed batches. The connection break shows a
 visible `Live -> Reconnecting -> Live` recovery in about one second and increments the reconnect
 counter. Navigating away during an in-flight map edit cancels the page's update loop and the edit

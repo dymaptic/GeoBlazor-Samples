@@ -5,20 +5,30 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace FleetDashboard.Server;
 
-public sealed class FleetHub(FleetSimulator simulator, ViewportSubscriptions viewports) : Hub
+public sealed class FleetHub(
+    FleetSimulator simulator,
+    FleetFrameBuilder frameBuilder,
+    FleetBroadcaster broadcaster,
+    ViewportSubscriptions viewports) : Hub
 {
-    public FleetFrame GetSnapshot() => simulator.CurrentFrame;
+    /// <summary>Always the full frame, even for a viewport connection: a reconnecting client
+    /// replaces its whole roster from this snapshot.</summary>
+    public FleetFrame GetSnapshot() => frameBuilder.CurrentFrame;
 
     public void SetPreset(string presetName)
     {
+        ScenarioSettings settings;
         try
         {
-            simulator.Configure(ScenarioSettings.ByName(presetName));
+            settings = ScenarioSettings.ByName(presetName);
         }
         catch (ArgumentException exception)
         {
             throw new HubException(exception.Message);
         }
+
+        simulator.Configure(settings);
+        broadcaster.Configure(settings);
     }
 
     public void PauseVehicle(int vehicleId) => simulator.PauseVehicle(vehicleId);
@@ -29,7 +39,16 @@ public sealed class FleetHub(FleetSimulator simulator, ViewportSubscriptions vie
 
     public void ResumeFleet() => simulator.ResumeFleet();
 
-    public void Reset() => simulator.Reset();
+    public void Reset()
+    {
+        // The simulator resets first. The reverse order lets a new-run frame carry the old run's
+        // high sequence numbers, and the client would then discard the restarted trucks'
+        // sequence-1 reports as older and freeze them. In this order, a frame published between
+        // the two calls carries the old run ID with new low sequences, which the client ignores
+        // for at most one frame.
+        simulator.Reset();
+        frameBuilder.StartNewRun();
+    }
 
     /// <summary>Opts this connection into viewport filtering with the extent the map shows, in
     /// WGS84 degrees. Until a connection calls this, it receives every full frame.</summary>

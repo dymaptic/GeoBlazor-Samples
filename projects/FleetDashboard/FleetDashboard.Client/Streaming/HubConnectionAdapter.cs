@@ -36,6 +36,9 @@ public sealed class HubConnectionAdapter(HubConnection connection) : IFleetHubCo
     public Task<T> InvokeAsync<T>(string methodName, CancellationToken cancellationToken = default) =>
         connection.InvokeAsync<T>(methodName, cancellationToken);
 
+    public Task InvokeAsync(string methodName, CancellationToken cancellationToken = default) =>
+        connection.InvokeAsync(methodName, cancellationToken);
+
     public Task SendAsync(string methodName, CancellationToken cancellationToken = default) =>
         connection.SendAsync(methodName, cancellationToken);
 

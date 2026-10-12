@@ -130,6 +130,9 @@ public sealed class ViewportMergeTests
         public Task<T> InvokeAsync<T>(string methodName, CancellationToken cancellationToken = default) =>
             Task.FromResult((T)(object)snapshot);
 
+        public Task InvokeAsync(string methodName, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
         public Task SendAsync(string methodName, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 

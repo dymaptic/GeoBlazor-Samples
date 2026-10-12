@@ -160,7 +160,7 @@
             <select id="preview-load" @bind="_requestedLoad">
                 @foreach (ScenarioSettings preset in ScenarioSettings.All)
                 {
-                    <option value="@preset.Name">@preset.Name · @preset.VehicleCount.ToString("N0") vehicles × @preset.FramesPerSecond/s = @preset.RecordsPerSecond.ToString("N0") records/s</option>
+                    <option value="@preset.Name">@preset.Name · @preset.VehicleCount.ToString("N0") vehicles × @preset.ReportsPerSecond/s = @preset.RecordsPerSecond.ToString("N0") records/s</option>
                 }
             </select>
             <button class="apply-preview" @onclick="ApplyPreview">Apply and reload</button>
@@ -276,10 +276,17 @@
     }
 
     /// <summary>The mode fixes the client's queue and cadence at startup, so a new mode or load
-    /// reloads the page through the same query string a rehearsed URL would use. The reload also
-    /// restarts the run, so every comparison starts from the same seed.</summary>
-    private void ApplyPreview() =>
+    /// reloads the page through the same query string a rehearsed URL would use. The server
+    /// simulator outlives the page, so a reload alone restarts only client state; resetting the
+    /// server run first makes every comparison start from the same seed. A failed reset still
+    /// reloads, because the reload is also how a presenter recovers from a dropped connection.</summary>
+    private async Task ApplyPreview()
+    {
+        if (FrameSource is IFleetScenarioControls controls)
+            await SendScenarioCommand(controls.ResetAsync());
+
         Navigation.NavigateTo($"?mode={_requestedMode}&preset={_requestedLoad}", forceLoad: true);
+    }
 
     private string? QueryValue(string key) => new Uri(Navigation.Uri).Query.TrimStart('?')
         .Split('&', StringSplitOptions.RemoveEmptyEntries)

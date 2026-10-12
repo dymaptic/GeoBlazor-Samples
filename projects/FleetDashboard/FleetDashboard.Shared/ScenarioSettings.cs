@@ -44,15 +44,19 @@ public static class DemoModeParser
 
 
 /// <summary>
-/// Validated simulator workload settings. Rates are workload settings, not throughput promises;
-/// every frame carries the complete roster, so records per second is vehicles times frame rate.
+/// Validated workload settings. Rates are workload settings, not throughput promises. Each simulated
+/// vehicle reports <see cref="ReportsPerSecond"/> times a second, and the server publishes
+/// <see cref="FramesPerSecond"/> frames a second, each carrying the latest report from every vehicle.
+/// The two clocks run independently, so records per second counts reports ingested by the server:
+/// vehicles times report rate.
 /// </summary>
 public sealed record ScenarioSettings
 {
     public const int MaxVehicleCount = 2000;
+    public const int MaxReportsPerSecond = 20;
     public const int MaxFramesPerSecond = 20;
 
-    public ScenarioSettings(string name, int vehicleCount, int framesPerSecond)
+    public ScenarioSettings(string name, int vehicleCount, int reportsPerSecond, int framesPerSecond)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -65,28 +69,37 @@ public sealed record ScenarioSettings
                 $"The roster holds 1 to {MaxVehicleCount} vehicles.");
         }
 
+        if (reportsPerSecond is < 1 or > MaxReportsPerSecond)
+        {
+            throw new ArgumentOutOfRangeException(nameof(reportsPerSecond), reportsPerSecond,
+                $"Each simulated vehicle reports 1 to {MaxReportsPerSecond} times per second.");
+        }
+
         if (framesPerSecond is < 1 or > MaxFramesPerSecond)
         {
             throw new ArgumentOutOfRangeException(nameof(framesPerSecond), framesPerSecond,
-                $"The simulator publishes 1 to {MaxFramesPerSecond} frames per second.");
+                $"The server publishes 1 to {MaxFramesPerSecond} frames per second.");
         }
 
         Name = name;
         VehicleCount = vehicleCount;
+        ReportsPerSecond = reportsPerSecond;
         FramesPerSecond = framesPerSecond;
     }
 
     public string Name { get; }
     public int VehicleCount { get; }
+    public int ReportsPerSecond { get; }
     public int FramesPerSecond { get; }
-    public int RecordsPerSecond => VehicleCount * FramesPerSecond;
+    public int RecordsPerSecond => VehicleCount * ReportsPerSecond;
 
-    public static ScenarioSettings Normal { get; } = new("normal", 50, 2);
-    public static ScenarioSettings Stress { get; } = new("stress", 500, 10);
-    /// <summary>The E3 quiet-application control: the stress roster at one frame per second, so a
-    /// map drain still carries up to 500 dirty features while receive work drops tenfold.</summary>
-    public static ScenarioSettings Quiet { get; } = new("quiet", 500, 1);
-    public static ScenarioSettings Ceiling { get; } = new("ceiling", 2000, 10);
+    public static ScenarioSettings Normal { get; } = new("normal", 50, 2, 2);
+    public static ScenarioSettings Stress { get; } = new("stress", 500, 10, 10);
+    /// <summary>The E3 quiet-application control: the stress roster reporting once a second and
+    /// published once a second, so a map drain still carries up to 500 dirty features while receive
+    /// work drops tenfold.</summary>
+    public static ScenarioSettings Quiet { get; } = new("quiet", 500, 1, 1);
+    public static ScenarioSettings Ceiling { get; } = new("ceiling", 2000, 10, 10);
 
     /// <summary>Every named preset, lightest first, for the preview controls.</summary>
     public static IReadOnlyList<ScenarioSettings> All { get; } = [Normal, Quiet, Stress, Ceiling];
