@@ -337,7 +337,11 @@
                 // with duplicates and inflate the incoming-record metric.
                 if (_frameCursor.TryAdvance(frame))
                 {
-                    _queue?.Accept(frame, _mapPendingReports);
+                    // Baseline's queue measures the map falling behind, not map startup, so ordered
+                    // intake waits until the map is ready (RetryMap clears this when it recreates
+                    // the map). Fleet state above still updates; other modes accept immediately.
+                    if (_mapInitialized || _mode.EditGranularity() != MapEditGranularity.Ordered)
+                        _queue?.Accept(frame, _mapPendingReports);
                     _metrics.RecordIncoming(ReceivedRecordCount(reports.Count));
                 }
 

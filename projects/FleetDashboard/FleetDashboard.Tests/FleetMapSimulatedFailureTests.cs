@@ -1,6 +1,7 @@
 using Bunit;
 using dymaptic.GeoBlazor.Core;
 using dymaptic.GeoBlazor.Core.Components.Views;
+using FleetDashboard.Client.Components;
 using FleetDashboard.Client.Pages;
 using FleetDashboard.Client.Streaming;
 using FleetDashboard.Shared;
@@ -66,6 +67,15 @@ public sealed class FleetMapSimulatedFailureTests
         context.Services.GetRequiredService<NavigationManager>().NavigateTo("http://localhost/?mode=baseline");
         var page = context.Render<Home>();
 
+        // The map is still starting, so reports leave the raw queue empty.
+        await Task.Delay(800);
+        source.AdvanceFrame();
+        await Task.Delay(800);
+        StringAssert.Contains(page.Markup, "Pending: 0 ·");
+
+        var map = page.FindComponent<FleetMap>();
+        await page.InvokeAsync(() => map.Instance.Initialized.InvokeAsync());
+        source.AdvanceFrame();
         page.WaitForAssertion(() => StringAssert.Contains(page.Markup, "Pending: 1 ·"));
 
         // A second report for the same truck must not replace the first one waiting for the map.
