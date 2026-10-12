@@ -80,6 +80,16 @@
     /// delegate: an EventCallback would re-render the whole page on every animation step.</summary>
     [Parameter] public Action<ViewportExtent>? ViewExtentChanged { get; set; }
 
+    /// <summary>Reports how many <see cref="MapEditGranularity.Ordered"/> updates wait for the map. A
+    /// plain delegate, like <see cref="ViewExtentChanged"/>, so a count change never re-renders the page.</summary>
+    [Parameter] public Action<int>? PendingReportsChanged { get; set; }
+
+    /// <summary>Incrementing this discards every waiting <see cref="MapEditGranularity.Ordered"/> update.</summary>
+    [Parameter] public int DiscardVersion { get; set; }
+
+    private readonly Queue<VehicleListItem> _pendingReports = [];
+    private int _discardVersion;
+
     protected override void OnInitialized()
     {
         _initialSource = Vehicles.Select(CreateGraphic).ToArray();
@@ -92,8 +102,16 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        await ApplyHostedLayerVisibility();
+        if (DiscardVersion != _discardVersion)
+        {
+            _discardVersion = DiscardVersion;
+            _pendingReports.Clear();
+            NotifyPendingReports();
+        }
+
+        // Queue before the awaited layer toggle so a newer batch can't overwrite this one's parameters.
         QueueVehicleDelta();
+        await ApplyHostedLayerVisibility();
         QueueSelection();
         if (RetryVersion != _retryVersion)
         {
@@ -165,7 +183,8 @@
             if (!_ready || !HasVehicleLayer) return;
 
             int appliedCalls = 0;
-            while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection)
+            while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection
+                       || _pendingReports.Count > 0)
                    && !_disposed && !_failed)
             {
                 VehicleListItem[] updates = _pendingUpdates.Values.ToArray();
@@ -173,6 +192,7 @@
                 VehicleListItem? selectedVehicle = _pendingSelectedVehicle;
                 bool updateSelection = _hasPendingSelection;
                 _hasPendingSelection = false;
+                appliedCalls = await ApplyReportsInOrder(appliedCalls);
 
                 if (updates.Length > 0 || removals.Length > 0)
                 {
@@ -215,6 +235,39 @@
         {
             _busy = false;
         }
+    }
+
+    /// <summary>Applies waiting reports one awaited edit at a time, oldest first. Works from a count
+    /// taken at the start, so a pending selection is still served between passes. A failed edit leaves
+    /// its report at the head of the queue, so the retry applies it before anything newer.</summary>
+    private async Task<int> ApplyReportsInOrder(int appliedCalls)
+    {
+        int snapshot = _pendingReports.Count;
+        for (int index = 0; index < snapshot; index++)
+        {
+            if (_disposed || _failed || CapReached(appliedCalls)) break;
+            if (!_pendingReports.TryPeek(out VehicleListItem? report)) break;
+
+            await ApplyVehicleDelta([report], []);
+
+            // A discard during the await may have cleared the queue; only remove what was applied.
+            if (_pendingReports.TryPeek(out VehicleListItem? head) && ReferenceEquals(head, report))
+            {
+                _pendingReports.Dequeue();
+            }
+
+            // An overloaded drain may never leave its loop, so reset the failure streak per success.
+            _consecutiveFailures = 0;
+            appliedCalls++;
+            NotifyPendingReports();
+        }
+
+        return appliedCalls;
+    }
+
+    private void NotifyPendingReports()
+    {
+        if (!_disposed) PendingReportsChanged?.Invoke(_pendingReports.Count);
     }
 
     /// <summary>Counts a failed batch without discarding its pending vehicles for reconciliation.
@@ -354,7 +407,8 @@
 
         foreach (VehicleListItem vehicle in UpdatedVehicles)
         {
-            _pendingUpdates[vehicle.VehicleId] = vehicle;
+            if (EditGranularity == MapEditGranularity.Ordered) _pendingReports.Enqueue(vehicle);
+            else _pendingUpdates[vehicle.VehicleId] = vehicle;
             _pendingRemovals.Remove(vehicle.VehicleId);
         }
 
@@ -363,6 +417,8 @@
             _pendingUpdates.Remove(vehicleId);
             _pendingRemovals.Add(vehicleId);
         }
+
+        if (EditGranularity == MapEditGranularity.Ordered) NotifyPendingReports();
     }
 
     private void RemoveAppliedDelta(IEnumerable<VehicleListItem> updates, IEnumerable<int> removals)

@@ -335,8 +335,152 @@ public sealed class FleetMapLifecycleTests
         Assert.AreEqual(4326, extent.SpatialReference?.Wkid);
     }
 
+    [TestMethod]
+    public async Task OrderedGranularityAppliesEveryReportInArrivalOrder()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        List<int> counts = [];
+        var map = context.Render<OrderTrackingFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered)
+            .Add(c => c.PendingReportsChanged, (Action<int>)counts.Add));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 }, Vehicle(7) with { SpeedKph = 30 } })
+            .Add(c => c.UpdateBatchVersion, 1L));
+
+        map.WaitForAssertion(() =>
+        {
+            CollectionAssert.AreEqual(new double[] { 10, 20, 30 }, map.Instance.AppliedSpeeds.ToArray());
+            Assert.AreEqual(0, counts[^1]);
+        });
+    }
+
+    [TestMethod]
+    public async Task OrderedGranularityRetriesAFailedReportBeforeLaterOnes()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        var map = context.Render<FlakyOrderedFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 } })
+            .Add(c => c.UpdateBatchVersion, 1L));
+        map.WaitForAssertion(() => Assert.AreEqual(1, map.Instance.Attempts));
+
+        // An empty batch starts the next drain, which must retry the failed report first.
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, Array.Empty<VehicleListItem>())
+            .Add(c => c.UpdateBatchVersion, 2L));
+
+        map.WaitForAssertion(() =>
+            CollectionAssert.AreEqual(new double[] { 10, 20 }, map.Instance.AppliedSpeeds.ToArray()));
+    }
+
+    [TestMethod]
+    public async Task DiscardVersionClearsTheOrderedQueue()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        List<int> counts = [];
+        var map = context.Render<BlockingOrderedFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered)
+            .Add(c => c.PendingReportsChanged, (Action<int>)counts.Add));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 }, Vehicle(7) with { SpeedKph = 30 } })
+            .Add(c => c.UpdateBatchVersion, 1L));
+        map.WaitForAssertion(() => Assert.AreEqual(1, map.Instance.Started));
+
+        // Discard while the first edit is in flight, then let that edit finish.
+        map.Render(parameters => parameters.Add(c => c.DiscardVersion, 1));
+        await map.InvokeAsync(() => map.Instance.Gate.SetResult());
+
+        map.WaitForAssertion(() =>
+        {
+            Assert.AreEqual(0, counts[^1]);
+            CollectionAssert.AreEqual(new double[] { 10 }, map.Instance.AppliedSpeeds.ToArray());
+        });
+    }
+
     private static VehicleListItem Vehicle(int vehicleId) => new(vehicleId, "swiftwater", "Swiftwater loop",
         -75.34, 41.09, 42, DateTimeOffset.UtcNow, VehicleStatus.Moving, 0);
+
+    private sealed class OrderTrackingFleetMap : FleetMap
+    {
+        public List<double> AppliedSpeeds { get; } = [];
+
+        protected override Task ApplyVehicleDelta(IReadOnlyList<VehicleListItem> updatedVehicles,
+            IReadOnlyList<int> removedVehicleIds)
+        {
+            AppliedSpeeds.AddRange(updatedVehicles.Select(v => v.SpeedKph));
+            return Task.CompletedTask;
+        }
+
+        protected override Task AddRoutes() => Task.CompletedTask;
+
+        protected override bool HasVehicleLayer => true;
+    }
+
+    private sealed class FlakyOrderedFleetMap : FleetMap
+    {
+        public int Attempts { get; private set; }
+        public List<double> AppliedSpeeds { get; } = [];
+
+        protected override Task ApplyVehicleDelta(IReadOnlyList<VehicleListItem> updatedVehicles,
+            IReadOnlyList<int> removedVehicleIds)
+        {
+            Attempts++;
+            if (Attempts == 1) throw new InvalidOperationException("The first edit fails.");
+            AppliedSpeeds.AddRange(updatedVehicles.Select(v => v.SpeedKph));
+            return Task.CompletedTask;
+        }
+
+        protected override Task AddRoutes() => Task.CompletedTask;
+
+        protected override bool HasVehicleLayer => true;
+    }
+
+    private sealed class BlockingOrderedFleetMap : FleetMap
+    {
+        public TaskCompletionSource Gate { get; } = new();
+        public int Started { get; private set; }
+        public List<double> AppliedSpeeds { get; } = [];
+
+        protected override async Task ApplyVehicleDelta(IReadOnlyList<VehicleListItem> updatedVehicles,
+            IReadOnlyList<int> removedVehicleIds)
+        {
+            Started++;
+            await Gate.Task;
+            AppliedSpeeds.AddRange(updatedVehicles.Select(v => v.SpeedKph));
+        }
+
+        protected override Task AddRoutes() => Task.CompletedTask;
+
+        protected override bool HasVehicleLayer => true;
+    }
 
     private sealed class HoldingFleetMap : FleetMap
     {
