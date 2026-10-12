@@ -52,6 +52,27 @@ public sealed class FleetMapSimulatedFailureTests
         StringAssert.Contains(page.Markup, "Failures: 3");
     }
 
+    [TestMethod]
+    public async Task BaselinePendingCountsReportsHandedToTheMap()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        var source = new AdvancingFrameSource();
+        context.Services.AddSingleton<IFleetFrameSource>(source);
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.Services.GetRequiredService<NavigationManager>().NavigateTo("http://localhost/?mode=baseline");
+        var page = context.Render<Home>();
+
+        page.WaitForAssertion(() => StringAssert.Contains(page.Markup, "Pending: 1 ·"));
+
+        // A second report for the same truck must not replace the first one waiting for the map.
+        source.AdvanceFrame();
+        page.WaitForAssertion(() => StringAssert.Contains(page.Markup, "Pending: 2 ·"));
+    }
+
     private sealed class QuietMapView : MapView
     {
         public override Task SetParametersAsync(ParameterView parameters) => Task.CompletedTask;

@@ -59,8 +59,8 @@
     {
         <div class="error-banner" role="alert">
             <div><strong>Baseline safety stop</strong>
-            <p>The pending queue reached @RawTelemetryQueue.Capacity.ToString("N0") records, so map
-               updates halted instead of growing without bound. Telemetry keeps flowing;
+            <p>Pending reports reached @RawTelemetryQueue.Capacity.ToString("N0"), so the page stopped
+               accepting new ones instead of growing without bound. Telemetry keeps flowing;
                @queue.RejectedRecordCount.ToString("N0") records were rejected.</p></div>
             <button @onclick="ResumeMapUpdates">Resume map updates</button>
         </div>
@@ -73,7 +73,8 @@
                           UpdatedVehicles="_mapUpdatedVehicles" RemovedVehicleIds="_mapRemovedVehicleIds"
                           UpdateBatchVersion="_mapBatchVersion"
                           EditGranularity="_mode.EditGranularity()"
-                          MaxEditsPerDrain="@(_mode.UsesRawQueue() ? RawEditsPerDrain : 0)"
+                          MaxEditsPerDrain="@(_mode.UsesRawQueue() && _mode.EditGranularity() != MapEditGranularity.Ordered ? RawEditsPerDrain : 0)"
+                          PendingReportsChanged="MapPendingReportsChanged" DiscardVersion="_discardVersion"
                           EditsApplied="RecordMapTelemetry" EditRetrying="MapRetrying"
                           SelectedVehicleId="_snapshot.SelectedVehicle?.VehicleId"
                           SelectedVehicleIdChanged="SelectVehicle" Initialized="MapInitialized"
@@ -216,7 +217,21 @@
     private string FreshnessLabel => _snapshot.LastFrameAtUtc is DateTimeOffset last
         ? $"Updated {Math.Max(0, (Clock.GetUtcNow() - last).TotalSeconds):0}s ago" : "Awaiting telemetry";
 
-    private string PendingDisplay => (_queue?.PendingCount ?? _state.DirtyVehicleCount).ToString("N0");
+    private string PendingDisplay =>
+        ((_queue?.PendingCount ?? _state.DirtyVehicleCount) + _mapPendingReports).ToString("N0");
+
+    private int _mapPendingReports;
+    private int _discardVersion;
+    private void MapPendingReportsChanged(int count) => _mapPendingReports = count;
+
+    /// <summary>Drops the raw queue and the map's ordered backlog together, so resuming never
+    /// re-trips the safety stop on reports that were already abandoned.</summary>
+    private void DiscardMapBacklog()
+    {
+        _queue?.Reset();
+        _mapPendingReports = 0;
+        _discardVersion++;
+    }
 
     /// <summary>What the server sent in its latest frame, before the client merges it onto the
     /// roster. Full-roster modes show the whole fleet; viewport mode shows the drop.</summary>
@@ -322,7 +337,7 @@
                 // with duplicates and inflate the incoming-record metric.
                 if (_frameCursor.TryAdvance(frame))
                 {
-                    _queue?.Accept(frame);
+                    _queue?.Accept(frame, _mapPendingReports);
                     _metrics.RecordIncoming(ReceivedRecordCount(reports.Count));
                 }
 
@@ -404,7 +419,8 @@
     {
         if (_queue is not null)
         {
-            PendingFleetBatch rawBatch = _queue.Capture(RawCaptureLimit);
+            PendingFleetBatch rawBatch = _queue.Capture(
+                _mode.EditGranularity() == MapEditGranularity.Ordered ? int.MaxValue : RawCaptureLimit);
             // Roster removals are only tracked by the state model; the raw queue holds reports.
             PendingFleetBatch removedBatch = _state.CaptureDirty();
             _mapUpdatedVehicles = rawBatch.Reports
@@ -491,7 +507,7 @@
 
     private void ResumeMapUpdates()
     {
-        _queue?.Reset();
+        DiscardMapBacklog();
     }
 
     private void RetryMap()
@@ -500,7 +516,12 @@
         _mapError = null;
         _mapRetryingAttempt = 0;
         _retryVersion++;
-        if (!_mapInitialized) _mapGeneration++;
+        if (!_mapInitialized)
+        {
+            _mapGeneration++;
+            // The recreated map starts with an empty queue and may never report a count again.
+            _mapPendingReports = 0;
+        }
     }
 
     /// <summary>Hosted layers are shown or hidden on the map itself; nothing in the vehicle pipeline
@@ -599,7 +620,7 @@
         _emptyFleet = false;
         _heldTruck = null;
         _state = new FleetDashboardState();
-        _queue?.Reset();
+        DiscardMapBacklog();
         RetryMap();
         await Advance();
     }
