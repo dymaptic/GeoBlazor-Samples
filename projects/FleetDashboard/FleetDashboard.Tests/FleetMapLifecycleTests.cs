@@ -425,6 +425,46 @@ public sealed class FleetMapLifecycleTests
         });
     }
 
+    [TestMethod]
+    public async Task ADiscardNeverDropsANewerOrderedReportQueuedDuringTheInFlightEdit()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        List<int> counts = [];
+        int failures = 0;
+        var map = context.Render<BlockingOrderedFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered)
+            .Add(c => c.PendingReportsChanged, (Action<int>)counts.Add)
+            .Add(c => c.EditRetrying, (int _) => failures++)
+            .Add(c => c.EditFailed, (string _) => failures++));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 }, Vehicle(7) with { SpeedKph = 30 } })
+            .Add(c => c.UpdateBatchVersion, 1L));
+        map.WaitForAssertion(() => Assert.AreEqual(1, map.Instance.Started));
+
+        // Discard, then queue a newer report while the first edit is still in flight.
+        map.Render(parameters => parameters.Add(c => c.DiscardVersion, 1));
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 40 } })
+            .Add(c => c.UpdateBatchVersion, 2L));
+        await map.InvokeAsync(() => map.Instance.Gate.SetResult());
+
+        map.WaitForAssertion(() =>
+        {
+            CollectionAssert.AreEqual(new double[] { 10, 40 }, map.Instance.AppliedSpeeds.ToArray());
+            Assert.AreEqual(0, counts[^1]);
+        });
+        Assert.AreEqual(0, failures);
+    }
+
     private static VehicleListItem Vehicle(int vehicleId) => new(vehicleId, "swiftwater", "Swiftwater loop",
         -75.34, 41.09, 42, DateTimeOffset.UtcNow, VehicleStatus.Moving, 0);
 
