@@ -545,7 +545,7 @@ public sealed class FleetMapLifecycleTests
         {
             UpdatedIds = updatedVehicles.Select(vehicle => vehicle.VehicleId).ToArray();
             RemovedIds = removedVehicleIds.ToArray();
-            BatchSizes = [..BatchSizes, updatedVehicles.Count + removedVehicleIds.Count];
+            BatchSizes = [.. BatchSizes, updatedVehicles.Count + removedVehicleIds.Count];
             return Task.CompletedTask;
         }
 
