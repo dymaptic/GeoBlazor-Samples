@@ -158,6 +158,11 @@
 
     private bool CapReached(int appliedCalls) => MaxEditsPerDrain > 0 && appliedCalls >= MaxEditsPerDrain;
 
+    /// <summary>Waiting reports keep the drain loop alive unless a simulated failure is on. The ordered
+    /// pass stops at the first edit under a simulated failure, so counting them would spin the loop;
+    /// they stay queued and the next parameter pass reaches the simulated-failure check.</summary>
+    private bool HasReportsToApply => _pendingReports.Count > 0 && !SimulateFailure;
+
     private async Task DrainUpdates()
     {
         if (_disposed || _busy || _failed) return;
@@ -184,15 +189,18 @@
 
             int appliedCalls = 0;
             while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection
-                       || _pendingReports.Count > 0)
+                       || HasReportsToApply)
                    && !_disposed && !_failed)
             {
+                // Before the snapshot below: a removal canceled or a selection made during the pass
+                // must be seen by it, not applied from an array taken before the pass began.
+                appliedCalls = await ApplyReportsInOrder(appliedCalls);
+
                 VehicleListItem[] updates = _pendingUpdates.Values.ToArray();
                 int[] removals = _pendingRemovals.ToArray();
                 VehicleListItem? selectedVehicle = _pendingSelectedVehicle;
                 bool updateSelection = _hasPendingSelection;
                 _hasPendingSelection = false;
-                appliedCalls = await ApplyReportsInOrder(appliedCalls);
 
                 if (updates.Length > 0 || removals.Length > 0)
                 {
@@ -238,14 +246,16 @@
     }
 
     /// <summary>Applies waiting reports one awaited edit at a time, oldest first. Works from a count
-    /// taken at the start, so a pending selection is still served between passes. A failed edit leaves
-    /// its report at the head of the queue, so the retry applies it before anything newer.</summary>
+    /// taken at the start, so reports that arrive during the pass wait for the next one. Under stress
+    /// the queue never empties, so the pass yields between edits to a simulated failure and to a pending
+    /// selection; the drain loop serves the selection, and a simulated failure ends the drain. A failed
+    /// edit leaves its report at the head of the queue, so the retry applies it before anything newer.</summary>
     private async Task<int> ApplyReportsInOrder(int appliedCalls)
     {
         int snapshot = _pendingReports.Count;
         for (int index = 0; index < snapshot; index++)
         {
-            if (_disposed || _failed || CapReached(appliedCalls)) break;
+            if (_disposed || _failed || SimulateFailure || _hasPendingSelection || CapReached(appliedCalls)) break;
             if (!_pendingReports.TryPeek(out VehicleListItem? report)) break;
 
             await ApplyVehicleDelta([report], []);

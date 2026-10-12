@@ -465,6 +465,104 @@ public sealed class FleetMapLifecycleTests
         Assert.AreEqual(0, failures);
     }
 
+    [TestMethod]
+    public async Task ARemovalCanceledDuringAnOrderedPassIsNeverApplied()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        var map = context.Render<BlockingOrderedFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7), Vehicle(8) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 } })
+            .Add(c => c.RemovedVehicleIds, new[] { 8 })
+            .Add(c => c.UpdateBatchVersion, 1L));
+        map.WaitForAssertion(() => Assert.AreEqual(1, map.Instance.Started));
+
+        // Vehicle 8 reports again while the first edit is in flight, which cancels its removal.
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(8) with { SpeedKph = 50 } })
+            .Add(c => c.RemovedVehicleIds, Array.Empty<int>())
+            .Add(c => c.UpdateBatchVersion, 2L));
+        await map.InvokeAsync(() => map.Instance.Gate.SetResult());
+
+        map.WaitForAssertion(() =>
+            CollectionAssert.AreEqual(new double[] { 10, 20, 50 }, map.Instance.AppliedSpeeds.ToArray()));
+        CollectionAssert.AreEqual(Array.Empty<int>(), map.Instance.RemovedIds.ToArray());
+    }
+
+    [TestMethod]
+    public async Task SimulatedFailureStopsAnOrderedDrainOnceTheInFlightEditReturns()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        List<int> retryAttempts = [];
+        var map = context.Render<BlockingOrderedFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered)
+            .Add(c => c.EditRetrying, (int attempt) => retryAttempts.Add(attempt)));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 }, Vehicle(7) with { SpeedKph = 30 } })
+            .Add(c => c.UpdateBatchVersion, 1L));
+        map.WaitForAssertion(() => Assert.AreEqual(1, map.Instance.Started));
+
+        map.Render(parameters => parameters.Add(c => c.SimulateFailure, true));
+        await map.InvokeAsync(() => map.Instance.Gate.SetResult());
+
+        // The next batch reaches the simulated-failure check only once the drain has released its
+        // busy guard, so waiting for the retry also waits for the drain to stop.
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, Array.Empty<VehicleListItem>())
+            .Add(c => c.UpdateBatchVersion, 2L));
+        map.WaitForAssertion(() => CollectionAssert.AreEqual(new[] { 1 }, retryAttempts.ToArray()));
+        Assert.AreEqual(1, map.Instance.Started);
+        CollectionAssert.AreEqual(new double[] { 10 }, map.Instance.AppliedSpeeds.ToArray());
+    }
+
+    [TestMethod]
+    public async Task ASelectionArrivingDuringAnOrderedPassIsServedBeforeTheNextReport()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        var mapView = new RecordingMapView();
+        context.ComponentFactories.Add<MapView>(() => mapView);
+        var map = context.Render<BlockingOrderedFleetMap>(parameters => parameters
+            .Add(c => c.Vehicles, new[] { Vehicle(7) })
+            .Add(c => c.EditGranularity, MapEditGranularity.Ordered));
+        await map.InvokeAsync(() => mapView.OnViewRendered.InvokeAsync(mapView.Id));
+
+        map.Render(parameters => parameters
+            .Add(c => c.UpdatedVehicles, new[] { Vehicle(7) with { SpeedKph = 10 },
+                Vehicle(7) with { SpeedKph = 20 }, Vehicle(7) with { SpeedKph = 30 } })
+            .Add(c => c.UpdateBatchVersion, 1L));
+        map.WaitForAssertion(() => Assert.AreEqual(1, map.Instance.Started));
+
+        map.Render(parameters => parameters.Add(c => c.SelectedVehicleId, 7));
+        await map.InvokeAsync(() => map.Instance.Gate.SetResult());
+
+        map.WaitForAssertion(() =>
+        {
+            CollectionAssert.AreEqual(new double[] { 10, 20, 30 }, map.Instance.AppliedSpeeds.ToArray());
+            CollectionAssert.AreEqual(new[] { 1 }, map.Instance.AppliedCountAtZoom.ToArray());
+        });
+    }
+
     private static VehicleListItem Vehicle(int vehicleId) => new(vehicleId, "swiftwater", "Swiftwater loop",
         -75.34, 41.09, 42, DateTimeOffset.UtcNow, VehicleStatus.Moving, 0);
 
@@ -508,6 +606,10 @@ public sealed class FleetMapLifecycleTests
         public TaskCompletionSource Gate { get; } = new();
         public int Started { get; private set; }
         public List<double> AppliedSpeeds { get; } = [];
+        public List<int> RemovedIds { get; } = [];
+
+        /// <summary>How many reports had been applied each time the view zoomed.</summary>
+        public List<int> AppliedCountAtZoom { get; } = [];
 
         protected override async Task ApplyVehicleDelta(IReadOnlyList<VehicleListItem> updatedVehicles,
             IReadOnlyList<int> removedVehicleIds)
@@ -515,6 +617,13 @@ public sealed class FleetMapLifecycleTests
             Started++;
             await Gate.Task;
             AppliedSpeeds.AddRange(updatedVehicles.Select(v => v.SpeedKph));
+            RemovedIds.AddRange(removedVehicleIds);
+        }
+
+        protected override Task GoToExtent(Extent extent)
+        {
+            AppliedCountAtZoom.Add(AppliedSpeeds.Count);
+            return Task.CompletedTask;
         }
 
         protected override Task AddRoutes() => Task.CompletedTask;
