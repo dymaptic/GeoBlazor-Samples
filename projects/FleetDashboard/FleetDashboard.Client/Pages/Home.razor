@@ -600,7 +600,6 @@
         _heldTruck = null;
         _state = new FleetDashboardState();
         _queue?.Reset();
-        if (FrameSource is DeterministicFleetFrameSource deterministic) deterministic.Reset();
         RetryMap();
         await Advance();
     }
