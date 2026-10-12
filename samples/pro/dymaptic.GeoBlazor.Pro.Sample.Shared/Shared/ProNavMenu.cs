@@ -21,6 +21,7 @@ public class ProNavMenu : NavMenu
             }),
         new("service-areas", "PRO: Service Areas", "oi-comment-square", null, true, Categories.Location),
         new("imagery-group-blend", "PRO: Imagery Blend", null, "blend.svg", true, Categories.Layers),
+        new("ground-elevation", "PRO: Ground Elevation", "oi-layers", null, true, Categories.MapsAndScenes),
         new("sketch-query", "PRO: Sketch Query", "oi-location", null, true, Categories.Queries),
         new("edit-feature-data", "PRO: Edit Data", "oi-map-marker", null, true, Categories.Interaction),
         new("popup-edit", "PRO: Popup Edit Data", "oi-pencil", null, true, Categories.Widgets),
