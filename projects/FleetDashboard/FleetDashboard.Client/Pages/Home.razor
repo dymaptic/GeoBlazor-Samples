@@ -336,8 +336,10 @@
                 if (_frameCursor.TryAdvance(frame))
                 {
                     // Baseline's queue measures the map falling behind, not map startup, so ordered
-                    // intake waits until the map is ready (RetryMap clears _mapInitialized when it
-                    // recreates the map). Fleet state above still updates; other modes accept immediately.
+                    // intake waits until the map first reports ready. Nothing clears _mapInitialized, and
+                    // RetryMap recreates the map only while it is still false, so the gate stays closed
+                    // until a map initializes. Fleet state above still updates; other modes accept
+                    // immediately.
                     if (_mapInitialized || _mode.EditGranularity() != MapEditGranularity.Ordered)
                         _queue?.Accept(frame, _mapPendingReports);
                     _metrics.RecordIncoming(ReceivedRecordCount(reports.Count));
