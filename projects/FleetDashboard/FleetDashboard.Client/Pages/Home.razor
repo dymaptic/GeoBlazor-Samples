@@ -62,7 +62,7 @@
             <p>Pending reports reached @RawTelemetryQueue.Capacity.ToString("N0"), so the page stopped
                accepting new ones instead of growing without bound. Telemetry keeps flowing;
                @queue.RejectedRecordCount.ToString("N0") records were rejected.</p></div>
-            <button @onclick="ResumeMapUpdates">Resume map updates</button>
+            <button @onclick="ResumeMapUpdates">Discard backlog and resume</button>
         </div>
     }
     <div class="workspace-grid">

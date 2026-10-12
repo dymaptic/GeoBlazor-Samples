@@ -124,8 +124,7 @@ not the merged roster.
 The raw-queue safety stop halts intake, not map updates, when pending records reach 20,000. It shows
 a red banner with the rejected-record count and keeps telemetry flowing, and the map keeps draining
 what it already holds. For `baseline`, Pending counts queued reports plus reports handed to the map
-but not yet applied, so the stop trips only when the map falls behind the read rate. Click **Resume map
-updates** to clear it; in `baseline` that discards both the queue and the map's backlog. The scenario strip reports records per second, vehicles in the latest received frame, pending count, map calls, edit
+but not yet applied, so the stop trips only when the map falls behind the read rate. Click **Discard backlog and resume** to clear it; in `baseline` that discards both the queue and the map's backlog. `baseline` ignores reports until the map is ready, so Pending reads 0 during map startup while Records/s is already nonzero. The scenario strip reports records per second, vehicles in the latest received frame, pending count, map calls, edit
 latency percentiles, failure count, latest map batch size, superseded state, and reconnect count.
 
 Open **Display preview controls** below the map to pause truck 007, pause all reports, hide the fleet
