@@ -99,8 +99,10 @@ The dashboard chooses one of eight pipeline modes from a `mode` query-string val
 `ready`. `ready`, `scheduled`, `resilient`, and `viewport` capture a bounded latest report per vehicle
 and apply collection map edits at a 250 ms cadence. `latest` and `batched` use the same bounded state at
 100 ms, with `latest` issuing one edit per vehicle and `batched` issuing one collection edit.
-`pipeline` and `baseline` instead keep every observation in a raw FIFO queue at 100 ms, with one
-awaited edit per vehicle, and both modes share the safety stop described below. Only `baseline`
+`pipeline` instead keeps every observation in a raw FIFO queue at 100 ms, with one awaited edit per
+vehicle and a cap of 250 records per tick. `baseline` reads the same raw queue but applies one awaited
+edit per report, in arrival order, with no per-tick cap. Both modes share the safety stop described
+below. Only `baseline`
 defaults to the stress workload; every other mode defaults to normal. Add a `preset` query parameter
 (`normal`, `stress`, `quiet`, or `ceiling`) to override the mode default. An unrecognized `mode` or
 `preset` falls back with a visible notice.
@@ -119,9 +121,11 @@ receives all 500 vehicles per frame; selecting truck 007 drops that to about 105
 plus the out-of-view share for that frame. In this mode Records/s counts what actually arrived,
 not the merged roster.
 
-The raw-queue safety stop halts map updates when the queue reaches 20,000 pending records, shows
-a red banner with the rejected-record count, and keeps telemetry flowing. Click **Resume map
-updates** to clear it. The scenario strip reports records per second, vehicles in the latest received frame, pending count, map calls, edit
+The raw-queue safety stop halts intake, not map updates, when pending records reach 20,000. It shows
+a red banner with the rejected-record count and keeps telemetry flowing, and the map keeps draining
+what it already holds. For `baseline`, Pending counts queued reports plus reports handed to the map
+but not yet applied, so the stop trips only when the map falls behind the read rate. Click **Resume map
+updates** to clear it; in `baseline` that discards both the queue and the map's backlog. The scenario strip reports records per second, vehicles in the latest received frame, pending count, map calls, edit
 latency percentiles, failure count, latest map batch size, superseded state, and reconnect count.
 
 Open **Display preview controls** below the map to pause truck 007, pause all reports, hide the fleet
