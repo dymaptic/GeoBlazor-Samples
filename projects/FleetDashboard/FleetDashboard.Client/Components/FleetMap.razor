@@ -87,9 +87,6 @@
     /// <summary>Incrementing this discards every waiting <see cref="MapEditGranularity.Ordered"/> update.</summary>
     [Parameter] public int DiscardVersion { get; set; }
 
-    private readonly Queue<VehicleListItem> _pendingReports = [];
-    private int _discardVersion;
-
     protected override void OnInitialized()
     {
         _initialSource = Vehicles.Select(CreateGraphic).ToArray();
@@ -596,6 +593,8 @@
     private readonly Dictionary<int, Guid> _graphicIds = [];
     private readonly Dictionary<int, VehicleListItem> _pendingUpdates = [];
     private readonly HashSet<int> _pendingRemovals = [];
+    private readonly Queue<VehicleListItem> _pendingReports = [];
+    private int _discardVersion;
     private VehicleListItem? _pendingSelectedVehicle;
     private VehicleListItem? _displayedSelectedVehicle;
     private bool _hasPendingSelection;

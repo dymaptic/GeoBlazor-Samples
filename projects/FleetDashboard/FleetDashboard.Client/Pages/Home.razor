@@ -220,8 +220,6 @@
     private string PendingDisplay =>
         ((_queue?.PendingCount ?? _state.DirtyVehicleCount) + _mapPendingReports).ToString("N0");
 
-    private int _mapPendingReports;
-    private int _discardVersion;
     private void MapPendingReportsChanged(int count) => _mapPendingReports = count;
 
     /// <summary>Drops the raw queue and the map's ordered backlog together, so resuming never
@@ -338,8 +336,8 @@
                 if (_frameCursor.TryAdvance(frame))
                 {
                     // Baseline's queue measures the map falling behind, not map startup, so ordered
-                    // intake waits until the map is ready (RetryMap clears this when it recreates
-                    // the map). Fleet state above still updates; other modes accept immediately.
+                    // intake waits until the map is ready (RetryMap clears _mapInitialized when it
+                    // recreates the map). Fleet state above still updates; other modes accept immediately.
                     if (_mapInitialized || _mode.EditGranularity() != MapEditGranularity.Ordered)
                         _queue?.Accept(frame, _mapPendingReports);
                     _metrics.RecordIncoming(ReceivedRecordCount(reports.Count));
@@ -651,6 +649,8 @@
     private bool _simulateMapFailure;
     private int _retryVersion;
     private int _mapGeneration;
+    private int _mapPendingReports;
+    private int _discardVersion;
     private IReadOnlyList<VehicleListItem> _mapUpdatedVehicles = [];
     private IReadOnlyList<int> _mapRemovedVehicleIds = [];
     private int _lastMapBatchCount;
