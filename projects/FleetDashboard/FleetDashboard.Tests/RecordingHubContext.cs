@@ -16,6 +16,16 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
 
     public string? MethodName => _proxy.MethodName;
 
+    /// <summary>Frame sequences in the order they were sent.</summary>
+    public IReadOnlyList<long> SentFrameSequences => _proxy.SentFrameSequences;
+
+    /// <summary>When set, the first send waits for this before completing, to stand in for a slow client.</summary>
+    public TaskCompletionSource? HoldFirstSend
+    {
+        get => _proxy.HoldFirstSend;
+        set => _proxy.HoldFirstSend = value;
+    }
+
     public IHubClients Clients => new RecordingHubClients(_proxy);
 
     public IGroupManager Groups => new RecordingGroupManager();
@@ -52,16 +62,35 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
 
     private sealed class RecordingClientProxy : IClientProxy
     {
+        private readonly object _gate = new();
+        private readonly List<long> _sequences = [];
+
         public TaskCompletionSource<FleetFrame> NextFrame { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public string? MethodName { get; private set; }
 
-        public Task SendCoreAsync(string methodName, object?[] args, CancellationToken cancellationToken = default)
+        public TaskCompletionSource? HoldFirstSend { get; set; }
+
+        public IReadOnlyList<long> SentFrameSequences
+        {
+            get { lock (_gate) return _sequences.ToArray(); }
+        }
+
+        public async Task SendCoreAsync(string methodName, object?[] args, CancellationToken cancellationToken = default)
         {
             MethodName = methodName;
-            if (args.Length == 1 && args[0] is FleetFrame frame) NextFrame.TrySetResult(frame);
-            return Task.CompletedTask;
+            if (args.Length != 1 || args[0] is not FleetFrame frame) return;
+
+            int sent;
+            lock (_gate)
+            {
+                _sequences.Add(frame.FrameSequence);
+                sent = _sequences.Count;
+            }
+
+            NextFrame.TrySetResult(frame);
+            if (sent == 1 && HoldFirstSend is { } hold) await hold.Task;
         }
     }
 }
