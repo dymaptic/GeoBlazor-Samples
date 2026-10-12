@@ -36,7 +36,8 @@ public sealed class FleetBroadcaster : BackgroundService
         using var timer = new PeriodicTimer(FrameInterval());
         try
         {
-            // Send a frame at once, so a client that connects or reconnects before the first tick gets a populated snapshot rather than the empty sequence-0 frame.
+            // Send a frame at once, so a client that connects or reconnects before the first tick gets
+            // a populated snapshot rather than the empty sequence-0 frame.
             await BroadcastAsync(_frameBuilder.CreateFrame(), stoppingToken);
 
             while (await timer.WaitForNextTickAsync(stoppingToken))

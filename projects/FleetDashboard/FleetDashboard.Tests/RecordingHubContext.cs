@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.SignalR;
 namespace FleetDashboard.Tests;
 
 
-/// <summary>A hub context that records the first frame sent to clients, so server tests can run
-/// the broadcaster without a SignalR host.</summary>
+/// <summary>A hub context that records every frame sent to clients in order and can optionally
+/// hold the first send, so server tests can run the broadcaster without a SignalR host.</summary>
 internal sealed class RecordingHubContext : IHubContext<FleetHub>
 {
     private readonly RecordingClientProxy _proxy = new();
@@ -77,7 +77,8 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
             get { lock (_gate) return _frames.ToArray(); }
         }
 
-        public async Task SendCoreAsync(string methodName, object?[] args, CancellationToken cancellationToken = default)
+        public async Task SendCoreAsync(string methodName, object?[] args,
+            CancellationToken cancellationToken = default)
         {
             MethodName = methodName;
             if (args.Length != 1 || args[0] is not FleetFrame frame) return;
