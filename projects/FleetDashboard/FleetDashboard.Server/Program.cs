@@ -16,6 +16,7 @@ builder.Services.AddSingleton(ScenarioSettings.Normal);
 builder.Services.AddSingleton<VehicleReportStore>();
 builder.Services.AddSingleton<FleetSimulator>();
 builder.Services.AddSingleton<FleetFrameBuilder>();
+builder.Services.AddSingleton<ViewportSubscriptions>();
 builder.Services.AddSingleton<FleetBroadcaster>();
 
 // The hub and the host share one instance of each loop. The simulator is registered first, so its

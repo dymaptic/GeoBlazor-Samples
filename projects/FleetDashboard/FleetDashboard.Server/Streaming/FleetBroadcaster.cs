@@ -5,21 +5,24 @@ using Microsoft.AspNetCore.SignalR;
 namespace FleetDashboard.Server.Streaming;
 
 /// <summary>Publishes a frame to every client on its own clock, independent of how often the
-/// vehicles report. A frame carries whatever the store holds at that moment.</summary>
+/// vehicles report. A frame carries whatever the store holds at that moment. Connections that
+/// registered a viewport receive their filtered frame instead of the full one.</summary>
 public sealed class FleetBroadcaster : BackgroundService
 {
     private readonly FleetFrameBuilder _frameBuilder;
     private readonly IHubContext<FleetHub> _hubContext;
+    private readonly ViewportSubscriptions _viewports;
     private readonly Channel<FleetFrame> _frames;
     private ScenarioSettings _settings;
     private long _droppedFrames;
 
     public FleetBroadcaster(FleetFrameBuilder frameBuilder, ScenarioSettings settings,
-        IHubContext<FleetHub> hubContext)
+        IHubContext<FleetHub> hubContext, ViewportSubscriptions viewports)
     {
         _frameBuilder = frameBuilder;
         _settings = settings;
         _hubContext = hubContext;
+        _viewports = viewports;
         _frames = Channel.CreateBounded<FleetFrame>(new BoundedChannelOptions(2)
         {
             FullMode = BoundedChannelFullMode.DropOldest,
@@ -80,7 +83,26 @@ public sealed class FleetBroadcaster : BackgroundService
     {
         await foreach (FleetFrame frame in _frames.Reader.ReadAllAsync(cancellationToken))
         {
-            await _hubContext.Clients.All.SendAsync("ReceiveFleetFrame", frame, cancellationToken);
+            IReadOnlyList<KeyValuePair<string, ViewportFrameFilter>> viewports = _viewports.Snapshot();
+            if (viewports.Count == 0)
+            {
+                await _hubContext.Clients.All.SendAsync(ClientMethod, frame, cancellationToken);
+                continue;
+            }
+
+            // Only the fan-out changes for viewport connections: the upstream channel still holds
+            // complete frames, and every other connection still gets the whole roster.
+            string[] viewportIds = viewports.Select(viewport => viewport.Key).ToArray();
+            List<Task> sends = [_hubContext.Clients.AllExcept(viewportIds).SendAsync(ClientMethod, frame, cancellationToken)];
+            foreach ((string connectionId, ViewportFrameFilter filter) in viewports)
+            {
+                sends.Add(_hubContext.Clients.Client(connectionId)
+                    .SendAsync(ClientMethod, filter.Filter(frame), cancellationToken));
+            }
+
+            await Task.WhenAll(sends);
         }
     }
+
+    private const string ClientMethod = "ReceiveFleetFrame";
 }

@@ -5,9 +5,14 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace FleetDashboard.Server;
 
-public sealed class FleetHub(FleetSimulator simulator, FleetFrameBuilder frameBuilder, FleetBroadcaster broadcaster)
-    : Hub
+public sealed class FleetHub(
+    FleetSimulator simulator,
+    FleetFrameBuilder frameBuilder,
+    FleetBroadcaster broadcaster,
+    ViewportSubscriptions viewports) : Hub
 {
+    /// <summary>Always the full frame, even for a viewport connection: a reconnecting client
+    /// replaces its whole roster from this snapshot.</summary>
     public FleetFrame GetSnapshot() => frameBuilder.CurrentFrame;
 
     public void SetPreset(string presetName)
@@ -43,6 +48,20 @@ public sealed class FleetHub(FleetSimulator simulator, FleetFrameBuilder frameBu
         // for at most one frame.
         simulator.Reset();
         frameBuilder.StartNewRun();
+    }
+
+    /// <summary>Opts this connection into viewport filtering with the extent the map shows, in
+    /// WGS84 degrees. Until a connection calls this, it receives every full frame.</summary>
+    public void SetViewport(ViewportExtent extent) => viewports.GetOrAdd(Context.ConnectionId).SetExtent(extent);
+
+    /// <summary>Keeps the selected vehicle in every filtered frame wherever it is; null clears it.</summary>
+    public void SetSelectedVehicle(int? vehicleId) =>
+        viewports.GetOrAdd(Context.ConnectionId).SetSelectedVehicle(vehicleId);
+
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        viewports.Remove(Context.ConnectionId);
+        return base.OnDisconnectedAsync(exception);
     }
 
     /// <summary>Aborts this client's transport to rehearse a real connection break. Unlike a

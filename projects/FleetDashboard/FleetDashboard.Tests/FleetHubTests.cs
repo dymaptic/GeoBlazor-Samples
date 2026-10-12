@@ -19,8 +19,10 @@ public sealed class FleetHubTests
         using var store = new VehicleReportStore();
         var simulator = new FleetSimulator(simulatorClock, ScenarioSettings.Normal, store);
         var frameBuilder = new FleetFrameBuilder(store, TimeProvider.System);
-        var broadcaster = new FleetBroadcaster(frameBuilder, ScenarioSettings.Normal, new RecordingHubContext());
-        var hub = new FleetHub(simulator, frameBuilder, broadcaster);
+        var viewports = new ViewportSubscriptions();
+        var broadcaster = new FleetBroadcaster(frameBuilder, ScenarioSettings.Normal, new RecordingHubContext(),
+            viewports);
+        var hub = new FleetHub(simulator, frameBuilder, broadcaster, viewports);
         simulator.Advance();
         simulator.Advance();
         FleetFrame oldRun = frameBuilder.CreateFrame();

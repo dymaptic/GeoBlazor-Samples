@@ -20,6 +20,7 @@ public sealed class DemoModesTests
         Assert.AreEqual(TimeSpan.FromMilliseconds(250), DemoMode.Ready.MapCadence());
         Assert.AreEqual(TimeSpan.FromMilliseconds(250), DemoMode.Scheduled.MapCadence());
         Assert.AreEqual(TimeSpan.FromMilliseconds(250), DemoMode.Resilient.MapCadence());
+        Assert.AreEqual(TimeSpan.FromMilliseconds(250), DemoMode.Viewport.MapCadence());
     }
 
     [TestMethod]
@@ -32,6 +33,7 @@ public sealed class DemoModesTests
         Assert.IsFalse(DemoMode.Batched.UsesRawQueue());
         Assert.IsFalse(DemoMode.Scheduled.UsesRawQueue());
         Assert.IsFalse(DemoMode.Resilient.UsesRawQueue());
+        Assert.IsFalse(DemoMode.Viewport.UsesRawQueue());
     }
 
     [TestMethod]
@@ -44,5 +46,15 @@ public sealed class DemoModesTests
         Assert.AreEqual(MapEditGranularity.Collection, DemoMode.Batched.EditGranularity());
         Assert.AreEqual(MapEditGranularity.Collection, DemoMode.Scheduled.EditGranularity());
         Assert.AreEqual(MapEditGranularity.Collection, DemoMode.Resilient.EditGranularity());
+        Assert.AreEqual(MapEditGranularity.Collection, DemoMode.Viewport.EditGranularity());
+    }
+
+    [TestMethod]
+    public void TheViewportModeParsesAndDefaultsToTheNormalPreset()
+    {
+        Assert.IsTrue(DemoModeParser.TryParse(" Viewport ", out DemoMode mode));
+        Assert.AreEqual(DemoMode.Viewport, mode);
+        Assert.AreEqual("viewport", mode.Label());
+        Assert.AreSame(ScenarioSettings.Normal, mode.Preset());
     }
 }

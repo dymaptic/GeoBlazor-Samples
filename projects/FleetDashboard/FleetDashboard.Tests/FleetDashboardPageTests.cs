@@ -78,6 +78,36 @@ public sealed class FleetDashboardPageTests
     }
 
     [TestMethod]
+    public async Task ViewportModeSendsTheSettledExtentAndTheSelection()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        var source = new ViewportSource();
+        context.Services.AddSingleton<IFleetFrameSource>(source);
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        context.Services.GetRequiredService<NavigationManager>()
+            .NavigateTo("http://localhost/?mode=viewport&preset=stress");
+        var page = context.Render<Home>();
+        var extent = new ViewportExtent(-75.36, 41.07, -75.33, 41.09);
+
+        page.FindComponent<Stub<FleetMap>>().Instance.Parameters.Get(p => p.ViewExtentChanged)!(extent);
+        page.Find("button[data-vehicle-id='7']").Click();
+
+        page.WaitForAssertion(() =>
+        {
+            CollectionAssert.AreEqual(new[] { extent }, source.Extents);
+            Assert.AreEqual(7, source.Selections.Last());
+        }, TimeSpan.FromSeconds(5));
+        StringAssert.Contains(page.Markup, "Mode: viewport");
+        StringAssert.Contains(page.Markup, "Load: stress");
+        StringAssert.Contains(page.Markup, "Vehicles/frame: 1");
+    }
+
+    [TestMethod]
     public async Task AnUnknownPresetFallsBackToTheModeDefaultWithAVisibleNotice()
     {
         await using var context = new BunitContext();
@@ -267,12 +297,41 @@ public sealed class FleetDashboardPageTests
         private long _sequence;
     }
 
-    private sealed class FakeSource : IFleetFrameSource
+    internal sealed class FakeSource : IFleetFrameSource
     {
         public ValueTask<FleetFrame> GetFrameAsync(DateTimeOffset instant, CancellationToken cancellationToken = default)
         {
             return ValueTask.FromResult(new FleetFrame(Guid.Empty, ++_sequence, instant,
                 [new VehicleReport(7, _sequence, instant, -75.34, 41.09, 42, "swiftwater")]));
+        }
+
+        private long _sequence;
+    }
+
+    private sealed class ViewportSource : IFleetFrameSource, IFleetViewportControls
+    {
+        public List<ViewportExtent> Extents { get; } = [];
+
+        public List<int?> Selections { get; } = [];
+
+        public int LastReceivedVehicleCount => 1;
+
+        public ValueTask<FleetFrame> GetFrameAsync(DateTimeOffset instant, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(new FleetFrame(Guid.Empty, ++_sequence, instant,
+                [new VehicleReport(7, _sequence, instant, -75.34, 41.09, 42, "swiftwater")]));
+        }
+
+        public Task SetViewportAsync(ViewportExtent extent, CancellationToken cancellationToken = default)
+        {
+            Extents.Add(extent);
+            return Task.CompletedTask;
+        }
+
+        public Task SetSelectedVehicleAsync(int? vehicleId, CancellationToken cancellationToken = default)
+        {
+            Selections.Add(vehicleId);
+            return Task.CompletedTask;
         }
 
         private long _sequence;
@@ -326,7 +385,7 @@ public sealed class FleetDashboardPageTests
         private long _sequence;
     }
 
-    private sealed class QuietMapView : MapView
+    internal sealed class QuietMapView : MapView
     {
         public override Task SetParametersAsync(ParameterView parameters)
         {

@@ -1,0 +1,4 @@
+.live-layers { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; padding: 0 0 1rem; font-size: .75rem; }
+.live-layers-label { color: #52665f; font-size: .7rem; }
+.live-layers button { background: var(--paper); border: 1px solid #b9cbc1; font-size: .75rem; }
+.live-layers button[aria-pressed="true"] { background: #f6e7ce; border-color: var(--amber); }

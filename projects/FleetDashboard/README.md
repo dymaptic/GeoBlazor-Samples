@@ -47,6 +47,36 @@ The client only reads `appsettings.Development.json` when it is running in the D
 environment, which it learns from the `Blazor-Environment` response header that
 `FleetDashboard.Server/Program.cs` sets on `/_framework` requests.
 
+## Live layers
+
+Under "Display preview controls", a "Live layers" group toggles three services that someone else
+hosts and keeps current. They are the contrast to the fleet pipeline: each service publishes its own
+stream, and the map only re-requests it on an interval, with no channel, coalescing, or batching.
+All are off by default and draw below the routes and vehicles. Toggling one changes the layer's
+visibility in place and does not touch the vehicle layer, selection, or the update loop.
+
+| Layer | Service | Refresh |
+|-------|---------|---------|
+| NOAA radar | `radar_base_reflectivity` MapServer (`MapImageLayer`) | 5 minutes |
+| NWS watches and warnings | `NWS_Watches_Warnings_v1` FeatureServer layer 6 (`FeatureLayer`) | 3 minutes |
+| Esri traffic | `World/Traffic` MapServer (`MapImageLayer`), needs an ArcGIS API key | 5 minutes |
+
+`RefreshInterval` is in minutes (the ArcGIS JS unit). Radar and warnings are public, so they are sent
+with `ExcludeApiKey` and work without any key. Radar is empty where the US has no weather; zoom out to
+see it.
+
+The traffic toggle appears only when an ArcGIS API key is configured. GeoBlazor reads a top-level
+`ArcGISApiKey` setting, so add it next to `GeoBlazor` in the gitignored
+`appsettings.Development.json` (the template carries an empty placeholder) and rebuild:
+
+```json
+{ "ArcGISApiKey": "YOUR_ARCGIS_API_KEY", "GeoBlazor": { "RegistrationKey": "..." } }
+```
+
+Like the registration key, the API key is downloaded by the browser at runtime, so use a key
+restricted to the traffic service and your demo origin. The layer definitions live in
+`FleetDashboard.Client/Rendering/HostedLayers.cs`.
+
 ## Running
 
 ```bash
@@ -65,9 +95,9 @@ dotnet test projects/FleetDashboard/FleetDashboard.Tests/FleetDashboard.Tests.cs
 
 ## Pipeline modes
 
-The dashboard chooses one of seven pipeline modes from a `mode` query-string value and defaults to
-`ready`. `ready`, `scheduled`, and `resilient` capture a bounded latest report per vehicle and apply
-collection map edits at a 250 ms cadence. `latest` and `batched` use the same bounded state at
+The dashboard chooses one of eight pipeline modes from a `mode` query-string value and defaults to
+`ready`. `ready`, `scheduled`, `resilient`, and `viewport` capture a bounded latest report per vehicle
+and apply collection map edits at a 250 ms cadence. `latest` and `batched` use the same bounded state at
 100 ms, with `latest` issuing one edit per vehicle and `batched` issuing one collection edit.
 `pipeline` and `baseline` instead keep every observation in a raw FIFO queue at 100 ms, with one
 awaited edit per vehicle, and both modes share the safety stop described below. Only `baseline`
@@ -75,9 +105,23 @@ defaults to the stress workload; every other mode defaults to normal. Add a `pre
 (`normal`, `stress`, `quiet`, or `ceiling`) to override the mode default. An unrecognized `mode` or
 `preset` falls back with a visible notice.
 
+`viewport` (implementation #5, "only send what the map can see") shrinks what the browser
+receives rather than what the map draws. The client tells the server its map extent once the view
+has held still for 300 ms, and which truck is selected. The server still produces one complete frame
+per tick, but sends this connection only the vehicles inside the extent and the selected truck on
+every frame. Every other vehicle rides along at most once per second, staggered across the second,
+with its real observation time, so the vehicle list stays complete and nothing turns stale. Filtered
+frames are marked partial and the client merges them onto the roster it holds. A connection's first
+frame, and any frame after the roster changes, goes out whole so removals still arrive. Other tabs
+keep receiving full frames, and `GetSnapshot` stays complete. Zoom in or select a truck and watch
+**Vehicles/frame** drop. At the stress preset the opening view holds the whole fleet, so it still
+receives all 500 vehicles per frame; selecting truck 007 drops that to about 105, the trucks in view
+plus the out-of-view share for that frame. In this mode Records/s counts what actually arrived,
+not the merged roster.
+
 The raw-queue safety stop halts map updates when the queue reaches 20,000 pending records, shows
 a red banner with the rejected-record count, and keeps telemetry flowing. Click **Resume map
-updates** to clear it. The scenario strip reports records per second, pending count, map calls, edit
+updates** to clear it. The scenario strip reports records per second, vehicles in the latest received frame, pending count, map calls, edit
 latency percentiles, failure count, latest map batch size, superseded state, and reconnect count.
 
 Open **Display preview controls** below the map to pause truck 007, pause all reports, hide the fleet
