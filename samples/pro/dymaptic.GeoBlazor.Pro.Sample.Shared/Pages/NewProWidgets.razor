@@ -1,0 +1,98 @@
+@page "/new-pro-widgets"
+@inherits SamplePage
+
+<PageTitle>New Pro Widgets</PageTitle>
+<h1>New Pro Widgets</h1>
+
+<p class="instructions">
+    Pick a widget to see it on its own map. Six of them need a 3D scene, and the last three run on a regular map.
+</p>
+
+<div class="spaced-row">
+    <label for="new-widget-select">Widget:</label>
+    <select id="new-widget-select" class="form-select" @bind="_selected" @bind:after="OnSelectionChanged">
+        @foreach (string name in _widgetNames)
+        {
+            <option value="@name">@name</option>
+        }
+    </select>
+</div>
+
+@if (_selected is "NavigationToggle" or "AreaMeasurement3D" or "DirectLineMeasurement3D" or "Daylight"
+    or "Slice" or "LineOfSight" or "ElevationProfile")
+{
+    <SceneView @key="_selected" Class="map-view" Tilt="65" Longitude="-122.4194" Latitude="37.7749" Zoom="15">
+        <Map Ground="@("world-elevation")">
+            <Basemap>
+                <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+            </Basemap>
+        </Map>
+        @switch (_selected)
+        {
+            case "NavigationToggle":
+                <NavigationToggleWidget Position="OverlayPosition.TopLeft" />
+                break;
+            case "AreaMeasurement3D":
+                <AreaMeasurement3DWidget Position="OverlayPosition.TopRight" />
+                break;
+            case "DirectLineMeasurement3D":
+                <DirectLineMeasurement3DWidget Position="OverlayPosition.TopRight" />
+                break;
+            case "Daylight":
+                <DaylightWidget Position="OverlayPosition.TopRight" />
+                break;
+            case "Slice":
+                <SliceWidget Position="OverlayPosition.TopRight" />
+                break;
+            case "LineOfSight":
+                <LineOfSightWidget Position="OverlayPosition.TopRight" />
+                break;
+            case "ElevationProfile":
+                <ElevationProfileWidget Position="OverlayPosition.BottomLeft" />
+                break;
+        }
+    </SceneView>
+}
+else
+{
+    <MapView @key="_selected" Class="map-view" Zoom="12" Longitude="-122.4194" Latitude="37.7749">
+        <Map>
+            <Basemap>
+                <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
+            </Basemap>
+        </Map>
+        @if (_selected == "Directions")
+        {
+            <DirectionsWidget Position="OverlayPosition.TopRight" />
+        }
+        else
+        {
+            <FullscreenWidget Position="OverlayPosition.TopLeft" />
+        }
+    </MapView>
+}
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/references/map-components/", "ArcGIS Maps SDK map components")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, shows nine widgets exposed as Razor " +
+        "components: NavigationToggleWidget, AreaMeasurement3DWidget, DirectLineMeasurement3DWidget, DaylightWidget, " +
+        "SliceWidget, LineOfSightWidget and ElevationProfileWidget on a tilted SceneView over San Francisco, and " +
+        "DirectionsWidget and FullscreenWidget on a MapView. A drop-down list switches between them, and each one " +
+        "is placed in a corner of the view through its Position parameter.";
+
+    private readonly string[] _widgetNames =
+    [
+        "NavigationToggle", "AreaMeasurement3D", "DirectLineMeasurement3D", "Daylight", "Slice", "LineOfSight",
+        "ElevationProfile", "Directions", "Fullscreen"
+    ];
+
+    private string _selected = "NavigationToggle";
+
+    private Task OnSelectionChanged() => InvokeAsync(StateHasChanged);
+}

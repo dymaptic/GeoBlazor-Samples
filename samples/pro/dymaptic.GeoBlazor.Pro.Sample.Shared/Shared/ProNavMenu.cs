@@ -31,6 +31,7 @@ public class ProNavMenu : NavMenu
         new("demographic-data", "PRO: Demographics", "oi-people", null, true, Categories.Location),
         new("length-and-area", "PRO: Length & Area", "oi-graph", null, true, Categories.Location),
         new("swipe", "PRO: Swipe Widget", "oi-arrow-thick-left", null, true, Categories.Widgets),
+        new("new-pro-widgets", "PRO: New Widgets", "oi-layers", null, true, Categories.Widgets),
         new("time-slider", "PRO: Time Slider", "oi-vertical-align-center", null, true, Categories.Widgets),
         new("search-custom-source", "PRO: Custom Search", "oi-magnifying-glass", null, true, Categories.Widgets),
         new("clustering", "PRO: Clustering", "oi-fullscreen-exit", null, true, Categories.Visualization),
