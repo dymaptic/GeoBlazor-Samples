@@ -1,7 +1,6 @@
-using FleetDashboard.Server.Simulation;
 using FleetDashboard.Server.Streaming;
-using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
+using FleetDashboard.Shared.Simulation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
@@ -14,7 +13,7 @@ public sealed class FleetFrameBuilderTests
     [TestMethod]
     public void BeforeTheFirstFrameTheSnapshotIsEmpty()
     {
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         store.Record(Report(1, 1));
         var builder = new FleetFrameBuilder(store, new FakeTimeProvider());
 
@@ -26,7 +25,7 @@ public sealed class FleetFrameBuilderTests
     public void AFrameIsStampedWithTheRunSequenceAndTimeAndCarriesEveryStoredReport()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         store.Record(Report(2, 4));
         store.Record(Report(1, 9));
         var builder = new FleetFrameBuilder(store, clock);
@@ -45,7 +44,7 @@ public sealed class FleetFrameBuilderTests
     public void TheFrameSequenceIncrementsWithinARun()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         store.Record(Report(1, 1));
         var builder = new FleetFrameBuilder(store, clock);
 
@@ -61,7 +60,7 @@ public sealed class FleetFrameBuilderTests
     [TestMethod]
     public void StartingANewRunChangesTheRunIdAndRestartsAtFrameOne()
     {
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         store.Record(Report(1, 1));
         var builder = new FleetFrameBuilder(store, new FakeTimeProvider());
         _ = builder.CreateFrame();
@@ -81,7 +80,7 @@ public sealed class FleetFrameBuilderTests
     public void APausedTrucksReportRepeatsUnchangedAcrossFrames()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         var builder = new FleetFrameBuilder(store, clock);
         simulator.PauseVehicle(7);

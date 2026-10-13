@@ -1,10 +1,7 @@
-using FleetDashboard.Server.Telemetry;
-using FleetDashboard.Shared;
-
-namespace FleetDashboard.Server.Streaming;
+namespace FleetDashboard.Shared.Simulation;
 
 /// <summary>
-/// The server's job of turning stored telemetry into a frame. Each frame is a complete snapshot of
+/// The host's job of turning stored telemetry into a frame. Each frame is a complete snapshot of
 /// every vehicle's latest report, including the ones that have not changed, so a client that misses
 /// a frame loses nothing. Frames are stamped with the run, a frame sequence, and the publish time,
 /// none of which the vehicles themselves know about.

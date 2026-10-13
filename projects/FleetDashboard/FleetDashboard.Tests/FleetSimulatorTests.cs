@@ -1,6 +1,5 @@
-using FleetDashboard.Server.Simulation;
-using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
+using FleetDashboard.Shared.Simulation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FleetDashboard.Tests;
@@ -12,7 +11,7 @@ public sealed class FleetSimulatorTests
     public void TheStoreHoldsEveryVehicleAtSequenceOneBeforeTheFirstAdvance()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         _ = new FleetSimulator(clock, ScenarioSettings.Normal, store);
 
         IReadOnlyList<VehicleReport> reports = store.Latest();
@@ -24,7 +23,7 @@ public sealed class FleetSimulatorTests
     public void PausingOneVehicleLeavesItsStoredReportUnchangedWhileOthersAdvance()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         simulator.Advance();
         VehicleReport heldBefore = Stored(store, 7);
@@ -45,7 +44,7 @@ public sealed class FleetSimulatorTests
     public void ResumedVehicleReportsTheNextSequenceWithoutAPositionJump()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         simulator.Advance();
 
@@ -67,7 +66,7 @@ public sealed class FleetSimulatorTests
     public void PausingTheFleetWritesNothingAndFreezesSimulatedTime()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         simulator.Advance();
         IReadOnlyList<VehicleReport> before = store.Latest();
@@ -95,7 +94,7 @@ public sealed class FleetSimulatorTests
     public void ResetRestartsEveryVehicleAtSequenceOneAndItsStartingPosition()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         IReadOnlyList<VehicleReport> initial = store.Latest();
         simulator.Advance();
@@ -121,7 +120,7 @@ public sealed class FleetSimulatorTests
     public void ConfiguringTheStressPresetGrowsTheRosterOnTheNextReport()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         simulator.Advance();
 
@@ -137,7 +136,7 @@ public sealed class FleetSimulatorTests
     public void ConfiguringTheNormalPresetShrinksTheStore()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Stress, store);
         simulator.Advance();
 
@@ -154,7 +153,7 @@ public sealed class FleetSimulatorTests
     public void TheConfiguredPresetExposesTheReportAndFrameRates()
     {
         var clock = new FakeTimeProvider();
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
         Assert.AreEqual(2, simulator.Settings.ReportsPerSecond);
         Assert.AreEqual(2, simulator.Settings.FramesPerSecond);
@@ -163,28 +162,6 @@ public sealed class FleetSimulatorTests
         Assert.AreEqual(10, simulator.Settings.ReportsPerSecond);
         Assert.AreEqual(10, simulator.Settings.FramesPerSecond);
         Assert.AreEqual(500, simulator.Settings.VehicleCount);
-    }
-
-    [TestMethod]
-    public async Task TheReportingLoopWritesReportsOnItsOwnClock()
-    {
-        using var store = new VehicleReportStore();
-        using var simulator = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal, store);
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-
-        await simulator.StartAsync(CancellationToken.None);
-        try
-        {
-            // Sequence 3 takes two loop iterations, so the loop is ticking rather than running once.
-            while (Stored(store, 1).Sequence < 3)
-            {
-                await Task.Delay(50, timeout.Token);
-            }
-        }
-        finally
-        {
-            await simulator.StopAsync(CancellationToken.None);
-        }
     }
 
     private static VehicleReport Stored(VehicleReportStore store, int vehicleId) =>

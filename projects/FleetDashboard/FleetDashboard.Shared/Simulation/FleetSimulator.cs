@@ -1,15 +1,15 @@
-using FleetDashboard.Server.Telemetry;
-using FleetDashboard.Shared;
 using FleetDashboard.Shared.Routing;
 
-namespace FleetDashboard.Server.Simulation;
+namespace FleetDashboard.Shared.Simulation;
 
 /// <summary>
 /// Stands in for the fleet's GPS devices and gateway. On its own clock, every truck that is not
-/// paused writes a new report into the <see cref="VehicleReportStore"/>. It never builds frames:
-/// publishing what the store holds is the server's job, on a separate clock.
+/// paused writes a new report into the <see cref="VehicleReportStore"/> each time <see cref="Advance"/>
+/// is called. It never builds frames: publishing what the store holds is the host's job, on a separate
+/// clock. The server calls <see cref="Advance"/> from a hosted loop and the browser-only client calls it
+/// from its update tick.
 /// </summary>
-public sealed class FleetSimulator : BackgroundService
+public sealed class FleetSimulator
 {
     private readonly object _gate = new();
     private readonly TimeProvider _timeProvider;
@@ -127,23 +127,6 @@ public sealed class FleetSimulator : BackgroundService
             _simulatedElapsedSeconds = 0;
             _lastAdvancedAtUtc = _timeProvider.GetUtcNow();
             RecordReports(_lastAdvancedAtUtc);
-        }
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                Advance();
-
-                // Re-read the report rate each tick so a preset change applies without a restart.
-                await Task.Delay(TimeSpan.FromSeconds(1d / Settings.ReportsPerSecond), stoppingToken);
-            }
-        }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-        {
         }
     }
 
