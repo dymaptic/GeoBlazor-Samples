@@ -13,8 +13,8 @@ All vehicle data is simulated. There is no live vehicle feed and no external tel
 | Project | Purpose |
 |---|---|
 | `FleetDashboard.Client` | Blazor WebAssembly dashboard: GeoBlazor map, vehicle list, speed chart |
-| `FleetDashboard.Server` | ASP.NET Core host, fleet simulator, and SignalR hub |
-| `FleetDashboard.Shared` | Telemetry contracts, scenario settings, and embedded route geometry |
+| `FleetDashboard.Server` | ASP.NET Core host and SignalR hub that run the simulator |
+| `FleetDashboard.Shared` | Telemetry contracts, scenario settings, the fleet simulator, and embedded route geometry |
 | `FleetDashboard.Tests` | MSTest and bUnit tests for the state, streaming, and dashboard components |
 
 ## Requirements
@@ -92,6 +92,36 @@ client process.
 dotnet build projects/FleetDashboard/FleetDashboard.slnx -c Release
 dotnet test projects/FleetDashboard/FleetDashboard.Tests/FleetDashboard.Tests.csproj -c Release --no-build
 ```
+
+## Browser-only mode
+
+By default the client reads frames from the SignalR hub on the server that hosts it. Browser-only mode
+runs the same fleet simulator inside the browser instead, so the client can be hosted as plain static
+files, for example on GitHub Pages or in an iframe embedded in a blog post. The frames, the per-vehicle
+sequences, and the stale-report behavior are the same as with the server, because both run the one
+`FleetSimulator` in `FleetDashboard.Shared`.
+
+Turn it on by adding a `Fleet` section to `FleetDashboard.Client/wwwroot/appsettings.json`, or to an
+environment-specific file such as `appsettings.Production.json`:
+
+```json
+{ "Fleet": { "Source": "Browser" } }
+```
+
+Any other value, or no value, keeps the SignalR source. Publish the client on its own, with no server:
+
+```bash
+dotnet publish projects/FleetDashboard/FleetDashboard.Client -c Release -o ./publish
+```
+
+The static site is `publish/wwwroot`. A host that serves it below a path, as GitHub Pages does, needs
+the `<base href>` in `index.html` changed to that path. The registration key setup above still applies,
+because the map needs one wherever it runs.
+
+Not everything carries over. **Break connection** does nothing, because there is no connection to
+break. Viewport mode still runs, but with no server to filter frames it shows every vehicle on every
+frame, and Vehicles/frame reads `n/a`. The simulation restarts on every page load and is not shared
+between tabs, since each browser runs its own copy.
 
 ## Pipeline modes
 

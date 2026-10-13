@@ -1,6 +1,6 @@
-using FleetDashboard.Server.Simulation;
 using FleetDashboard.Server.Streaming;
 using FleetDashboard.Shared;
+using FleetDashboard.Shared.Simulation;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FleetDashboard.Server;

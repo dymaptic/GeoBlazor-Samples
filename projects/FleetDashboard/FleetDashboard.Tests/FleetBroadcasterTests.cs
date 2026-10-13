@@ -1,7 +1,6 @@
-using FleetDashboard.Server.Simulation;
 using FleetDashboard.Server.Streaming;
-using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
+using FleetDashboard.Shared.Simulation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
@@ -14,7 +13,7 @@ public sealed class FleetBroadcasterTests
     [TestMethod]
     public async Task BroadcastsBuiltFramesOnTheClientMethodContract()
     {
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         // The simulator's constructor fills the store; its reporting loop is not needed here.
         _ = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal, store);
         var frameBuilder = new FleetFrameBuilder(store, TimeProvider.System);
@@ -33,7 +32,7 @@ public sealed class FleetBroadcasterTests
     [TestMethod]
     public async Task SendsAPopulatedFrameAtStartRatherThanWaitingForTheFirstTick()
     {
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         _ = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal, store);
         var frameBuilder = new FleetFrameBuilder(store, TimeProvider.System);
         var hubContext = new RecordingHubContext();
@@ -52,7 +51,7 @@ public sealed class FleetBroadcasterTests
     [TestMethod]
     public async Task BuildsEachFrameWhenItIsSentSoASlowSendNeverQueuesAStaleOne()
     {
-        using var store = new VehicleReportStore();
+        var store = new VehicleReportStore();
         _ = new FleetSimulator(TimeProvider.System, ScenarioSettings.Normal, store);
         var frameBuilder = new FleetFrameBuilder(store, TimeProvider.System);
         var hubContext = new RecordingHubContext

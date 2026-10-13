@@ -1,8 +1,8 @@
 using FleetDashboard.Server;
 using FleetDashboard.Server.Simulation;
 using FleetDashboard.Server.Streaming;
-using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
+using FleetDashboard.Shared.Simulation;
 
 // Hosts the WebAssembly dashboard, the simulated fleet, and the SignalR hub in one process.
 // Two independent loops run here: the simulator writes truck reports into the report store on
@@ -19,9 +19,9 @@ builder.Services.AddSingleton<FleetFrameBuilder>();
 builder.Services.AddSingleton<ViewportSubscriptions>();
 builder.Services.AddSingleton<FleetBroadcaster>();
 
-// The hub and the host share one instance of each loop. The simulator is registered first, so its
-// constructor fills the store before the broadcaster builds the first frame.
-builder.Services.AddHostedService(sp => sp.GetRequiredService<FleetSimulator>());
+// The hub and the host share one instance of each loop. The simulator host is registered first, so it
+// constructs the simulator, whose constructor fills the store, before the broadcaster builds the first frame.
+builder.Services.AddHostedService<FleetSimulatorHost>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<FleetBroadcaster>());
 
 WebApplication app = builder.Build();
