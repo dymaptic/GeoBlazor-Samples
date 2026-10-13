@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.SignalR;
 namespace FleetDashboard.Tests;
 
 
-/// <summary>A hub context that records the first frame sent to clients, so server tests can run
-/// the broadcaster without a SignalR host.</summary>
+/// <summary>A hub context that records every frame sent to clients in order and can optionally
+/// hold the first send, so server tests can run the broadcaster without a SignalR host.</summary>
 internal sealed class RecordingHubContext : IHubContext<FleetHub>
 {
     private readonly RecordingClientProxy _proxy = new();
@@ -15,6 +15,16 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
     public Task<FleetFrame> NextFrame => _proxy.NextFrame.Task;
 
     public string? MethodName => _proxy.MethodName;
+
+    /// <summary>Frames in the order they were sent.</summary>
+    public IReadOnlyList<FleetFrame> SentFrames => _proxy.SentFrames;
+
+    /// <summary>When set, the first send waits for this before completing, to stand in for a slow client.</summary>
+    public TaskCompletionSource? HoldFirstSend
+    {
+        get => _proxy.HoldFirstSend;
+        set => _proxy.HoldFirstSend = value;
+    }
 
     public IHubClients Clients => new RecordingHubClients(_proxy);
 
@@ -52,16 +62,36 @@ internal sealed class RecordingHubContext : IHubContext<FleetHub>
 
     private sealed class RecordingClientProxy : IClientProxy
     {
+        private readonly object _gate = new();
+        private readonly List<FleetFrame> _frames = [];
+
         public TaskCompletionSource<FleetFrame> NextFrame { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public string? MethodName { get; private set; }
 
-        public Task SendCoreAsync(string methodName, object?[] args, CancellationToken cancellationToken = default)
+        public TaskCompletionSource? HoldFirstSend { get; set; }
+
+        public IReadOnlyList<FleetFrame> SentFrames
+        {
+            get { lock (_gate) return _frames.ToArray(); }
+        }
+
+        public async Task SendCoreAsync(string methodName, object?[] args,
+            CancellationToken cancellationToken = default)
         {
             MethodName = methodName;
-            if (args.Length == 1 && args[0] is FleetFrame frame) NextFrame.TrySetResult(frame);
-            return Task.CompletedTask;
+            if (args.Length != 1 || args[0] is not FleetFrame frame) return;
+
+            int sent;
+            lock (_gate)
+            {
+                _frames.Add(frame);
+                sent = _frames.Count;
+            }
+
+            NextFrame.TrySetResult(frame);
+            if (sent == 1 && HoldFirstSend is { } hold) await hold.Task.WaitAsync(cancellationToken);
         }
     }
 }

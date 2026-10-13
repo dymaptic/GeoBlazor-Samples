@@ -51,7 +51,7 @@ environment, which it learns from the `Blazor-Environment` response header that
 
 Under "Display preview controls", a "Live layers" group toggles three services that someone else
 hosts and keeps current. They are the contrast to the fleet pipeline: each service publishes its own
-stream, and the map only re-requests it on an interval, with no channel, coalescing, or batching.
+stream, and the map only re-requests it on an interval, with no store, frames, coalescing, or batching.
 All are off by default and draw below the routes and vehicles. Toggling one changes the layer's
 visibility in place and does not touch the vehicle layer, selection, or the update loop.
 
@@ -143,8 +143,8 @@ itself, so no work continues against a component that no longer exists.
    a complete roster snapshot so a dropped frame cannot corrupt the picture.
 3. **Receive promptly, retain little.** Keep one latest report per vehicle in a store keyed by
    vehicle ID. The store can never exceed the roster, no matter how fast reports arrive.
-4. **Bound the server side too.** Hold a small number of frames and drop the oldest, which is safe
-   only because each frame is complete.
+4. **Send the latest, not a queue.** Snapshot the store on the frame clock and send it, building the
+   frame only when it is sent, so a slow send delays the next frame instead of queuing a stale one.
 5. **Draw on a clock, not on arrival.** Submit batches of edits on a fixed interval, await each
    batch, and never start a second edit while one is in flight. Give the map and the chart
    different intervals, and measure before calling any interval final.
