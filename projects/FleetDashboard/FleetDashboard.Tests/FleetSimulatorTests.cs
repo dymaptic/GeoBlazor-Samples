@@ -41,6 +41,24 @@ public sealed class FleetSimulatorTests
     }
 
     [TestMethod]
+    public void AdvancingAsOfAnInstantStampsTheReportsWithThatInstantNotTheClock()
+    {
+        var clock = new FakeTimeProvider();
+        var store = new VehicleReportStore();
+        var simulator = new FleetSimulator(clock, ScenarioSettings.Normal, store);
+        DateTimeOffset start = clock.GetUtcNow();
+        VehicleReport before = Stored(store, 8);
+
+        simulator.Advance(start.AddSeconds(1));
+        simulator.Advance(start.AddSeconds(2));
+
+        VehicleReport after = Stored(store, 8);
+        Assert.AreEqual(before.Sequence + 2, after.Sequence);
+        Assert.AreEqual(start.AddSeconds(2), after.ObservedAtUtc);
+        Assert.AreNotEqual(before.Latitude, after.Latitude);
+    }
+
+    [TestMethod]
     public void ResumedVehicleReportsTheNextSequenceWithoutAPositionJump()
     {
         var clock = new FakeTimeProvider();

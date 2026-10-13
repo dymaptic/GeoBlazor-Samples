@@ -30,11 +30,7 @@ public sealed class BrowserFleetFrameSource : IFleetFrameSource, IFleetScenarioC
             // The server runs the reporting and frame clocks independently, so they are scheduled
             // independently here. An unset due time means "now", which also builds the first frame at
             // once, as the broadcaster does.
-            if (observedAtUtc >= _nextReportAtUtc)
-            {
-                _simulator.Advance();
-                _nextReportAtUtc = NextDue(_nextReportAtUtc, ReportInterval, observedAtUtc);
-            }
+            RunDueReports(observedAtUtc);
 
             if (_currentFrame is null || observedAtUtc >= _nextFrameAtUtc)
             {
@@ -100,6 +96,27 @@ public sealed class BrowserFleetFrameSource : IFleetFrameSource, IFleetScenarioC
 
     /// <summary>Does nothing: there is no connection to break in the browser.</summary>
     public Task BreakConnectionAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    /// <summary>Runs every report tick that has come due, each stamped with its own due time, so the
+    /// report rate follows the preset however often the page polls. The server's timer reports on its
+    /// own schedule, so a slow poll must not thin the workload out.</summary>
+    private void RunDueReports(DateTimeOffset observedAtUtc)
+    {
+        TimeSpan interval = ReportInterval;
+        if (_nextReportAtUtc == DateTimeOffset.MinValue) _nextReportAtUtc = observedAtUtc;
+
+        // A tab that was backgrounded for minutes must not replay thousands of ticks in one call. Keep
+        // at most one second of reports, the last one at observedAtUtc, and drop the older ticks, as the
+        // server's timer does when it falls behind.
+        DateTimeOffset oldestKept = observedAtUtc - (interval * (_simulator.Settings.ReportsPerSecond - 1));
+        if (_nextReportAtUtc < oldestKept) _nextReportAtUtc = oldestKept;
+
+        while (observedAtUtc >= _nextReportAtUtc)
+        {
+            _simulator.Advance(_nextReportAtUtc);
+            _nextReportAtUtc += interval;
+        }
+    }
 
     private TimeSpan ReportInterval => TimeSpan.FromSeconds(1d / _simulator.Settings.ReportsPerSecond);
 

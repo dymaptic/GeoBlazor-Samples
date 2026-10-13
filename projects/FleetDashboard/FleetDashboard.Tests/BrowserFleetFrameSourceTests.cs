@@ -141,6 +141,49 @@ public sealed class BrowserFleetFrameSourceTests
     }
 
     [TestMethod]
+    public async Task ReportsKeepThePresetRateWhenThePageOnlyPollsEveryQuarterSecond()
+    {
+        var clock = new FakeTimeProvider();
+        var source = new BrowserFleetFrameSource(clock);
+        await source.SetPresetAsync("stress");
+        FleetFrame start = await source.GetFrameAsync(clock.GetUtcNow());
+
+        FleetFrame latest = start;
+        for (int poll = 0; poll < 8; poll++)
+        {
+            clock.AdvanceSeconds(0.25);
+            latest = await source.GetFrameAsync(clock.GetUtcNow());
+        }
+
+        // Stress reports 10 times a second, so two seconds of polling yields 20 reports per vehicle.
+        VehicleReport first = start.Vehicles.Single(v => v.VehicleId == 1);
+        VehicleReport last = latest.Vehicles.Single(v => v.VehicleId == 1);
+        Assert.AreEqual(first.Sequence + 20, last.Sequence);
+        Assert.AreEqual(clock.GetUtcNow(), last.ObservedAtUtc);
+    }
+
+    [TestMethod]
+    public async Task AfterALongGapOnePollRunsAtMostOneSecondOfReportsAndThenResumesNormally()
+    {
+        var clock = new FakeTimeProvider();
+        var source = new BrowserFleetFrameSource(clock);
+        await source.SetPresetAsync("stress");
+        FleetFrame start = await source.GetFrameAsync(clock.GetUtcNow());
+
+        clock.AdvanceSeconds(5 * 60);
+        FleetFrame afterGap = await source.GetFrameAsync(clock.GetUtcNow());
+
+        VehicleReport first = start.Vehicles.Single(v => v.VehicleId == 1);
+        VehicleReport caughtUp = afterGap.Vehicles.Single(v => v.VehicleId == 1);
+        Assert.AreEqual(first.Sequence + ScenarioSettings.Stress.ReportsPerSecond, caughtUp.Sequence);
+        Assert.AreEqual(clock.GetUtcNow(), caughtUp.ObservedAtUtc);
+
+        clock.AdvanceSeconds(0.1);
+        FleetFrame next = await source.GetFrameAsync(clock.GetUtcNow());
+        Assert.AreEqual(caughtUp.Sequence + 1, next.Vehicles.Single(v => v.VehicleId == 1).Sequence);
+    }
+
+    [TestMethod]
     public async Task AnUnknownPresetIsRejected()
     {
         var source = new BrowserFleetFrameSource(new FakeTimeProvider());

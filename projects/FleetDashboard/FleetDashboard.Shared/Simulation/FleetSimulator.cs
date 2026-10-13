@@ -56,19 +56,23 @@ public sealed class FleetSimulator
     /// <summary>Moves simulated time to now and records a new report for every vehicle that is not
     /// paused. While the whole fleet is paused nothing is written, so the store keeps every last
     /// report and the dashboard sees the fleet go stale.</summary>
-    public void Advance()
+    public void Advance() => Advance(_timeProvider.GetUtcNow());
+
+    /// <summary>Moves simulated time to <paramref name="at"/> and records the reports as of that
+    /// instant. A host that polls more slowly than the report rate uses this to replay the report
+    /// ticks it missed with their own due times, instead of stamping every one with the current time.</summary>
+    public void Advance(DateTimeOffset at)
     {
         lock (_gate)
         {
-            DateTimeOffset now = _timeProvider.GetUtcNow();
-            TimeSpan sinceLastAdvance = now - _lastAdvancedAtUtc;
-            _lastAdvancedAtUtc = now;
+            TimeSpan sinceLastAdvance = at - _lastAdvancedAtUtc;
+            _lastAdvancedAtUtc = at;
 
             // Simulated time stands still while the fleet is paused, so trucks resume where they stopped.
             if (_fleetPaused) return;
 
             _simulatedElapsedSeconds += Math.Max(0, sinceLastAdvance.TotalSeconds);
-            RecordReports(now);
+            RecordReports(at);
         }
     }
 
