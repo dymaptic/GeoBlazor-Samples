@@ -120,8 +120,9 @@ because the map needs one wherever it runs.
 
 Not everything carries over. **Break connection** does nothing, because there is no connection to
 break. Viewport mode still runs, but with no server to filter frames it shows every vehicle on every
-frame, and **Vehicles/frame** reads `n/a`. The simulation restarts on every page load and is not shared
+frame, and Vehicles/frame reads `n/a`. The simulation restarts on every page load and is not shared
 between tabs, since each browser runs its own copy.
+
 ## Pipeline modes
 
 The dashboard chooses one of eight pipeline modes from a `mode` query-string value and defaults to
