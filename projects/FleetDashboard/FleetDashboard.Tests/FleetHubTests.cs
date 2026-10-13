@@ -1,7 +1,8 @@
 using FleetDashboard.Server;
+using FleetDashboard.Server.Simulation;
 using FleetDashboard.Server.Streaming;
+using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
-using FleetDashboard.Shared.Simulation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
@@ -15,7 +16,7 @@ public sealed class FleetHubTests
     public void ResetNeverLetsANewRunFrameCarryTheOldRunsSequences()
     {
         var simulatorClock = new InterleavingTimeProvider();
-        var store = new VehicleReportStore();
+        using var store = new VehicleReportStore();
         var simulator = new FleetSimulator(simulatorClock, ScenarioSettings.Normal, store);
         var frameBuilder = new FleetFrameBuilder(store, TimeProvider.System);
         var viewports = new ViewportSubscriptions();

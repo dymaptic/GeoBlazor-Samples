@@ -1,15 +1,15 @@
+using FleetDashboard.Server.Telemetry;
+using FleetDashboard.Shared;
 using FleetDashboard.Shared.Routing;
 
-namespace FleetDashboard.Shared.Simulation;
+namespace FleetDashboard.Server.Simulation;
 
 /// <summary>
 /// Stands in for the fleet's GPS devices and gateway. On its own clock, every truck that is not
-/// paused writes a new report into the <see cref="VehicleReportStore"/> each time <see cref="Advance"/>
-/// is called. It never builds frames: publishing what the store holds is the host's job, on a separate
-/// clock. The server calls <see cref="Advance"/> from a hosted loop and the browser-only client calls it
-/// from its update tick.
+/// paused writes a new report into the <see cref="VehicleReportStore"/>. It never builds frames:
+/// publishing what the store holds is the server's job, on a separate clock.
 /// </summary>
-public sealed class FleetSimulator
+public sealed class FleetSimulator : BackgroundService
 {
     private readonly object _gate = new();
     private readonly TimeProvider _timeProvider;
@@ -56,23 +56,19 @@ public sealed class FleetSimulator
     /// <summary>Moves simulated time to now and records a new report for every vehicle that is not
     /// paused. While the whole fleet is paused nothing is written, so the store keeps every last
     /// report and the dashboard sees the fleet go stale.</summary>
-    public void Advance() => Advance(_timeProvider.GetUtcNow());
-
-    /// <summary>Moves simulated time to <paramref name="at"/> and records the reports as of that
-    /// instant. A host that polls more slowly than the report rate uses this to replay the report
-    /// ticks it missed with their own due times, instead of stamping every one with the current time.</summary>
-    public void Advance(DateTimeOffset at)
+    public void Advance()
     {
         lock (_gate)
         {
-            TimeSpan sinceLastAdvance = at - _lastAdvancedAtUtc;
-            _lastAdvancedAtUtc = at;
+            DateTimeOffset now = _timeProvider.GetUtcNow();
+            TimeSpan sinceLastAdvance = now - _lastAdvancedAtUtc;
+            _lastAdvancedAtUtc = now;
 
             // Simulated time stands still while the fleet is paused, so trucks resume where they stopped.
             if (_fleetPaused) return;
 
             _simulatedElapsedSeconds += Math.Max(0, sinceLastAdvance.TotalSeconds);
-            RecordReports(at);
+            RecordReports(now);
         }
     }
 
@@ -131,6 +127,23 @@ public sealed class FleetSimulator
             _simulatedElapsedSeconds = 0;
             _lastAdvancedAtUtc = _timeProvider.GetUtcNow();
             RecordReports(_lastAdvancedAtUtc);
+        }
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                Advance();
+
+                // Re-read the report rate each tick so a preset change applies without a restart.
+                await Task.Delay(TimeSpan.FromSeconds(1d / Settings.ReportsPerSecond), stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
         }
     }
 

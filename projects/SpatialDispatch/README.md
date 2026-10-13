@@ -14,7 +14,6 @@ are ordinary Entity Framework Core LINQ.
 |---|---|
 | `SpatialDispatch` | ASP.NET Core host: Minimal API endpoints, static assets, and the Blazor WebAssembly host |
 | `SpatialDispatch.Client` | Blazor WebAssembly dashboard, the GeoBlazor map, and the GeoJSON layer files |
-| `SpatialDispatch.Browser` | Standalone WebAssembly host that runs the same dashboard with no server, for static hosting |
 | `SpatialDispatch.Shared` | Business contracts, service interfaces, the demo records, and the API-backed providers |
 | `SpatialDispatch.Data` | Entity Framework Core model, the SQL Server spatial queries, seeding, and the GeoJSON layer shape |
 | `SpatialDispatch.Tests` | xUnit v3 and bUnit tests for the contracts, the spatial queries, and the dashboard |
@@ -137,41 +136,6 @@ only. To reseed, drop the database and run again:
 sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "DROP DATABASE SpatialDispatch"
 ```
 
-## Running without a server
-
-`SpatialDispatch.Browser` exists for places that can only serve static files, such as a blog post that embeds
-the dashboard in an iframe. It renders the client's own pages and map, but nothing behind them is SQL Server.
-The dispatch answer comes from the in-memory demo contract in `SpatialDispatch.Shared/Demo`, the map layers
-come from the GeoJSON files under the client's `wwwroot/data`, and routing is always the dashed straight-line
-connector. The demo contract is the same document the spatial queries are tested against, so the
-recommendation matches the server-hosted app.
-
-It still needs the Pro key. Copy the template inside the browser project and set `GeoBlazor:LicenseKey`:
-
-```bash
-cp projects/SpatialDispatch/SpatialDispatch.Browser/wwwroot/appsettings.Development.json.template \
-   projects/SpatialDispatch/SpatialDispatch.Browser/wwwroot/appsettings.Development.json
-```
-
-That file is gitignored, the same as the client's. Then run it, with no database and no Docker:
-
-```bash
-cd projects/SpatialDispatch
-dotnet run --project SpatialDispatch.Browser
-```
-
-Open the URL the command prints. To publish it for a static host:
-
-```bash
-dotnet publish SpatialDispatch.Browser -c Release -o ./publish
-```
-
-Upload the contents of `publish/wwwroot`. When the site serves it from a folder rather than the root, change
-`<base href="/" />` in `wwwroot/index.html` to that folder, for example `/samples/spatial-dispatch/`, or the
-app cannot find its own files. A published build runs in the Production environment, so it ignores
-`appsettings.Development.json`, and publish leaves that file out so the key never reaches the upload. Put the
-key in the published `wwwroot/appsettings.json` at deployment time instead, for example from a CI secret.
-
 ## What you should see
 
 1. **Open jobs** lists three jobs, with the urgent one, Summit Sports Catering, at the top.
@@ -192,8 +156,7 @@ dotnet run --project projects/SpatialDispatch/SpatialDispatch.Tests
 The suite covers the demo contract's acceptance checks against both providers, the spatial indexes and the
 clustered primary key they depend on, the GeoJSON layer shape, and the dashboard's visible behavior:
 selection, recommendation display, assignment, refresh-reset, and the loading, empty, error, and
-routing-fallback states. It also checks that the browser-only host registers the in-memory providers rather
-than the API-backed ones.
+routing-fallback states.
 
 The spatial query tests need SQL Server, because the point is that `STContains` and `STDistance` run inside
 the database. When the container is not reachable they skip with a message rather than failing, so the rest
