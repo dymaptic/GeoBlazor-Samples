@@ -1,5 +1,4 @@
 using FleetDashboard.Shared;
-using FleetDashboard.Shared.Simulation;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FleetDashboard.Server.Streaming;

@@ -1,5 +1,5 @@
+using FleetDashboard.Server.Telemetry;
 using FleetDashboard.Shared;
-using FleetDashboard.Shared.Simulation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
@@ -12,7 +12,7 @@ public sealed class VehicleReportStoreTests
     [TestMethod]
     public void RecordingAVehicleAgainKeepsOnlyItsLatestReport()
     {
-        var store = new VehicleReportStore();
+        using var store = new VehicleReportStore();
 
         store.Record(Report(7, 1));
         store.Record(Report(7, 2));
@@ -25,7 +25,7 @@ public sealed class VehicleReportStoreTests
     [TestMethod]
     public void LatestIsOrderedByVehicleId()
     {
-        var store = new VehicleReportStore();
+        using var store = new VehicleReportStore();
 
         store.Record(Report(30, 1));
         store.Record(Report(2, 1));
@@ -37,7 +37,7 @@ public sealed class VehicleReportStoreTests
     [TestMethod]
     public void RemovedVehiclesNoLongerAppear()
     {
-        var store = new VehicleReportStore();
+        using var store = new VehicleReportStore();
         store.Record(Report(1, 1));
         store.Record(Report(2, 1));
 
@@ -49,7 +49,7 @@ public sealed class VehicleReportStoreTests
     [TestMethod]
     public void AVehicleThatStopsReportingKeepsItsLastReport()
     {
-        var store = new VehicleReportStore();
+        using var store = new VehicleReportStore();
         store.Record(Report(7, 3));
 
         // Other vehicles keep reporting while vehicle 7 goes quiet.
