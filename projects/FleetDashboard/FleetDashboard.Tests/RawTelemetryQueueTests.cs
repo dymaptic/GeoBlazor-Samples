@@ -70,6 +70,18 @@ public sealed class RawTelemetryQueueTests
     }
 
     [TestMethod]
+    public void AcceptCountsReportsHandedToTheMapTowardTheSafetyStop()
+    {
+        var queue = new RawTelemetryQueue();
+
+        queue.Accept(Frame(1, [Report(7, 1), Report(8, 1), Report(9, 1)]), RawTelemetryQueue.Capacity - 1);
+
+        Assert.IsTrue(queue.SafetyStop);
+        Assert.AreEqual(1, queue.PendingCount);
+        Assert.AreEqual(2, queue.RejectedRecordCount);
+    }
+
+    [TestMethod]
     public void NullFramesAreRejected()
     {
         var queue = new RawTelemetryQueue();

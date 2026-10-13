@@ -80,6 +80,13 @@
     /// delegate: an EventCallback would re-render the whole page on every animation step.</summary>
     [Parameter] public Action<ViewportExtent>? ViewExtentChanged { get; set; }
 
+    /// <summary>Reports how many <see cref="MapEditGranularity.Ordered"/> updates wait for the map. A
+    /// plain delegate, like <see cref="ViewExtentChanged"/>, so a count change never re-renders the page.</summary>
+    [Parameter] public Action<int>? PendingReportsChanged { get; set; }
+
+    /// <summary>Incrementing this discards every waiting <see cref="MapEditGranularity.Ordered"/> update.</summary>
+    [Parameter] public int DiscardVersion { get; set; }
+
     protected override void OnInitialized()
     {
         _initialSource = Vehicles.Select(CreateGraphic).ToArray();
@@ -92,8 +99,16 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        await ApplyHostedLayerVisibility();
+        if (DiscardVersion != _discardVersion)
+        {
+            _discardVersion = DiscardVersion;
+            _pendingReports.Clear();
+            NotifyPendingReports();
+        }
+
+        // Queue before the awaited layer toggle so a newer batch can't overwrite this one's parameters.
         QueueVehicleDelta();
+        await ApplyHostedLayerVisibility();
         QueueSelection();
         if (RetryVersion != _retryVersion)
         {
@@ -140,6 +155,11 @@
 
     private bool CapReached(int appliedCalls) => MaxEditsPerDrain > 0 && appliedCalls >= MaxEditsPerDrain;
 
+    /// <summary>Waiting reports keep the drain loop alive unless a simulated failure is on. The ordered
+    /// pass stops at the first edit under a simulated failure, so counting them would spin the loop;
+    /// they stay queued and the next parameter pass reaches the simulated-failure check.</summary>
+    private bool HasReportsToApply => _pendingReports.Count > 0 && !SimulateFailure;
+
     private async Task DrainUpdates()
     {
         if (_disposed || _busy || _failed) return;
@@ -165,9 +185,14 @@
             if (!_ready || !HasVehicleLayer) return;
 
             int appliedCalls = 0;
-            while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection)
+            while ((_pendingUpdates.Count > 0 || _pendingRemovals.Count > 0 || _hasPendingSelection
+                       || HasReportsToApply)
                    && !_disposed && !_failed)
             {
+                // Before the snapshot below: a removal canceled or a selection made during the pass
+                // must be seen by it, not applied from an array taken before the pass began.
+                appliedCalls = await ApplyReportsInOrder(appliedCalls);
+
                 VehicleListItem[] updates = _pendingUpdates.Values.ToArray();
                 int[] removals = _pendingRemovals.ToArray();
                 VehicleListItem? selectedVehicle = _pendingSelectedVehicle;
@@ -215,6 +240,41 @@
         {
             _busy = false;
         }
+    }
+
+    /// <summary>Applies waiting reports one awaited edit at a time, oldest first. Works from a count
+    /// taken at the start, so reports that arrive during the pass wait for the next one. Under stress
+    /// the queue never empties, so the pass yields between edits to a simulated failure and to a pending
+    /// selection; the drain loop serves the selection, and a simulated failure ends the drain. A failed
+    /// edit leaves its report at the head of the queue, so the retry applies it before anything newer.</summary>
+    private async Task<int> ApplyReportsInOrder(int appliedCalls)
+    {
+        int snapshot = _pendingReports.Count;
+        for (int index = 0; index < snapshot; index++)
+        {
+            if (_disposed || _failed || SimulateFailure || _hasPendingSelection || CapReached(appliedCalls)) break;
+            if (!_pendingReports.TryPeek(out VehicleListItem? report)) break;
+
+            await ApplyVehicleDelta([report], []);
+
+            // A discard during the await may have cleared the queue; only remove what was applied.
+            if (_pendingReports.TryPeek(out VehicleListItem? head) && ReferenceEquals(head, report))
+            {
+                _pendingReports.Dequeue();
+            }
+
+            // An overloaded drain may never leave its loop, so reset the failure streak per success.
+            _consecutiveFailures = 0;
+            appliedCalls++;
+            NotifyPendingReports();
+        }
+
+        return appliedCalls;
+    }
+
+    private void NotifyPendingReports()
+    {
+        if (!_disposed) PendingReportsChanged?.Invoke(_pendingReports.Count);
     }
 
     /// <summary>Counts a failed batch without discarding its pending vehicles for reconciliation.
@@ -354,7 +414,8 @@
 
         foreach (VehicleListItem vehicle in UpdatedVehicles)
         {
-            _pendingUpdates[vehicle.VehicleId] = vehicle;
+            if (EditGranularity == MapEditGranularity.Ordered) _pendingReports.Enqueue(vehicle);
+            else _pendingUpdates[vehicle.VehicleId] = vehicle;
             _pendingRemovals.Remove(vehicle.VehicleId);
         }
 
@@ -363,6 +424,8 @@
             _pendingUpdates.Remove(vehicleId);
             _pendingRemovals.Add(vehicleId);
         }
+
+        if (EditGranularity == MapEditGranularity.Ordered) NotifyPendingReports();
     }
 
     private void RemoveAppliedDelta(IEnumerable<VehicleListItem> updates, IEnumerable<int> removals)
@@ -530,6 +593,8 @@
     private readonly Dictionary<int, Guid> _graphicIds = [];
     private readonly Dictionary<int, VehicleListItem> _pendingUpdates = [];
     private readonly HashSet<int> _pendingRemovals = [];
+    private readonly Queue<VehicleListItem> _pendingReports = [];
+    private int _discardVersion;
     private VehicleListItem? _pendingSelectedVehicle;
     private VehicleListItem? _displayedSelectedVehicle;
     private bool _hasPendingSelection;

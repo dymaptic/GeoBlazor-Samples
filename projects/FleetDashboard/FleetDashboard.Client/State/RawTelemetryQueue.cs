@@ -13,7 +13,10 @@ public sealed class RawTelemetryQueue
 {
     public const int Capacity = 20_000;
 
-    public void Accept(FleetFrame frame)
+    /// <param name="frame">The frame whose reports are appended in arrival order.</param>
+    /// <param name="handedOffPending">Reports already handed to the map but not yet applied. They count
+    /// toward <see cref="Capacity"/>, so the safety stop measures the whole backlog.</param>
+    public void Accept(FleetFrame frame, int handedOffPending = 0)
     {
         ArgumentNullException.ThrowIfNull(frame);
 
@@ -27,7 +30,7 @@ public sealed class RawTelemetryQueue
 
             for (int index = 0; index < frame.Vehicles.Count; index++)
             {
-                if (_pending.Count >= Capacity)
+                if (_pending.Count + handedOffPending >= Capacity)
                 {
                     SafetyStop = true;
                     RejectedRecordCount += frame.Vehicles.Count - index;

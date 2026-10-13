@@ -8,7 +8,10 @@ public enum MapEditGranularity
     Collection,
 
     /// <summary>One awaited edit per vehicle, submitted serially.</summary>
-    Individual
+    Individual,
+
+    /// <summary>One awaited edit per report, in arrival order; nothing replaces or skips a report.</summary>
+    Ordered
 }
 
 
