@@ -28,12 +28,13 @@
         @if (Dispatch is not null)
         {
             @* A second layer over the same GeoJSON, filtered to the one territory that contains the job.
-               Re-keyed on the territory ID so a different answer redraws the highlight. *@
+               Re-keyed on the territory ID so a different answer redraws the highlight. The fill carries its
+               own low alpha instead of a layer opacity, so the route drawn inside stays readable while the
+               outline stays fully opaque. *@
             <GeoJSONLayer @key="@($"territory-{Dispatch.ContainingTerritory.Id}")"
                           Url="@LayerSource.TerritoriesUrl"
                           Title="Containing territory"
-                          DefinitionExpression="@($"TerritoryId = {Dispatch.ContainingTerritory.Id}")"
-                          Opacity="0.55">
+                          DefinitionExpression="@($"TerritoryId = {Dispatch.ContainingTerritory.Id}")">
                 <SimpleRenderer>
                     <SimpleFillSymbol Color="@ContainingFill">
                         <Outline Color="@ContainingOutline" Width="3" />
@@ -91,7 +92,7 @@
 
     private static readonly MapColor TerritoryFill = new("#94a3b8");
     private static readonly MapColor TerritoryOutline = new("#475569");
-    private static readonly MapColor ContainingFill = new("#3b82f6");
+    private static readonly MapColor ContainingFill = new([59, 130, 246, 0.12]);
     private static readonly MapColor ContainingOutline = new("#1d4ed8");
     private static readonly MapColor TechnicianFill = new("#64748b");
     private static readonly MapColor TechnicianOutline = new("#ffffff");
