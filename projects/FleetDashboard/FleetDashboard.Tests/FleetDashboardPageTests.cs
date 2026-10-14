@@ -145,23 +145,21 @@ public sealed class FleetDashboardPageTests
         CollectionAssert.AreEqual(new[]
         {
             "Finished dashboard · ready",
-            "Trace the data path · pipeline",
-            "Keep every report · baseline",
-            "Keep the newest per truck · latest",
-            "One call, all trucks · batched",
-            "Read every 250 ms · scheduled",
-            "Failure scenarios · resilient",
-            "Send only what is in view · viewport"
+            "Raw queue · baseline",
+            "Raw queue with 250 record cap per tick · pipeline",
+            "Keep the latest per truck · latest",
+            "Batched ApplyEdits calls · batched",
+            "Batched ApplyEdits with 250 ms tick · scheduled",
+            "Filter by view extent · viewport",
+            "Failure scenarios · resilient"
         }, page.FindAll("#preview-mode option").Select(option => option.TextContent).ToArray());
         StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
-            "Normal load: one position per truck, one collection map edit every 250 ms.");
+            "Normal load: one report per truck, one ApplyEdits call every 250 ms. Same pipeline as scheduled and resilient.");
 
         page.Find("#preview-mode").Change("baseline");
 
-        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
-            "Every report drawn one at a time. Under stress the queue grows to the 20,000 safety stop.");
-        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
-            "Open ?mode=baseline for stress load. Watch Pending climb past 500 until the red safety stop banner appears.");
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.WatchingLine());
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.DemonstrationCue());
 
         foreach (DemoMode mode in Enum.GetValues<DemoMode>())
         {

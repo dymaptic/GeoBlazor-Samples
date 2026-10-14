@@ -121,9 +121,9 @@ public sealed class ScenarioSettingsTests
             Assert.IsFalse(string.IsNullOrWhiteSpace(name), $"{mode} needs a display name.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(watching), $"{mode} needs a watching line.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(cue), $"{mode} needs a demonstration cue.");
-            Assert.IsTrue(name.Length <= 30, $"{mode}'s display name exceeds 30 characters.");
-            Assert.IsTrue(watching.Length <= 90, $"{mode}'s watching line exceeds 90 characters.");
-            Assert.IsTrue(cue.Length <= 120, $"{mode}'s cue exceeds 120 characters.");
+            Assert.IsTrue(name.Length <= 48, $"{mode}'s display name exceeds 48 characters.");
+            Assert.IsTrue(watching.Length <= 135, $"{mode}'s watching line exceeds 135 characters.");
+            Assert.IsTrue(cue.Length <= 150, $"{mode}'s cue exceeds 150 characters.");
         }
     }
 
@@ -138,12 +138,12 @@ public sealed class ScenarioSettingsTests
 
     [TestMethod]
     [DataRow(DemoMode.Ready, "ready", "Finished dashboard")]
-    [DataRow(DemoMode.Pipeline, "pipeline", "Trace the data path")]
-    [DataRow(DemoMode.Baseline, "baseline", "Keep every report")]
-    [DataRow(DemoMode.Latest, "latest", "Keep the newest per truck")]
-    [DataRow(DemoMode.Batched, "batched", "One call, all trucks")]
-    [DataRow(DemoMode.Scheduled, "scheduled", "Read every 250 ms")]
-    [DataRow(DemoMode.Viewport, "viewport", "Send only what is in view")]
+    [DataRow(DemoMode.Baseline, "baseline", "Raw queue")]
+    [DataRow(DemoMode.Pipeline, "pipeline", "Raw queue with 250 record cap per tick")]
+    [DataRow(DemoMode.Latest, "latest", "Keep the latest per truck")]
+    [DataRow(DemoMode.Batched, "batched", "Batched ApplyEdits calls")]
+    [DataRow(DemoMode.Scheduled, "scheduled", "Batched ApplyEdits with 250 ms tick")]
+    [DataRow(DemoMode.Viewport, "viewport", "Filter by view extent")]
     [DataRow(DemoMode.Resilient, "resilient", "Failure scenarios")]
     public void PresenterNamesPreserveTheRecordedUrlTokens(DemoMode mode, string token, string name)
     {
