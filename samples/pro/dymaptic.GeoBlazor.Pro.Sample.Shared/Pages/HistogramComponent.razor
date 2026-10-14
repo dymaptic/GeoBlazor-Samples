@@ -1,0 +1,58 @@
+@page "/histogram-widget"
+@inherits SamplePage
+<PageTitle>Histogram Widget</PageTitle>
+<h1>Histogram Widget</h1>
+<p class="instructions">
+    The Histogram widget draws a set of bins as bars. Average, standard deviation, and the data lines mark values
+    that matter to the reader. The bins here are fixed sample data; in an app they usually come from the result of a
+    smart mapping histogram call.
+</p>
+
+<MapView Class="map-view" Zoom="3" Longitude="-98" Latitude="39">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+    </Map>
+    <HistogramWidget Position="OverlayPosition.BottomLeft"
+                     Label="Poverty rate by county"
+                     Bins="_bins"
+                     Min="0"
+                     Max="70"
+                     Average="@_average"
+                     StandardDeviation="@_standardDeviation"
+                     Layout="WidgetLayout.Horizontal"
+                     DataLines="_dataLines" />
+</MapView>
+
+@code {
+    private const double _average = 34.5;
+    private const double _standardDeviation = 12.8;
+
+    private readonly List<Bin> _bins =
+    [
+        new(count: 4, minValue: 0, maxValue: 10),
+        new(count: 14, minValue: 10.1, maxValue: 20),
+        new(count: 9, minValue: 20.1, maxValue: 30),
+        new(count: 34, minValue: 30.1, maxValue: 40),
+        new(count: 351, minValue: 40.1, maxValue: 50),
+        new(count: 100, minValue: 50.1, maxValue: 60),
+        new(count: 1, minValue: 60.1, maxValue: 70)
+    ];
+
+    private readonly List<HistogramDataLine> _dataLines =
+    [
+        new(label: "Target", value: 45)
+    ];
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/histogram/", "ArcGIS Maps SDK for JavaScript")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, shows the Histogram component from " +
+        "@arcgis/common-components through GeoBlazor Pro's HistogramWidget Razor component. The page places a " +
+        "HistogramWidget over a 2D MapView and feeds it fixed bins, a minimum and maximum, an average, a " +
+        "standard deviation, and one data line, so the bars and markers can be checked against known values.";
+}
