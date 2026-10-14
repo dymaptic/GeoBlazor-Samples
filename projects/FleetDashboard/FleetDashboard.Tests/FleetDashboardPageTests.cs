@@ -56,6 +56,8 @@ public sealed class FleetDashboardPageTests
 
         StringAssert.Contains(page.Markup, "Mode: baseline");
         StringAssert.Contains(page.Markup, "Load: stress");
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.WatchingLine());
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.DemonstrationCue());
     }
 
     [TestMethod]
@@ -124,6 +126,55 @@ public sealed class FleetDashboardPageTests
 
         StringAssert.Contains(page.Markup, "Load: normal");
         StringAssert.Contains(page.Markup, "Unknown preset 'turbo'");
+    }
+
+    [TestMethod]
+    public async Task TheModePickerExplainsTheSelectionBeforeApplyingIt()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        context.Services.AddSingleton<IFleetFrameSource>(new FakeSource());
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        var navigation = context.Services.GetRequiredService<NavigationManager>();
+        var page = context.Render<Home>();
+
+        CollectionAssert.AreEqual(new[]
+        {
+            "Finished dashboard · ready",
+            "Trace the data path · pipeline",
+            "Keep every report · baseline",
+            "Keep the newest per truck · latest",
+            "One call, all trucks · batched",
+            "Read every 250 ms · scheduled",
+            "Failure scenarios · resilient",
+            "Send only what is in view · viewport"
+        }, page.FindAll("#preview-mode option").Select(option => option.TextContent).ToArray());
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
+            "Normal load: one position per truck, one collection map edit every 250 ms.");
+
+        page.Find("#preview-mode").Change("baseline");
+
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
+            "Every report drawn one at a time. Under stress the queue grows to the 20,000 safety stop.");
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
+            "Open ?mode=baseline for stress load. Watch Pending climb past 500 until the red safety stop banner appears.");
+
+        foreach (DemoMode mode in Enum.GetValues<DemoMode>())
+        {
+            page.Find("#preview-mode").Change(mode.Label());
+
+            Assert.AreEqual(mode.Label(), page.Find("#preview-mode").GetAttribute("value"));
+            StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, mode.WatchingLine());
+            StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, mode.DemonstrationCue());
+        }
+
+        Assert.AreEqual("http://localhost/", navigation.Uri);
+        StringAssert.Contains(page.Markup, "Mode: ready");
+        Assert.AreEqual("normal", page.Find("#preview-load").GetAttribute("value"));
     }
 
     [TestMethod]

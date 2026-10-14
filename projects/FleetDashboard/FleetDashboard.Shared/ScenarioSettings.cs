@@ -40,6 +40,60 @@ public static class DemoModeParser
     }
 
     public static string Label(this DemoMode mode) => mode.ToString().ToLowerInvariant();
+
+
+    /// <summary>Presenter-facing name; Label remains the URL and measurement token.</summary>
+    public static string DisplayName(this DemoMode mode)
+    {
+        return mode switch
+        {
+            DemoMode.Ready => "Finished dashboard",
+            DemoMode.Pipeline => "Trace the data path",
+            DemoMode.Baseline => "Keep every report",
+            DemoMode.Latest => "Keep the newest per truck",
+            DemoMode.Batched => "One call, all trucks",
+            DemoMode.Scheduled => "Read every 250 ms",
+            DemoMode.Viewport => "Send only what is in view",
+            DemoMode.Resilient => "Failure scenarios",
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown demo mode.")
+        };
+    }
+
+
+    /// <summary>What the presenter is watching in this mode.</summary>
+    public static string WatchingLine(this DemoMode mode)
+    {
+        return mode switch
+        {
+            DemoMode.Ready => "Normal load: one position per truck, one collection map edit every 250 ms.",
+            DemoMode.Pipeline => "Every report queued in arrival order, then up to 250 edits per 100 ms tick, one per truck.",
+            DemoMode.Baseline => "Every report drawn one at a time. Under stress the queue grows to the 20,000 safety stop.",
+            DemoMode.Latest => "One waiting report per truck, newest wins. One edit per changed truck, about 59 a second.",
+            DemoMode.Batched => "Newest per truck, but every change rides in one map call per tick, about 7 calls a second.",
+            DemoMode.Scheduled => "The 250 ms design under stress: one map call per tick, about 3.7 calls a second.",
+            DemoMode.Viewport => "Trucks inside the map view arrive each frame; the rest arrive at most once a second.",
+            DemoMode.Resilient => "Silent trucks go stale after 5 seconds, and a broken connection can be reconnected.",
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown demo mode.")
+        };
+    }
+
+
+    /// <summary>A short demonstration to run with this mode.</summary>
+    public static string DemonstrationCue(this DemoMode mode)
+    {
+        return mode switch
+        {
+            DemoMode.Ready => "Open with no query string. Select Truck 007 and watch its marker step every 250 ms while Pending stays at 0.",
+            DemoMode.Pipeline => "Open ?mode=pipeline, then select Truck 007 and follow one report from Pending in the strip to its marker on the map.",
+            DemoMode.Baseline => "Open ?mode=baseline for stress load. Watch Pending climb past 500 until the red safety stop banner appears.",
+            DemoMode.Latest => "Open ?mode=latest&preset=stress. Watch Pending hold at or under 500, with map calls a second near 59.",
+            DemoMode.Batched => "Open ?mode=batched&preset=stress. Watch map calls a second drop from about 59 to about 7 with the same trucks moving.",
+            DemoMode.Scheduled => "Open ?mode=scheduled&preset=stress. Watch map calls a second fall to about 3.7 with the truck motion unchanged.",
+            DemoMode.Viewport => "Open ?mode=viewport&preset=stress, select Truck 007, then stop panning. Watch trucks per frame fall from 500 toward 191.",
+            DemoMode.Resilient => "Open ?mode=resilient. Pause truck 007: stale after 5 seconds. Break the connection and watch Reconnecting clear.",
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown demo mode.")
+        };
+    }
 }
 
 

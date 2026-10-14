@@ -95,6 +95,20 @@ dotnet test projects/FleetDashboard/FleetDashboard.Tests/FleetDashboard.Tests.cs
 
 ## Pipeline modes
 
+The Mode picker shows a display name followed by the URL token. Its guidance follows the selected
+mode before **Apply and reload**; selecting a mode alone does not change the running pipeline.
+
+| Display name | URL token (`mode`) | What you are watching | How to demonstrate it |
+|---|---|---|---|
+| Finished dashboard | `ready` | Normal load: one position per truck, one collection map edit every 250 ms. | Open with no query string. Select Truck 007 and watch its marker step every 250 ms while Pending stays at 0. |
+| Trace the data path | `pipeline` | Every report queued in arrival order, then up to 250 edits per 100 ms tick, one per truck. | Open ?mode=pipeline, then select Truck 007 and follow one report from Pending in the strip to its marker on the map. |
+| Keep every report | `baseline` | Every report drawn one at a time. Under stress the queue grows to the 20,000 safety stop. | Open ?mode=baseline for stress load. Watch Pending climb past 500 until the red safety stop banner appears. |
+| Keep the newest per truck | `latest` | One waiting report per truck, newest wins. One edit per changed truck, about 59 a second. | Open ?mode=latest&preset=stress. Watch Pending hold at or under 500, with map calls a second near 59. |
+| One call, all trucks | `batched` | Newest per truck, but every change rides in one map call per tick, about 7 calls a second. | Open ?mode=batched&preset=stress. Watch map calls a second drop from about 59 to about 7 with the same trucks moving. |
+| Read every 250 ms | `scheduled` | The 250 ms design under stress: one map call per tick, about 3.7 calls a second. | Open ?mode=scheduled&preset=stress. Watch map calls a second fall to about 3.7 with the truck motion unchanged. |
+| Send only what is in view | `viewport` | Trucks inside the map view arrive each frame; the rest arrive at most once a second. | Open ?mode=viewport&preset=stress, select Truck 007, then stop panning. Watch trucks per frame fall from 500 toward 191. |
+| Failure scenarios | `resilient` | Silent trucks go stale after 5 seconds, and a broken connection can be reconnected. | Open ?mode=resilient. Pause truck 007: stale after 5 seconds. Break the connection and watch Reconnecting clear. |
+
 The dashboard chooses one of eight pipeline modes from a `mode` query-string value and defaults to
 `ready`. `ready`, `scheduled`, `resilient`, and `viewport` capture a bounded latest report per vehicle
 and apply collection map edits at a 250 ms cadence. `latest` and `batched` use the same bounded state at
