@@ -369,3 +369,6 @@ MigrationBackup/
 /SimpleSearch/SimpleSearch/wwwroot/lib/
 /NationFinder2/NationFinder/Properties/ServiceDependencies
 *.db*
+
+# Agent memory stays on each developer's machine; it is not part of the samples.
+/.agent-memory/
