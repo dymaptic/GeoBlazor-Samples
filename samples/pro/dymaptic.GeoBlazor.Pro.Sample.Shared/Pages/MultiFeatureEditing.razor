@@ -1,0 +1,123 @@
+﻿@page "/multi-feature-editing"
+@inherits SamplePage
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Edit Several Features</PageTitle>
+<h1>Edit Several Features</h1>
+
+<p class="instructions">
+    Tick two or more survey sites, then choose "Edit selected sites". The Editor Widget opens one form that
+    applies each value you enter to every selected feature. Press Update to save the change to the layer.
+</p>
+<p class="instructions" style="color: var(--geoblazor-accent);">
+    This sample currently uses code from our <a target="_blank" href="https://www.geoblazor.com/#beta-popup">GeoBlazor Pro</a> extensions library.
+    <br/>
+    For more information about licensing these advanced features, contact <a href="mailto:info@dymaptic.com">info@dymaptic.com</a>.
+</p>
+<MapView @ref="_view"
+         Longitude="-118.25"
+         Latitude="34.05"
+         Zoom="9"
+         Class="map-view"
+         Style="min-height: 500px;"
+         OnViewRendered="OnViewRendered">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+    </Map>
+    <EditorWidget Position="OverlayPosition.TopRight" HideCreateFeaturesSection="true" />
+    <CustomOverlay Position="OverlayPosition.TopLeft">
+        <div class="esri-widget esri-widget--panel" style="padding: 8px 12px;">
+            @foreach (SurveySite site in _sites)
+            {
+                <label style="display: block;">
+                    <input type="checkbox"
+                           checked="@_selectedNames.Contains(site.Name)"
+                           @onchange="e => ToggleSite(site.Name, (bool)e.Value!)" />
+                    @site.Name
+                </label>
+            }
+            <button class="esri-button"
+                    disabled="@(_selectedNames.Count < 2)"
+                    @onclick="EditSelectedSites">
+                Edit selected sites (@_selectedNames.Count)
+            </button>
+        </div>
+    </CustomOverlay>
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/references/map-components/arcgis-editor/",
+            "ArcGIS Maps SDK for JavaScript")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor Pro sample, written in Blazor for .NET developers, shows multi-feature attribute editing " +
+        "with the EditorWidget, which renders the arcgis-editor web component from the ArcGIS Maps SDK for " +
+        "JavaScript. The map shows five in-memory survey sites on a light-gray basemap. A panel of checkboxes " +
+        "selects two or more of them, and its button starts the editor's update workflow on the selected sites. " +
+        "The editor then opens a single form whose values apply to every selected feature, and pressing Update " +
+        "commits the edit to the layer.";
+
+    private async Task OnViewRendered()
+    {
+        // The layer is built in code so its fields and in-memory features travel together. The sites are not
+        // stored anywhere, so the edit lives only until the page reloads.
+        await _view!.AddLayer(new FeatureLayer(source: _sites.Select(s => s.ToGraphic()).ToList(),
+            fields: CreateFields(), outFields: ["*"], objectIdField: "OBJECTID",
+            geometryType: FeatureGeometryType.Point, title: LayerTitle));
+    }
+
+    // EditorWidget.StartUpdateFeaturesWorkflow does not pass its argument to the editor yet (see
+    // docs/pro-editor-multi-feature-editing.md in dymaptic.GeoBlazor.CodeGen), so the page starts the workflow
+    // through the editor element's own method.
+    private async Task EditSelectedSites()
+    {
+        await JsRuntime.InvokeVoidAsync("startMultiFeatureEdit", LayerTitle, _selectedNames);
+    }
+
+    private void ToggleSite(string name, bool isSelected)
+    {
+        if (isSelected)
+        {
+            _selectedNames.Add(name);
+        }
+        else
+        {
+            _selectedNames.Remove(name);
+        }
+    }
+
+    private static List<Field> CreateFields()
+    {
+#pragma warning disable BL0005
+        return
+        [
+            new(name: "OBJECTID", alias: "OBJECTID", editable: false, nullable: false) { Type = FieldType.Oid },
+            new(name: "Name", alias: "Name", length: 50) { Type = FieldType.String },
+            new(name: "Status", alias: "Status", length: 50) { Type = FieldType.String }
+        ];
+#pragma warning restore BL0005
+    }
+
+    private const string LayerTitle = "Survey sites";
+    private MapView? _view;
+    private readonly HashSet<string> _selectedNames = [];
+
+    private readonly List<SurveySite> _sites = Enumerable.Range(1, 5)
+        .Select(i => new SurveySite(i, $"Site {i}", new Point(-118.45 + i * 0.1, 34.0 + (i % 2) * 0.1)))
+        .ToList();
+
+    private record SurveySite(int ObjectId, string Name, Point Location)
+    {
+        public Graphic ToGraphic()
+        {
+            return new Graphic(Location, attributes: new AttributesDictionary(
+                new Dictionary<string, object?> { ["OBJECTID"] = ObjectId, ["Name"] = Name, ["Status"] = "Pending" }));
+        }
+    }
+}
