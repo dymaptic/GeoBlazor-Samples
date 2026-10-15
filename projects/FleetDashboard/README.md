@@ -65,8 +65,8 @@ visibility in place and does not touch the vehicle layer, selection, or the upda
 `RefreshInterval` is in minutes (the ArcGIS JS unit). Radar and warnings are public and work without any
 key. They deliberately do not set `ExcludeApiKey`: in GeoBlazor Core 4.6.2 that flag clears the key for
 the whole page, which breaks the imagery basemap and the traffic layer. The ArcGIS SDK only attaches the
-key to Esri-hosted services, so the NOAA radar requests never carry it. Radar is empty where the US has
-no weather; zoom out to see it.
+key to Esri-hosted services, so the NOAA radar requests never carry it, though the NWS warnings layer
+(Esri-hosted) does carry it. Radar is empty where the US has no weather; zoom out to see it.
 
 The traffic toggle and the imagery hybrid basemap appear only when an ArcGIS API key is configured.
 GeoBlazor reads a top-level `ArcGISApiKey` setting, so add it next to `GeoBlazor` in the gitignored
