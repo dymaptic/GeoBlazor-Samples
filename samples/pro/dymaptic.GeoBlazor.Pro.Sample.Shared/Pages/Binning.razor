@@ -23,17 +23,17 @@
                       Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/NYC_motor_crashes/FeatureServer/0"
                       Title="Motor vehicle crashes (2020)"
                       DefinitionExpression="@($"CRASH_DATE > Date '12-31-{_year - 1}' AND CRASH_DATE < Date '01-01-{_year + 1}'")">
-            <PopupTemplate Title="Crash location">
-                <FieldInfo FieldName="CRASH_DATE" Label="Date">
-                    <FieldInfoFormat DateFormat="DateFormat.DayShortMonthYearLongTime" />
-                </FieldInfo>
-                <FieldInfo FieldName="NUMBER_OF_PERSONS_KILLED" Label="Fatalities" />
-                <FieldInfo FieldName="NUMBER_OF_PERSONS_INJURED" Label="Injuries" />
-            </PopupTemplate>
+            <PopupTemplate Title="@("Crash location")"
+                           FieldInfos="@([
+                               new FieldInfo("CRASH_DATE", "Date",
+                                   Format: new FieldInfoFormat(dateFormat: DateFormat.DayShortMonthYearLongTime)),
+                               new FieldInfo("NUMBER_OF_PERSONS_KILLED", "Fatalities"),
+                               new FieldInfo("NUMBER_OF_PERSONS_INJURED", "Injuries")
+                           ])" />
             <SimpleRenderer Label="Crash location">
                 <SimpleMarkerSymbol Style="SimpleMarkerSymbolStyle.Circle" 
                                     Size="5" Color="@(new MapColor(_colors[3]))">
-                    <Outline Style="SimpleLineSymbolStyle.Solid" Width="0.5" 
+                    <Outline Style="LineStyle.Solid" Width="0.5" 
                              Color="@(new MapColor(15, 15, 15, 0.3))" />
                 </SimpleMarkerSymbol>
             </SimpleRenderer>
@@ -47,7 +47,7 @@
                     </TextSymbol>
                     <LabelExpressionInfo Expression="Text($feature.aggregateCount, '#,###')" /> 
                 </LabelClass>
-                <PopupTemplate Title="Car crashes" StringContent="{aggregateCount} car crashes occurred in this area." />
+                <PopupTemplate Title="@("Car crashes")" StringContent="{aggregateCount} car crashes occurred in this area." />
                 <SimpleRenderer>
                     <SimpleFillSymbol Color="@(new MapColor(0, 255, 71, 1))">
                         <Outline Color="@(new MapColor(153, 31, 23, 0.3))" Width="0.3" />

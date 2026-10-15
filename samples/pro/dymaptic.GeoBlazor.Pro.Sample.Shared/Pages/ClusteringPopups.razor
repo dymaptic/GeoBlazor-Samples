@@ -14,7 +14,7 @@
 <MapView Class="map-view" @ref="_mapView"
          Center="@(new Point(80.20127, 22.12355))"
          Zoom="4"
-         OnViewLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerviewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisTopographic" />
@@ -23,11 +23,8 @@
                       Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Places_of_Worship_India/FeatureServer/0"
                       Title="Places of worship"
                       OutFields="@(new []{"name", "religion", "denomination"})">
-            <PopupTemplate Title="{name}">
-                <FieldsContent>
-                    <FieldInfo FieldName="religion" />
-                    <FieldInfo FieldName="denomination" />
-                </FieldsContent>
+            <PopupTemplate Title="@("{name}")">
+                <FieldsContent FieldInfos="@([new FieldInfo("religion"), new FieldInfo("denomination")])" />
             </PopupTemplate>
         </FeatureLayer>
     </Map>
@@ -79,30 +76,14 @@
     [Inject]
     public required LabelGenerator LabelGenerator { get; set; }
 
-    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _featureLayer?.Id)
         {
             _layerView = createEvent.LayerView as FeatureLayerView;
-            await _mapView!.AddReactiveWaiter("view.popup.viewModel", OverrideClusterSymbol,
-                "view", true);
 
             _cluster = await GenerateClusterConfig();
             await _featureLayer!.SetFeatureReduction(_cluster);
-        }
-    }
-
-    private async Task OverrideClusterSymbol()
-    {
-        // PopupViewModel inherits SelectedClusterBoundaryFeature from FeaturesViewModel.
-        PopupViewModel? viewModel = await _popupWidget!.GetViewModel();
-        Graphic? boundaryFeature = viewModel is null ? null : await viewModel.GetSelectedClusterBoundaryFeature();
-
-        if (boundaryFeature is not null)
-        {
-            await boundaryFeature.SetSymbol(new SimpleFillSymbol(
-                new Outline(new MapColor(50, 50, 50, 0.25), 0.5),
-                new MapColor(50, 50, 50, 0.15), SimpleFillSymbolStyle.Solid));
         }
     }
 
@@ -134,7 +115,7 @@
     {
         string? newValue = arg.Value?.ToString();
         string? whereClause = string.IsNullOrEmpty(newValue) ? null : $"religion = '{newValue}'";
-        await _layerView!.SetFilter(new FeatureFilter(where: whereClause));
+        await _layerView!.SetFilter(new LayerFeatureFilter(Where: whereClause));
 
         await _mapView!.ClosePopup();
     }

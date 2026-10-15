@@ -56,7 +56,7 @@ public partial class CustomPopupContents
         }
     }
 
-    private async Task<PopupTemplateContent> GenerateContent(PopupTemplateCreatorEvent? creatorEvent)
+    private async Task<dymaptic.GeoBlazor.Core.Interfaces.IPopupTemplateContentCreatorFunctionValue> GenerateContent(PopupTemplateCreatorEvent? creatorEvent)
     {
         try
         {
@@ -68,14 +68,14 @@ public partial class CustomPopupContents
 
             Query queryObject = new(Geometry: creatorEvent?.Graphic?.Geometry,
                 GroupByFieldsForStatistics: ["LEVEL_"],
-                OutFields: ["*"], SpatialRelationship: SpatialRelationship.Intersects,
+                OutFields: ["*"], SpatialRelationship: RestSpatialRelationship.Intersects,
                 OutStatistics: [levelCount, enrollmentAvg]);
 
             FeatureSet? result = await QueryService.ExecuteQueryJSON(_queryUrl, queryObject);
 
             if (result?.Features is null)
             {
-                return string.Empty;
+                return (PopupTemplateContentCreated)string.Empty;
             }
 
             List<AttributesDictionary> featureAttributes = result
@@ -109,7 +109,7 @@ public partial class CustomPopupContents
             Console.WriteLine(e);
         }
         
-        return $"""
+        return (PopupTemplateContentCreated)$"""
                 There is a total of <b>{_stats.ElementaryCount + _stats.SecondaryCount + _stats.TotalCount}</b> 
                 private schools that reside within the state. Out of this total amount of private schools: 
                 <ul><li><b>{_stats.ElementaryCount}</b> were classified as elementary, with an average enrollment of 
@@ -129,12 +129,12 @@ public partial class CustomPopupContents
         {
             // we have to reload the graphic to ensure that the popup has refreshed and can be reused
             // if you check the ArcGIS JS sample, you can see that it won't work after the first search
-            HitTestResult? hitTestResult = await _mapView!.HitTest(((Polygon)resultGraphic.Geometry!).Centroid!);
+            ViewHitTestResult? hitTestResult = await _mapView!.HitTest(((Polygon)resultGraphic.Geometry!).Extent!.Center!);
 
-            await _popupWidget!.Open(new PopupOpenOptions(Features: hitTestResult?.Results
+            await _mapView!.OpenPopup(new ViewPopupOpenOptions(Features: hitTestResult?.Results
                 .Where(r => r is GraphicHit)
                 .Select(g => ((GraphicHit)g).Graphic)
-                .ToArray(), ShouldFocus: true));
+                .ToArray()));
         }
 
     }

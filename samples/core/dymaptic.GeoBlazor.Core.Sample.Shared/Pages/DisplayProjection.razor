@@ -20,7 +20,7 @@
     <SpatialReference Wkid="4326" />
     <Graphic>
         <SimpleFillSymbol Color="@(new MapColor("transparent"))">
-            <Outline Width="0.5" Color="@(new MapColor(50, 50, 50, 0.75))" Style="SimpleLineSymbolStyle.Dash" />
+            <Outline Width="0.5" Color="@(new MapColor(50, 50, 50, 0.75))" Style="LineStyle.Dash" />
         </SimpleFillSymbol>
         <Extent Xmin="-180" Xmax="180" Ymin="-90" Ymax="90">
             <SpatialReference Wkid="4326" />
@@ -128,7 +128,7 @@
     private async Task DisplayCoordinates(Point? center)
     {
         var popupOptions = new PopupOptions(new PopupDockOptions(
-                PopupDockPosition.BottomLeft, true),
+                dymaptic.GeoBlazor.Core.Enums.PopupDockPosition.BottomLeft, true),
             new PopupVisibleElements(false, false));
 
         PopupTemplate popupTemplate = new PopupTemplate($"WKID: {center!.SpatialReference!.Wkid}",
@@ -138,7 +138,7 @@
 
         _coordinatesSet = true;
 
-        PopupOpenOptions options =
+        ViewPopupOpenOptions options =
             new(Features: [graphic]);
         await InvokeAsync(async () => await View!.OpenPopup(options));
     }

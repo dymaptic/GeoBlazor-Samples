@@ -49,7 +49,7 @@
             <div>
                 <b>Spatial relationships</b>
             </div>
-            @foreach (KeyValuePair<SpatialRelationship, bool> kvp in _relationshipResults)
+            @foreach (KeyValuePair<string, bool> kvp in _relationshipResults)
              {
                  if (kvp.Value)
                  {
@@ -83,7 +83,7 @@
         "basemap centered on the Santa Monica Mountains, prepopulated with a polyline and a polygon graphic that " +
         "the user can drag, reshape, or replace. A SketchWidget in the upper-right corner provides update and create " +
         "tools (polyline, polygon, rectangle, circle) with snapping enabled. A Spatial relationships overlay docked " +
-        "in the lower-right lists every relationship from the SpatialRelationship enum (Contains, Crosses, Disjoint, " +
+        "in the lower-right lists every spatial relationship (Contains, Crosses, Disjoint, " +
         "EqualTo, Intersects, Overlaps, Touches, Within), each updating to true or false in real time as the user " +
         "edits geometry, with currently true relationships rendered in bold. The sample is intended to demonstrate " +
         "how GeometryEngine evaluates each topological predicate between two geometries.";
@@ -100,9 +100,9 @@
         }
     }
 
-    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
+    private async Task OnSketchCreate(CreateEvent sketchEvent)
     {
-        if (sketchEvent.State == SketchEventState.Start)
+        if (sketchEvent.State == SketchCreateEventState.Start)
         {
             Graphic first = _currentGraphics[0];
             await _graphicsLayer!.Remove(first);
@@ -110,7 +110,12 @@
             return;
         }
 
-        if (sketchEvent.State != SketchEventState.Complete)
+        if (sketchEvent.State != SketchCreateEventState.Complete)
+        {
+            return;
+        }
+
+        if (sketchEvent.Graphic is null)
         {
             return;
         }
@@ -119,7 +124,7 @@
         await RecalculateRelationships();
     }
 
-    private Task OnSketchUpdate(SketchUpdateEvent sketchEvent)
+    private Task OnSketchUpdate(UpdateEvent sketchEvent)
     {
         // Recalculate on every update state so the results track the drag.
         return RecalculateRelationships();
@@ -151,21 +156,21 @@
 
     private async Task UpdateRelationshipResults(Geometry geometry1, Geometry geometry2, CancellationToken token)
     {
-        _relationshipResults[SpatialRelationship.Contains] = await GeometryEngine.Contains(geometry1, geometry2);
+        _relationshipResults["Contains"] = await GeometryEngine.Contains(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.Crosses] = await GeometryEngine.Crosses(geometry1, geometry2);
+        _relationshipResults["Crosses"] = await GeometryEngine.Crosses(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.Disjoint] = await GeometryEngine.Disjoint(geometry1, geometry2);
+        _relationshipResults["Disjoint"] = await GeometryEngine.Disjoint(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.EqualTo] = await GeometryEngine.AreEqual(geometry1, geometry2);
+        _relationshipResults["EqualTo"] = await GeometryEngine.AreEqual(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.Intersects] = await GeometryEngine.Intersects(geometry1, geometry2);
+        _relationshipResults["Intersects"] = await GeometryEngine.Intersects(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.Overlaps] = await GeometryEngine.Overlaps(geometry1, geometry2);
+        _relationshipResults["Overlaps"] = await GeometryEngine.Overlaps(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.Touches] = await GeometryEngine.Touches(geometry1, geometry2);
+        _relationshipResults["Touches"] = await GeometryEngine.Touches(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
-        _relationshipResults[SpatialRelationship.Within] = await GeometryEngine.Within(geometry1, geometry2);
+        _relationshipResults["Within"] = await GeometryEngine.Within(geometry1, geometry2);
         if (token.IsCancellationRequested) return;
         StateHasChanged();
     }
@@ -201,7 +206,9 @@
         new(-13228098.704542402, 4035365.9427463487)
     ];
 
-    private readonly Dictionary<SpatialRelationship, bool> _relationshipResults =
-        Enum.GetNames(typeof(SpatialRelationship))
-            .ToDictionary(k => (SpatialRelationship)Enum.Parse(typeof(SpatialRelationship), k), _ => false);
+    // Keyed by relationship name: the SpatialRelationship enum no longer lists the full set, and EqualTo is not
+    // a member of any spatial relationship enum.
+    private readonly Dictionary<string, bool> _relationshipResults =
+        new[] { "Contains", "Crosses", "Disjoint", "EqualTo", "Intersects", "Overlaps", "Touches", "Within" }
+            .ToDictionary(k => k, _ => false);
 }

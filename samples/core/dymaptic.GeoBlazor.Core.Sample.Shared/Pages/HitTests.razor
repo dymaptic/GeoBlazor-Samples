@@ -8,9 +8,9 @@
     Hover over or click on a line on the map, and the "Hit Test" will return the hurricane name, category, and wind speed (knots).
 </p>
 
-<MapView @ref="_mapView" OnPointerMove="@(e => OnPointerMoveOrDown(e.X, e.Y))"
-         OnPointerDown="@(e => OnPointerMoveOrDown(e.X, e.Y))"
-         OnViewLayerViewCreate="OnLayerViewCreate"
+<MapView @ref="_mapView" OnViewPointerMove="@(e => OnPointerMoveOrDown(e.X, e.Y))"
+         OnViewPointerDown="@(e => OnPointerMoveOrDown(e.X, e.Y))"
+         OnViewLayerviewCreate="OnLayerViewCreate"
          Class="map-view"
          Longitude="-61.125537"
          Latitude="35.863534"
@@ -65,7 +65,7 @@
         "with EventRateLimitInMilliseconds. The sample is intended to demonstrate hit testing and feature " +
         "highlighting in a Blazor application without writing JavaScript.";
 
-    private void OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (_hurricaneLayer!.Id == createEvent.Layer!.Id)
         {
@@ -84,7 +84,7 @@
                 {
                     IncludeByGeoBlazorId = [_hurricaneLayer!.Id]
                 };
-            HitTestResult? result = await _mapView!.HitTest(new ScreenPoint(x, y), options);
+            ViewHitTestResult? result = await _mapView!.HitTest(new ScreenPoint(x, y), options);
             Graphic? graphic = result?.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
             if (graphic?.Attributes != null)
             {
@@ -103,26 +103,30 @@
 
                 Console.WriteLine($"Attributes: NAME={newName}, YEAR={newYear}, CAT={_category}, WIND_KTS={_wind}");
 
-                if (_highlightHandle is not null && ((_name != newName) || (_year != newYear)))
+                if (_highlighted && ((_name != newName) || (_year != newYear)))
                 {
-                    await _highlightHandle.Remove();
-                    _highlightHandle = null;
+                    await _layerView!.SetFeatureEffect(null);
+                    _highlighted = false;
                 }
 
-                if (_highlightHandle is null)
+                if (!_highlighted)
                 {
-                    Query layerQuery = (await _layerView!.CreateQuery())!;
-                    layerQuery.Where = $"YEAR = {newYear} AND NAME = '{newName}'";
-                    ObjectId[] ids = await _layerView.QueryObjectIds(layerQuery) ?? [];
-                    _highlightHandle = await _layerView!.Highlight(ids);
+                    // FeatureLayerView no longer exposes CreateQuery, QueryObjectIds, or Highlight, so the layer
+                    // runs the query and a feature effect marks the matching features instead
+                    Query layerQuery = new() { Where = $"YEAR = {newYear} AND NAME = '{newName}'" };
+                    ObjectId[] ids = await _hurricaneLayer!.QueryObjectIds(layerQuery) ?? [];
+                    await _layerView!.SetFeatureEffect(new FeatureEffect(
+                        filter: new LayerFeatureFilter(ObjectIds: ids),
+                        includedEffect: "bloom(2, 1px, 0.1)"));
+                    _highlighted = true;
                     _year = newYear;
                     _name = newName;
                 }
             }
-            else if (_highlightHandle is not null)
+            else if (_highlighted)
             {
-                await _highlightHandle.Remove();
-                _highlightHandle = null;
+                await _layerView!.SetFeatureEffect(null);
+                _highlighted = false;
             }
         }
         catch (Exception ex)
@@ -142,6 +146,6 @@
     private string? _wind;
     private string? _year;
     private FeatureLayerView? _layerView;
-    private Handle? _highlightHandle;
+    private bool _highlighted;
     private bool _evaluatingPointer;
 }

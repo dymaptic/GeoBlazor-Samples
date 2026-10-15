@@ -63,7 +63,7 @@
 
     private async Task OnSearchSelectResult(SearchSelectResultEvent selectResultEvent)
     {
-        SearchSelectResultEventResult selectResult = selectResultEvent.Result!;
+        SearchResult selectResult = selectResultEvent.Result;
         await GetDemographicData(selectResult.Name!, (Point)selectResult.Feature!.Geometry!);
     }
 
@@ -107,7 +107,7 @@
         Console.WriteLine($"Average household size: {avgHouseholdSize}");
         string popupContent = $"Population: {totalPop}<br>Males: {totalMales}<br>Females: {totalFemales}<br>Average Household Size: {avgHouseholdSize}";
 
-        await View!.OpenPopup(new PopupOpenOptions
+        await View!.OpenPopup(new ViewPopupOpenOptions
         {
             Title = popupTitle,
             Content = popupContent,

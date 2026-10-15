@@ -12,7 +12,7 @@
          Class="map-view"
          Longitude="-97.75188" Latitude="37.23308"
          Zoom="3"
-         OnViewLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerviewCreate="OnLayerViewCreate"
          Style="padding-right: 380px">
     <Map>
         <Basemap>
@@ -25,25 +25,17 @@
                                      Height="12"
                                      Width="12" />
             </SimpleRenderer>
-            <PopupTemplate Title="{Park}">
-                <FieldsContent>
-                    <FieldInfo FieldName="TOTAL"
-                               Label="Total visits">
-                        <FieldInfoFormat Places="0" DigitSeparator="true" />
-                    </FieldInfo>
-                    <FieldInfo FieldName="F2018"
-                               Label="2018">
-                        <FieldInfoFormat Places="0" DigitSeparator="true" />
-                    </FieldInfo>
-                    <FieldInfo FieldName="F2019"
-                               Label="2019">
-                        <FieldInfoFormat Places="0" DigitSeparator="true" />
-                    </FieldInfo>
-                    <FieldInfo FieldName="F2020"
-                               Label="2020">
-                        <FieldInfoFormat Places="0" DigitSeparator="true" />
-                    </FieldInfo>
-                </FieldsContent>
+            <PopupTemplate Title="@("{Park}")">
+                <FieldsContent FieldInfos="@([
+                                   new FieldInfo("TOTAL", "Total visits",
+                                       Format: new FieldInfoFormat(places: 0, digitSeparator: true)),
+                                   new FieldInfo("F2018", "2018",
+                                       Format: new FieldInfoFormat(places: 0, digitSeparator: true)),
+                                   new FieldInfo("F2019", "2019",
+                                       Format: new FieldInfoFormat(places: 0, digitSeparator: true)),
+                                   new FieldInfo("F2020", "2020",
+                                       Format: new FieldInfoFormat(places: 0, digitSeparator: true))
+                               ])" />
             </PopupTemplate>
         </FeatureLayer>
     </Map>
@@ -171,7 +163,7 @@
         "The sample is intended to demonstrate group-wise top-N feature queries in a Blazor application " +
         "without writing JavaScript.";
 
-    private void OnLayerViewCreate(ViewLayerViewCreateEvent evt)
+    private void OnLayerViewCreate(LayerViewCreateEvent evt)
     {
         if (evt.Layer!.Id == _featureLayer?.Id)
         {
@@ -199,13 +191,13 @@
 
         query.OrderByFields = [""];
         ObjectId[] objectIds = (await _featureLayer!.QueryTopObjectIds(query))!;
-        await _layerView!.SetFilter(new FeatureFilter(objectIds: objectIds));
+        await _layerView!.SetFilter(new LayerFeatureFilter(ObjectIds: objectIds));
     }
 
     private async Task OnParkResultClicked(int index)
     {
         Graphic feature = _results!.Features![index];
-        PopupOpenOptions options = 
+        ViewPopupOpenOptions options = 
             new(Features: [feature], Location: await feature.GetGeometry() as Point);
         await _mapView!.ClosePopup();
         await _mapView!.OpenPopup(options);

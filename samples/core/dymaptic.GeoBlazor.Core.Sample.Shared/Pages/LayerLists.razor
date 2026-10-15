@@ -72,11 +72,11 @@
         }
     }
 
-    private async Task OnListItemCreated(ListItemCreatedHandlerEvent evt)
+    private async Task OnListItemCreated(ListItemModifierEvent evt)
     {
-        ListItem item = evt.Item;
+        LayerListListItem item = evt.Item;
         await item.SetVisibility(true);
-        await item.SetPanel(new ListItemPanelWidget(showLegendContent: true));
+        await item.SetPanel(new LayerListListItemPanel(content: [LayerListListItemPanelContentValue.Legend]));
         if (item.Title?.StartsWith("Transit") ?? false)
         {
             await item.SetTitle($"Mass {item.Title}");

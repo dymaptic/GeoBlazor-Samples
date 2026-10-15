@@ -69,18 +69,15 @@
         {
             <FeatureLayer Title="Trails"
                           Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails/FeatureServer/0">
-                <UniqueValueRenderer Field="USE_BIKE">
-                    <UniqueValueInfo Value="Yes" Label="Bike Allowed">
-                        <SimpleLineSymbol Color="@(new MapColor("#27ae60"))"
-                                          Style="SimpleLineSymbolStyle.Solid"
-                                          Width="2.5" />
-                    </UniqueValueInfo>
-                    <UniqueValueInfo Value="No" Label="No Bikes">
-                        <SimpleLineSymbol Color="@(new MapColor("#e74c3c"))"
-                                          Style="SimpleLineSymbolStyle.Dash"
-                                          Width="1.5" />
-                    </UniqueValueInfo>
-                </UniqueValueRenderer>
+                <UniqueValueRenderer Field="USE_BIKE"
+                                     UniqueValueInfos="@([
+                                         new UniqueValueInfo("Bike Allowed",
+                                             new SimpleLineSymbol(new MapColor("#27ae60"),
+                                                 width: 2.5, style: LineStyle.Solid), "Yes"),
+                                         new UniqueValueInfo("No Bikes",
+                                             new SimpleLineSymbol(new MapColor("#e74c3c"),
+                                                 width: 1.5, style: LineStyle.Dash), "No")
+                                     ])" />
             </FeatureLayer>
         }
 

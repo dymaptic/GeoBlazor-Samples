@@ -13,8 +13,8 @@
         </Basemap>
         <FeatureLayer Title="OSM Highways of North America"
                       MinScale="0" MaxScale="0"
-                      Renderer="_uniqueValueRenderer">
-            <OrderByInfo Order="SortOrder.Descending" Field="maxspeed"/>
+                      Renderer="_uniqueValueRenderer"
+                      OrderBy="@([new OrderByInfo("maxspeed", SortOrder.Descending)])">
             <PortalItem PortalItemId="7afec250e02845868db89c83949a672f"/>
         </FeatureLayer>
     </Map>

@@ -9,7 +9,7 @@
     This follows the ESRI sample, but the Timeline Widget is included with GeoBlazor pro.
 </p>
 <MapView Class="map-view" 
-         OnViewLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerviewCreate="OnLayerViewCreate"
          OnViewRendered="OnViewRendered">
     <WebMap>
         <PortalItem PortalItemId="70b726074af04a7e9839d8a07f64c039" />
@@ -55,7 +55,7 @@
         "demonstrate reactive collection binding and feature effect filtering in a Blazor application without " +
         "writing JavaScript.";
 
-    private void OnLayerViewCreate(ViewLayerViewCreateEvent evt)
+    private void OnLayerViewCreate(LayerViewCreateEvent evt)
     {
         if (evt.Layer is not FeatureLayer) return;
         _layerView = evt.LayerView as FeatureLayerView;
@@ -87,7 +87,7 @@
         var hurricaneName = eventArgs.Bookmark.Name;
 
         var featureEffect = new FeatureEffect("grayscale(100%) opacity(30%)",
-            null, new FeatureFilter(where: $"Name = '{hurricaneName!.ToUpper()}'"));
+            null, new LayerFeatureFilter(Where: $"Name = '{hurricaneName!.ToUpper()}'"));
         _ = _layerView.SetFeatureEffect(featureEffect);
     }
     

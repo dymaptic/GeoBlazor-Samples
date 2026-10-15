@@ -33,7 +33,7 @@
 </div>
 
 <SceneView @ref="_view" Class="map-view"
-           OnViewLayerViewCreate="OnLayerViewCreate">
+           OnViewLayerviewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisDarkGray"/>
@@ -70,7 +70,7 @@
                                 <SimpleRenderer>
                                     <SimpleLineSymbol Color="@(new MapColor(255, 255, 255, 0.5))"
                                                       Width="@(new Dimension(0.75))"
-                                                      Style="@SimpleLineSymbolStyle.LongDashDotDot"/>
+                                                      Style="@LineStyle.LongDashDotDot"/>
                                 </SimpleRenderer>
                                 <DynamicDataLayer>
                                     <TableDataSource WorkspaceId="MyDatabaseWorkspaceIDSSR2"
@@ -115,7 +115,7 @@
                                       Visible="true"
                                       Opacity="0.8">
                                 <SimpleRenderer Label="Interstate highway">
-                                    <SimpleLineSymbol Style="SimpleLineSymbolStyle.None"
+                                    <SimpleLineSymbol Style="LineStyle.None"
                                                       Width="@(0.7)"
                                                       Color="@(new MapColor("white"))"/>
                                 </SimpleRenderer>
@@ -296,7 +296,7 @@
         "the labels demo. The sample is intended to demonstrate MapImageLayer sublayer toggling, custom " +
         "rendering, and dynamic filtering in a Blazor application without writing JavaScript.";
 
-    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is MapImageLayer imageLayer)
         {

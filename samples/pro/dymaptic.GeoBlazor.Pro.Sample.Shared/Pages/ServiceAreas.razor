@@ -54,7 +54,7 @@
 
             // a separate Graphic is used for the facility because ArcGIS mutates the geometry of each
             // facility feature in place while normalizing it, which would corrupt the displayed marker
-            FeatureSet facilities = new(Features: [new Graphic(clickEvent.MapPoint)]);
+            FacilityFeatureSet facilities = new([new Graphic(clickEvent.MapPoint)]);
 
             ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl,
                 facilities: facilities,
@@ -82,6 +82,10 @@
     private readonly Graphic _areaGraphic = new(symbol: new SimpleMarkerSymbol(color: new MapColor("white"), size: 8));
     private readonly SimpleFillSymbol _areaFillSymbol = new(color: new MapColor(81, 46, 132, 0.25));
     // ArcGIS appends "/solveServiceArea" itself, so this must stop at the network analysis layer
+    // ServiceAreaService.Solve types its facilities as IClosestFacilityParametersFacility, which no Core type
+    // implements, so this record carries the facility graphics in the FeatureSet JSON shape ({ features: [...] }).
+    private sealed record FacilityFeatureSet(IReadOnlyList<Graphic> Features) : IClosestFacilityParametersFacility;
+
     private readonly string _serviceAreaUrl =
         "https://route-api.arcgis.com/arcgis/rest/services/World/ServiceAreas/NAServer/ServiceArea_World";
 }

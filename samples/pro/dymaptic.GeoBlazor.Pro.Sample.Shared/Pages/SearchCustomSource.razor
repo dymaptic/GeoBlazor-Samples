@@ -53,8 +53,8 @@
         _center = _view!.Center ?? _center;
     }
 
-    private async Task<SearchSuggestResult[]> GetSuggestions(string suggestTerm, double? maxSuggestions,
-        int? sourceIndex, SpatialReference? spatialReference)
+    private async Task<SuggestResult[]> GetSuggestions(string suggestTerm, double? maxSuggestions,
+        AbortOptions? options)
     {
         // You can request data from a
         // third-party source to find some
@@ -73,13 +73,13 @@
         });
       
         return response.Data?.Features
-            .Select(feature => new SearchSuggestResult(Key: "name", SourceIndex: sourceIndex,
+            .Select(feature => new SuggestResult(Key: "name",
                 Text: feature.Properties["label"].ToString()!))
             .ToArray() ?? [];
     }
 
     private async Task<SearchResult[]> GetResults(bool? exactMatch, Point? location, double? maxResults,
-        int? sourceIndex, SpatialReference? spatialReference, SearchSuggestResult suggestResult)
+        SuggestResult suggestResult, AbortOptions? options)
     {
         // If the Search widget passes the current location,
         // you can use this in your own custom source

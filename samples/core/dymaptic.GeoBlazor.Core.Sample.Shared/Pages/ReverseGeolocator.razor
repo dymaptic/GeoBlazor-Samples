@@ -65,7 +65,7 @@
         _longitude = mapPoint.Longitude!.Value;
         _address = (await LocationService.LocationToAddress(_serviceUrl, mapPoint)).Address ?? string.Empty;
         StateHasChanged();
-        await View!.OpenPopup(new PopupOpenOptions
+        await View!.OpenPopup(new ViewPopupOpenOptions
         {
             Title = $"{_longitude}, {_latitude}",
             Content = _address,

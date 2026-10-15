@@ -31,9 +31,8 @@
         <FeatureLayer @ref="_featureLayer"
                       OutFields="@(new []{"*"})"
                       Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/El_Paso_Recreation_AttributeEditsOnly/FeatureServer/1">
-            <PopupTemplate Title="Trail name: {trailName}" OnContentFunction="DifficultyLevel">
-                <FieldInfo FieldName="trailName" />
-                <FieldInfo FieldName="difficulty" />
+            <PopupTemplate Title="@("Trail name: {trailName}")" OnContentFunction="DifficultyLevel"
+                           FieldInfos="@([new FieldInfo("trailName"), new FieldInfo("difficulty")])">
                 <ActionButton Title="Edit feature" ActionId="edit-this" ClassName="esri-icon-edit" />
             </PopupTemplate>
         </FeatureLayer>
@@ -105,7 +104,7 @@
         return Task.FromResult<IReadOnlyList<IContent>>(new IContent[] { textElement, attachmentsElement });
     }
     
-    private async Task OnPopupTriggerAction(PopupTriggerActionEvent triggerEvent)
+    private async Task OnPopupTriggerAction(ActionEvent triggerEvent)
     {
         if (triggerEvent.Action.ActionId == "edit-this")
         {
@@ -144,10 +143,9 @@
     private FeatureLayer? _featureLayer;
     private EditorWidget? _editor;
     private bool _firstRender = true;
-    private readonly PopupOpenOptions _popupOpenOptions = new()
+    private readonly ViewPopupOpenOptions _popupOpenOptions = new()
     {
-        FetchFeatures = true,
-        ShouldFocus = true
+        FetchFeatures = true
     };
     // lang=html
     private readonly string _expandContent = 

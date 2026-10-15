@@ -103,9 +103,10 @@
 
     private async Task ClearMap()
     {
-        if (_highlight is not null)
+        if (_highlighted)
         {
-            await _highlight.Remove();
+            await ((FeatureLayerView)_featureLayer!.LayerView!).SetFeatureEffect(null);
+            _highlighted = false;
         }
 
         _relatedFeatures = null;
@@ -117,7 +118,7 @@
         {
             Geometry = point,
             OutFields = ["*"],
-            SpatialRelationship = SpatialRelationship.Intersects,
+            SpatialRelationship = RestSpatialRelationship.Intersects,
             ReturnGeometry = false
         };
 
@@ -129,17 +130,16 @@
 
         var layerView = (FeatureLayerView)_featureLayer!.LayerView!;
 
-        if (_highlight is not null)
-        {
-            await _highlight.Remove();
-        }
-
-        _highlight = await layerView.Highlight(objectIds.Select(i => i.StringVal).ToList());
+        // FeatureLayerView no longer exposes Highlight, so a feature effect marks the selected features instead
+        await layerView.SetFeatureEffect(new FeatureEffect(
+            filter: new LayerFeatureFilter(ObjectIds: objectIds),
+            includedEffect: "bloom(2, 1px, 0.1)"));
+        _highlighted = true;
 
         var relationshipQuery = new RelationshipQuery
         {
             OutFields = ["NAME", "SUM_POPULATION"],
-            RelationshipId = _featureLayer.Relationships?.FirstOrDefault()?.RelationshipId,
+            RelationshipId = _featureLayer.Relationships?.FirstOrDefault()?.LayerRelationshipId,
             ObjectIds = objectIds
         };
 
@@ -147,6 +147,6 @@
     }
 
     private FeatureLayer? _featureLayer;
-    private Handle? _highlight;
-    RelatedFeaturesQueryResult? _relatedFeatures;
+    private bool _highlighted;
+    Dictionary<string, FeatureSet>? _relatedFeatures;
 }

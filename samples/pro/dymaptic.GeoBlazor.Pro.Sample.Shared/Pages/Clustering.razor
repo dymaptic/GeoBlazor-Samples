@@ -22,12 +22,12 @@
                       Title="Earthquakes from the last month"
                       Url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
                       Copyright="USGS Earthquakes">
-            <PopupTemplate Title="Magnitude {mag} {type}"
-                           StringContent="Magnitude {mag} {type} hit {place} on {time}">
-                <FieldInfo FieldName="time">
-                    <FieldInfoFormat DateFormat="DateFormat.ShortDateShortTime"/>
-                </FieldInfo>
-            </PopupTemplate>
+            <PopupTemplate Title="@("Magnitude {mag} {type}")"
+                           StringContent="Magnitude {mag} {type} hit {place} on {time}"
+                           FieldInfos="@([
+                               new FieldInfo("time",
+                                   Format: new FieldInfoFormat(dateFormat: DateFormat.ShortDateShortTime))
+                           ])" />
             <SimpleRenderer>
                 <SimpleMarkerSymbol Size="8" Color="@(new MapColor("#69dcff"))"
                                     Style="SimpleMarkerSymbolStyle.Triangle">
@@ -38,12 +38,12 @@
                                      ClusterRadius="@("100px")"
                                      ClusterMinSize="@("24px")"
                                      ClusterMaxSize="@("60px")">
-                <PopupTemplate Title="Cluster summary"
-                               StringContent="This cluster represents {cluster_count} earthquakes.">
-                    <FieldInfo FieldName="cluster_count">
-                        <FieldInfoFormat Places="0" DigitSeparator="true"/>
-                    </FieldInfo>
-                </PopupTemplate>
+                <PopupTemplate Title="@("Cluster summary")"
+                               StringContent="This cluster represents {cluster_count} earthquakes."
+                               FieldInfos="@([
+                                   new FieldInfo("cluster_count",
+                                       Format: new FieldInfoFormat(places: 0, digitSeparator: true))
+                               ])" />
                 <SimpleMarkerSymbol Style="SimpleMarkerSymbolStyle.Circle"
                                     Color="@(new MapColor("#69dcff"))">
                     <Outline Color="@(new MapColor(0, 139, 174, 0.5))" Width="6"/>

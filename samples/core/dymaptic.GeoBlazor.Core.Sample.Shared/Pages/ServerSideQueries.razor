@@ -9,7 +9,7 @@
 
 <MapView @ref="_mapView"
          OnClick="OnClick"
-         OnViewLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerviewCreate="OnLayerViewCreate"
          Class="map-view">
     <Map>
         <Basemap>
@@ -27,8 +27,8 @@
     </Extent>
     <PopupWidget @ref="_popup" DockEnabled="true">
         <PopupDockOptions ButtonEnabled="false"
-                          BreakPoint="@(new Breakpoint(false))"
-                          Position="PopupDockPosition.BottomRight" />
+                          BreakPoint="@(new Breakpoint { BoolValue = false })"
+                          Position="dymaptic.GeoBlazor.Core.Enums.PopupDockPosition.BottomRight" />
     </PopupWidget>
     <LegendWidget Position="OverlayPosition.BottomLeft">
         <LegendLayerInfos LayerId="@(_featureLayer?.Id)" />
@@ -72,7 +72,7 @@
     [Inject]
     public required IJSRuntime JsRuntime { get; set; }
 
-    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _featureLayer?.Id)
         {
@@ -86,7 +86,7 @@
         query.Geometry = clickEvent.MapPoint;
         query.Distance = Distance;
         query.Units = Unit;
-        query.SpatialRelationship = SpatialRelationship.Intersects;
+        query.SpatialRelationship = RestSpatialRelationship.Intersects;
         query.ReturnGeometry = true;
         query.ReturnQueryGeometry = true;
         query.OutFields = ["*"];
@@ -97,7 +97,7 @@
 
         if (_queryType == "distance")
         {
-            Graphic buffer = new(result.QueryGeometry, _bufferSymbol);
+            Graphic buffer = new(result.QueryGeometry as Geometry, _bufferSymbol);
             await _mapView.AddGraphics([pointGraphic, buffer]);
         }
         else

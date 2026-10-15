@@ -22,7 +22,7 @@
          Class="map-view"
          BackgroundColor="@(new MapColor("white"))"
          OnViewRendered="OnViewRendered"
-         OnViewLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerviewCreate="OnLayerViewCreate">
     <SpatialReference Wkid="102003" />
     <MapViewConstraints SnapToZoom="false" MinScale="50465153" />
     <Map>
@@ -63,8 +63,8 @@
                             style="height: 400px;"
                             ContainerId="feature-table-container"
                             OnCellClick="OnCellClick"
-                            OnCellPointerOver="OnCellPointerOver"
-                            OnCellPointerOut="OnCellPointerOut"
+                            OnCellPointerover="OnCellPointerOver"
+                            OnCellPointerout="OnCellPointerOut"
                             FilterBySelectionEnabled="false"
                             Layer="@_npsLayer" />
     }
@@ -108,7 +108,7 @@
         }
     }
 
-    private void OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.LayerView is FeatureLayerView flv && createEvent.Layer?.Id == _npsLayer?.Id)
         {
@@ -116,9 +116,9 @@
         }
     }
 
-    private async Task OnCellClick()
+    private async Task OnCellClick(TableInteractionCellClickEvent clickEvent)
     {
-        IReadOnlyList<IFeatureTableActiveFilter>? activeFilters = await _featureTable!.GetActiveFilters();
+        IReadOnlyList<IFeatureTableSupportedFilters>? activeFilters = await _featureTable!.GetActiveFilters();
         
         if (activeFilters is null || activeFilters.Count == 0)
         {
@@ -137,7 +137,7 @@
                 
                 // Apply feature effect to blur non-selected features
                 var featureEffect = new FeatureEffect(
-                    filter: new FeatureFilter(objectIds: _selectedObjectIds.ToArray()),
+                    filter: new LayerFeatureFilter(ObjectIds: _selectedObjectIds.ToArray()),
                     excludedEffect: "blur(5px) grayscale(90%) opacity(40%)");
 
                 await _layerView!.SetFeatureEffect(featureEffect);
@@ -145,9 +145,9 @@
         }
     }
 
-    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
+    private async Task OnSketchCreate(CreateEvent sketchEvent)
     {
-        if (sketchEvent.State == SketchEventState.Complete
+        if (sketchEvent.State == SketchCreateEventState.Complete
             && _polygonGraphicsLayer is not null)
         {
             // Get all drawn rectangle geometries and union them
@@ -212,12 +212,11 @@
             // Update the feature table highlight and filter
             await _featureTable!.SetHighlightIds([]);
             await _featureTable.SetFilterGeometry(geometry);
-            string[] highlightIds = _selectedObjectIds.Select(id => id.ToString()).ToArray();
-            await _featureTable.SetHighlightIds(highlightIds);
+            await _featureTable.SetHighlightIds(_selectedObjectIds);
 
             // Apply feature effect to blur non-selected features
             var featureEffect = new FeatureEffect(
-                filter: new FeatureFilter(objectIds: _selectedObjectIds.ToArray()),
+                filter: new LayerFeatureFilter(ObjectIds: _selectedObjectIds.ToArray()),
                 excludedEffect: "blur(5px) grayscale(90%) opacity(40%)");
 
             await _layerView!.SetFeatureEffect(featureEffect);
@@ -249,7 +248,7 @@
         }
     }
 
-    private async Task OnCellPointerOver(FeatureTableCellEvent pointeroverEvent)
+    private async Task OnCellPointerOver(TableInteractionCellPointeroverEvent pointeroverEvent)
     {
         if (_onRowOverHighlight is not null)
         {
@@ -264,7 +263,7 @@
         _onRowOverHighlight = await _layerView!.Highlight(pointeroverEvent.Feature!);
     }
 
-    private async Task OnCellPointerOut()
+    private async Task OnCellPointerOut(TableInteractionCellPointeroutEvent pointeroutEvent)
     {
         if (_onRowOverHighlight is not null)
         {
@@ -284,5 +283,5 @@
     private FeatureLayerView? _layerView;
     private readonly List<ObjectId> _selectedObjectIds = [];
     private bool _firstRender = true;
-    Handle? _onRowOverHighlight;
+    ResourceHandle? _onRowOverHighlight;
 }

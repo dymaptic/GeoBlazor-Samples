@@ -41,7 +41,7 @@
                     <FieldElement Label="Flood" FieldName="floodinsur"/>
                     <FieldElement Label="Fire" FieldName="fireinsur"/>
                 </GroupElement>
-                <ExpressionInfo Name="alwaysHidden" Expression="1 == 0"/>
+                <FormExpressionInfo Name="alwaysHidden" Expression="1 == 0"/>
             </FormTemplate>
         </FeatureLayer>
     </Map>
@@ -97,7 +97,7 @@
             _highlightHandle = null;
         }
 
-        HitTestResult hitTest = (await _mapView!.HitTest(clickEvent))!;
+        ViewHitTestResult hitTest = (await _mapView!.HitTest(clickEvent))!;
         IViewHit[] results = hitTest.Results;
         if (results.Length > 0 &&
             results[0] is GraphicHit graphicHit &&
@@ -150,7 +150,7 @@
                     await _editFeature.Attributes.AddOrUpdate(key, value);
                 }
 
-                var edits = new FeatureLayerApplyEditsEdits { UpdateFeatures = [_editFeature] };
+                var edits = new EditingEdits { UpdateFeatures = [_editFeature] };
 
                 await ApplyAttributeUpdates(edits);
             }
@@ -161,7 +161,7 @@
         }
     }
 
-    private async Task ApplyAttributeUpdates(FeatureLayerApplyEditsEdits edits)
+    private async Task ApplyAttributeUpdates(EditingEdits edits)
     {
         try
         {
@@ -182,14 +182,14 @@
         await _form!.Submit();
     }
     
-    private void OnValueChange(FeatureFormValueChangeEvent arg)
+    private void OnValueChange(FeatureFormViewModelValueChangeEvent arg)
     {
         Console.WriteLine($"New Value: {arg.Value}");
     }
 
     private MapView? _mapView;
     private FeatureLayer? _featureLayer;
-    private Handle? _highlightHandle;
+    private ResourceHandle? _highlightHandle;
     private FeatureFormWidget? _form;
     private Graphic? _editFeature;
     private string _hiddenClass = "esri-hidden";

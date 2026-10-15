@@ -51,7 +51,7 @@
     {
         Point point = arg.MapPoint;
 
-        HitTestResult? result = await _mapView!.HitTest(new ScreenPoint(arg.X, arg.Y));
+        ViewHitTestResult? result = await _mapView!.HitTest(new ScreenPoint(arg.X, arg.Y));
 
         if (result?.Results is { Length: > 0 } && result.Results[0] is GraphicHit)
         {
@@ -79,7 +79,7 @@
         await _graphic.SetGeometry(point);
     }
 
-    private async Task OnTriggerAction(PopupTriggerActionEvent triggerEvent)
+    private async Task OnTriggerAction(ActionEvent triggerEvent)
     {
         if (triggerEvent.Action.ActionId == "test-1")
         {

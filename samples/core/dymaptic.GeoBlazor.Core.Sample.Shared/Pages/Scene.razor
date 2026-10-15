@@ -53,7 +53,7 @@
                 <SimpleFillSymbol Color="@(new MapColor(81, 46, 132, 0.8))">
                     <Outline Color="@(new MapColor(255, 255, 255))" Width="1" />
                 </SimpleFillSymbol>
-                <PopupTemplate Title="{Name}" StringContent="{Description}<br/>Number: {Number}<br/>{Date}: {Date}<br/>Bool: {Boolean}</br>Object: {Object}" />
+                <PopupTemplate Title="@("{Name}")" StringContent="@("{Description}<br/>Number: {Number}<br/>{Date}: {Date}<br/>Bool: {Boolean}</br>Object: {Object}")" />
             </Graphic>
         </GraphicsLayer>
     </Map>

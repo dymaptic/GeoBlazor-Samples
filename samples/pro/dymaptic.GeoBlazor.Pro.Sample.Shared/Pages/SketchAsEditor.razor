@@ -108,7 +108,7 @@
         {
             IncludeByGeoBlazorId = [_featureLayer.Id]
         };
-        HitTestResult hit = (await _mapView.HitTest(evt, options))!;
+        ViewHitTestResult hit = (await _mapView.HitTest(evt, options))!;
         Graphic? graphic = hit.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
 
         if (graphic is null)
@@ -152,9 +152,9 @@
         }
     }
 
-    private async Task HandleSketchEvent(SketchUpdateEvent evt)
+    private async Task HandleSketchEvent(UpdateEvent evt)
     {
-        if (evt.State != SketchEventState.Complete)
+        if (evt.State != SketchUpdateEventState.Complete)
         {
             return;
         }
@@ -178,7 +178,7 @@
 
         try
         {
-            EditsResult result = (await _featureLayer.ApplyEdits(new FeatureLayerApplyEditsEdits
+            EditsResult result = (await _featureLayer.ApplyEdits(new EditingEdits
             {
                 UpdateFeatures = [moved]
             }))!;

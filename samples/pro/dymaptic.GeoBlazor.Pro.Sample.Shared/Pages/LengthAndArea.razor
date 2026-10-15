@@ -85,7 +85,7 @@
         }
     }
 
-    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
+    private async Task OnSketchCreate(CreateEvent sketchEvent)
     {
         if (_firstSketch)
         {
@@ -93,9 +93,9 @@
             _firstSketch = false;
         }
 
-        if (sketchEvent.State == SketchEventState.Complete)
+        if (sketchEvent.State == SketchCreateEventState.Complete)
         {
-            if (_sketchGraphic is not null && sketchEvent.State == SketchEventState.Complete)
+            if (_sketchGraphic is not null && sketchEvent.State == SketchCreateEventState.Complete)
             {
                 Console.WriteLine($"Removing Sketch ID: {_sketchGraphic.Id}");
                 await _graphicsLayer.Remove(_sketchGraphic);
@@ -103,7 +103,7 @@
             }
             _updating = true;
             _sketchGraphic = sketchEvent.Graphic;
-            Console.WriteLine($"Sketch created. ID: {_sketchGraphic.Id}");
+            Console.WriteLine($"Sketch created. ID: {_sketchGraphic?.Id}");
             if (_sketchGraphic is not null)
             {
                 await GetMeasurements(_sketchGraphic.Geometry!);  
@@ -112,7 +112,7 @@
         }
     }
 
-    private async Task OnSketchUpdate(SketchUpdateEvent sketchEvent)
+    private async Task OnSketchUpdate(UpdateEvent sketchEvent)
     {
         // Measure on every update state, not just Complete, so the readout tracks the drag live.
         // The _updating flag throttles re-entrant events while a measurement is in flight.
