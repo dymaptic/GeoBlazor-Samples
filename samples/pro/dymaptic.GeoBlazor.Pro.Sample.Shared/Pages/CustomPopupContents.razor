@@ -27,10 +27,8 @@
                       @ref="_schoolsLayer"
                       PopupEnabled="true">
             <PopupTemplate OutFields="@( ["*"])"
-                           Title="State: {state_name}">
-                <CustomContent Creator="@(new CustomContentCreator(
-                                             customContentCreatorPopupTemplateContent:
-                                             $"<img src='{_logoUrl}' width='150' alt='GeoBlazor Logo' />"))" />
+                           Title="@("State: {state_name}")">
+                <CustomContent Creator="@($"<img src='{_logoUrl}' width='150' alt='GeoBlazor Logo' />")" />
                 <CustomContent>
                     <SearchWidget IncludeDefaultSources="false"
                                   LocationEnabled="false"
@@ -47,9 +45,9 @@
                                            Placeholder="Search by state" />
                     </SearchWidget>
                 </CustomContent>
-                <CustomContent OutFields="@( ["*"])">
-                    <CustomContentCreator OnCustomContentCreatorPopupTemplateContentCreator="@GenerateContent" />
-                </CustomContent>
+                <CustomContent OutFields="@( ["*"])"
+                               Creator="@(new PopupTemplateContentCreator(
+                                   onPopupTemplateContentCreatorPopupTemplateContentCreatorFunction: GenerateContent))" />
             </PopupTemplate>
         </FeatureLayer>
     </Map>
@@ -57,6 +55,6 @@
                  DefaultPopupTemplateEnabled="false"
                  DockEnabled="true">
         <PopupDockOptions ButtonEnabled="false"
-                          BreakPoint="@(new Breakpoint(false))" />
+                          BreakPoint="@(new Breakpoint { BoolValue = false })" />
     </PopupWidget>
 </MapView>

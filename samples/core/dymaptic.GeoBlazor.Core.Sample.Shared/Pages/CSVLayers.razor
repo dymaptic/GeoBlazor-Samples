@@ -21,33 +21,23 @@
         </Basemap>
         <CSVLayer Url="https://arcgis.github.io/arcgis-samples-javascript/sample-data/hurricanes.csv"
                   Title="Hurricanes" Copyright="NOAA">
-            <PopupTemplate Title="{Name}">
+            <PopupTemplate Title="@("{Name}")"
+                           FieldInfos="@([
+                               new FieldInfo("ISO_time",
+                                   Format: new FieldInfoFormat(dateFormat: DateFormat.ShortDateShortTime))
+                           ])">
                 <TextContent Text="Category {Category} storm with that occurred at {ISO_time}."/>
-                <FieldsContent>
-                    <FieldInfo FieldName="wmo_pres" Label="Pressure"/>
-                    <FieldInfo FieldName="wmo_wind" Label="Wind Speed (mph)"/>
-                </FieldsContent>
-                <FieldInfo FieldName="ISO_time">
-                    <FieldInfoFormat DateFormat="DateFormat.ShortDateShortTime"/>
-                </FieldInfo>
+                <FieldsContent FieldInfos="@([
+                                   new FieldInfo("wmo_pres", "Pressure"),
+                                   new FieldInfo("wmo_wind", "Wind Speed (mph)")
+                               ])" />
             </PopupTemplate>
-            <UniqueValueRenderer Field="Category">
-                <UniqueValueInfo Value="1">
-                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[0]}")" />
-                </UniqueValueInfo>
-                <UniqueValueInfo Value="2">
-                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[1]}")" />
-                </UniqueValueInfo>
-                <UniqueValueInfo Value="3">
-                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[2]}")" />
-                </UniqueValueInfo>
-                <UniqueValueInfo Value="4">
-                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[3]}")" />
-                </UniqueValueInfo>
-                <UniqueValueInfo Value="5">
-                    <PictureMarkerSymbol Url="@($"{_baseUrl}{_fireFlyImages[4]}")" />
-                </UniqueValueInfo>
-            </UniqueValueRenderer>
+            <UniqueValueRenderer Field="Category"
+                                 UniqueValueInfos="@(_fireFlyImages
+                                     .Select((image, index) => new UniqueValueInfo(
+                                         Symbol: new PictureMarkerSymbol($"{_baseUrl}{image}"),
+                                         Value: index + 1))
+                                     .ToArray())" />
         </CSVLayer>
     </Map>
     <ExpandWidget Position="OverlayPosition.TopLeft">

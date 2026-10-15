@@ -46,15 +46,14 @@
                           Title="USGS Earthquakes"
                           Copyright="USGS Earthquakes"
                           OrderBy="@([new OrderByInfo("mag", SortOrder.Descending)])">
-                <PopupTemplate Title="Earthquake Info">
-                    <FieldsContent>
-                        <FieldInfo FieldName="mag" Label="Magnitude" />
-                        <FieldInfo FieldName="type" Label="Type" />
-                        <FieldInfo FieldName="place" Label="Location" />
-                        <FieldInfo FieldName="time" Label="Time">
-                            <FieldInfoFormat DateFormat="@DateFormat.ShortDateShortTime" />
-                        </FieldInfo>
-                    </FieldsContent>               
+                <PopupTemplate Title="@("Earthquake Info")">
+                    <FieldsContent FieldInfos="@([
+                                       new FieldInfo("mag", "Magnitude"),
+                                       new FieldInfo("type", "Type"),
+                                       new FieldInfo("place", "Location"),
+                                       new FieldInfo("time", "Time",
+                                           Format: new FieldInfoFormat(dateFormat: DateFormat.ShortDateShortTime))
+                                   ])" />
                 </PopupTemplate>
                 <SimpleRenderer>
                     <SimpleMarkerSymbol Color="@(new MapColor(226, 119, 40))"

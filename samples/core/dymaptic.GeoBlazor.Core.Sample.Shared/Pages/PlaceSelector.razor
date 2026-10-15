@@ -28,7 +28,7 @@
 <SimpleMarkerSymbol @ref="_symbol" Color="@(new MapColor("#000000"))" Size="12">
     <Outline Color="@(new MapColor("#ffffff"))" Width="2" />
 </SimpleMarkerSymbol>
-<PopupTemplate @ref="_popup" Title="{PlaceName}" StringContent="{Place_addr}" />
+<PopupTemplate @ref="_popup" Title="@("{PlaceName}")" StringContent="{Place_addr}" />
 
 @code {
     [Inject]

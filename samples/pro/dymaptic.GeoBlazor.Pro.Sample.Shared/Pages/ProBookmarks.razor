@@ -9,7 +9,7 @@
     Also included is the TimelineWidget, which requires GeoBlazor Pro.
 </p>
 <MapView @ref="_mapView" Class="map-view" 
-         OnViewLayerViewCreate="OnLayerViewCreate"
+         OnViewLayerviewCreate="OnLayerViewCreate"
          OnViewRendered="OnViewRendered">
     <WebMap @ref="_webMap">
         <PortalItem PortalItemId="70b726074af04a7e9839d8a07f64c039" />
@@ -87,7 +87,7 @@
     /// <summary>
     /// Setting the TimeSliderWidget properties from the time-aware layer
     /// </summary>
-    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         try
         {
@@ -129,7 +129,7 @@
         var hurricaneName = eventArgs.Bookmark.Name;
 
         var featureEffect = new FeatureEffect("grayscale(100%) opacity(30%)",
-            filter: new FeatureFilter(where: $"Name = '{hurricaneName!.ToUpper()}'"));
+            filter: new LayerFeatureFilter(Where: $"Name = '{hurricaneName!.ToUpper()}'"));
            
         _ = _layerView.SetFeatureEffect(featureEffect);
     }

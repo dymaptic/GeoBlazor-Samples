@@ -43,7 +43,7 @@ public partial class StyledGeoJSONLayers
         _initialExtent ??= await _mapView!.GetExtent();
     }
     
-    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer is ProGeoJSONLayer layer)
         {
@@ -77,11 +77,11 @@ public partial class StyledGeoJSONLayers
             _highlightHandle = await layerView.Highlight(feature);
             // create a buffer around the feature geometry
             Polygon buffer = (await GeometryEngine.GeodesicBuffer(feature.Geometry!, 100))!;
-            await _popupWidget!.Close();
+            await _mapView!.ClosePopup();
             await _mapView!.GoTo(_initialExtent!);
             await Task.Delay(200);
             await _mapView.GoTo(buffer.Extent!);
-            await _popupWidget.Open(new PopupOpenOptions(Features: [feature], UpdateLocationEnabled: true));
+            await _mapView.OpenPopup(new ViewPopupOpenOptions(Features: [feature], UpdateLocationEnabled: true));
         }
         catch (Exception e)
         {
@@ -111,7 +111,7 @@ public partial class StyledGeoJSONLayers
     private Dictionary<ProGeoJSONLayer, List<Graphic>> _features = [];
     private Dictionary<ProGeoJSONLayer, GeoJSONLayerView> _layerViews = [];
     private Extent? _initialExtent;
-    private Handle? _highlightHandle;
+    private ResourceHandle? _highlightHandle;
     private MapView? _mapView;
     private PopupWidget? _popupWidget;
     private ProGeoJSONLayer? _pointsLayer;

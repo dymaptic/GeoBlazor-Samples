@@ -81,14 +81,14 @@
     public override string Description =>
         "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the queryRelatedFeatures " +
         "method from the ArcGIS Maps SDK for JavaScript via GeoBlazor's FeatureLayer.QueryRelatedFeatures, " +
-        "RelationshipQuery, and FeatureLayerView.Highlight APIs. " +
+        "RelationshipQuery, and FeatureLayerView.SetFeatureEffect APIs. " +
         "The page shows a 2D map of the contiguous United States at zoom level 3, rendered from an ArcGIS " +
         "Online basemap. A FeatureLayer of hexagonal aggregation cells, each representing a region containing " +
         "major US cities, is overlaid on top. " +
         "An ExpandWidget anchored in the top-right corner of the map can be opened to reveal a LegendWidget. " +
         "A custom overlay in the bottom-left corner contains a 'US Cities' panel with instructions and an " +
         "initially empty results table. When the user clicks any hexagon on the map, the page first queries " +
-        "the layer for the matching ObjectIds, highlights the clicked hexagon via the FeatureLayerView, then " +
+        "the layer for the matching ObjectIds, marks the clicked hexagon with a feature effect on the FeatureLayerView, then " +
         "issues a RelationshipQuery to retrieve the related city records (NAME and SUM_POPULATION) and " +
         "renders them as rows in the table. A 'Clear Query' button below the table removes the highlight and " +
         "empties the results. " +
@@ -103,9 +103,10 @@
 
     private async Task ClearMap()
     {
-        if (_highlight is not null)
+        if (_highlighted)
         {
-            await _highlight.Remove();
+            await ((FeatureLayerView)_featureLayer!.LayerView!).SetFeatureEffect(null);
+            _highlighted = false;
         }
 
         _relatedFeatures = null;
@@ -117,7 +118,7 @@
         {
             Geometry = point,
             OutFields = ["*"],
-            SpatialRelationship = SpatialRelationship.Intersects,
+            SpatialRelationship = RestSpatialRelationship.Intersects,
             ReturnGeometry = false
         };
 
@@ -129,17 +130,16 @@
 
         var layerView = (FeatureLayerView)_featureLayer!.LayerView!;
 
-        if (_highlight is not null)
-        {
-            await _highlight.Remove();
-        }
-
-        _highlight = await layerView.Highlight(objectIds.Select(i => i.StringVal).ToList());
+        // FeatureLayerView no longer exposes Highlight, so a feature effect marks the selected features instead
+        await layerView.SetFeatureEffect(new FeatureEffect(
+            filter: new LayerFeatureFilter(ObjectIds: objectIds),
+            includedEffect: "bloom(2, 1px, 0.1)"));
+        _highlighted = true;
 
         var relationshipQuery = new RelationshipQuery
         {
             OutFields = ["NAME", "SUM_POPULATION"],
-            RelationshipId = _featureLayer.Relationships?.FirstOrDefault()?.RelationshipId,
+            RelationshipId = _featureLayer.Relationships?.FirstOrDefault()?.LayerRelationshipId,
             ObjectIds = objectIds
         };
 
@@ -147,6 +147,6 @@
     }
 
     private FeatureLayer? _featureLayer;
-    private Handle? _highlight;
-    RelatedFeaturesQueryResult? _relatedFeatures;
+    private bool _highlighted;
+    Dictionary<string, FeatureSet>? _relatedFeatures;
 }

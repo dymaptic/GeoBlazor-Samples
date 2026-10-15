@@ -11,7 +11,7 @@
          class="map-view"
          Center="@(new Point(-100, 40))"
          Zoom="4"
-         OnViewLayerViewCreate="OnLayerViewCreated"
+         OnViewLayerviewCreate="OnLayerViewCreated"
          BackgroundColor="@(new MapColor("#F5F5F5"))">
     <SpatialReference Wkid="102003" />
     <Map>
@@ -110,7 +110,7 @@
         "to demonstrate dynamic raster restyling and live reprojection in a Blazor application without writing " +
         "JavaScript.";
 
-    private async Task OnLayerViewCreated(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _layer?.Id)
         {
@@ -141,8 +141,8 @@
             for (int i = 0; i < landType.Categories.Length; i++)
             {
                 infos.Add(new UniqueValueInfo(
-                    symbol: new SimpleFillSymbol(color: new MapColor(landType.Colors[i])),
-                    value: landType.Categories[i]));
+                    Symbol: new SimpleFillSymbol(color: new MapColor(landType.Colors[i])),
+                    Value: landType.Categories[i]));
             }
         }
         

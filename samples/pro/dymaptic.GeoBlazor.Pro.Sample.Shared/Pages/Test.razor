@@ -29,17 +29,17 @@
 
 
 @code {
-    private async Task OnSketchCreate(SketchCreateEvent arg)
+    private async Task OnSketchCreate(CreateEvent arg)
     {
-        if (arg.State == SketchEventState.Complete)
+        if (arg.State == SketchCreateEventState.Complete)
         {
-            await ProjectAndAssert(arg.Graphic.Geometry);
+            await ProjectAndAssert(arg.Graphic!.Geometry);
         }
     }
 
-    private async Task OnSketchUpdate(SketchUpdateEvent arg)
+    private async Task OnSketchUpdate(UpdateEvent arg)
     {
-        if (arg.State == SketchEventState.Complete)
+        if (arg.State == SketchUpdateEventState.Complete)
         {
             await ProjectAndAssert(arg.Graphics.FirstOrDefault()?.Geometry);
         }

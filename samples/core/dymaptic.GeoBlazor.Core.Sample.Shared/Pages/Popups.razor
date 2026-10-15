@@ -33,15 +33,15 @@
         {
             <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads_Styled/FeatureServer/0"
                           OutFields="@(new[] { "TRL_NAME", "CITY_JUR", "X_STREET", "PARKING", "ELEV_FT" })">
-                <PopupTemplate Title="Trailhead"
-                               StringContent="<b>Trail:</b> {TRL_NAME}<br><b>City:</b> {CITY_JUR}<br><b>Cross Street:</b> {X_STREET}<br><b>Parking:</b> {PARKING}<br><b>Elevation:</b> {ELEV_FT} ft" />
+                <PopupTemplate Title="@("Trailhead")"
+                               StringContent="@("<b>Trail:</b> {TRL_NAME}<br><b>City:</b> {CITY_JUR}<br><b>Cross Street:</b> {X_STREET}<br><b>Parking:</b> {PARKING}<br><b>Elevation:</b> {ELEV_FT} ft")" />
             </FeatureLayer>
         }
         else if (_showPopupOption == 2)
         {
             <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails_Styled/FeatureServer/0"
                           OutFields="@(new[] { "TRL_NAME", "ELEV_GAIN" })">
-                <PopupTemplate Title="Trail Information">
+                <PopupTemplate Title="@("Trail Information")">
                     <MediaContent>
                         <ColumnChartMediaInfo Caption="">
                             <ChartMediaInfoValue Fields="@(new[] { "ELEV_MIN", "ELEV_MAX" })"
@@ -55,19 +55,18 @@
         {
             <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Parks_and_Open_Space_Styled/FeatureServer/0"
                           OutFields="@(new[] { "TYPE", "PARK_NAME", "AGNCY_NAME", "ACCESS_TYP", "GIS_ACRES", "TRLS_MI", "TOTAL_GOOD", "TOTAL_FAIR", "TOTAL_POOR" })">
-                <PopupTemplate Title="{PARK_NAME}">
-                    <FieldsContent>
-                        <FieldInfo FieldName="AGNCY_NAME" Label="Agency" IsEditable="true" Tooltip="" Visible="true"
-                                   StringFieldOption="StringFieldOption.TextBox" />
-                        <FieldInfo FieldName="TYPE" Label="Type" IsEditable="true" Tooltip="" Visible="true"
-                                   StringFieldOption="StringFieldOption.TextBox" />
-                        <FieldInfo FieldName="ACCESS_TYP" Label="Access" IsEditable="true" Tooltip="" Visible="true"
-                                   StringFieldOption="StringFieldOption.TextBox" />
-                        <FieldInfo FieldName="GIS_ACRES" Label="Acres" IsEditable="true" Tooltip="" Visible="true"
-                                   StringFieldOption="StringFieldOption.TextBox">
-                            <FieldInfoFormat Places="2" DigitSeparator="true" />
-                        </FieldInfo>
-                    </FieldsContent>
+                <PopupTemplate Title="@("{PARK_NAME}")">
+                    <FieldsContent FieldInfos="@([
+                                       new FieldInfo("AGNCY_NAME", "Agency", "", StringFieldOption.TextBox,
+                                           IsEditable: true, Visible: true),
+                                       new FieldInfo("TYPE", "Type", "", StringFieldOption.TextBox,
+                                           IsEditable: true, Visible: true),
+                                       new FieldInfo("ACCESS_TYP", "Access", "", StringFieldOption.TextBox,
+                                           IsEditable: true, Visible: true),
+                                       new FieldInfo("GIS_ACRES", "Acres", "", StringFieldOption.TextBox,
+                                           new FieldInfoFormat(places: 2, digitSeparator: true),
+                                           IsEditable: true, Visible: true)
+                                   ])" />
                 </PopupTemplate>
             </FeatureLayer>
         }

@@ -29,17 +29,17 @@
           Opacity="0.5"
           Title="@_wcsSampleTitle"
           Url="@_wcsLayerUrl">
-    <RasterStretchRenderer StretchType="RendererStretchType.StandardDeviation"
+    <RasterStretchRenderer StretchType="RasterStretchType.StandardDeviation"
                            NumberOfStandardDeviations="3"
                            CustomStatistics="@([_wcsLayerStatistics])">
         <MultipartColorRamp>
-            <AlgorithmicColorRamp Algorithm="Algorithm.Hsv" 
+            <AlgorithmicColorRamp Algorithm="ColorRampAlgorithmType.Hsv" 
                                   FromColor="@(new MapColor(0, 0, 255))" 
                                   ToColor="@(new MapColor(0, 255, 255))" />
-            <AlgorithmicColorRamp Algorithm="Algorithm.Hsv" 
+            <AlgorithmicColorRamp Algorithm="ColorRampAlgorithmType.Hsv" 
                                   FromColor="@(new MapColor(0, 255, 255))" 
                                   ToColor="@(new MapColor(255, 255, 0))" />
-            <AlgorithmicColorRamp Algorithm="Algorithm.Hsv" 
+            <AlgorithmicColorRamp Algorithm="ColorRampAlgorithmType.Hsv" 
                                   FromColor="@(new MapColor(255, 255, 0))" 
                                   ToColor="@(new MapColor(255, 0, 0))" />
         </MultipartColorRamp>

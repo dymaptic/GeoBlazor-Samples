@@ -15,7 +15,7 @@
          Longitude="-8.9624771"
          Latitude="41.7458514"
          Zoom="10"
-         OnViewLayerViewCreate="OnLayerViewCreate">
+         OnViewLayerviewCreate="OnLayerViewCreate">
     <Map>
         <Basemap>
             <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
@@ -26,21 +26,21 @@
             <UniqueValueRenderer ValueExpression="@_valueExpression"
                                  ValueExpressionTitle="NAVAID type"
                                  UniqueValueInfos="@_uniqueValueInfos" />
-            <PopupTemplate Title="{title}">
+            <PopupTemplate Title="@("{title}")">
                 <TextContent Text="This structure is {expression/altitude} meters above sea level and {expression/height} meters tall." />
-                <FieldsContent>
-                    <FieldInfo FieldName="no_nac" Label="National Number" />
-                    <FieldInfo FieldName="desc" Label="Original Description (Portuguese)" />
-                    <FieldInfo FieldName="foto_url" Label="Photo URL" />
-                </FieldsContent>
+                <FieldsContent FieldInfos="@([
+                                   new FieldInfo("no_nac", "National Number"),
+                                   new FieldInfo("desc", "Original Description (Portuguese)"),
+                                   new FieldInfo("foto_url", "Photo URL")
+                               ])" />
                 <PopupExpressionInfo Name="altitude" Expression="DefaultValue($feature.alt_m, 'unknown')" />
                 <PopupExpressionInfo Name="height" Expression="DefaultValue($feature.hgt_m, 'unknown')" />
             </PopupTemplate>
         </OGCFeatureLayer>
     </Map>
     <PopupWidget @ref="_popupWidget" DockEnabled="true">
-        <PopupDockOptions Position="PopupDockPosition.BottomRight"
-                          BreakPoint="@(new Breakpoint(false))"
+        <PopupDockOptions Position="dymaptic.GeoBlazor.Core.Enums.PopupDockPosition.BottomRight"
+                          BreakPoint="@(new Breakpoint { BoolValue = false })"
                           ButtonEnabled="false" />
     </PopupWidget>
     <LegendWidget Position="OverlayPosition.TopRight" />
@@ -103,10 +103,10 @@
 
         await _atonLayerView.SetFeatureEffect(
             new FeatureEffect(excludedEffect: "opacity(20%)",
-                filter: new FeatureFilter(where: where)));
+                filter: new LayerFeatureFilter(Where: where)));
     }
 
-    private void OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         if (createEvent.LayerView is OGCFeatureLayerView ogcFeatureLayerView)
         {

@@ -29,14 +29,14 @@
                     <SizeStop Value="@(Scale * 32)" Size="1" />
                 </SizeVariable>
             </UniqueValueRenderer>
-            <PopupTemplate Title="{Name}">
-                <FieldsContent>
-                    <FieldInfo FieldName="cat2" Label="Category" />
-                    <FieldInfo FieldName="addrln1" Label="Address" />
-                    <FieldInfo FieldName="city" Label="City" />
-                    <FieldInfo FieldName="phones" Label="Phone number" />
-                    <FieldInfo FieldName="link" Label="Link" />
-                </FieldsContent>
+            <PopupTemplate Title="@("{Name}")">
+                <FieldsContent FieldInfos="@([
+                                   new FieldInfo("cat2", "Category"),
+                                   new FieldInfo("addrln1", "Address"),
+                                   new FieldInfo("city", "City"),
+                                   new FieldInfo("phones", "Phone number"),
+                                   new FieldInfo("link", "Link")
+                               ])" />
             </PopupTemplate>
         </FeatureLayer>
     </Map>

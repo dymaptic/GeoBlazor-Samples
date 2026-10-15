@@ -16,7 +16,7 @@
         </Basemap>
         <FeatureLayer Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/LA_County_Parcels/FeatureServer/0"
                       DefinitionExpression="@_selectedQuery">
-            <PopupTemplate Title="{UseType}"
+            <PopupTemplate Title="@("{UseType}")"
                            StringContent="Description: {UseDescription}. Land value: {Roll_LandValue}" />
         </FeatureLayer>
     </Map>

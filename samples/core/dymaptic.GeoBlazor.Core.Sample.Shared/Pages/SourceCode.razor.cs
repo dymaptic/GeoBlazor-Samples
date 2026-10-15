@@ -74,11 +74,11 @@ public partial class SourceCode
 
     private static Type? ResolvePageType(string typeName)
     {
-        Dictionary<string, Type> index = LazyPageIndex.Value;
+        Dictionary<string, Type> index = lazyPageIndex.Value;
         return index.TryGetValue(typeName, out Type? t) ? t : null;
     }
 
-    private static readonly Lazy<Dictionary<string, Type>> LazyPageIndex = new(() =>
+    private static readonly Lazy<Dictionary<string, Type>> lazyPageIndex = new(() =>
     {
         var index = new Dictionary<string, Type>(StringComparer.Ordinal);
         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())

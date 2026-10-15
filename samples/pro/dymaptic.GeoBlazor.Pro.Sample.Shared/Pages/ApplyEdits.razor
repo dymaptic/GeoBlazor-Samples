@@ -96,7 +96,7 @@
         string cursor = await _mapView!.GetCursor();
         if (cursor != "crosshair")
         {
-            HitTestResult hitTestResult = (await _mapView.HitTest(clickEvent))!;
+            ViewHitTestResult hitTestResult = (await _mapView.HitTest(clickEvent))!;
             if (hitTestResult.Results.Length == 0)
             {
                 ToggleEditingDivs("block", "none");
@@ -156,7 +156,7 @@
                 #pragma warning restore BL0005
                 _editFeature = new Graphic(point);
                 await _editFeature.Attributes.AddOrUpdate("IncidentType", attributes["IncidentType"]!);
-                var edits = new FeatureLayerApplyEditsEdits
+                var edits = new EditingEdits
                 {
                     AddFeatures = [_editFeature]
                 };
@@ -185,7 +185,7 @@
                 await _editFeature.Attributes.AddOrUpdate(key, value);
             }
 
-            var edits = new FeatureLayerApplyEditsEdits
+            var edits = new EditingEdits
             {
                 UpdateFeatures = [_editFeature]
             };
@@ -199,7 +199,7 @@
         }
     }
 
-    private async Task ApplyEditsToIncidents(FeatureLayerApplyEditsEdits edits)
+    private async Task ApplyEditsToIncidents(EditingEdits edits)
     {
         try
         {
@@ -249,9 +249,9 @@
 
     private async Task DeleteEdits()
     {
-        var edits = new FeatureLayerApplyEditsEdits
+        var edits = new EditingEdits
         {
-            DeleteFeatures = [_editFeature!]
+            DeleteFeatures = new[] { _editFeature! }
         };
         await ApplyEditsToIncidents(edits);
         await _mapView!.SetCursor("auto");
@@ -259,7 +259,7 @@
 
     private MapView? _mapView;
     private FeatureLayer? _featureLayer;
-    private Handle? _highlightHandle;
+    private ResourceHandle? _highlightHandle;
     private FeatureFormWidget? _form;
     private Graphic? _editFeature;
     private string _addFeatureDivDisplayStyle = "block";

@@ -28,7 +28,7 @@
                            Name="Congressional Districts"
                            Placeholder="example: 3708">
             <FeatureLayer Url="https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_117th_Congressional_Districts_all/FeatureServer/0">
-                <PopupTemplate Title="Congressional District {DISTRICTID} </br>{NAME}, ({PARTY})" OverwriteActions="true" />
+                <PopupTemplate Title="@("Congressional District {DISTRICTID} </br>{NAME}, ({PARTY})")" OverwriteActions="true" />
             </FeatureLayer>
         </LayerSearchSource>
         <LayerSearchSource SearchFields="@( ["Name", "Party"])"
@@ -39,7 +39,7 @@
                            Placeholder="example: Casey"
                            ZoomScale="500000">
             <FeatureLayer Url="https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Senators_2020/FeatureServer/0">
-                <PopupTemplate Title="<a href={Web_Page} target='_blank'> {Name}</a>, ({Party}-{State}) " OverwriteActions="true" />
+                <PopupTemplate Title="@("<a href={Web_Page} target='_blank'> {Name}</a>, ({Party}-{State}) ")" OverwriteActions="true" />
             </FeatureLayer>
             <PictureMarkerSymbol Url="https://developers.arcgis.com/javascript/latest//sample-code/widgets-search-multiplesource/live/images/senate.png"
                                  Height="36"

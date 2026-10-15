@@ -32,7 +32,7 @@
 <SimpleFillSymbol @ref="Symbol" Color="@(new MapColor(20, 130, 200, 0.5))">
     <Outline Color="@(new MapColor("white"))" Width="0.5" />
 </SimpleFillSymbol>
-<PopupTemplate @ref="Popup" Title="Parcel {APN}"
+<PopupTemplate @ref="Popup" Title="@("Parcel {APN}")"
                StringContent="Type: {UseType} <br> Land value: {Roll_LandValue} <br> Tax Rate City: {TaxRateCity}" />
 
 @code {
@@ -83,7 +83,7 @@
                 "APN", "UseType", "TaxRateCity", "Roll_LandValue"
             },
                 ReturnGeometry = true,
-                SpatialRelationship = SpatialRelationship.Intersects,
+                SpatialRelationship = RestSpatialRelationship.Intersects,
                 UseViewExtent = true
             };
         

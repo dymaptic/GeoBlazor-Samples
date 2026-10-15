@@ -202,7 +202,7 @@ else
 }
 
 <SceneView @ref="_view" Class="map-view" OnViewRendered="OnViewRendered"
-           OnViewLayerViewCreate="OnLayerViewCreate">
+           OnViewLayerviewCreate="OnLayerViewCreate">
     <WebScene>
         <PortalItem PortalItemId="0614ea1f9dd043e9ba157b9c20d3c538"/>
     </WebScene>
@@ -307,7 +307,7 @@ else
     }
 
     // hook to `MapView.OnLayerViewCreate`
-    private async Task OnLayerViewCreate(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreate(LayerViewCreateEvent createEvent)
     {
         Layer? layer = createEvent.Layer;
 
@@ -416,13 +416,12 @@ else
         StateHasChanged();
     }
 
-    private async Task<ListItem> OnListItemCreated(ListItemCreatedHandlerEvent evt)
+    private async Task OnListItemCreated(ListItemModifierEvent evt)
     {
-        ListItem item = evt.Item;
+        LayerListListItem item = evt.Item;
         Console.WriteLine($"ListItem created for layer {item.Title} with id {item.Id}");
         await item.SetVisibility(false);
         _listItemsCreated++;
-        return item;
     }
 
     private async Task AttachZoomWatcher()

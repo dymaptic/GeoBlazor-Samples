@@ -34,7 +34,7 @@
 
 <FeatureLayer @ref="ParcelLayer"
               Url="https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/LA_County_Parcels/FeatureServer/0" />
-<PopupTemplate @ref="PopupTemplate" Title="Parcel {APN}"
+<PopupTemplate @ref="PopupTemplate" Title="@("Parcel {APN}")"
                StringContent="Type: {UseType} <br> Land value: {Roll_LandValue} <br> Tax Rate City: {TaxRateCity}" />
 <SimpleFillSymbol @ref="FillSymbol" Color="@(new MapColor(20, 130, 200, 0.5))">
     <Outline Color="@(new MapColor("white"))" Width="0.5" />
@@ -67,15 +67,15 @@
 
     private readonly Query _query = new()
     {
-        SpatialRelationship = SpatialRelationship.Intersects,
+        SpatialRelationship = RestSpatialRelationship.Intersects,
         OutFields = new HashSet<string> { "APN", "UseType", "TaxRateCity", "Roll_LandValue" },
         ReturnGeometry = true,
         Where="1=1"
     };
 
-    private async Task OnSketchCreate(SketchCreateEvent sketchEvent)
+    private async Task OnSketchCreate(CreateEvent sketchEvent)
     {
-        if (sketchEvent.State != SketchEventState.Complete)
+        if (sketchEvent.State != SketchCreateEventState.Complete)
         {
             return;
         }
@@ -83,7 +83,7 @@
         await QueryBySketch(sketchEvent.Graphic, replacePrevious: true);
     }
 
-    private async Task OnSketchUpdate(SketchUpdateEvent sketchEvent)
+    private async Task OnSketchUpdate(UpdateEvent sketchEvent)
     {
         // Query on every update state so results track the drag; _updating throttles re-entrant events.
         if (_updating)
@@ -92,7 +92,7 @@
         }
 
         await QueryBySketch(sketchEvent.Graphics.FirstOrDefault(),
-            replacePrevious: sketchEvent.State == SketchEventState.Complete);
+            replacePrevious: sketchEvent.State == SketchUpdateEventState.Complete);
     }
 
     private async Task QueryBySketch(Graphic? graphic, bool replacePrevious)

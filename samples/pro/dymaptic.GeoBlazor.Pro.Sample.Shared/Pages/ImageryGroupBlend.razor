@@ -11,7 +11,7 @@
 <MapView class="map-view" @ref="_mapView"
          Center="@(new Point(84, 31))"
          Zoom="4"
-         OnViewLayerViewCreate="OnLayerViewCreated">
+         OnViewLayerviewCreate="OnLayerViewCreated">
     <MapViewConstraints SnapToZoom="false" />
     <Map>
         <Basemap>
@@ -42,8 +42,8 @@
     <select id="stretchType" @onchange="ToggleStretchType"
             class="esri-input esri-select"
             style="width: 10rem;">
-        <option value="@RendererStretchType.MinMax" selected>min-max</option>
-        <option value="@RendererStretchType.StandardDeviation">standard deviation</option>
+        <option value="@RasterStretchType.MinMax" selected>min-max</option>
+        <option value="@RasterStretchType.StandardDeviation">standard deviation</option>
     </select>
     <br />
     <label id="sliderLabel" class="esri-feature-form__label">
@@ -117,13 +117,13 @@
         _dotNetRef = null;
     }
 
-    private async Task OnLayerViewCreated(ViewLayerViewCreateEvent createEvent)
+    private async Task OnLayerViewCreated(LayerViewCreateEvent createEvent)
     {
         if (createEvent.Layer?.Id == _layer!.Id 
             && _layer!.Renderer == null && !_rendererAdded)
         {
             _rendererAdded = true;
-            await _layer.SetRenderer(new RasterStretchRenderer(new AlgorithmicColorRamp(Algorithm.CieLab,
+            await _layer.SetRenderer(new RasterStretchRenderer(new AlgorithmicColorRamp(ColorRampAlgorithmType.CieLab,
                 new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                 stretchType: _stretchType, 
                 customStatistics: [new RasterBandStatistics(Min: 120, Max: 3068, Avg: 400, Stddev: 700)]));
@@ -135,19 +135,19 @@
     {
         if (_rasterInfo?.Statistics is null) return;
 
-        RasterInfoStatistics bandStat = _rasterInfo.Statistics.First();
+        RasterBandStatistics bandStat = _rasterInfo.Statistics.First();
         RasterStretchRenderer newRenderer;
         switch (_stretchType)
         {
-            case RendererStretchType.MinMax:
-                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(Algorithm.CieLab,
+            case RasterStretchType.MinMax:
+                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(ColorRampAlgorithmType.CieLab,
                         new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                     stretchType: _stretchType, 
                     customStatistics: [new RasterBandStatistics(Avg: bandStat.Avg, Max: values[1], Min: values[0], Stddev: bandStat.Stddev)]);
 
                 break;
             default:
-                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(Algorithm.CieLab,
+                newRenderer = new RasterStretchRenderer(new AlgorithmicColorRamp(ColorRampAlgorithmType.CieLab,
                         new MapColor(0, 0, 0, 0), new MapColor(0, 0, 0, 1)),
                     stretchType: _stretchType, 
                     customStatistics: [new RasterBandStatistics(Avg: bandStat.Avg, Max: bandStat.Max, Min: bandStat.Min, 
@@ -174,7 +174,7 @@
 
     private async Task ToggleStretchType(ChangeEventArgs e)
     {
-        _stretchType = (RendererStretchType)Enum.Parse(typeof(RendererStretchType), e.Value?.ToString()!);
+        _stretchType = (RasterStretchType)Enum.Parse(typeof(RasterStretchType), e.Value?.ToString()!);
         await ConfigureSlider();
         await UpdateRenderer(SliderSettings[_stretchType].Values);
     }
@@ -186,12 +186,12 @@
             setting.Step, setting.Ticks, setting.Values);
     }
 
-    private async Task OnListItemCreated(ListItemCreatedHandlerEvent evt)
+    private async Task OnListItemCreated(ListItemModifierEvent evt)
     {
-        ListItem listItem = evt.Item;
+        LayerListListItem listItem = evt.Item;
         if (listItem.LayerId == _layer?.Id)
         {
-            await listItem.SetPanel(new ListItemPanelWidget(open: true, icon: "map", containerId: "rendererDiv"));
+            await listItem.SetPanel(new LayerListListItemPanel(open: true, icon: "map", containerId: "rendererDiv"));
             await listItem.SetOpen(true);
             _listItemsSet = true;
         }
@@ -205,15 +205,15 @@
 
     // Slider configuration per stretch type, matching Esri's ArcGIS Maps SDK sample. Min-Max uses a
     // two-thumb range in meters, Standard Deviation a single thumb over 1-3 deviations.
-    private static readonly Dictionary<RendererStretchType, SliderSetting> SliderSettings = new()
+    private static readonly Dictionary<RasterStretchType, SliderSetting> SliderSettings = new()
     {
-        [RendererStretchType.MinMax] = new SliderSetting(Min: 0, Max: 5000, Step: 10, Ticks: 5000, Values: [120, 3068]),
-        [RendererStretchType.StandardDeviation] = new SliderSetting(Min: 1, Max: 3, Step: 1, Ticks: 3, Values: [1])
+        [RasterStretchType.MinMax] = new SliderSetting(Min: 0, Max: 5000, Step: 10, Ticks: 5000, Values: [120, 3068]),
+        [RasterStretchType.StandardDeviation] = new SliderSetting(Min: 1, Max: 3, Step: 1, Ticks: 3, Values: [1])
     };
 
     private ImageryTileLayer? _layer;
     private GroupLayer? _groupLayer;
-    private RendererStretchType _stretchType = RendererStretchType.MinMax;
+    private RasterStretchType _stretchType = RasterStretchType.MinMax;
     private RasterInfo? _rasterInfo;
     private MapView? _mapView;
     private bool _rendererAdded;
