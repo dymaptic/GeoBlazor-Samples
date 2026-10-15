@@ -8,6 +8,11 @@ namespace FleetDashboard.Tests;
 [TestClass]
 public sealed class ScenarioSettingsTests
 {
+    // Length caps that keep the presenter text readable in the Mode picker and the guidance panel.
+    private const int MaxDisplayNameLength = 48;
+    private const int MaxWatchingLineLength = 135;
+    private const int MaxDemonstrationCueLength = 150;
+
     [TestMethod]
     public void TheNormalPresetCarriesFiftyVehiclesAtTwoReportsAndTwoFramesPerSecond()
     {
@@ -121,9 +126,12 @@ public sealed class ScenarioSettingsTests
             Assert.IsFalse(string.IsNullOrWhiteSpace(name), $"{mode} needs a display name.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(watching), $"{mode} needs a watching line.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(cue), $"{mode} needs a demonstration cue.");
-            Assert.IsTrue(name.Length <= 48, $"{mode}'s display name exceeds 48 characters.");
-            Assert.IsTrue(watching.Length <= 135, $"{mode}'s watching line exceeds 135 characters.");
-            Assert.IsTrue(cue.Length <= 150, $"{mode}'s cue exceeds 150 characters.");
+            Assert.IsTrue(name.Length <= MaxDisplayNameLength,
+                $"{mode}'s display name exceeds {MaxDisplayNameLength} characters.");
+            Assert.IsTrue(watching.Length <= MaxWatchingLineLength,
+                $"{mode}'s watching line exceeds {MaxWatchingLineLength} characters.");
+            Assert.IsTrue(cue.Length <= MaxDemonstrationCueLength,
+                $"{mode}'s cue exceeds {MaxDemonstrationCueLength} characters.");
         }
     }
 

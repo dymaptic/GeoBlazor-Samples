@@ -96,13 +96,16 @@ dotnet test projects/FleetDashboard/FleetDashboard.Tests/FleetDashboard.Tests.cs
 ## Pipeline modes
 
 The Mode picker shows a display name followed by the URL token. Its guidance follows the selected
-mode before **Apply and reload**; selecting a mode alone does not change the running pipeline.
+mode before **Apply and reload**; selecting a mode alone does not change the running pipeline. The
+guidance columns in the table below copy that picker text; `FleetDashboard.Shared/ScenarioSettings.cs`
+stays the source of truth.
 
 The picker lists the modes in the order they are demonstrated, and the two raw-queue entries sit together
 so the cap is the only difference between them. Four entries run the same pipeline: `ready`, `scheduled`,
 `resilient`, and `viewport` all keep the bounded per-truck store with one `ApplyEdits` call per 250 ms
-tick, and `viewport` adds the server-side extent filter described below. They differ in the load applied
-and in what the presenter does with them, not in that pipeline. Only `baseline` defaults to the stress load.
+tick, and `viewport` adds the server-side extent filter described below. They differ in the load each
+demonstration uses and in what the presenter does with them, not in that pipeline. Only `baseline`
+defaults to the stress load.
 
 | Display name | URL token (`mode`) | What you are watching | How to demonstrate it | Same pipeline as |
 |---|---|---|---|---|
