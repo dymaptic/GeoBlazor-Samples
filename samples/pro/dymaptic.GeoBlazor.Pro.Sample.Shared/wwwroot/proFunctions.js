@@ -98,3 +98,33 @@ function getCaseInsensitive(obj, key) {
     }
     return undefined;
 }
+
+// Walks the light DOM and every open shadow root, because ArcGIS map components move slotted widgets into their own
+// shadow tree.
+function queryComposed(root, selector) {
+    const found = root.querySelector(selector);
+    if (found) {
+        return found;
+    }
+    for (const element of root.querySelectorAll('*')) {
+        const nested = element.shadowRoot ? queryComposed(element.shadowRoot, selector) : null;
+        if (nested) {
+            return nested;
+        }
+    }
+    return null;
+}
+
+// Starts the Editor's multi-feature workflow on the features of the titled layer whose Name is in `names`. The names
+// are matched in a query because the layer's OBJECTID values are not the integers the C# side wrote.
+window.startMultiFeatureEdit = async (layerTitle, names) => {
+    const map = queryComposed(document, 'arcgis-map')?.map;
+    const editor = queryComposed(document, 'arcgis-editor');
+    const layer = map?.layers.find(l => l.title === layerTitle);
+    if (!editor || !layer) {
+        throw new Error(`The editor or the "${layerTitle}" layer is not on the page yet. Try again in a moment.`);
+    }
+    const quoted = names.map(n => `'${n.replaceAll("'", "''")}'`).join(',');
+    const objectIds = await layer.queryObjectIds({where: `Name IN (${quoted})`});
+    await editor.startUpdateFeaturesWorkflow({layer, objectIds});
+};
