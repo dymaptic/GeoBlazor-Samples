@@ -12,6 +12,14 @@
              OnViewRendered="MapInitialized" OnClick="SelectAtPoint" OnExtentChanged="ExtentChanged"
              OnJavascriptErrorHandler="MapJavascriptFailed" OnExceptionHandler="MapExceptionFailed">
         <Map>
+            @if (UseImageryBasemap)
+            {
+                @* Esri's imagery hybrid style: satellite with roads and labels. It needs an API key;
+                   without one the map keeps GeoBlazor's default OpenStreetMap basemap. *@
+                <Basemap>
+                    <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+                </Basemap>
+            }
             <GraphicsLayer @ref="_routeLayer" Title="Stored demonstration routes" />
             <FeatureLayer @ref="_vehicleLayer" Title="Fleet vehicles" ObjectIdField="oid"
                           GeometryType="FeatureGeometryType.Point" Source="_initialSource" Fields="_fields"
@@ -29,14 +37,14 @@
                 {
                     <FeatureLayer @ref="_hostedLayerRefs[definition.Id]" Title="@definition.Label"
                                   Url="@definition.Url" Visible="false" Opacity="definition.Opacity"
-                                  RefreshInterval="definition.RefreshMinutes" ExcludeApiKey="@(!definition.RequiresApiKey)"
+                                  RefreshInterval="definition.RefreshMinutes"
                                   PopupTemplate="_warningPopup" ListMode="ListMode.Hide" />
                 }
                 else
                 {
                     <MapImageLayer @ref="_hostedLayerRefs[definition.Id]" Title="@definition.Label"
                                    Url="@definition.Url" Visible="false" Opacity="definition.Opacity"
-                                   RefreshInterval="definition.RefreshMinutes" ExcludeApiKey="@(!definition.RequiresApiKey)" />
+                                   RefreshInterval="definition.RefreshMinutes" />
                 }
             }
         </Map>
@@ -52,6 +60,10 @@
     /// <summary>The optional hosted layers to add below the fleet layers, already filtered for
     /// API-key availability. Read once, when the map tree first renders.</summary>
     [Parameter] public IReadOnlyList<HostedLayerDefinition> HostedLayerOptions { get; set; } = [];
+
+    /// <summary>Draws the ArcGIS imagery hybrid basemap instead of the default OpenStreetMap one.
+    /// Set only when an ArcGIS API key is configured. Read once, when the map tree first renders.</summary>
+    [Parameter] public bool UseImageryBasemap { get; set; }
 
     /// <summary>Ids of the hosted layers to show; every other hosted layer is hidden.</summary>
     [Parameter] public IReadOnlySet<string> VisibleHostedLayers { get; set; } = new HashSet<string>();

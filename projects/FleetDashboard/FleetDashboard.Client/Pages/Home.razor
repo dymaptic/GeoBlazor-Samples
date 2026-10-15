@@ -81,7 +81,8 @@
                           EditFailed="MapFailed" SelectionFailed="SelectionFailed"
                           RetryVersion="_retryVersion" SimulateFailure="_simulateMapFailure"
                           ViewExtentChanged="ViewExtentChanged"
-                          HostedLayerOptions="_hostedLayers" VisibleHostedLayers="_liveLayers" />
+                          HostedLayerOptions="_hostedLayers" VisibleHostedLayers="_liveLayers"
+                          UseImageryBasemap="_useImageryBasemap" />
                 @if (!_mapInitialized && _mapError is null)
                 {
                     <div class="map-notice"><strong>Initializing map</strong><span>The vehicle list is ready to use.</span></div>
@@ -195,7 +196,9 @@
         _requestedMode = _mode.Label();
         _requestedLoad = _preset.Name;
         _metrics = new DemoMetrics(Clock);
-        _hostedLayers = HostedLayers.Available(HostedLayers.HasApiKey(Configuration));
+        bool hasApiKey = HostedLayers.HasApiKey(Configuration);
+        _hostedLayers = HostedLayers.Available(hasApiKey);
+        _useImageryBasemap = hasApiKey;
         if (_mode.UsesRawQueue()) _queue = new RawTelemetryQueue();
         _presetNeedsApply = FrameSource is IFleetScenarioControls;
         await Advance();
@@ -643,6 +646,7 @@
     }
 
     private IReadOnlyList<HostedLayerDefinition> _hostedLayers = [];
+    private bool _useImageryBasemap;
     private IReadOnlySet<string> _liveLayers = new HashSet<string>();
     private readonly CancellationTokenSource _lifetime = new();
     private readonly FleetFrameCursor _frameCursor = new();

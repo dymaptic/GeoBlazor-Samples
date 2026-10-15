@@ -23,8 +23,9 @@ All vehicle data is simulated. There is no live vehicle feed and no external tel
 - A free GeoBlazor registration key from [licensing.dymaptic.com](https://licensing.dymaptic.com)
 
 GeoBlazor's `MapView` calls a license check during initialization and throws without a key, so the
-map does not render until one is configured. No ArcGIS API key is needed for the default
-OpenStreetMap basemap. Map assets and basemap tiles require network access.
+map does not render until one is configured. An ArcGIS API key is optional: without one the map uses
+an OpenStreetMap basemap, and with one it switches to Esri's imagery hybrid basemap (satellite with
+roads and labels) and offers a traffic layer. Map assets and basemap tiles require network access.
 
 ## Configuring the key
 
@@ -63,12 +64,14 @@ visibility in place and does not touch the vehicle layer, selection, or the upda
 | NWS watches and warnings | `NWS_Watches_Warnings_v1` FeatureServer layer 6 (`FeatureLayer`) | 3 minutes |
 | Esri traffic | `World/Traffic` MapServer (`MapImageLayer`), needs an ArcGIS API key | 5 minutes |
 
-`RefreshInterval` is in minutes (the ArcGIS JS unit). Radar and warnings are public, so they are sent
-with `ExcludeApiKey` and work without any key. Radar is empty where the US has no weather; zoom out to
-see it.
+`RefreshInterval` is in minutes (the ArcGIS JS unit). Radar and warnings are public and work without any
+key. They deliberately do not set `ExcludeApiKey`: in GeoBlazor Core 4.6.2 that flag clears the key for
+the whole page, which breaks the imagery basemap and the traffic layer. The ArcGIS SDK only attaches the
+key to Esri-hosted services, so the NOAA radar requests never carry it, though the NWS warnings layer
+(Esri-hosted) does carry it. Radar is empty where the US has no weather; zoom out to see it.
 
-The traffic toggle appears only when an ArcGIS API key is configured. GeoBlazor reads a top-level
-`ArcGISApiKey` setting, so add it next to `GeoBlazor` in the gitignored
+The traffic toggle and the imagery hybrid basemap appear only when an ArcGIS API key is configured.
+GeoBlazor reads a top-level `ArcGISApiKey` setting, so add it next to `GeoBlazor` in the gitignored
 `appsettings.Development.json` (the template carries an empty placeholder) and rebuild:
 
 ```json
@@ -76,7 +79,7 @@ The traffic toggle appears only when an ArcGIS API key is configured. GeoBlazor 
 ```
 
 Like the registration key, the API key is downloaded by the browser at runtime, so use a key
-restricted to the traffic service and your demo origin. The layer definitions live in
+restricted to basemap styles, the traffic service, and your demo origin. The layer definitions live in
 `FleetDashboard.Client/Rendering/HostedLayers.cs`.
 
 ## Running
