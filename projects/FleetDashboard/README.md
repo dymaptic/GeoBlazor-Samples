@@ -99,10 +99,10 @@ The Mode picker shows a display name followed by the URL token. Its guidance fol
 mode before **Apply and reload**; selecting a mode alone does not change the running pipeline.
 
 The picker lists the modes in the order they are demonstrated, and the two raw-queue entries sit together
-so the cap is the only difference between them. Three entries run the same pipeline: `ready`, `scheduled`
-and `resilient` are all the bounded per-truck store with one `ApplyEdits` call per 250 ms tick. They differ
-in the load applied and in what the presenter does with them, not in the pipeline. Only `baseline` defaults
-to the stress load.
+so the cap is the only difference between them. Four entries run the same pipeline: `ready`, `scheduled`,
+`resilient`, and `viewport` all keep the bounded per-truck store with one `ApplyEdits` call per 250 ms
+tick, and `viewport` adds the server-side extent filter described below. They differ in the load applied
+and in what the presenter does with them, not in that pipeline. Only `baseline` defaults to the stress load.
 
 | Display name | URL token (`mode`) | What you are watching | How to demonstrate it | Same pipeline as |
 |---|---|---|---|---|
@@ -111,8 +111,8 @@ to the stress load.
 | Raw queue with 250 record cap per tick | `pipeline` | The same raw queue, but the map is handed at most 250 records a tick, which keeps it drained at the normal load. | Open ?mode=pipeline at the normal load. Select Truck 007 and follow one report from Pending in the strip to its marker. | none |
 | Keep the latest per truck | `latest` | One waiting report per truck, latest wins. One ApplyEdits call per changed truck, about 59 a second. | Open ?mode=latest&preset=stress. Watch Pending hold at or under 500, with map calls a second near 59. | none |
 | Batched ApplyEdits calls | `batched` | The same per-truck state, but one ApplyEdits call carries every changed truck: about 7 calls a second. | Open ?mode=batched&preset=stress. Watch map calls a second drop from about 59 to about 7 with the same trucks moving. | none |
-| Batched ApplyEdits with 250 ms tick | `scheduled` | The same batched ApplyEdits calls, on a 250 ms page tick instead of 100 ms: about 3.7 calls a second. | Open ?mode=scheduled&preset=stress. The tick doubles to 250 ms, so watch map calls a second fall to about 3.7 with the motion unchanged. | `ready`, `resilient` |
-| Filter by view extent | `viewport` | The server filters each frame by the map's view extent, plus the selected truck. The rest arrive once a second. | Open ?mode=viewport&preset=stress, select Truck 007, then stop panning so the extent settles. Watch trucks per frame fall toward 191. | none |
+| Batched ApplyEdits with 250 ms tick | `scheduled` | The same batched ApplyEdits calls, on a 250 ms page tick instead of 100 ms: about 3.7 calls a second. | Open ?mode=scheduled&preset=stress. The tick lengthens from 100 ms to 250 ms, so watch map calls a second fall to about 3.7 with the motion unchanged. | `ready`, `resilient` |
+| Filter by view extent | `viewport` | The server filters each frame by the map's view extent, plus the selected truck. The rest arrive once a second. | Open ?mode=viewport&preset=stress, select Truck 007, then stop panning so the extent settles. Watch trucks per frame fall toward 191. | `ready`, `scheduled`, `resilient` (adds a server-side extent filter) |
 | Failure scenarios | `resilient` | No pipeline change: this runs the same pipeline as ready and scheduled, with the failure controls at hand. | Open ?mode=resilient. Pause truck 007, and watch it go stale after 5 seconds, then break the connection and watch Reconnecting clear. | `ready`, `scheduled` |
 
 The dashboard chooses one of eight pipeline modes from a `mode` query-string value and defaults to

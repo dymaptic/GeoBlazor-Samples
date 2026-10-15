@@ -98,7 +98,7 @@ public static class DemoModeParser
             DemoMode.Pipeline => "Open ?mode=pipeline at the normal load. Select Truck 007 and follow one report from Pending in the strip to its marker.",
             DemoMode.Latest => "Open ?mode=latest&preset=stress. Watch Pending hold at or under 500, with map calls a second near 59.",
             DemoMode.Batched => "Open ?mode=batched&preset=stress. Watch map calls a second drop from about 59 to about 7 with the same trucks moving.",
-            DemoMode.Scheduled => "Open ?mode=scheduled&preset=stress. The tick doubles to 250 ms, so watch map calls a second fall to about 3.7 with the motion unchanged.",
+            DemoMode.Scheduled => "Open ?mode=scheduled&preset=stress. The tick lengthens from 100 ms to 250 ms, so watch map calls a second fall to about 3.7 with the motion unchanged.",
             DemoMode.Viewport => "Open ?mode=viewport&preset=stress, select Truck 007, then stop panning so the extent settles. Watch trucks per frame fall toward 191.",
             DemoMode.Resilient => "Open ?mode=resilient. Pause truck 007, and watch it go stale after 5 seconds, then break the connection and watch Reconnecting clear.",
             _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown demo mode.")
