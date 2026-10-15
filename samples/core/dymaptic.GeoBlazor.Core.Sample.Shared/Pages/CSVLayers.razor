@@ -21,7 +21,11 @@
         </Basemap>
         <CSVLayer Url="https://arcgis.github.io/arcgis-samples-javascript/sample-data/hurricanes.csv"
                   Title="Hurricanes" Copyright="NOAA">
-            <PopupTemplate Title="@("{Name}")">
+            <PopupTemplate Title="@("{Name}")"
+                           FieldInfos="@([
+                               new FieldInfo("ISO_time",
+                                   Format: new FieldInfoFormat(dateFormat: DateFormat.ShortDateShortTime))
+                           ])">
                 <TextContent Text="Category {Category} storm with that occurred at {ISO_time}."/>
                 <FieldsContent FieldInfos="@([
                                    new FieldInfo("wmo_pres", "Pressure"),
