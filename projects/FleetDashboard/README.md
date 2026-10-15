@@ -44,8 +44,10 @@ server is not enough; the new file 404s and the client falls back to the "no reg
 error.
 
 The client only reads `appsettings.Development.json` when it is running in the Development
-environment, which it learns from the `Blazor-Environment` response header that
-`FleetDashboard.Server/Program.cs` sets on `/_framework` requests.
+environment. Since .NET 10 that environment is fixed when the client is built, not read from the
+`Blazor-Environment` response header: `dotnet build` and `dotnet run` produce a Development client,
+and `dotnet publish` produces a Production one unless you pass
+`-p:WasmApplicationEnvironmentName=Development` (see [Measuring performance](#measuring-performance)).
 
 ## Live layers
 
@@ -85,6 +87,27 @@ dotnet run --project projects/FleetDashboard/FleetDashboard.Server/FleetDashboar
 
 Then open <http://localhost:5068>. The server hosts the WebAssembly client; there is no separate
 client process.
+
+## Measuring performance
+
+Measure a published build, not `dotnet run` or `dotnet build` output. A built (unpublished)
+WebAssembly client runs with debugging enabled, and on the stress preset its map edits took about 30
+times longer than the same code published: a `batched` edit median of about 2,500 ms against 84 ms.
+
+```bash
+dotnet publish projects/FleetDashboard/FleetDashboard.Server/FleetDashboard.Server.csproj -c Release \
+  -o publish -p:WasmApplicationEnvironmentName=Development
+cd publish
+./FleetDashboard.Server --environment Development --urls http://localhost:5068
+```
+
+`-p:WasmApplicationEnvironmentName=Development` keeps the published client in the Development
+environment so it still reads the registration key from `appsettings.Development.json`. Without it
+the client boots as Production and the map reports a missing registration key.
+
+To compare ahead-of-time compilation, add `-p:RunAOTCompilation=true` (it needs the `wasm-tools`
+workload). On the stress preset it shortened a 500-truck edit from about 75 ms to about 54 ms, and
+grew `dotnet.native.wasm` from 2.9 MB to 51 MB.
 
 ## Validating
 
