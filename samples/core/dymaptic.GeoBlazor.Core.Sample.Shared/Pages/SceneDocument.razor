@@ -1,0 +1,48 @@
+@page "/scene-document"
+@inherits SamplePage
+
+<PageTitle>Scene Document</PageTitle>
+<h1>Scene Document</h1>
+
+<p class="instructions">
+    A <code>Scene</code> is a 3D map document you build in markup or C#, nested inside a <code>SceneView</code>.
+    This one sets a basemap, a world elevation ground, a local viewing mode, and a high quality profile directly on the
+    component. Use <code>WebScene</code> instead when the scene already lives in a portal item.
+</p>
+<div class="spaced-row">
+    <label for="viewing-mode">Viewing mode:</label>
+    <select id="viewing-mode" @bind="_viewingMode">
+        <option value="@ViewViewingMode.Global">Global</option>
+        <option value="@ViewViewingMode.Local">Local</option>
+    </select>
+    <span>Changing the mode rebuilds the scene.</span>
+</div>
+
+@* The fully qualified tag avoids the sample page named Scene in this namespace *@
+<SceneView @key="_viewingMode" Class="map-view" Longitude="-118.805" Latitude="33.95" ZIndex="2000" Tilt="76">
+    <dymaptic.GeoBlazor.Core.Components.Scene ViewingMode="_viewingMode"
+                                              QualityProfile="SceneViewQualityProfile.High"
+                                              Ground="@("world-elevation")">
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisImageryStandard" />
+        </Basemap>
+    </dymaptic.GeoBlazor.Core.Components.Scene>
+</SceneView>
+
+@code
+{
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-scene/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://developers.arcgis.com/javascript/latest/references/map-components/components/arcgis-scene/", "arcgis-scene Component Reference")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample shows how to build a 3D scene document in code with the Scene component, " +
+        "placed inside a SceneView. The Scene sets an imagery basemap, the world elevation ground, a high " +
+        "quality profile, and a viewing mode chosen from a drop-down list, with no portal item involved. " +
+        "Switching between global and local viewing modes rebuilds the scene, and the page notes when to " +
+        "reach for WebScene instead.";
+
+    private ViewViewingMode _viewingMode = ViewViewingMode.Global;
+}
