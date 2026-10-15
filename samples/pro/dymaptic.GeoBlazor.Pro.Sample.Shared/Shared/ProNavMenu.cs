@@ -37,6 +37,7 @@ public class ProNavMenu : NavMenu
         new("time-slider", "PRO: Time Slider", "oi-vertical-align-center", null, true, Categories.Widgets),
         new("search-custom-source", "PRO: Custom Search", "oi-magnifying-glass", null, true, Categories.Widgets),
         new("clustering", "PRO: Clustering", "oi-fullscreen-exit", null, true, Categories.Visualization),
+        new("slider-visualization", "PRO: Slider Visualization", "oi-contrast", null, true, Categories.Visualization),
         new("clustering-popups", "PRO: Clustering Popups", "oi-fullscreen-enter", null, true, Categories.Visualization),
         new("cluster-pie-charts", "PRO: Pie Chart Clusters", "oi-pie-chart", null, true, Categories.Visualization),
         new("binning", "PRO: Binning", "oi-grid-three-up", null, true, Categories.Visualization),
