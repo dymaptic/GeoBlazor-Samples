@@ -49,6 +49,8 @@ h1 span { color: var(--teal); }
 .preview-settings { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; padding: .25rem 0 .75rem; font-size: .75rem; }
 .preview-settings select { min-height: 44px; font-size: .75rem; background: var(--paper); border: 1px solid #b9cbc1; padding: 0 .5rem; }
 .preview-settings button { background: var(--paper); border: 1px solid #b9cbc1; font-size: .75rem; }
+.preview-mode-guidance { flex-basis: 100%; color: #52665f; line-height: 1.5; }
+.preview-mode-guidance p { margin: .15rem 0; }
 .scenario-actions { display: flex; gap: .6rem; flex-wrap: wrap; padding: .25rem 0 1rem; }
 .scenario-actions button { background: var(--paper); border: 1px solid #b9cbc1; font-size: .75rem; }
 .scenario-actions button[aria-pressed="true"] { background: #f6e7ce; border-color: var(--amber); }

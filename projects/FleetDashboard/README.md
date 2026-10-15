@@ -95,6 +95,29 @@ dotnet test projects/FleetDashboard/FleetDashboard.Tests/FleetDashboard.Tests.cs
 
 ## Pipeline modes
 
+The Mode picker shows a display name followed by the URL token. Its guidance follows the selected
+mode before **Apply and reload**; selecting a mode alone does not change the running pipeline. The
+guidance columns in the table below copy that picker text; `FleetDashboard.Shared/ScenarioSettings.cs`
+stays the source of truth.
+
+The picker lists the modes in the order they are demonstrated, and the two raw-queue entries sit together
+so the cap is the only difference between them. Four entries run the same pipeline: `ready`, `scheduled`,
+`resilient`, and `viewport` all keep the bounded per-truck store with one `ApplyEdits` call per 250 ms
+tick, and `viewport` adds the server-side extent filter described below. They differ in the load each
+demonstration uses and in what the presenter does with them, not in that pipeline. Only `baseline`
+defaults to the stress load.
+
+| Display name | URL token (`mode`) | What you are watching | How to demonstrate it | Same pipeline as |
+|---|---|---|---|---|
+| Finished dashboard | `ready` | Normal load: one report per truck, one ApplyEdits call every 250 ms. Same pipeline as scheduled and resilient. | Open with no query string. Select Truck 007 and watch its marker step every 250 ms while Pending stays at 0. | `scheduled`, `resilient` |
+| Raw queue | `baseline` | Every report queued in arrival order and drawn one at a time, with no per-tick cap. Under stress it reaches the 20,000 safety stop. | Open ?mode=baseline, which applies the stress load. Watch Pending climb past 500 until the red safety stop banner appears. | none |
+| Raw queue with 250 record cap per tick | `pipeline` | The same raw queue, but the map is handed at most 250 records a tick, which keeps it drained at the normal load. | Open ?mode=pipeline at the normal load. Select Truck 007 and follow one report from Pending in the strip to its marker. | none |
+| Keep the latest per truck | `latest` | One waiting report per truck, latest wins. One ApplyEdits call per changed truck, about 59 a second. | Open ?mode=latest&preset=stress. Watch Pending hold at or under 500, with map calls a second near 59. | none |
+| Batched ApplyEdits calls | `batched` | The same per-truck state, but one ApplyEdits call carries every changed truck: about 7 calls a second. | Open ?mode=batched&preset=stress. Watch map calls a second drop from about 59 to about 7 with the same trucks moving. | none |
+| Batched ApplyEdits with 250 ms tick | `scheduled` | The same batched ApplyEdits calls, on a 250 ms page tick instead of 100 ms: about 3.7 calls a second. | Open ?mode=scheduled&preset=stress. The tick lengthens from 100 ms to 250 ms, so watch map calls a second fall to about 3.7 with the motion unchanged. | `ready`, `resilient` |
+| Filter by view extent | `viewport` | The server filters each frame by the map's view extent, plus the selected truck. The rest arrive once a second. | Open ?mode=viewport&preset=stress, select Truck 007, then stop panning so the extent settles. Watch trucks per frame fall toward 191 for the recorded run. | `ready`, `scheduled`, `resilient` (adds a server-side extent filter) |
+| Failure scenarios | `resilient` | No pipeline change: this runs the same pipeline as ready and scheduled, with the failure controls at hand. | Open ?mode=resilient. Pause truck 007, and watch it go stale after 5 seconds, then break the connection and watch Reconnecting clear. | `ready`, `scheduled` |
+
 The dashboard chooses one of eight pipeline modes from a `mode` query-string value and defaults to
 `ready`. `ready`, `scheduled`, `resilient`, and `viewport` capture a bounded latest report per vehicle
 and apply collection map edits at a 250 ms cadence. `latest` and `batched` use the same bounded state at
@@ -116,8 +139,9 @@ frames are marked partial and the client merges them onto the roster it holds. A
 frame, and any frame after the roster changes, goes out whole so removals still arrive. Other tabs
 keep receiving full frames, and `GetSnapshot` stays complete. Zoom in or select a truck and watch
 **Vehicles/frame** drop. At the stress preset the opening view holds the whole fleet, so it still
-receives all 500 vehicles per frame; selecting truck 007 drops that to about 105, the trucks in view
-plus the out-of-view share for that frame. In this mode Records/s counts what actually arrived,
+receives all 500 vehicles per frame; selecting truck 007 drops it to about 191, the trucks in view
+plus the out-of-view share for that frame. That count depends on where the trucks sit once the extent
+settles; the recorded run carried 191. In this mode Records/s counts what actually arrived,
 not the merged roster.
 
 The raw-queue safety stop halts intake, not map updates, when pending records reach 20,000. It shows

@@ -56,6 +56,8 @@ public sealed class FleetDashboardPageTests
 
         StringAssert.Contains(page.Markup, "Mode: baseline");
         StringAssert.Contains(page.Markup, "Load: stress");
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.WatchingLine());
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.DemonstrationCue());
     }
 
     [TestMethod]
@@ -124,6 +126,53 @@ public sealed class FleetDashboardPageTests
 
         StringAssert.Contains(page.Markup, "Load: normal");
         StringAssert.Contains(page.Markup, "Unknown preset 'turbo'");
+    }
+
+    [TestMethod]
+    public async Task TheModePickerExplainsTheSelectionBeforeApplyingIt()
+    {
+        await using var context = new BunitContext();
+        IConfiguration config = new ConfigurationBuilder().Build();
+        context.Services.AddSingleton(config);
+        context.Services.AddGeoBlazor(config);
+        context.Services.AddSingleton(TimeProvider.System);
+        context.Services.AddSingleton<IFleetFrameSource>(new FakeSource());
+        context.ComponentFactories.Add<MapView>(() => new QuietMapView());
+        context.ComponentFactories.AddStub<FleetMap>();
+        var navigation = context.Services.GetRequiredService<NavigationManager>();
+        var page = context.Render<Home>();
+
+        CollectionAssert.AreEqual(new[]
+        {
+            "Finished dashboard · ready",
+            "Raw queue · baseline",
+            "Raw queue with 250 record cap per tick · pipeline",
+            "Keep the latest per truck · latest",
+            "Batched ApplyEdits calls · batched",
+            "Batched ApplyEdits with 250 ms tick · scheduled",
+            "Filter by view extent · viewport",
+            "Failure scenarios · resilient"
+        }, page.FindAll("#preview-mode option").Select(option => option.TextContent).ToArray());
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent,
+            "Normal load: one report per truck, one ApplyEdits call every 250 ms. Same pipeline as scheduled and resilient.");
+
+        page.Find("#preview-mode").Change("baseline");
+
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.WatchingLine());
+        StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, DemoMode.Baseline.DemonstrationCue());
+
+        foreach (DemoMode mode in Enum.GetValues<DemoMode>())
+        {
+            page.Find("#preview-mode").Change(mode.Label());
+
+            Assert.AreEqual(mode.Label(), page.Find("#preview-mode").GetAttribute("value"));
+            StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, mode.WatchingLine());
+            StringAssert.Contains(page.Find("#preview-mode-guidance").TextContent, mode.DemonstrationCue());
+        }
+
+        Assert.AreEqual("http://localhost/", navigation.Uri);
+        StringAssert.Contains(page.Markup, "Mode: ready");
+        Assert.AreEqual("normal", page.Find("#preview-load").GetAttribute("value"));
     }
 
     [TestMethod]

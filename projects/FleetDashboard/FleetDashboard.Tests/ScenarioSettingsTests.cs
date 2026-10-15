@@ -8,6 +8,11 @@ namespace FleetDashboard.Tests;
 [TestClass]
 public sealed class ScenarioSettingsTests
 {
+    // Length caps that keep the presenter text readable in the Mode picker and the guidance panel.
+    private const int MaxDisplayNameLength = 48;
+    private const int MaxWatchingLineLength = 135;
+    private const int MaxDemonstrationCueLength = 150;
+
     [TestMethod]
     public void TheNormalPresetCarriesFiftyVehiclesAtTwoReportsAndTwoFramesPerSecond()
     {
@@ -107,6 +112,53 @@ public sealed class ScenarioSettingsTests
     public void UnknownPresetNamesAreRejected()
     {
         Assert.ThrowsExactly<ArgumentException>(() => ScenarioSettings.ByName("turbo"));
+    }
+
+    [TestMethod]
+    public void EveryModeHasPresenterTextWithinTheLengthCaps()
+    {
+        foreach (DemoMode mode in Enum.GetValues<DemoMode>())
+        {
+            string name = mode.DisplayName();
+            string watching = mode.WatchingLine();
+            string cue = mode.DemonstrationCue();
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(name), $"{mode} needs a display name.");
+            Assert.IsFalse(string.IsNullOrWhiteSpace(watching), $"{mode} needs a watching line.");
+            Assert.IsFalse(string.IsNullOrWhiteSpace(cue), $"{mode} needs a demonstration cue.");
+            Assert.IsTrue(name.Length <= MaxDisplayNameLength,
+                $"{mode}'s display name exceeds {MaxDisplayNameLength} characters.");
+            Assert.IsTrue(watching.Length <= MaxWatchingLineLength,
+                $"{mode}'s watching line exceeds {MaxWatchingLineLength} characters.");
+            Assert.IsTrue(cue.Length <= MaxDemonstrationCueLength,
+                $"{mode}'s cue exceeds {MaxDemonstrationCueLength} characters.");
+        }
+    }
+
+    [TestMethod]
+    public void AllEightDisplayNamesAreDistinct()
+    {
+        string[] names = Enum.GetValues<DemoMode>().Select(mode => mode.DisplayName()).ToArray();
+
+        Assert.HasCount(8, names);
+        Assert.AreEqual(names.Length, names.Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [TestMethod]
+    [DataRow(DemoMode.Ready, "ready", "Finished dashboard")]
+    [DataRow(DemoMode.Baseline, "baseline", "Raw queue")]
+    [DataRow(DemoMode.Pipeline, "pipeline", "Raw queue with 250 record cap per tick")]
+    [DataRow(DemoMode.Latest, "latest", "Keep the latest per truck")]
+    [DataRow(DemoMode.Batched, "batched", "Batched ApplyEdits calls")]
+    [DataRow(DemoMode.Scheduled, "scheduled", "Batched ApplyEdits with 250 ms tick")]
+    [DataRow(DemoMode.Viewport, "viewport", "Filter by view extent")]
+    [DataRow(DemoMode.Resilient, "resilient", "Failure scenarios")]
+    public void PresenterNamesPreserveTheRecordedUrlTokens(DemoMode mode, string token, string name)
+    {
+        Assert.AreEqual(name, mode.DisplayName());
+        Assert.AreEqual(token, mode.Label());
+        Assert.IsTrue(DemoModeParser.TryParse(mode.Label(), out DemoMode parsed));
+        Assert.AreEqual(mode, parsed);
     }
 
     [TestMethod]

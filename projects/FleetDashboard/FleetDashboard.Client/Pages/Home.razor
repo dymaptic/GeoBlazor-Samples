@@ -151,12 +151,16 @@
         }
         <div class="preview-settings">
             <label for="preview-mode">Mode</label>
-            <select id="preview-mode" @bind="_requestedMode">
+            <select id="preview-mode" @bind="_requestedMode" aria-describedby="preview-mode-guidance">
                 @foreach (DemoMode mode in Enum.GetValues<DemoMode>())
                 {
-                    <option value="@mode.Label()">@mode.Label()</option>
+                    <option value="@mode.Label()">@mode.DisplayName() · @mode.Label()</option>
                 }
             </select>
+            <div id="preview-mode-guidance" class="preview-mode-guidance" aria-live="polite">
+                <p><strong>What this mode shows after Apply and reload:</strong> @RequestedMode.WatchingLine()</p>
+                <p><strong>How to demonstrate it:</strong> @RequestedMode.DemonstrationCue()</p>
+            </div>
             <label for="preview-load">Load</label>
             <select id="preview-load" @bind="_requestedLoad">
                 @foreach (ScenarioSettings preset in ScenarioSettings.All)
@@ -299,6 +303,15 @@
             await SendScenarioCommand(controls.ResetAsync());
 
         Navigation.NavigateTo($"?mode={_requestedMode}&preset={_requestedLoad}", forceLoad: true);
+    }
+
+    private DemoMode RequestedMode
+    {
+        get
+        {
+            DemoModeParser.TryParse(_requestedMode, out DemoMode mode);
+            return mode;
+        }
     }
 
     private string? QueryValue(string key) => new Uri(Navigation.Uri).Query.TrimStart('?')
