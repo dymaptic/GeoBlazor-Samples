@@ -1,0 +1,64 @@
+@page "/scene-root"
+@inherits SamplePage
+
+<PageTitle>Scene Root</PageTitle>
+<h1>Scene Root</h1>
+
+<p class="instructions">
+    A <code>Scene</code> renders a 3D map on its own, with no <code>SceneView</code> around it. The camera position,
+    tilt, quality profile, and ground are set directly on the component, and the buttons below change the zoom and
+    center from C# once the scene has rendered. A point is added to the scene from code at the same time.
+</p>
+<div class="spaced-row">
+    <button disabled="@(!_rendered)" @onclick="@(() => _scene!.SetZoom(14))">Zoom In</button>
+    <button disabled="@(!_rendered)" @onclick="@(() => _scene!.SetZoom(10))">Zoom Out</button>
+    <button disabled="@(!_rendered)" @onclick="FlyToPoint">Center on the Point</button>
+</div>
+
+@* The fully qualified tag avoids the sample page named Scene in this namespace *@
+<dymaptic.GeoBlazor.Core.Components.Scene @ref="_scene" Class="map-view"
+                                          Longitude="-118.805" Latitude="33.95" ZIndex="2000" Tilt="76"
+                                          QualityProfile="SceneQualityProfile.High"
+                                          Ground="@("world-elevation")"
+                                          OnViewRendered="OnViewRendered">
+    <Basemap>
+        <BasemapStyle Name="BasemapStyleName.ArcgisImageryStandard" />
+    </Basemap>
+    <GraphicsLayer @ref="_graphicsLayer" />
+</dymaptic.GeoBlazor.Core.Components.Scene>
+
+@code
+{
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/display-a-scene/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://developers.arcgis.com/javascript/latest/references/map-components/components/arcgis-scene/", "arcgis-scene Component Reference")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample shows the Scene component as the top-level 3D root, rendering an arcgis-scene " +
+        "element with no SceneView. The scene sets its camera position, tilt, quality profile, imagery basemap, " +
+        "and world elevation ground in markup. After the scene renders, C# adds a point graphic and the buttons " +
+        "change the zoom and center at runtime.";
+
+    private async Task OnViewRendered()
+    {
+        if (_rendered)
+        {
+            return;
+        }
+
+        await _graphicsLayer!.Add(new Graphic(_point, new SimpleMarkerSymbol(color: new MapColor("orange"))));
+        _rendered = true;
+    }
+
+    private async Task FlyToPoint()
+    {
+        await _scene!.SetCenter(_point);
+    }
+
+    private readonly Point _point = new(-118.80, 34.02);
+    private dymaptic.GeoBlazor.Core.Components.Scene? _scene;
+    private GraphicsLayer? _graphicsLayer;
+    private bool _rendered;
+}

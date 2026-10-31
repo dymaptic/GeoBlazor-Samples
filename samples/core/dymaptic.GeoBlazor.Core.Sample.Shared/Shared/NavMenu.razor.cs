@@ -147,6 +147,7 @@ public partial class NavMenu
         new("", "Home", "oi-home"),
         new("navigation", "Navigation", "oi-compass", Category: Categories.MapsAndScenes),
         new("scene", "Scene & Attributes", "oi-globe", Category: Categories.MapsAndScenes),
+        new("scene-root", "Scene Root", "oi-globe", Category: Categories.MapsAndScenes),
         new("basemaps", "Basemaps", "oi-map", Category: Categories.MapsAndScenes),
         new("web-map", "Web Map", "oi-browser", Category: Categories.MapsAndScenes),
         new("web-scene", "Web Scene", "oi-box", Category: Categories.MapsAndScenes),
