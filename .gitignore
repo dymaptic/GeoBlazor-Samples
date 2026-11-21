@@ -372,3 +372,6 @@ MigrationBackup/
 
 # Per-developer MSBuild overrides (e.g. UseProjectReferences) - see Directory.Build.props
 local.props
+# Local pre-release GeoBlazor packages (see nuget.config)
+/geoblazor_local/*
+!/geoblazor_local/.gitkeep
