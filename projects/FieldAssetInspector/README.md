@@ -1,3 +1,5 @@
+> **GeoBlazor V5 update.** This project was originally written against dymaptic.GeoBlazor.Core with a floating version (the latest at the time). It now references the single `dymaptic.GeoBlazor` package (V5) and targets net10.0. If you are following a blog post written for the earlier version, the code here no longer matches it exactly.
+
 # Field Asset Inspector
 
 A cross-platform **Uno Platform** application demonstrating **GeoBlazor** map integration via MAUI Embedding.

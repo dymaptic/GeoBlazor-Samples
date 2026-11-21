@@ -1,8 +1,8 @@
-using dymaptic.GeoBlazor.Core.Components;
-using dymaptic.GeoBlazor.Core.Components.Renderers;
-using dymaptic.GeoBlazor.Core.Components.Symbols;
-using dymaptic.GeoBlazor.Core.Enums;
-using dymaptic.GeoBlazor.Core.Model;
+using dymaptic.GeoBlazor.Components;
+using dymaptic.GeoBlazor.Components.Renderers;
+using dymaptic.GeoBlazor.Components.Symbols;
+using dymaptic.GeoBlazor.Enums;
+using dymaptic.GeoBlazor.Model;
 
 namespace IowaBridges.Components.Bridges;
 

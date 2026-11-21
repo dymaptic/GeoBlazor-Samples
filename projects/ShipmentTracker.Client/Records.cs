@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using dymaptic.Blazor.StateManagement;
-using dymaptic.GeoBlazor.Core.Model;
+using dymaptic.GeoBlazor.Model;
 
 namespace ShipmentTracker.Client;
 

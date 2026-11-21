@@ -1,3 +1,5 @@
+> **GeoBlazor V5 update.** This project was originally written against dymaptic.GeoBlazor.Core 3.0.1. It now references the single `dymaptic.GeoBlazor` package (V5) and targets net10.0. If you are following a blog post written for the earlier version, the code here no longer matches it exactly.
+
 # Using Maps in Blazor
 ## Iowa Code Camp 2023
 Tim Purdum
@@ -19,7 +21,7 @@ https://dymaptic.com
 ```bash
 dotnet new blazorserver-empty -o DesMoinesBusRoutes
 cd DesMoinesBusRoutes
-dotnet add package dymaptic.GeoBlazor.Core --prerelease
+dotnet add package dymaptic.GeoBlazor --prerelease
 ```
 
 - Create a free account for https://developers.arcgis.com
@@ -37,29 +39,29 @@ dotnet add package dymaptic.GeoBlazor.Core --prerelease
 ### `_Host.cshtml`
 
 ```html
-<link href="_content/dymaptic.GeoBlazor.Core"/>
-<link href="_content/dymaptic.GeoBlazor.Core/assets/esri/themes/dark/main.css" rel="stylesheet" />
+<link href="_content/dymaptic.GeoBlazor"/>
+<link href="_content/dymaptic.GeoBlazor/assets/esri/themes/dark/main.css" rel="stylesheet" />
 <link href="DesMoinesBusRoutes.styles.css" rel="stylesheet" />
 ```
 
 ### `_Imports.razor`
 
 ```html
-@using dymaptic.GeoBlazor.Core.Components
-@using dymaptic.GeoBlazor.Core.Components.Geometries
-@using dymaptic.GeoBlazor.Core.Components.Layers
-@using dymaptic.GeoBlazor.Core.Components.Popups
-@using dymaptic.GeoBlazor.Core.Components.Symbols
-@using dymaptic.GeoBlazor.Core.Components.Views
-@using dymaptic.GeoBlazor.Core.Components.Widgets
-@using dymaptic.GeoBlazor.Core.Events
-@using dymaptic.GeoBlazor.Core.Objects
+@using dymaptic.GeoBlazor.Components
+@using dymaptic.GeoBlazor.Components.Geometries
+@using dymaptic.GeoBlazor.Components.Layers
+@using dymaptic.GeoBlazor.Components.Popups
+@using dymaptic.GeoBlazor.Components.Symbols
+@using dymaptic.GeoBlazor.Components.Views
+@using dymaptic.GeoBlazor.Components.Widgets
+@using dymaptic.GeoBlazor.Events
+@using dymaptic.GeoBlazor.Objects
 ```
 
 ### `Program.cs`
 
 ```csharp
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.StaticFiles;
 ...
 builder.Services.AddGeoBlazor();

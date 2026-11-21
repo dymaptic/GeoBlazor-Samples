@@ -1,3 +1,5 @@
+> **GeoBlazor V5 update.** This project was originally written against dymaptic.GeoBlazor.Core 4.4.4. It now references the single `dymaptic.GeoBlazor` package (V5) and targets net10.0. If you are following a blog post written for the earlier version, the code here no longer matches it exactly.
+
 # Iowa Bridges
 
 A Blazor Web App (.NET 10) built with [GeoBlazor](https://geoblazor.com) Core 4.4.4 that visualizes Iowa bridge condition data from the FHWA National Bridge Inventory (NBI). Features condition-based symbology, sidebar filters (condition, year built, county), bridge popups, and a "Find Bridges at Risk" query workflow.

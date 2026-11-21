@@ -25,7 +25,7 @@
                                      "route_shortname", 
                                      "route_long", 
                                      "trip_headsign" ])">
-            <PopupTemplate Title="{trip_headsign}" ContentFunction="BuildContent">
+            <PopupTemplate Title="@("{trip_headsign}")" ContentFunction="BuildContent">
                 <ActionButton Image="@(_isPaused ? "images/play.jpg" : "images/pause.jpg")"
                     Title="@(_isPaused ? "Play" : "Pause")"
                     Id="play"
@@ -41,8 +41,8 @@
     <ScaleBarWidget Position="OverlayPosition.BottomLeft" />
     <PopupWidget DockEnabled="true">
         <PopupDockOptions ButtonEnabled="false"
-                          BreakPoint="@(new BreakPoint(false))"
-                          Position="PopupDockPosition.BottomRight" />
+                          Breakpoint="@(new Breakpoint { BoolValue = false })"
+                          Position="dymaptic.GeoBlazor.Enums.PopupDockPosition.BottomRight" />
     </PopupWidget>
 </MapView>
 @if (_showOtto)
@@ -82,8 +82,8 @@
         {
             IncludeByGeoBlazorId = new[] { _routesLayer!.Id }
         };
-        HitTestResult result = await _mapView!.HitTest(clickEvent, options);
-        Graphic? feature = result.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
+        ViewHitTestResult? result = await _mapView!.HitTest(clickEvent, options);
+        Graphic? feature = result?.Results.OfType<GraphicHit>().FirstOrDefault()?.Graphic;
         if (feature is not null)
         {
             Query query = await _routesLayerView!.CreateQuery();
@@ -111,7 +111,7 @@
         }
 
         _isPaused = false;
-        await _mapView!.OpenPopup(new PopupOpenOptions()
+        await _mapView!.OpenPopup(new ViewPopupOpenOptions()
         {
             Features = [feature]
         });

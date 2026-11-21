@@ -1,4 +1,4 @@
-import {arcGisObjectRefs} from "/_content/dymaptic.GeoBlazor.Core/js/arcGisJsInterop.js"
+import {arcGisObjectRefs} from "/_content/dymaptic.GeoBlazor/js/arcGisJsInterop.js"
 
 export async function configureLayer(layerId, mapViewId) {
     console.log("Configure Layer");

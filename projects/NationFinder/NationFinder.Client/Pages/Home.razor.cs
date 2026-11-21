@@ -1,11 +1,11 @@
 using Blazored.LocalStorage;
-using dymaptic.GeoBlazor.Core.Components;
-using dymaptic.GeoBlazor.Core.Components.Geometries;
-using dymaptic.GeoBlazor.Core.Components.Layers;
-using dymaptic.GeoBlazor.Core.Components.Symbols;
-using dymaptic.GeoBlazor.Core.Components.Views;
-using dymaptic.GeoBlazor.Core.Events;
-using dymaptic.GeoBlazor.Core.Model;
+using dymaptic.GeoBlazor.Components;
+using dymaptic.GeoBlazor.Components.Geometries;
+using dymaptic.GeoBlazor.Components.Layers;
+using dymaptic.GeoBlazor.Components.Symbols;
+using dymaptic.GeoBlazor.Components.Views;
+using dymaptic.GeoBlazor.Events;
+using dymaptic.GeoBlazor.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 

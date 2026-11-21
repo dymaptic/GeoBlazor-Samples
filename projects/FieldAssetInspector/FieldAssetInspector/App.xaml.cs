@@ -1,5 +1,5 @@
 using System.Reflection;
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 using FieldAssetInspector.Razor;
 using Microsoft.Extensions.Configuration;
 using Application = Microsoft.Maui.Controls.Application;

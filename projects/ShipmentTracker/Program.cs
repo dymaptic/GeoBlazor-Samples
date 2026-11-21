@@ -1,5 +1,5 @@
 using dymaptic.Blazor.StateManagement.Server;
-using dymaptic.GeoBlazor.Pro;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +34,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-builder.Services.AddGeoBlazorPro(builder.Configuration);
+builder.Services.AddGeoBlazor(builder.Configuration);
 builder.Services.AddServerStateManagement<ShipmentDbContext>([
     typeof(Shipment),
     typeof(PickupRequestModel),

@@ -1,11 +1,11 @@
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options => { options.MaximumReceiveMessageSize = 2_000_000; });
-builder.Services.AddGeoBlazor();
+builder.Services.AddGeoBlazor(builder.Configuration);
 
 var app = builder.Build();
 

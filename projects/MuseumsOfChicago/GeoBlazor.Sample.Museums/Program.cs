@@ -1,4 +1,4 @@
-using dymaptic.GeoBlazor.Pro;
+using dymaptic.GeoBlazor;
 using GeoBlazor.Sample.Museums.Client.Pages;
 using GeoBlazor.Sample.Museums.Components;
 
@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
-builder.Services.AddGeoBlazorPro(builder.Configuration);
+builder.Services.AddGeoBlazor(builder.Configuration);
 
 builder.Services.AddCors();
 

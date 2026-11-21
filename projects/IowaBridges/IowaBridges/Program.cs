@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.StaticFiles;
 using IowaBridges.Components;
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 

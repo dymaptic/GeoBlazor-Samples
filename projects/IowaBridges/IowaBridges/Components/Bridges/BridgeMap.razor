@@ -18,16 +18,17 @@
                       DefinitionExpression="@_currentDefinitionExpression"
                       Renderer="@_renderer"
                       OutFields="@(["OBJECTID", "STRUCTURE_NUMBER_008", "STATE_CODE_001", "COUNTY_CODE_003", "DECK_COND_058", "SUPERSTRUCTURE_COND_059", "SUBSTRUCTURE_COND_060", "YEAR_BUILT_027", "ADT_029", "OPERATING_RATING_064", "DATE_OF_INSPECT_090"])">
-            <PopupTemplate Title="Bridge {STRUCTURE_NUMBER_008}">
-                <FieldsPopupContent Title="NBI attributes">
-                    <FieldInfo FieldName="YEAR_BUILT_027" Label="Year built" />
-                    <FieldInfo FieldName="DECK_COND_058" Label="Deck condition" />
-                    <FieldInfo FieldName="SUPERSTRUCTURE_COND_059" Label="Superstructure condition" />
-                    <FieldInfo FieldName="SUBSTRUCTURE_COND_060" Label="Substructure condition" />
-                    <FieldInfo FieldName="ADT_029" Label="Average daily traffic" />
-                    <FieldInfo FieldName="OPERATING_RATING_064" Label="Operating rating" />
-                    <FieldInfo FieldName="DATE_OF_INSPECT_090" Label="Inspection date (YYYYMM)" />
-                </FieldsPopupContent>
+            <PopupTemplate Title="@("Bridge {STRUCTURE_NUMBER_008}")">
+                <FieldsContent Title="NBI attributes"
+                              FieldInfos="@([
+                        new FieldInfo("YEAR_BUILT_027", "Year built"),
+                        new FieldInfo("DECK_COND_058", "Deck condition"),
+                        new FieldInfo("SUPERSTRUCTURE_COND_059", "Superstructure condition"),
+                        new FieldInfo("SUBSTRUCTURE_COND_060", "Substructure condition"),
+                        new FieldInfo("ADT_029", "Average daily traffic"),
+                        new FieldInfo("OPERATING_RATING_064", "Operating rating"),
+                        new FieldInfo("DATE_OF_INSPECT_090", "Inspection date (YYYYMM)")
+                          ])" />
             </PopupTemplate>
         </FeatureLayer>
 
@@ -120,7 +121,7 @@
         var result = await _bridgeLayer.QueryFeatures(query);
         await _atRiskLayer.Clear();
 
-        if (result?.Features is null || result.Features.Count == 0)
+        if (result?.Features is null || !result.Features.Any())
         {
             await OnAtRiskCount.InvokeAsync(0);
             return 0;
@@ -142,7 +143,7 @@
 
         double xmin = double.MaxValue, ymin = double.MaxValue;
         double xmax = double.MinValue, ymax = double.MinValue;
-        var graphics = new List<Graphic>(result.Features.Count);
+        var graphics = new List<Graphic>(result.Features.Count());
 
         foreach (var feature in result.Features)
         {

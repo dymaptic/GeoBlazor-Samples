@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="dymaptic.GeoBlazor.Pro" Version="4.2.0-beta-2.1" />
+        <PackageReference Include="dymaptic.GeoBlazor" Version="5.*" />
         <PackageReference Include="Radzen.Blazor" Version="7.1.6" />
     </ItemGroup>
 

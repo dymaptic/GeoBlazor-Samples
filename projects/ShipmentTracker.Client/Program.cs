@@ -1,5 +1,5 @@
 using dymaptic.Blazor.StateManagement;
-using dymaptic.GeoBlazor.Pro;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ShipmentTracker.Client;
 
@@ -8,7 +8,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
-builder.Services.AddGeoBlazorPro(builder.Configuration);
+builder.Services.AddGeoBlazor(builder.Configuration);
 builder.Services.AddClientStateManagement([
     typeof(Shipment),
     typeof(PickupRequestModel),
