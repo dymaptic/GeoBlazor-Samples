@@ -34,29 +34,29 @@ jobs:
             -l "${{ secrets.SAMPLES_GEOBLAZOR_DEV_LICENSE_KEY }}" `
             -b "${{ secrets.SAMPLES_API_BYPASS_KEY }}" `
             -dark `
-            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.json" `
-            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.Client/wwwroot/appsettings.Production.json" `
-            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.json" `
-            -o "./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/appsettings.Production.json"
+            -o "./samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp.Client/wwwroot/appsettings.json" `
+            -o "./samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp.Client/wwwroot/appsettings.Production.json" `
+            -o "./samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp/appsettings.json" `
+            -o "./samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp/appsettings.Production.json"
         
         # Publishes the Samples project
         # DON'T PRE-RESTORE, PRE-BUILD, IT BREAKS IN DOCKER -- SEE https://github.com/dotnet/aspnetcore/issues/63962
       - name: Publish Samples
         shell: pwsh
         run: |
-          dotnet publish ./samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp.csproj `
+          dotnet publish ./samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp.csproj `
           -c Release `
           /p:RunAOT=true `
           /m `
-          --output samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/published
+          --output samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp/published
 
       - name: Upload Samples Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dev-webapp
-          path: samples/pro/dymaptic.GeoBlazor.Pro.Sample.WebApp/dymaptic.GeoBlazor.Pro.Sample.WebApp/published
+          path: samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp/published
 
-  # This step will deploy the Pro Blazor Samples app to Azure develop slot
+  # This step will deploy the Blazor Samples app to Azure develop slot
   deploy:
     runs-on: [ ubuntu-latest ]
     needs: [ build ]
@@ -76,4 +76,4 @@ jobs:
           app-name: dy-blazor-samples-server
           package: published
           slot-name: develop
-          startup-command: 'dotnet dymaptic.GeoBlazor.Pro.Sample.WebApp.dll'
+          startup-command: 'dotnet dymaptic.GeoBlazor.Sample.WebApp.dll'
