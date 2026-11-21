@@ -1,8 +1,10 @@
 ﻿<Router AppAssembly="@typeof(App).Assembly"
         AdditionalAssemblies="new[] { typeof(MainLayout).Assembly }">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        <CascadingValue Name="PageRouteData" Value="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </CascadingValue>
     </Found>
     <NotFound>
         <PageTitle>Not found</PageTitle>

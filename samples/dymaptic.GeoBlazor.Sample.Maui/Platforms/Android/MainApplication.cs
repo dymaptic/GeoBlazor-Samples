@@ -10,7 +10,7 @@ using Android.Runtime;
 [assembly: UsesFeature("android.hardware.location.network", Required = false)]
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.Maui;
+namespace dymaptic.GeoBlazor.Sample.Maui;
 
 [Application]
 public class MainApplication : MauiApplication

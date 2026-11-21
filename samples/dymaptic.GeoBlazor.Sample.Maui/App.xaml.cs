@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.Maui;
+namespace dymaptic.GeoBlazor.Sample.Maui;
 
 public partial class App
 {

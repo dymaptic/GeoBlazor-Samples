@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Models;
+namespace dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Models;
 
 /// <summary>
 ///     The response from the request for an ArcGIS token, including success notification and error messages.

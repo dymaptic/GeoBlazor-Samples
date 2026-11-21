@@ -1,9 +1,9 @@
-using dymaptic.GeoBlazor.Core.Model;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Models;
+using dymaptic.GeoBlazor.Model;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Models;
 using System.Text.Json;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Services;
+namespace dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Services;
 
 /// <summary>
 ///     Service for managing ArcGIS authentication tokens.

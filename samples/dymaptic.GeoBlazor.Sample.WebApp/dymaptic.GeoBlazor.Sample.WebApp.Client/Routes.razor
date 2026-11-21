@@ -2,7 +2,9 @@
         AdditionalAssemblies="@(new[] { typeof(MainLayout).Assembly })"
         NotFoundPage="@typeof(NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        <CascadingValue Name="PageRouteData" Value="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </CascadingValue>
     </Found>
 </Router>

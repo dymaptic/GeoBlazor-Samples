@@ -101,7 +101,7 @@ nav {
         .navbar__logo {
             height: 100%;
             width: 250px;
-            background-image: url('../../_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/GeoBlazor-by-dymaptic-White.svg');
+            background-image: url('../../_content/dymaptic.GeoBlazor.Sample.Shared/images/GeoBlazor-by-dymaptic-White.svg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center center;
@@ -109,7 +109,7 @@ nav {
 
         @media (prefers-color-scheme: light) {
             .navbar__logo {
-                background-image: url('../../_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/GeoBlazor-by-dymaptic-Purple.svg');
+                background-image: url('../../_content/dymaptic.GeoBlazor.Sample.Shared/images/GeoBlazor-by-dymaptic-Purple.svg');
             }
 
             .navbar__menu-item:hover {
@@ -167,7 +167,7 @@ background: var(--background-grey-3);
     }
 
     .icon.hamburger-icon {
-        background-image: url('../../_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/menu.svg');
+        background-image: url('../../_content/dymaptic.GeoBlazor.Sample.Shared/images/menu.svg');
         width: 3.75rem;
         height: 3.75rem;
         cursor: pointer;
@@ -341,7 +341,7 @@ background: var(--background-grey-3);
     
     .oi-chevron-down {
         height: 2rem;
-        background-image: url('../../_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/down-carat.svg');
+        background-image: url('../../_content/dymaptic.GeoBlazor.Sample.Shared/images/down-carat.svg');
         background-position: center;
     }
 

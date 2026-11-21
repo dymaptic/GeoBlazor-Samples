@@ -1,7 +1,7 @@
 ﻿using Foundation;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.Maui
+namespace dymaptic.GeoBlazor.Sample.Maui
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

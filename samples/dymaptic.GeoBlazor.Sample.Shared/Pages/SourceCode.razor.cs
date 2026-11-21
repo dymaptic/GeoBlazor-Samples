@@ -1,8 +1,8 @@
 using System.Reflection;
-using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
+using dymaptic.GeoBlazor.Sample.Shared.Shared;
 using Microsoft.AspNetCore.Components;
 
-namespace dymaptic.GeoBlazor.Core.Sample.Shared.Pages;
+namespace dymaptic.GeoBlazor.Sample.Shared.Pages;
 
 public partial class SourceCode
 {
@@ -95,7 +95,7 @@ public partial class SourceCode
             {
                 if (type.GetCustomAttributes<RouteAttribute>().Any())
                 {
-                    // last writer wins; Pro can shadow Core if names collide
+                    // last writer wins if names collide
                     index[type.Name] = type;
                 }
             }

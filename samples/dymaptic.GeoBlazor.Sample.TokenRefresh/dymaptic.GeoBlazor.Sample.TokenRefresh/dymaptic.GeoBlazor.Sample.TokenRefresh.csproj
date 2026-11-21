@@ -6,19 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client/dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.csproj" />
-      <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.13"/>
+    <ProjectReference Include="../dymaptic.GeoBlazor.Sample.TokenRefresh.Client/dymaptic.GeoBlazor.Sample.TokenRefresh.Client.csproj" />
+      <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.15"/>
   </ItemGroup>
 
   <Choose>
       <When Condition="'$(UseProjectReferences)' == 'true'">
           <ItemGroup>
-              <ProjectReference Include="$(CoreProjectPath)\dymaptic.GeoBlazor.Core.csproj" />
+              <ProjectReference Include="$(GeoBlazorProjectPath)\dymaptic.GeoBlazor.csproj" />
           </ItemGroup>
       </When>
       <Otherwise>
           <ItemGroup>
-              <PackageReference Include="dymaptic.GeoBlazor.Core" Version="*" />
+              <PackageReference Include="dymaptic.GeoBlazor" Version="*" />
           </ItemGroup>
       </Otherwise>
   </Choose>

@@ -1,7 +1,7 @@
 ﻿using UIKit;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.Maui;
+namespace dymaptic.GeoBlazor.Sample.Maui;
 
 public class Program
 {

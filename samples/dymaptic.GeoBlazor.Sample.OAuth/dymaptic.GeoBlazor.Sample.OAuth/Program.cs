@@ -1,6 +1,6 @@
-using dymaptic.GeoBlazor.Core;
-using dymaptic.GeoBlazor.Core.Sample.OAuth.Components;
-using _Imports = dymaptic.GeoBlazor.Core.Sample.OAuth.Client._Imports;
+using dymaptic.GeoBlazor;
+using dymaptic.GeoBlazor.Sample.OAuth.Components;
+using _Imports = dymaptic.GeoBlazor.Sample.OAuth.Client._Imports;
 
 
 var builder = WebApplication.CreateBuilder(args);

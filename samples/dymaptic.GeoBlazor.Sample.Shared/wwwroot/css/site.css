@@ -1057,22 +1057,6 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
     line-height: 1.75rem;
 }
 
-.nav-list .nav-list-item .nav-list-link.pro .nav-item-title, .nav-list .nav-list-item .nav-list-link.pro.active .nav-item-title {
-    color: var(--geoblazor-accent);
-}
-
-.nav-list .nav-list-item .nav-list-link.pro .oi, .nav-list .nav-list-item .nav-list-link.pro .oi {
-    color: var(--geoblazor-accent);
-}
-
-.nav-list .nav-list-item:hover .nav-list-link.pro .nav-item-title {
-    color: var(--geoblazor-accent-emphasis);
-}
-
-.nav-list .nav-list-item:hover .nav-list-link.pro .oi, .nav-list .nav-list-item .nav-list-link.pro .oi {
-    color: var(--geoblazor-accent-emphasis);
-}
-
 .nav-list .nav-list-item:has(> .nav-list-link.active) {
     background-color: var(--background-grey-3);
 }
@@ -1388,7 +1372,7 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
         background-color: var(--background-grey-4);
     }
 
-    .oi img:not(.pro .oi img) {
+    .oi img {
         filter: invert(1);
     }
 }

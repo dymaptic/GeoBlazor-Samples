@@ -20,7 +20,7 @@
 <script type="application/ld+json">@((MarkupString)SchemaGraphJson)</script>
 
 <div class="page">
-    <DynamicComponent Type="NavMenuType" />
+    <NavMenu />
     <main>
         <div class="main-links">
 
@@ -102,12 +102,15 @@
         {
             bool isDarkMode = await JsRuntime.InvokeAsync<bool>("isDarkMode");
             Configuration["GeoBlazor:Theme"] = isDarkMode ? "Dark" : "Light";
+
+            // Route WFS, WMS, and other CORS-blocked requests through the host's /proxy endpoint.
+            IJSObjectReference coreModule = await AuthenticationManager.GetCoreJsModule();
+            await JsRuntime.InvokeVoidAsync("setInterceptors", coreModule);
             StateHasChanged();
         }
     }
-    
-    protected virtual Type NavMenuType => typeof(NavMenu);
-    
+
+
     private readonly string[] _btnTypes = ["btn-primary", "btn-secondary", "btn-accent"];
 
     private const string DefaultMetaDescription =
@@ -231,7 +234,7 @@
                     ["sameAs"] = new[]
                     {
                         "https://github.com/dymaptic/GeoBlazor",
-                        "https://www.nuget.org/packages/dymaptic.GeoBlazor.Core",
+                        "https://www.nuget.org/packages/dymaptic.GeoBlazor",
                         "https://discord.com/invite/x4QbXWb5"
                     }
                 },
@@ -245,7 +248,7 @@
                     ["applicationSubCategory"] = "Mapping API",
                     ["operatingSystem"] = ".NET 8, .NET 9, .NET 10",
                     ["url"] = "https://geoblazor.com",
-                    ["downloadUrl"] = "https://www.nuget.org/packages/dymaptic.GeoBlazor.Core",
+                    ["downloadUrl"] = "https://www.nuget.org/packages/dymaptic.GeoBlazor",
                     ["codeRepository"] = "https://github.com/dymaptic/GeoBlazor",
                     ["publisher"] = new Dictionary<string, object?> { ["@id"] = "https://geoblazor.com/#organization" }
                 },

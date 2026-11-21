@@ -74,8 +74,7 @@
 @code {
     RenderFragment RenderNavLink(PageLink page)
     {
-        string linkClass = $"nav-list-link{(page.Pro ? " pro" : "")}";
-        return @<NavLink class="@linkClass" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
+        return @<NavLink class="nav-list-link" href="@(page.Href)" @onclick:preventDefault="true" Match="NavLinkMatch.All">
                    @if (page.IconClass is not null)
                    {
                        <text><span class="oi @(page.IconClass)" aria-hidden="true"></span><span
@@ -83,7 +82,7 @@
                    }
                    else
                    {
-                       <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/@(page.ImageFile)"
+                       <text><span class="oi"><img src="_content/dymaptic.GeoBlazor.Sample.Shared/images/@(page.ImageFile)"
                                                    alt="@(page.Title)"/></span><span
                                class="nav-item-title">@(page.Title)</span></text>
                    }

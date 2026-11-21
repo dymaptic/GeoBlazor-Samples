@@ -2,7 +2,7 @@
 using Android.Content.PM;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.Maui;
+namespace dymaptic.GeoBlazor.Sample.Maui;
 
 [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, Icon = "@drawable/icon",
     ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode |

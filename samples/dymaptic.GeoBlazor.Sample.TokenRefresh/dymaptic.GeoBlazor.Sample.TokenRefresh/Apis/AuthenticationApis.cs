@@ -1,8 +1,8 @@
-﻿using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Models;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Services;
+﻿using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Models;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Services;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Apis;
+namespace dymaptic.GeoBlazor.Sample.TokenRefresh.Apis;
 
 public static class AuthenticationApis
 {

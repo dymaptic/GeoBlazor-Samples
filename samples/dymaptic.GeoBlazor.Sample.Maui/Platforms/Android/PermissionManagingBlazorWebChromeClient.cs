@@ -15,7 +15,7 @@ using WebView = Android.Webkit.WebView;
 
 
 // ReSharper disable once CheckNamespace
-namespace dymaptic.GeoBlazor.Core.Sample.Maui.Platforms.Android;
+namespace dymaptic.GeoBlazor.Sample.Maui.Platforms.Android;
 
 /// <summary>
 ///     Borrowed from https://github.com/MackinnonBuck/MauiBlazorPermissionsExample

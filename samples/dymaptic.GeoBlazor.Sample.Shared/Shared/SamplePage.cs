@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
+namespace dymaptic.GeoBlazor.Sample.Shared.Shared;
 
 public abstract class SamplePage: ComponentBase
 {

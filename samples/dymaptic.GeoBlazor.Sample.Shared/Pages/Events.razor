@@ -149,10 +149,10 @@
 </Accordion>
 
 <MapView @ref="_view" Class="map-view" OnClick="OnMapClick" OnDoubleClick="OnMapDoubleClick"
-         OnHold="OnMapHold" OnBlur="OnMapBlur" OnFocus="OnMapFocus" OnDrag="OnMapDrag"
+         OnHold="OnMapHold" OnBlur="OnMapBlur" OnFocus="OnMapFocus" OnViewDrag="OnMapDrag"
          OnPointerDown="OnMapPointerDown" OnPointerUp="OnMapPointerUp" OnPointerEnter="OnMapPointerEnter"
          OnPointerLeave="OnMapPointerLeave" OnPointerMove="OnMapPointerMove" OnExtentChanged="OnMapExtentChanged"
-         OnKeyDown="OnMapKeyDown" OnKeyUp="OnMapKeyUp" OnMouseWheel="OnMapMouseWheel"
+         OnViewKeyDown="OnMapKeyDown" OnViewKeyUp="OnMapKeyUp" OnMouseWheel="OnMapMouseWheel"
          EventRateLimitInMilliseconds="500">
     <WebMap>
         <PortalItem ExcludeApiKey="true" 
@@ -224,7 +224,7 @@
         _focusJson = BuildViewableJson(focusEvent);
     }
 
-    private void OnMapDrag(ViewDragEvent dragEvent)
+    private void OnMapDrag(DragEvent dragEvent)
     {
         _dragJson = BuildViewableJson(dragEvent);
     }
@@ -259,12 +259,12 @@
         _extentJson = BuildViewableJson(extent);
     }
 
-    private void OnMapKeyDown(ViewKeyDownEvent keyDownEvent)
+    private void OnMapKeyDown(KeyDownEvent keyDownEvent)
     {
         _keyDownJson = BuildViewableJson(keyDownEvent);
     }
 
-    private void OnMapKeyUp(ViewKeyUpEvent keyUpEvent)
+    private void OnMapKeyUp(KeyUpEvent keyUpEvent)
     {
         _keyUpJson = BuildViewableJson(keyUpEvent);
     }

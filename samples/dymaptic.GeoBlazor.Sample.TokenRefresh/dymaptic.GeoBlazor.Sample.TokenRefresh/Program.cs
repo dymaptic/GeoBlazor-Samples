@@ -1,8 +1,8 @@
-using dymaptic.GeoBlazor.Core;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Apis;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Services;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Components;
-using _Imports = dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client._Imports;
+using dymaptic.GeoBlazor;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Apis;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Services;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Components;
+using _Imports = dymaptic.GeoBlazor.Sample.TokenRefresh.Client._Imports;
 
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

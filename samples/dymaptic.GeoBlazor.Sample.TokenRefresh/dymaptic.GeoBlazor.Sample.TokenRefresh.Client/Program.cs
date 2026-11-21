@@ -1,6 +1,6 @@
-using dymaptic.GeoBlazor.Core;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Models;
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Services;
+using dymaptic.GeoBlazor;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Models;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.Net.Http.Json;
 

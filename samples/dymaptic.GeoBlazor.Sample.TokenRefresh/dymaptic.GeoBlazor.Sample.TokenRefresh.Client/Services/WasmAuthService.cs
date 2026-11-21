@@ -1,8 +1,8 @@
-using dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Models;
+using dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Models;
 using System.Net.Http.Json;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.TokenRefresh.Client.Services;
+namespace dymaptic.GeoBlazor.Sample.TokenRefresh.Client.Services;
 
 /// <summary>
 ///     Passes token requests to the server API in a Blazor WebAssembly application.

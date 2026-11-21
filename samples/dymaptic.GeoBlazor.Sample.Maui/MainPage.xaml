@@ -2,8 +2,8 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:dymaptic.GeoBlazor.Core.Sample.Maui"
-             x:Class="dymaptic.GeoBlazor.Core.Sample.Maui.MainPage"
+             xmlns:local="clr-namespace:dymaptic.GeoBlazor.Sample.Maui"
+             x:Class="dymaptic.GeoBlazor.Sample.Maui.MainPage"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <BlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html">

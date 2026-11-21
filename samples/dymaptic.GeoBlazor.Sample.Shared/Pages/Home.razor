@@ -1,4 +1,5 @@
-﻿@page "/{PageRoute:nonfile?}"
+﻿@implements IDisposable
+@page "/{PageRoute:nonfile?}"
 
 @* Anything that reaches this catch-all with a route segment matched no page. Say so rather than
    silently rendering Home, which makes a missing or excluded sample page look like a working link. *@
@@ -8,7 +9,7 @@
         <h2>Sample not found</h2>
         <p>
             No sample page is registered for <code>/@PageRoute</code> in this host. It may not be
-            included in this build &mdash; check the other Core/Pro sample hosts.
+            included in this build &mdash; check the other sample hosts.
         </p>
     </div>
 }
@@ -20,7 +21,7 @@
         web application.
     </p>
     <div id="feature-inset">
-        <img id="map-img" src="_content/dymaptic.GeoBlazor.Core.Sample.Shared/images/scene-map-background.webp" />
+        <img id="map-img" src="_content/dymaptic.GeoBlazor.Sample.Shared/images/scene-map-background.webp" />
         <div id="feature-text-container">
             <div id="feature-text">
                 <h2>Visit our Home Page</h2>
@@ -33,7 +34,7 @@
                 </p>
                 <h2>Get the Nuget Package</h2>
                 <p>
-                    <a href="https://www.nuget.org/packages/dymaptic.GeoBlazor.Core">https://www.nuget.org/packages/<br />dymaptic.GeoBlazor.Core</a>
+                    <a href="https://www.nuget.org/packages/dymaptic.GeoBlazor">https://www.nuget.org/packages/<br />dymaptic.GeoBlazor</a>
                 </p>
                 <h2>Get Started</h2>
                 <p>
@@ -44,20 +45,64 @@
     </div>
     <p>Need help creating your own Geospatial Information System, maps, or data applications?</p>
     <p>Visit <a href="https://www.dymaptic.com">dymaptic.com</a> or <a href="mailto:geoblazor@dymaptic.com">email us</a> and let us know how we can help you!</p>
-    <div class="pro">
-        Go Pro with the <a href="https://docs.geoblazor.com/pages/pro.html">GeoBlazor Pro</a> package!
-    </div>
+    @if (_jsLoaded == false) // just load once to get data into browser
+    {
+        <!-- Hidden map load to pre-load JS files on landing page -->
+        <div style="visibility: hidden; opacity: 0" aria-hidden="true">
+            <MapView @ref="_mapView">
+                <Map>
+                    <Basemap>
+                        <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+                    </Basemap>
+                </Map>
+            </MapView>
+        </div>
+    }
 </div>
 
 @code {
     [Parameter]
     public string? PageRoute { get; set; }
 
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    public required IJSRuntime JsRuntime { get; set; }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        Console.WriteLine(PageRoute);
+        NavigationManager.LocationChanged += OnLocationChanged;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsLoaded = bool.TryParse(await JsRuntime.InvokeAsync<string?>("localStorage.getItem", "geoBlazorLoaded"), out bool isLoaded) && isLoaded;
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        try
+        {
+            _ = JsRuntime.InvokeVoidAsync("localStorage.setItem", "geoBlazorLoaded", "true");
+            _ = _mapView!.DisposeAsync();
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    private MapView? _mapView;
+    private bool? _jsLoaded;
 }

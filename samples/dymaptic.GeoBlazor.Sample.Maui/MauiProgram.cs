@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Reflection;
-using dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
+using dymaptic.GeoBlazor.Sample.Shared.Shared;
 
 
-namespace dymaptic.GeoBlazor.Core.Sample.Maui;
+namespace dymaptic.GeoBlazor.Sample.Maui;
 
 public static class MauiProgram
 {
@@ -29,7 +29,7 @@ public static class MauiProgram
         var executingAssembly = Assembly.GetExecutingAssembly();
 
         using Stream stream = executingAssembly
-            .GetManifestResourceStream("dymaptic.GeoBlazor.Core.Sample.Maui.appsettings.json")!;
+            .GetManifestResourceStream("dymaptic.GeoBlazor.Sample.Maui.appsettings.json")!;
 
         IConfigurationRoot config = new ConfigurationBuilder()
             .AddUserSecrets(executingAssembly)

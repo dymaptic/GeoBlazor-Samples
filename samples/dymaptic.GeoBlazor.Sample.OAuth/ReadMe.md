@@ -3,8 +3,8 @@
 This sample shows how to set up User Authentication with OAuth in a Blazor Web App using the GeoBlazor library.
 
 There are two projects related to the BWA
-- `dymaptic.GeoBlazor.Core.Sample.OAuth`
-- `dymaptic.GeoBlazor.Core.Sample.OAuth.Client`
+- `dymaptic.GeoBlazor.Sample.OAuth`
+- `dymaptic.GeoBlazor.Sample.OAuth.Client`
 
 The `Client` app is referenced by the core `WebApp`, and is used to render WebAssembly components.
 We have added a `RenderModeSelector` to the sample, which allows you to test the different rendering modes.

@@ -3,8 +3,8 @@
 This sample shows how to use the GeoBlazor library in a Blazor Web App. It also showcases many different features of the library.
 
 There are two projects related to the BWA
-- `dymaptic.GeoBlazor.Core.Sample.WebApp`
-- `dymaptic.GeoBlazor.Core.Sample.WebApp.Client`
+- `dymaptic.GeoBlazor.Sample.WebApp`
+- `dymaptic.GeoBlazor.Sample.WebApp.Client`
 
 The `Client` app is referenced by the core `WebApp`, and is used to render WebAssembly components.
 We have added a `RenderModeSelector` to the sample, which allows you to test the different rendering modes.

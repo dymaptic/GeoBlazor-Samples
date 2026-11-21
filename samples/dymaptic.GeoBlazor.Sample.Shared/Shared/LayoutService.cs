@@ -1,4 +1,4 @@
-namespace dymaptic.GeoBlazor.Core.Sample.Shared.Shared;
+namespace dymaptic.GeoBlazor.Sample.Shared.Shared;
 
 public class LayoutService
 {
