@@ -50,7 +50,7 @@
 
     private async Task OnViewRendered()
     {
-        if (!_mapView!.Map!.Layers!.Contains(_featureLayer!))
+        if (_mapView!.Map!.Layers?.Contains(_featureLayer!) != true)
         {
             await _mapView!.AddLayer(_featureLayer!);
         }
