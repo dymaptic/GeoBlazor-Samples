@@ -14,7 +14,7 @@
             <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
         </Basemap>
         <Ground>
-            <ElevationLayer Url="https://sampleserver6.arcgisonline.com/arcgis/rest/services/Elevation/MtBaldy_Elevation/ImageServer" />
+            <ElevationLayer Url="https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer" />
         </Ground>
     </Map>
 </SceneView>
@@ -30,6 +30,6 @@
     public override string Description =>
         "This GeoBlazor sample, written in Blazor for .NET developers, shows Ground as a regular Razor component. " +
         "A SceneView hosts a Map with an imagery Basemap and a Ground element. The Ground holds an ElevationLayer " +
-        "child that points at the Mt. Baldy elevation service, so the terrain near Mt. Baldy in California renders " +
-        "in 3D instead of as a flat surface. Leaving Ground out gives a Scene the default world elevation.";
+        "child that points at the tiled World Elevation 3D terrain service, so the terrain near Mt. Baldy in California " +
+        "renders in 3D instead of as a flat surface. ArcGIS 5 elevation layers need a tiled service.";
 }
