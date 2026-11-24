@@ -696,18 +696,8 @@ body { /* body tag added to help overwrite Bootstrap */
         color: var(--text-disabled);
     }
 
-    textarea::-webkit-resizer {
-        background-image: url(../images/icons/resize-handle.svg);
-    }
-
     ::placeholder {
         color: var(--text-disabled);
-    }
-
-    @media (prefers-color-scheme: light) {
-        textarea::-webkit-resizer {
-            background-image: url(../images/icons/resize-handle-dark.svg);
-        }
     }
 
 }
