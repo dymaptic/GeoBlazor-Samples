@@ -1,12 +1,8 @@
 <Project>
-    <!-- Per-developer opt-in overrides (gitignored). Must come first: the imports and conditions
-         below read UseProjectReferences, and IDE project-model evaluation only sees it if set here. -->
+    <!-- Per-developer opt-in overrides (gitignored). Must come first: the conditions below read
+         UseProjectReferences, and IDE project-model evaluation only sees it if set here. -->
     <Import Project="$(MSBuildThisFileDirectory)local.props"
             Condition="Exists('$(MSBuildThisFileDirectory)local.props')"/>
-
-    <!-- Import parent Directory.Build.props if it exists (e.g., when running as submodule of Pro) -->
-    <Import Project="../Directory.Build.props"
-            Condition="Exists('$(MSBuildThisFileDirectory)../Directory.Build.props') AND '$(UseProjectReferences)' == 'true'"/>
 
     <PropertyGroup>
         <Nullable>enable</Nullable>
@@ -14,24 +10,24 @@
     </PropertyGroup>
 
     <!--
-        By default, samples reference GeoBlazor NuGet packages with Version="*" (latest).
-        Set UseProjectReferences=true and configure the paths below to use local project references instead.
-        This is useful when developing GeoBlazor Core/Pro alongside the samples (e.g., as submodules).
+        By default, samples reference the dymaptic.GeoBlazor NuGet package with Version="*" (latest).
+        Set UseProjectReferences=true to build against the library source instead. This is the everyday dev
+        loop when changing GeoBlazor and the samples together.
+
+        GeoBlazorProjectPath defaults to the sibling checkout (GeoBlazor and GeoBlazor-Samples side by side
+        in the same parent folder). Override it when the library lives elsewhere.
 
         Example usage:
-          dotnet build /p:UseProjectReferences=true /p:CoreProjectPath=../GeoBlazor/src/dymaptic.GeoBlazor.Core /p:ProProjectPath=../GeoBlazor.Pro/src/dymaptic.GeoBlazor.Pro
+          dotnet build /p:UseProjectReferences=true /p:GeoBlazorProjectPath=../GeoBlazor/src/dymaptic.GeoBlazor
     -->
     <PropertyGroup Condition="'$(UseProjectReferences)' == 'true'">
-        <CoreProjectPath Condition="'$(CoreProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor.Core</CoreProjectPath>
-        <!-- Nested layout first (this repo as a submodule of GeoBlazor.Pro), then sibling checkouts. -->
-        <ProProjectPath Condition="'$(ProProjectPath)' == '' AND Exists('$(MSBuildThisFileDirectory)..\src\dymaptic.GeoBlazor.Pro\dymaptic.GeoBlazor.Pro.csproj')">$(MSBuildThisFileDirectory)..\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
-        <ProProjectPath Condition="'$(ProProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor.Pro\src\dymaptic.GeoBlazor.Pro</ProProjectPath>
+        <GeoBlazorProjectPath Condition="'$(GeoBlazorProjectPath)' == ''">$(MSBuildThisFileDirectory)..\GeoBlazor\src\dymaptic.GeoBlazor</GeoBlazorProjectPath>
         <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
-        <!-- Source-ref sample hosts: drop the ESBuild-emitted Core/Pro JS from the MapStaticAssets endpoint manifest so
-             they aren't fingerprinted/listed; UseStaticFiles still serves them at their _content path. Matched against
+        <!-- Source-ref sample hosts: drop the ESBuild-emitted GeoBlazor JS from the MapStaticAssets endpoint manifest so
+             it isn't fingerprinted/listed; UseStaticFiles still serves it at its _content path. Matched against
              the served route, which for RCL assets is _content/{PackageId}/... . Retain the framework default. -->
         <StaticWebAssetEndpointExclusionPattern>
-            $(StaticWebAssetEndpointExclusionPattern);_content/dymaptic.GeoBlazor.Core/js/**;_content/dymaptic.GeoBlazor.Pro/js/**
+            $(StaticWebAssetEndpointExclusionPattern);_content/dymaptic.GeoBlazor/js/**
         </StaticWebAssetEndpointExclusionPattern>
     </PropertyGroup>
 </Project>

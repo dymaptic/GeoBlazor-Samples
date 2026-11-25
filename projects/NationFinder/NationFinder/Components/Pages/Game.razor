@@ -82,7 +82,7 @@
                     ReturnGeometry = true
                 };
 
-            FeatureSet? result = await _countriesMapLayer!.QueryFeatures(query, token);
+            FeatureSet? result = await _countriesMapLayer!.QueryFeatures(query);
 
             await _graphicsMapLayer!.Clear();
             Symbol fillSymbol = new SimpleFillSymbol(color: new MapColor("blue"));

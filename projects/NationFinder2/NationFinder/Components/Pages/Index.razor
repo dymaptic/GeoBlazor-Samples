@@ -3,6 +3,7 @@
 @using ProfanityFilter
 @using System.Text.Json
 @inject IJSRuntime JsRuntime
+@inject JsModuleManager JsModuleManager
 
 @rendermode RenderMode
 
@@ -208,7 +209,8 @@ else
         IJSObjectReference module =
             await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./geoblazorextension.js");
 
-        await module.InvokeVoidAsync("hideUiControls", _sceneView!.JsModule, _sceneView.Id);
+        IJSObjectReference coreModule = await JsModuleManager.GetCoreJsModule(JsRuntime, CancellationToken.None);
+        await module.InvokeVoidAsync("hideUiControls", coreModule, _sceneView!.Id);
     }
 
     private async Task OnViewRendered()

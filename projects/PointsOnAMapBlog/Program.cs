@@ -1,4 +1,4 @@
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.StaticFiles;
 using PointsOnAMapBlog.Components;
 

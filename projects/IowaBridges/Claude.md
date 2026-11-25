@@ -2,7 +2,7 @@ You are a senior .NET + Blazor + GIS engineer. Generate a complete, buildable Ge
 
 ## Mission
 
-  Create a Blazor Web App (.NET 10) using dymaptic.GeoBlazor.Core 4.4.4 and Interactive Server render mode in 20 minutes or less.
+  Create a Blazor Web App (.NET 10) using dymaptic.GeoBlazor 4.4.4 and Interactive Server render mode in 20 minutes or less.
 
 App purpose: visualize Iowa bridge condition data (NBI) with:
 
@@ -25,7 +25,7 @@ App purpose: visualize Iowa bridge condition data (NBI) with:
 ## Authoritative Sources (must consult first)
 
 - GeoBlazor docs: https://docs.geoblazor.com (Getting Started, FeatureLayer, Renderers, Popups, Widgets, Query, Authentication if relevant).
-- NuGet API/version reference for `dymaptic.GeoBlazor.Core` 4.4.4
+- NuGet API/version reference for `dymaptic.GeoBlazor` 4.4.4
 - ArcGIS layer metadata via `?f=json` (for real field names/types)
 - Microsoft Blazor render modes (project structure rules): https://learn.microsoft.com/en-us/aspnet/core/blazor/components/render-modes
 - If you run into compiler error/warning `BL0005`, the correct solution is to use parameterized constructors with named parameters, not to suppress the error.
@@ -40,11 +40,11 @@ For this app: The project's `Components/Pages/` folder should contain only what'
 
 Other rules:
 
-- Add `dymaptic.GeoBlazor.Core` 4.4.4 to **`IowaBridges`** (the project that hosts the interactive components).
+- Add `dymaptic.GeoBlazor` 4.4.4 to **`IowaBridges`** (the project that hosts the interactive components).
 - Put matching `appsettings.Development.json` values in `IowaBridges/appsettings.Development.json`
 - Register in `Program.cs`: `builder.Services.AddGeoBlazor(builder.Configuration);`
-- Add GeoBlazor `@using` entries in `IowaBridges/Components/_Imports.razor` — at minimum: `dymaptic.GeoBlazor.Core`, `Components`, `Components.Layers`, `Components.Popups`, `Components.Renderers`, `Components.Symbols`, `Components.Widgets`.
-- Add required GeoBlazor/Esri CSS links in `App.razor` `<head>` per 4.4.4 docs (the `_content/dymaptic.GeoBlazor.Core` and ESRI theme stylesheet).
+- Add GeoBlazor `@using` entries in `IowaBridges/Components/_Imports.razor` — at minimum: `dymaptic.GeoBlazor`, `Components`, `Components.Layers`, `Components.Popups`, `Components.Renderers`, `Components.Symbols`, `Components.Widgets`.
+- Add required GeoBlazor/Esri CSS links in `App.razor` `<head>` per 4.4.4 docs (the `_content/dymaptic.GeoBlazor` and ESRI theme stylesheet).
 - Set the https url in `launchSettings.json` to https://localhost:7654 and always run with `dotnet run -lp https`.
 
 ## Configuration

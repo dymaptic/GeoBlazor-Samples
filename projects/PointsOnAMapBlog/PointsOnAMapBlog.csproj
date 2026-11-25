@@ -8,7 +8,7 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="dymaptic.GeoBlazor.Core" Version="4.4.4" />
+        <PackageReference Include="dymaptic.GeoBlazor" Version="5.*" />
     </ItemGroup>
 
 </Project>

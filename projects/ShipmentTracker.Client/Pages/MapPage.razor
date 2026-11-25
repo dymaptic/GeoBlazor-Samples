@@ -62,7 +62,7 @@
         {
             foreach (var shipment in Model!)
             {
-                dymaptic.GeoBlazor.Core.Components.Geometries.Point location = new(shipment.Longitude, shipment.Latitude);
+                dymaptic.GeoBlazor.Components.Geometries.Point location = new(shipment.Longitude, shipment.Latitude);
                 Symbol symbol = new SimpleMarkerSymbol(new Outline(new MapColor("black"), 1), 
                     CategoryColors.AllColors[shipment.Category!]);
                 PopupTemplate popupTemplate = new("{Name}",

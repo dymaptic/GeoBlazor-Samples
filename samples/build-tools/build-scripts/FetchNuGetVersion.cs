@@ -3,7 +3,7 @@
 // Fetch NuGet Package Version Script
 // C# file-based app version of fetchNuGetVersion.ps1
 // Usage: dotnet FetchNuGetVersion.cs <package-name>
-// Example: dotnet FetchNuGetVersion.cs dymaptic.GeoBlazor.Core
+// Example: dotnet FetchNuGetVersion.cs dymaptic.GeoBlazor
 // Returns the latest non-prerelease version of the specified package from NuGet.org
 
 using System.Text.Json;

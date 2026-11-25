@@ -1,7 +1,7 @@
 ﻿@page "/"
-@using dymaptic.GeoBlazor.Core.Events
+@using dymaptic.GeoBlazor.Events
 
-@inject Projection Projection
+@inject ProjectionEngine ProjectionEngine
 @inject GeometryEngine GeometryEngine
 @inject IJSRuntime JsRuntime
 
@@ -110,7 +110,7 @@
             _terminusAdded = true;
             _terminus = new Graphic(_polygon!,
                 new SimpleFillSymbol(new Outline(new MapColor(0, 0, 0, 0)),
-                    new MapColor(0, 0, 0, 0.3), FillStyle.Solid));
+                    new MapColor(0, 0, 0, 0.3), SimpleFillSymbolStyle.Solid));
             await _graphicsLayer!.Add(_terminus);
             await JsRuntime.InvokeVoidAsync("removeLoadingCursor");
         }
@@ -184,7 +184,7 @@
         }
         
         _polygon = new Polygon(rings.ToArray(), SpatialReference.Wgs84);
-        _polygon = (Polygon)(await Projection.Project(_polygon, SpatialReference.WebMercator))!;
+        _polygon = (Polygon)(await ProjectionEngine.Project(_polygon, SpatialReference.WebMercator))!;
     }
 
     private async Task UpdateGraphic()
@@ -340,13 +340,13 @@
     
     private async void GoToOverride(GoToOverrideParameters parameters)
     {
-        if (parameters.Target.TargetGeometry is Point point)
+        if (parameters.Target.GoToTargetGeometry is Point point)
         {
             _focusPoint = point;
         }
         else
         {
-            Extent extent = parameters.Target.TargetGraphic!.Geometry!.Extent!;
+            Extent extent = parameters.Target.GoToTargetGraphic!.Geometry!.Extent!;
             _focusPoint = await GeometryEngine.GetExtentCenter(extent);
         }
         
@@ -371,7 +371,7 @@
     private Polygon? _polygon;
     private Graphic? _terminus;
     private readonly SimpleMarkerSymbol _focusSymbol = new(new Outline(new MapColor(0, 0, 0, 0)),
-        new MapColor(255, 0, 0, 0.5), 10, SimpleMarkerStyle.Circle);
+        new MapColor(255, 0, 0, 0.5), 10, SimpleMarkerSymbolStyle.Circle);
 
     private Graphic? _focusGraphic;
     private TimeSpan _timeZoneOffset = TimeSpan.Zero;

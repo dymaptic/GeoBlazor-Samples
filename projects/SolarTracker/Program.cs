@@ -1,4 +1,4 @@
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SolarTracker;

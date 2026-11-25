@@ -1,4 +1,5 @@
-﻿@page "/"
+﻿@inject RouteService RouteService
+@page "/"
 
 @rendermode RenderMode
 <PageTitle>Museums</PageTitle>
@@ -119,7 +120,7 @@
         new FieldInfo("PhoneNumber", "Phone Number"),
         new FieldInfo("Website", "Website")
         ]);
-        PopupTemplate popupTemplate = new("{CommonName}", contents: [content]);
+        PopupTemplate popupTemplate = new("{CommonName}", content: [content]);
         foreach (MuseumRecord record in FilteredRecords)
         {
             Point point = new Point(record.Longitude, record.Latitude);
@@ -159,7 +160,7 @@
         {
             await Clear();
         }
-        await _popupWidget!.SetProperty(nameof(PopupWidget.AutoOpenEnabled), !_routing);
+        await _mapView!.SetPopupDisabled(_routing);
     }
 
     private async Task OnClick(ClickEvent clickEvent)
@@ -167,13 +168,13 @@
         if (!_routing) return;
         Graphic stop = new(clickEvent.MapPoint);
         await _routeLayer!.Add(stop);
-        List<Graphic> stops = _routeParameters.FeatureSetStops!.Features!.ToList();
+        List<Graphic> stops = (_routeParameters.FeatureSetStops?.Features ?? []).ToList();
         stops.Add(stop);
-        _routeParameters.FeatureSetStops.Features = stops.ToArray();
+        _routeParameters = _routeParameters with { FeatureSetStops = new FeatureSet { Features = stops.ToArray() } };
 
-        if (_routeParameters.FeatureSetStops.Features.Length >= 2)
+        if (stops.Count >= 2)
         {
-            RouteSolveResult result = await Route.Solve(_routeUrl, _routeParameters);
+            RouteSolveResult result = await RouteService.Solve(_routeUrl, _routeParameters);
             await ShowRoute(result);
         }
     }
@@ -190,14 +191,14 @@
 
     private async Task Clear()
     {
-        await _popupWidget!.Close();
+        await _mapView!.ClosePopup();
         _directions = [];
-        _routeParameters.FeatureSetStops!.Features = [];
+        _routeParameters = _routeParameters with { FeatureSetStops = new FeatureSet { Features = [] } };
         await _routeLayer!.Clear();
     }
 
     private readonly SimpleLineSymbol _routeSymbol = new(new MapColor(0, 0, 255, 0.5), 5);
-    private readonly RouteParameters _routeParameters = new()
+    private RouteParameters _routeParameters = new()
     {
         FeatureSetStops = new FeatureSet
         {

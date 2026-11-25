@@ -1,0 +1,18 @@
+# Container for the Blazor Web App sample (server host, serves the WebAssembly client too).
+# Not verified with docker in the stage 14 merge: the previous file targeted .NET 7 and a project that no longer exists.
+# Provide the keys at run time, for example:  -e ArcGISApiKey=YOUR_KEY -e GeoBlazor__LicenseKey=YOUR_KEY (optional)
+#
+# Build from the repository root so the whole repo is in the build context:
+#   docker build -f samples/Dockerfile.server -t geoblazor-samples .
+#   docker run -p 8080:8080 geoblazor-samples
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY . .
+# Do not pre-restore or pre-build; see https://github.com/dotnet/aspnetcore/issues/63962
+RUN dotnet publish "samples/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp/dymaptic.GeoBlazor.Sample.WebApp.csproj" -c Release -o /publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=build /publish ./
+ENTRYPOINT ["dotnet", "dymaptic.GeoBlazor.Sample.WebApp.dll"]

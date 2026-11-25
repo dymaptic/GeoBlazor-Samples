@@ -43,8 +43,8 @@
 
         string objectIdField = _bridgesLayer?.ObjectIdField ?? "OBJECTID";
 
-        HitTestResult hitTestResult = await _mapView.HitTest(clickEvent);
-        ViewHit? hit = hitTestResult.Results.FirstOrDefault();
+        ViewHitTestResult? hitTestResult = await _mapView.HitTest(clickEvent);
+        IViewHit? hit = hitTestResult?.Results.FirstOrDefault();
 
         if (hit is GraphicHit graphicHit)
         {

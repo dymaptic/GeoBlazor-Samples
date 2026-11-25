@@ -1,0 +1,108 @@
+﻿@implements IDisposable
+@page "/{PageRoute:nonfile?}"
+
+@* Anything that reaches this catch-all with a route segment matched no page. Say so rather than
+   silently rendering Home, which makes a missing or excluded sample page look like a working link. *@
+@if (!string.IsNullOrWhiteSpace(PageRoute))
+{
+    <div id="route-not-found">
+        <h2>Sample not found</h2>
+        <p>
+            No sample page is registered for <code>/@PageRoute</code> in this host. It may not be
+            included in this build &mdash; check the other sample hosts.
+        </p>
+    </div>
+}
+
+<div id="feature-panel">
+    <h1>GeoBlazor</h1>
+    <p>
+        The dymaptic Blazor API wraps the esri ArcGIS Javascript API, providing tag-based web-map building for any Asp.NET Core
+        web application.
+    </p>
+    <div id="feature-inset">
+        <img id="map-img" src="_content/dymaptic.GeoBlazor.Sample.Shared/images/scene-map-background.webp" />
+        <div id="feature-text-container">
+            <div id="feature-text">
+                <h2>Visit our Home Page</h2>
+                <p>
+                    <a href="https://www.geoblazor.com">https://www.geoblazor.com</a>
+                </p>
+                <h2>Get the Source</h2>
+                <p>
+                    <a href="https://github.com/dymaptic/GeoBlazor">https://github.com/<br />dymaptic/GeoBlazor</a>
+                </p>
+                <h2>Get the Nuget Package</h2>
+                <p>
+                    <a href="https://www.nuget.org/packages/dymaptic.GeoBlazor">https://www.nuget.org/packages/<br />dymaptic.GeoBlazor</a>
+                </p>
+                <h2>Get Started</h2>
+                <p>
+                    <a href="https://docs.geoblazor.com/pages/gettingStarted.html">https://docs.geoblazor.com/<br />pages/gettingStarted.html</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <p>Need help creating your own Geospatial Information System, maps, or data applications?</p>
+    <p>Visit <a href="https://www.dymaptic.com">dymaptic.com</a> or <a href="mailto:geoblazor@dymaptic.com">email us</a> and let us know how we can help you!</p>
+    @if (_jsLoaded == false) // just load once to get data into browser
+    {
+        <!-- Hidden map load to pre-load JS files on landing page -->
+        <div style="visibility: hidden; opacity: 0" aria-hidden="true">
+            <MapView @ref="_mapView">
+                <Map>
+                    <Basemap>
+                        <BasemapStyle Name="BasemapStyleName.ArcgisImagery" />
+                    </Basemap>
+                </Map>
+            </MapView>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? PageRoute { get; set; }
+
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    public required IJSRuntime JsRuntime { get; set; }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsLoaded = bool.TryParse(await JsRuntime.InvokeAsync<string?>("localStorage.getItem", "geoBlazorLoaded"), out bool isLoaded) && isLoaded;
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        try
+        {
+            _ = JsRuntime.InvokeVoidAsync("localStorage.setItem", "geoBlazorLoaded", "true");
+            _ = _mapView!.DisposeAsync();
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    private MapView? _mapView;
+    private bool? _jsLoaded;
+}

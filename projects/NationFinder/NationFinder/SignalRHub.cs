@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using NationFinder.Client;
+using State = NationFinder.Client.State;
 
 namespace NationFinder;
 

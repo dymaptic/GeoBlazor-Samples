@@ -1,3 +1,5 @@
+> **GeoBlazor V5 update.** This project was originally written against dymaptic.GeoBlazor.Core 4.4.4. It now references the single `dymaptic.GeoBlazor` package (V5) and targets net10.0. If you are following a blog post written for the earlier version, the code here no longer matches it exactly.
+
 # Points on A Map
 
 This is the source code that goes along with the blog over

@@ -1,0 +1,91 @@
+﻿@page "/service-areas"
+@inherits SamplePage
+<PageTitle>Service Areas</PageTitle>
+<h1>Service Areas</h1>
+<p class="instructions">
+    Click on any point on the map to be shown a set of "Service Areas". Service Areas are drivable distances in 5, 10, and 15 minute bands.
+</p>
+<MapView @ref="_mapView" Longitude="135.5023"
+         Latitude="34.6937"
+         Zoom="11"
+         Class="map-view"
+         OnClick="OnClick">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisNavigation" />
+        </Basemap>
+    </Map>
+</MapView>
+
+@code {
+
+    [Inject]
+    public required ServiceAreaService ServiceAreaService { get; set; }
+
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/find-service-areas/", "ArcGIS Maps SDK for JavaScript"),
+     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates service-area " +
+        "(drive-time) network analysis from the ArcGIS Maps SDK for JavaScript exposed through " +
+        "GeoBlazor's ServiceAreaService.Solve method. The page shows a 2D navigation basemap centered on " +
+        "Osaka, Japan at zoom level 11. Above the map is an instructional paragraph telling the user to " +
+        "click on any point on the map to see a set of Service Areas representing 5, 10, and 15 minute " +
+        "drivable distance bands. When the user clicks, a small white marker is placed at the clicked " +
+        "point and the page calls ServiceAreaService.Solve against the ArcGIS World ServiceAreas REST endpoint " +
+        "with break values of 5, 10, and 15 minutes; the resulting drive-time polygons are added to the " +
+        "map and styled with a translucent purple fill, with previous graphics cleared on each click. " +
+        "The sample is intended to demonstrate solving and visualizing network service areas from a " +
+        "hosted routing service in a Blazor application without writing JavaScript.";
+
+    private async Task OnClick(ClickEvent clickEvent)
+    {
+        await JSRuntime.InvokeVoidAsync("setWaitCursor", true);
+        await InvokeAsync(async() => 
+        {
+            await _areaGraphic.SetGeometry(clickEvent.MapPoint);
+            await _mapView!.ClearGraphics();
+            await _mapView.AddGraphic(_areaGraphic);
+
+            // a separate Graphic is used for the facility because ArcGIS mutates the geometry of each
+            // facility feature in place while normalizing it, which would corrupt the displayed marker
+            FacilityFeatureSet facilities = new([new Graphic(clickEvent.MapPoint)]);
+
+            ServiceAreaSolveResult? result = await ServiceAreaService.Solve(_serviceAreaUrl,
+                facilities: facilities,
+                defaultBreaks: [5, 10, 15],
+                outSpatialReference: new SpatialReference(3857));
+
+            if (result?.ServiceAreaPolygons?.Features is not null && result.ServiceAreaPolygons.Features.Length > 0)
+            {
+                List<Graphic> graphics = [];
+            
+                foreach (Graphic graphic in result.ServiceAreaPolygons.Features)
+                {
+                    await graphic.SetSymbol(_areaFillSymbol);
+                    graphics.Add(graphic);
+                }
+                
+                await _mapView.AddGraphics(graphics);
+            }
+            
+            await JSRuntime.InvokeVoidAsync("setWaitCursor", false);
+        });
+    }
+
+    private MapView? _mapView;
+    private readonly Graphic _areaGraphic = new(symbol: new SimpleMarkerSymbol(color: new MapColor("white"), size: 8));
+    private readonly SimpleFillSymbol _areaFillSymbol = new(color: new MapColor(81, 46, 132, 0.25));
+    // ArcGIS appends "/solveServiceArea" itself, so this must stop at the network analysis layer
+    // ServiceAreaService.Solve types its facilities as IClosestFacilityParametersFacility, which no library type
+    // implements, so this record carries the facility graphics in the FeatureSet JSON shape ({ features: [...] }).
+    private sealed record FacilityFeatureSet(IReadOnlyList<Graphic> Features) : IClosestFacilityParametersFacility;
+
+    private readonly string _serviceAreaUrl =
+        "https://route-api.arcgis.com/arcgis/rest/services/World/ServiceAreas/NAServer/ServiceArea_World";
+}

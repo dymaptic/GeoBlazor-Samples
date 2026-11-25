@@ -1,0 +1,162 @@
+@page "/ogc-feature-layers"
+@inherits SamplePage
+
+<h3>OGC Feature Layers</h3>
+
+<p class="instructions">
+    This sample shows how to access an <a target="_blank" href="https://www.ogc.org/standards/ogcapi-features">OGC API Features service</a>
+    using an <code>OGCFeatureLayer</code>. Portuguese maritime navigational aids ("Aids to Navigation") are categorized
+    via an Arcade <code>valueExpression</code> in a <code>UniqueValueRenderer</code> and pictographed with
+    <code>WebStyleSymbol</code>s. Use the filter to fade out features that do not match the selected NAVAID type.
+</p>
+
+<MapView @ref="_mapView"
+         class="map-view"
+         Longitude="-8.9624771"
+         Latitude="41.7458514"
+         Zoom="10"
+         OnViewLayerviewCreate="OnLayerViewCreate">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisLightGray" />
+        </Basemap>
+        <OGCFeatureLayer Url="https://api-features.hidrografico.pt"
+                         CollectionId="aton"
+                         Copyright="<a href='https://www.hidrografico.pt/' target='_blank'>Instituto Hidrográfico</a>">
+            <UniqueValueRenderer ValueExpression="@_valueExpression"
+                                 ValueExpressionTitle="NAVAID type"
+                                 UniqueValueInfos="@_uniqueValueInfos" />
+            <PopupTemplate Title="@("{title}")">
+                <TextContent Text="This structure is {expression/altitude} meters above sea level and {expression/height} meters tall." />
+                <FieldsContent FieldInfos="@([
+                                   new FieldInfo("no_nac", "National Number"),
+                                   new FieldInfo("desc", "Original Description (Portuguese)"),
+                                   new FieldInfo("foto_url", "Photo URL")
+                               ])" />
+                <PopupExpressionInfo Name="altitude" Expression="DefaultValue($feature.alt_m, 'unknown')" />
+                <PopupExpressionInfo Name="height" Expression="DefaultValue($feature.hgt_m, 'unknown')" />
+            </PopupTemplate>
+        </OGCFeatureLayer>
+    </Map>
+    <PopupWidget @ref="_popupWidget" DockEnabled="true">
+        <PopupDockOptions Position="dymaptic.GeoBlazor.Enums.PopupDockPosition.BottomRight"
+                          BreakPoint="@(new Breakpoint { BoolValue = false })"
+                          ButtonEnabled="false" />
+    </PopupWidget>
+    <LegendWidget Position="OverlayPosition.TopRight" />
+    <ExpandWidget ExpandIcon="filter" Expanded="true" Position="OverlayPosition.TopLeft" Group="sample-group">
+        <div id="navaid-filter-label" class="esri-widget" style="padding:15px;">
+            <label for="navaid-filter"><b>Filter by the type of navigational aid</b></label>
+            <select id="navaid-filter" @onchange="OnFilterChange" style="display:block; margin-top:8px; width:100%;">
+                <option value="" selected>All</option>
+                <option value="Buoy">Buoy</option>
+                <option value="Ocean Data Acquisition System">Ocean Data Acquisition System</option>
+                <option value="Raised Light Structure">Raised Light Structure</option>
+                <option value="WindFloat">WindFloat</option>
+            </select>
+        </div>
+    </ExpandWidget>
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-ogcfeaturelayer/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://api-features.hidrografico.pt", "Instituto Hidrográfico - Aids to Navigation (ATON)")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the OGC API Features client " +
+        "from the ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's OGCFeatureLayer Razor component. The page " +
+        "shows a 2D light-gray basemap centered off the northern Portuguese coast, displaying the Instituto " +
+        "Hidrográfico Aids to Navigation (ATON) collection. A UniqueValueRenderer uses an Arcade valueExpression to " +
+        "categorize each feature as Buoy, Ocean Data Acquisition System, Raised Light Structure, WindFloat, or Other " +
+        "based on substrings in the title and description fields, and renders each category with a WebStyleSymbol " +
+        "from the Esri shapes and nautical web styles. A PopupTemplate combines a TextPopupContent with two " +
+        "PopupExpressionInfo entries (altitude and height) plus a FieldsPopupContent that exposes the national " +
+        "number, original Portuguese description, and photo URL. A LegendWidget in the upper-right shows the " +
+        "category-to-symbol mapping, and an ExpandWidget in the upper-left contains a dropdown filter that applies " +
+        "a FeatureEffect with an opacity(20%) excludedEffect so non-matching navigational aids fade out. The sample " +
+        "is intended to demonstrate consuming an OGC API Features service with Arcade-driven unique-value styling " +
+        "and FeatureEffect filtering.";
+
+    private async Task OnFilterChange(ChangeEventArgs args)
+    {
+        if (await _popupWidget!.GetVisible() == true)
+        {
+            await _mapView!.ClosePopup();
+        }
+
+        string value = args.Value?.ToString() ?? string.Empty;
+
+        if (_atonLayerView is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(value) || !_sqlWhereClauses.TryGetValue(value, out string? where))
+        {
+            await _atonLayerView.SetFeatureEffect(null);
+            return;
+        }
+
+        await _atonLayerView.SetFeatureEffect(
+            new FeatureEffect(excludedEffect: "opacity(20%)",
+                filter: new LayerFeatureFilter(Where: where)));
+    }
+
+    private void OnLayerViewCreate(LayerViewCreateEvent createEvent)
+    {
+        if (createEvent.LayerView is OGCFeatureLayerView ogcFeatureLayerView)
+        {
+            _atonLayerView = ogcFeatureLayerView;
+        }
+    }
+
+    private const string ShapeStyleUrl =
+        "https://cdn.arcgis.com/sharing/rest/content/items/a63b3a4631ae41d4a1bc3ba6d9c85bfe/data";
+
+    private const string NauticalStyleUrl =
+        "https://cdn.arcgis.com/sharing/rest/content/items/36359a4a8f3143b6bf44d5688e007900/data";
+
+    // Verbatim (not raw) string: Rider's Razor parser mis-tokenizes """ inside @code and flags the rest of the block.
+    private readonly string _valueExpression =
+        @"When(
+  Find('boia', Lower(DefaultValue($feature.title, ''))) > -1, 'Buoy',
+  Find('odas', Lower(DefaultValue($feature.title, ''))) > -1, 'Ocean Data Acquisition System',
+  Find('coluna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('torre', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('lanterna', Lower(DefaultValue($feature.desc, ''))) > -1 || Find('poste', Lower(DefaultValue($feature.desc, ''))) > -1, 'Raised Light Structure',
+  Find('windfloat', Lower(DefaultValue($feature.title, ''))) > -1 || Find('wfa', Lower(DefaultValue($feature.title, ''))) > -1, 'WindFloat',
+  'Other' )";
+
+    private readonly Dictionary<string, string> _sqlWhereClauses = new()
+    {
+        ["Buoy"] = "LOWER(title) LIKE '%boia%'",
+        ["Ocean Data Acquisition System"] = "LOWER(title) LIKE '%odas%'",
+        ["Raised Light Structure"] = "(LOWER(desc) LIKE '%coluna%' OR LOWER(desc) LIKE '%torre%' OR LOWER(desc) LIKE '%lanterna%' OR LOWER(desc) LIKE '%poste%')",
+        ["WindFloat"] = "(LOWER(title) LIKE '%windfloat%' OR LOWER(title) LIKE '%wfa%')"
+    };
+
+    private UniqueValueInfo[] _uniqueValueInfos =>
+    [
+        new UniqueValueInfo("Buoy",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "Circle 3_Shapes_3"),
+            "Buoy"),
+        new UniqueValueInfo("Ocean Data Acquisition System",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "Rectangle"),
+            "Ocean Data Acquisition System"),
+        new UniqueValueInfo("Raised Light Structure",
+            new WebStyleSymbol(styleUrl: NauticalStyleUrl, name: "Lighthouse 1"),
+            "Raised Light Structure"),
+        new UniqueValueInfo("WindFloat",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "Triangle 3_Shapes_3"),
+            "WindFloat"),
+        new UniqueValueInfo("Other",
+            new WebStyleSymbol(styleUrl: ShapeStyleUrl, name: "asterisk "),
+            "Other")
+    ];
+
+    private MapView? _mapView;
+    private PopupWidget? _popupWidget;
+    private OGCFeatureLayerView? _atonLayerView;
+}

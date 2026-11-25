@@ -1,5 +1,5 @@
 using Blazored.LocalStorage;
-using dymaptic.GeoBlazor.Pro;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using NationFinder;
@@ -18,7 +18,7 @@ builder.Services.AddResponseCompression(opts =>
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
 });
 
-builder.Services.AddGeoBlazorPro(builder.Configuration);
+builder.Services.AddGeoBlazor(builder.Configuration);
 builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
 builder.Services.AddScoped<SignalRClient>();
 builder.Services.AddBlazoredLocalStorage();

@@ -1,3 +1,4 @@
+using dymaptic.GeoBlazor.Model;
 namespace CustomPopups.Shared;
 
 public class DataSet
@@ -8,13 +9,13 @@ public class DataSet
     public string? Description;
     public string? Address;
 
-    public Dictionary<string, object> Attributes =>
-        new Dictionary<string, object>()
+    public AttributesDictionary Attributes =>
+        new(new Dictionary<string, object?>()
         {
             {nameof(Name), Name},
             {nameof(Description), Description},
             {nameof(Address), Address}
-        };
+        });
 
     public static List<DataSet> GenerateSomePoints(double centerLat, double centerLong)
     {

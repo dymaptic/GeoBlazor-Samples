@@ -1,5 +1,5 @@
 using Blazored.LocalStorage;
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using NationFinder;

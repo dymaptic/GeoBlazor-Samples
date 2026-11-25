@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using dymaptic.GeoBlazor.Core.Components.Geometries;
+using dymaptic.GeoBlazor.Components.Geometries;
 
 namespace SolarTracker;
 

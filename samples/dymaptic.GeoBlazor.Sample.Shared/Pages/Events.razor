@@ -1,0 +1,305 @@
+﻿@page "/events"
+@inherits SamplePage
+@using System.Text.Json.Serialization
+@using Environment = System.Environment
+
+<PageTitle>Events</PageTitle>
+<h1>Events</h1>
+<p class="instructions">
+    Sample demonstrates simple event listeners attached to the MapView.
+</p>
+
+<Accordion Title="Click/Drag/Focus Events">
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Click:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_clickJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Double Click:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_doubleClickJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Hold:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_holdJson)</b>
+            </div>
+        </div>
+    </div>
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Drag:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_dragJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Blur:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_blurJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Focus:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_focusJson)</b>
+            </div>
+        </div>
+    </div>
+</Accordion>
+<Accordion Title="Pointer Events">
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Pointer Down:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerDownJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Pointer Up:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerUpJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Pointer Enter:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerEnterJson)</b>
+            </div>
+        </div>
+    </div>
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Pointer Leave:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerLeaveJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Pointer Move:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_pointerMoveJson)</b>
+            </div>
+        </div>
+    </div>
+</Accordion>
+<Accordion Title="Key/Mouse Events">
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Key Down:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_keyDownJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Key Up:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_keyUpJson)</b>
+            </div>
+        </div>
+    </div>
+    <div class="spaced-row">
+        <div class="form-group">
+            <label>
+                Mouse Wheel:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_mouseWheelJson)</b>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Extent:
+            </label>
+            <div class="response-area">
+                <b>@((MarkupString)_extentJson)</b>
+            </div>
+        </div>
+    </div>
+</Accordion>
+
+<MapView @ref="_view" Class="map-view" OnClick="OnMapClick" OnDoubleClick="OnMapDoubleClick"
+         OnHold="OnMapHold" OnBlur="OnMapBlur" OnFocus="OnMapFocus" OnViewDrag="OnMapDrag"
+         OnPointerDown="OnMapPointerDown" OnPointerUp="OnMapPointerUp" OnPointerEnter="OnMapPointerEnter"
+         OnPointerLeave="OnMapPointerLeave" OnPointerMove="OnMapPointerMove" OnExtentChanged="OnMapExtentChanged"
+         OnViewKeyDown="OnMapKeyDown" OnViewKeyUp="OnMapKeyUp" OnMouseWheel="OnMapMouseWheel"
+         EventRateLimitInMilliseconds="500">
+    <WebMap>
+        <PortalItem ExcludeApiKey="true" 
+                    PortalItemId="3d355e34cbd3405dbb3f031286f7b39b" />
+    </WebMap>
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html#events-summary", "ArcGIS Maps SDK for JavaScript"),
+        new("https://www.arcgis.com/home/item.html?id=3d355e34cbd3405dbb3f031286f7b39b", "Daily Planet Imagery Web Map")
+    ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the full set of MapView " +
+        "events from the ArcGIS Maps SDK for JavaScript surfaced as Razor event callbacks on GeoBlazor's MapView " +
+        "component. The page shows a 2D Daily Planet imagery WebMap loaded from an ArcGIS Online portal item. " +
+        "Above the map are three collapsible Accordion sections grouping the live event feeds: Click/Drag/Focus " +
+        "Events (Click, Double Click, Hold, Drag, Blur, Focus), Pointer Events (Pointer Down, Pointer Up, Pointer " +
+        "Enter, Pointer Leave, Pointer Move), and Key/Mouse Events (Key Down, Key Up, Mouse Wheel, Extent). Each " +
+        "field in those sections shows a live JSON dump of the most recent corresponding event payload. " +
+        "Interactions on the map (clicks, drags, key presses, scroll-wheel zooms, etc.) flow through OnClick, " +
+        "OnDoubleClick, OnHold, OnDrag, OnPointerDown, OnPointerUp, OnPointerEnter, OnPointerLeave, OnPointerMove, " +
+        "OnKeyDown, OnKeyUp, OnMouseWheel, OnExtentChanged, OnBlur, and OnFocus callbacks; OnClick additionally " +
+        "calls ToScreen and ToMap to round-trip the click point. Events are throttled with EventRateLimitInMilliseconds. " +
+        "The sample is intended to demonstrate listening to and inspecting every map event in a Blazor application " +
+        "without writing JavaScript.";
+
+    private async Task OnMapClick(ClickEvent clickEvent)
+    {
+        _clickJson = BuildViewableJson(clickEvent);
+        ScreenPoint? screenPoint = await _view!.ToScreen(clickEvent.MapPoint);
+
+        if (screenPoint is null)
+        {
+            return;
+        }
+
+        _clickJson += $", ScreenPoint: {screenPoint.X}, {screenPoint.Y}";
+        Point? mapPoint = await _view.ToMap(screenPoint);
+
+        if (mapPoint is null)
+        {
+            return;
+        }
+
+        _clickJson += $", MapPoint: {mapPoint.X}, {mapPoint.Y}";
+    }
+
+    private void OnMapDoubleClick(ClickEvent clickEvent)
+    {
+        _doubleClickJson = BuildViewableJson(clickEvent);
+    }
+
+    private void OnMapHold(ClickEvent holdEvent)
+    {
+        _holdJson = BuildViewableJson(holdEvent);
+    }
+
+    private void OnMapBlur(ViewBlurEvent blurEvent)
+    {
+        _blurJson = BuildViewableJson(blurEvent);
+    }
+
+    private void OnMapFocus(ViewFocusEvent focusEvent)
+    {
+        _focusJson = BuildViewableJson(focusEvent);
+    }
+
+    private void OnMapDrag(DragEvent dragEvent)
+    {
+        _dragJson = BuildViewableJson(dragEvent);
+    }
+
+    private void OnMapPointerEnter(PointerEvent pointerEvent)
+    {
+        _pointerEnterJson = BuildViewableJson(pointerEvent);
+    }
+
+    private void OnMapPointerLeave(PointerEvent pointerEvent)
+    {
+        _pointerLeaveJson = BuildViewableJson(pointerEvent);
+    }
+
+    private void OnMapPointerDown(PointerEvent pointerEvent)
+    {
+        _pointerDownJson = BuildViewableJson(pointerEvent);
+    }
+
+    private void OnMapPointerUp(PointerEvent pointerEvent)
+    {
+        _pointerUpJson = BuildViewableJson(pointerEvent);
+    }
+
+    private void OnMapPointerMove(PointerEvent pointerEvent)
+    {
+        _pointerMoveJson = BuildViewableJson(pointerEvent);
+    }
+
+    private void OnMapExtentChanged(Extent extent)
+    {
+        _extentJson = BuildViewableJson(extent);
+    }
+
+    private void OnMapKeyDown(KeyDownEvent keyDownEvent)
+    {
+        _keyDownJson = BuildViewableJson(keyDownEvent);
+    }
+
+    private void OnMapKeyUp(KeyUpEvent keyUpEvent)
+    {
+        _keyUpJson = BuildViewableJson(keyUpEvent);
+    }
+
+    private void OnMapMouseWheel(ViewMouseWheelEvent mouseWheelEvent)
+    {
+        _mouseWheelJson = BuildViewableJson(mouseWheelEvent);
+    }
+
+    private string BuildViewableJson(object eventObject)
+    {
+        string json = JsonSerializer.Serialize(eventObject, _options);
+        return json.Replace(Environment.NewLine, "<br>")
+            .Replace(" ", "&nbsp;");
+    }
+
+    private MapView? _view;
+    private string _clickJson = string.Empty;
+    private string _doubleClickJson = string.Empty;
+    private string _holdJson = string.Empty;
+    private string _blurJson = string.Empty;
+    private string _focusJson = string.Empty;
+    private string _dragJson = string.Empty;
+    private string _pointerEnterJson = string.Empty;
+    private string _pointerLeaveJson = string.Empty;
+    private string _pointerDownJson = string.Empty;
+    private string _pointerUpJson = string.Empty;
+    private string _pointerMoveJson = string.Empty;
+    private string _extentJson = string.Empty;
+    private string _keyDownJson = string.Empty;
+    private string _keyUpJson = string.Empty;
+    private string _mouseWheelJson = string.Empty;
+    private readonly JsonSerializerOptions _options = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+}

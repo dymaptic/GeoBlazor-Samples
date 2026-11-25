@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using dymaptic.GeoBlazor.Core;
+using dymaptic.GeoBlazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

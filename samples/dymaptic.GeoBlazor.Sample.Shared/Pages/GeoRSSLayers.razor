@@ -1,0 +1,37 @@
+﻿@page "/georss-layer"
+@inherits SamplePage
+<PageTitle>GeoRSSLayers</PageTitle>
+<h1>GeoRSS Layer</h1>
+<p class="instructions">
+    A simple demo of displaying a GeoRSS feed, sourced from the USGS live worldwide earthquake feed.
+</p>
+
+<MapView Longitude="0" Latitude="20" Zoom="2" Class="map-view">
+    <Map>
+        <Basemap>
+            <BasemapStyle Name="BasemapStyleName.ArcgisStreets" />
+        </Basemap>
+        <GeoRSSLayer
+            Url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.atom" />
+    </Map>
+</MapView>
+
+@code {
+
+    public override List<NavMenu.PageLink> PageLinks =>
+    [
+        new("https://developers.arcgis.com/javascript/latest/sample-code/layers-georss/", "ArcGIS Maps SDK for JavaScript"),
+        new("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.atom", "USGS Earthquakes, Past Day"),
+     ];
+
+    public override string Description =>
+        "This GeoBlazor sample, written in Blazor for .NET developers, demonstrates the GeoRSSLayer from the " +
+        "ArcGIS Maps SDK for JavaScript exposed through GeoBlazor's GeoRSSLayer Razor component. The page shows " +
+        "a 2D streets basemap zoomed out to a whole-world view. A GeoRSSLayer is added on top of the basemap, " +
+        "sourced from the USGS live earthquake feed: an Atom GeoRSS document listing every earthquake recorded " +
+        "worldwide in the past day, and the feed the ArcGIS Maps SDK for JavaScript's own GeoRSSLayer sample " +
+        "uses. The layer parses the feed's GeoRSS points and renders each earthquake as a point with default " +
+        "GeoRSS symbology, reloading on its refresh interval as the feed updates. There are no controls beyond " +
+        "the basic map navigation (pan, zoom). The sample is intended to demonstrate the simplest possible " +
+        "declarative consumption of a live GeoRSS feed in a Blazor application without writing JavaScript.";
+}
